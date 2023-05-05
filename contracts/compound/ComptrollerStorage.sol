@@ -180,7 +180,8 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
   mapping(address => mapping(address => EnumerableSet.AddressSet)) internal borrowCapForCollateralWhitelist;
 
   /// @dev set of whitelisted accounts that are allowed to bypass the borrow cap
-  mapping(address => mapping(address => EnumerableSet.AddressSet)) internal borrowingAgainstCollateralBlacklistWhitelist;
+  mapping(address => mapping(address => EnumerableSet.AddressSet))
+    internal borrowingAgainstCollateralBlacklistWhitelist;
 
   /// @dev set of whitelisted accounts that are allowed to bypass the supply cap
   mapping(address => EnumerableSet.AddressSet) internal supplyCapWhitelist;

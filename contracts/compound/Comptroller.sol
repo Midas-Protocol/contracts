@@ -258,7 +258,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
       CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
       uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
-      uint256 nonWhitelistedTotalSupply = totalUnderlyingSupply - asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
+      uint256 nonWhitelistedTotalSupply = totalUnderlyingSupply -
+        asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
       require(nonWhitelistedTotalSupply + mintAmount < supplyCap, "!supply cap");
     }
 
@@ -467,7 +468,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // borrowCapWhitelist[cToken][minter] is defaulted to false
     if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      uint256 nonWhitelistedTotalBorrows = totalBorrows - asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
+      uint256 nonWhitelistedTotalBorrows = totalBorrows -
+        asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
       require(nonWhitelistedTotalBorrows + borrowAmount < borrowCap, "!borrow:cap");
     }
 

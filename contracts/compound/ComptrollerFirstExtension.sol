@@ -291,10 +291,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     else supplyCapWhitelist[cToken].remove(account);
   }
 
-  function isSupplyCapWhitelisted(
-    address cToken,
-    address account
-  ) public view returns (bool) {
+  function isSupplyCapWhitelisted(address cToken, address account) public view returns (bool) {
     return supplyCapWhitelist[cToken].contains(account);
   }
 
