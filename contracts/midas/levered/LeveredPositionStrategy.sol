@@ -16,6 +16,9 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 contract LeveredPositionStrategy is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
+  // @notice maximum slippage in swaps, in bps
+  uint256 public constant MAX_SLIPPAGE = 800;
+
   address public positionOwner;
   ICErc20 public collateralMarket;
   ICErc20 public stableMarket;
@@ -61,32 +64,6 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     pool.enterMarkets(cTokens);
   }
 
-  // @notice this will make the position liquidatable
-  function withdrawMax() public {
-    withdrawMax(msg.sender);
-  }
-
-  // @notice this will make the position liquidatable
-  function withdrawMax(address withdrawTo) public {
-    withdraw(getMaxWithdrawable(), withdrawTo);
-  }
-
-  function withdraw(uint256 amount) public {
-    withdraw(amount, msg.sender);
-  }
-
-  function withdraw(uint256 amount, address withdrawTo) public {
-    require(msg.sender == positionOwner, "only owner");
-
-    // it is assumed that all collateral is supplied to the market all the time
-    require(collateralMarket.redeemUnderlying(amount) == 0, "redeem max failed");
-    // therefore, withdrawing only what is redeemed
-    collateralAsset.safeTransfer(withdrawTo, amount);
-
-    uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
-    _updateBaseCollateral(borrowBalance);
-  }
-
   function closePosition() public returns (uint256) {
     return closePosition(msg.sender);
   }
@@ -94,7 +71,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   function closePosition(address withdrawTo) public returns (uint256 withdrawAmount) {
     require(msg.sender == positionOwner, "only owner");
 
-    _leverDown(type(uint256).max);
+    _leverDown(0);
 
     uint256 maxRedeem = pool.getMaxRedeemOrBorrow(address(this), collateralMarket, false);
     require(collateralMarket.redeemUnderlying(maxRedeem) == 0, "redeem failed");
@@ -111,7 +88,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     require(msg.sender == positionOwner, "only owner");
 
     uint256 currentRatio = getCurrentLeverageRatio();
-    if (currentRatio < targetRatioMantissa) _leverUp(targetRatioMantissa);
+    if (currentRatio < targetRatioMantissa) _leverUp(targetRatioMantissa - currentRatio);
     else _leverDown(targetRatioMantissa);
 
     // return the de facto achieved ratio
@@ -162,26 +139,32 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     return (suppliedCollateralCurrent * 1e18) / baseCollateral;
   }
 
+  function getMinLeverageRatioDiff() public view returns (uint256) {
+    IPriceOracle oracle = pool.oracle();
+    uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
+
+    return (factory.getMinBorrowNative() * 1e36) / (baseCollateral * collateralAssetPrice);
+  }
+
   function getMaxLeverageRatio() public view returns (uint256) {
     if (baseCollateral == 0) return 0;
 
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
+    (, uint256 collatCollateralFactor) = pool.markets(address(collateralMarket));
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
     uint256 maxBorrow = pool.getMaxRedeemOrBorrow(address(this), stableMarket, true);
     uint256 maxBorrowValueScaled = maxBorrow * stableAssetPrice;
 
-    // not accounting for swaps slippage
-    uint256 maxTopUpRepay = maxBorrowValueScaled / collateralAssetPrice;
-    uint256 maxFlashLoaned = (maxTopUpRepay * 1e18) / (1e18 - stableCollateralFactor);
+    // accounting for swaps slippage
+    uint256 maxTopUpCollateralSwapValueScaled = (maxBorrowValueScaled * 10000) / (10000 + MAX_SLIPPAGE);
 
+    uint256 maxTopUpRepay = maxTopUpCollateralSwapValueScaled / collateralAssetPrice;
+    uint256 maxCollateralToRepay = (maxTopUpRepay * stableCollateralFactor) / (1e18 - stableCollateralFactor);
+    uint256 maxFlashLoaned = (maxCollateralToRepay * collatCollateralFactor) / 1e18;
     uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlyingHypo(address(this));
     return ((suppliedCollateralCurrent + maxFlashLoaned) * 1e18) / baseCollateral;
-  }
-
-  function getMaxWithdrawable() public view returns (uint256) {
-    return pool.getMaxRedeemOrBorrow(address(this), collateralMarket, false);
   }
 
   function isFundingAssetSupported(IERC20Upgradeable fundingAsset) public view returns (bool) {
@@ -207,41 +190,29 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     require(collateralMarket.mint(amountToSupply) == 0, "supply collateral failed");
   }
 
-  function _leverUp(uint256 targetRatioMantissa) internal {
-    (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
+  function _leverUp(uint256 ratioDiff) internal {
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
-    // baseCollateral + overcollateralization + flashLoanAmount = totalCollateralSupplied
-    // baseCollateral / totalCollateralSupplied = targetRatio
-    // therefore => flashLoanAmount = (targetRatio - 1) * collateralFactor * baseCollateral
     // flash loan the flashLoanAmount, then borrow stable and swap for the amount needed to repay the FL
-    //uint256 flashLoanCollateralAmount = ((((targetRatioMantissa - 1e18) * stableCollateralFactor) / 1e18) * baseCollateral) / 1e18;
-    uint256 flashLoanCollateralAmount = (baseCollateral * stableCollateralFactor) / (targetRatioMantissa + 1e18);
-    //(baseCollateral * targetRatioMantissa) / 1e18;
+    uint256 flashLoanCollateralAmount = (baseCollateral * ratioDiff) / 1e18;
     uint256 flashLoanedCollateralValueScaled = flashLoanCollateralAmount * collateralAssetPrice;
-    // not accounting for swaps slippage
-    uint256 stableToBorrow = flashLoanedCollateralValueScaled / stableAssetPrice;
 
-    {
-      // 5% slippage
-      stableToBorrow = (stableToBorrow * 105) / 100;
-    }
+    uint256 stableToBorrow = flashLoanedCollateralValueScaled / stableAssetPrice;
+    // accounting for swaps slippage
+    stableToBorrow = (stableToBorrow * (10000 + MAX_SLIPPAGE)) / 10000;
 
     CTokenExtensionInterface(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
     // the execution will first receive a callback to receiveFlashLoan()
     // then it continues from here
-    uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
-    _updateBaseCollateral(borrowBalance);
   }
 
   function _leverUpPostFL(uint256 borrowAmount) internal {
-    // supply the flashloaned collateral
+    // supply the flash loaned collateral
     _supplyCollateral(collateralAsset);
 
     // borrow stables that will be swapped to repay the FL
-    //uint256 maxBorrow = pool.getMaxRedeemOrBorrow(address(this), stableMarket, true);
     require(stableMarket.borrow(borrowAmount) == 0, "borrow stable failed");
 
     // swap for the FL asset
@@ -253,26 +224,20 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     uint256 amountToRedeem;
     uint256 borrowsToRepay;
 
-    // TODO reduce getUnderlyingPrice calls in _updateBaseCollateral
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
 
-    uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
-
-    // if max levering down, then derive the amount to redeem from the debt to be repaid
+    // anything under 1:1 means removing the leverage
     if (targetRatioMantissa < 1e18) {
-      // TODO only deleveraging allowed
-
-      borrowsToRepay = borrowBalance;
+      // if max levering down, then derive the amount to redeem from the debt to be repaid
+      borrowsToRepay = stableMarket.borrowBalanceCurrent(address(this));
       uint256 borrowsToRepayValueScaled = borrowsToRepay * stableAssetPrice;
       // not accounting for swaps slippage
       amountToRedeem = ((borrowsToRepayValueScaled / collateralAssetPrice) * 1e18) / stableCollateralFactor;
     } else {
-      // TODO
-      uint256 ratioDiff = targetRatioMantissa;
-
+      uint256 ratioDiff = getCurrentLeverageRatio() - targetRatioMantissa;
       // else derive the debt to be repaid from the amount to redeem
       amountToRedeem = (baseCollateral * ratioDiff) / 1e18;
       uint256 amountToRedeemValueScaled = amountToRedeem * collateralAssetPrice;
@@ -283,7 +248,6 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
     // the execution will first receive a callback to receiveFlashLoan()
     // then it continues from here
-    _updateBaseCollateral(borrowBalance - borrowsToRepay);
   }
 
   function _leverDownPostFL(uint256 _flashLoanedCollateral, uint256 _amountToRedeem) internal {
@@ -303,28 +267,6 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     // swap for the FL asset
     convertAllTo(collateralAsset, stableAsset);
-  }
-
-  function _updateBaseCollateral(uint256 borrowBalance) internal {
-    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlyingHypo(address(this));
-    if (borrowBalance == 0) {
-      baseCollateral = suppliedCollateralCurrent;
-    } else {
-      (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
-      IPriceOracle oracle = pool.oracle();
-      uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
-      uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
-
-      uint256 borrowsValueScaled = borrowBalance * stableAssetPrice;
-      uint256 borrowsCollateralizationValueScaled = (borrowsValueScaled * 1e18) / stableCollateralFactor;
-      uint256 totalCollateralValueScaled = suppliedCollateralCurrent * collateralAssetPrice;
-
-      this.log("borrows value scaled", borrowsValueScaled);
-      this.log("borrows collateralization value scaled", borrowsCollateralizationValueScaled);
-      this.log("total collateral value scaled", totalCollateralValueScaled);
-      // the base collateral is the collateral which is not backing any borrows
-      baseCollateral = (totalCollateralValueScaled - borrowsCollateralizationValueScaled) / collateralAssetPrice;
-    }
   }
 
   function log(string memory, uint256) public pure {}

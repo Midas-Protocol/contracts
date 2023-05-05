@@ -15,4 +15,6 @@ interface ILeveredPositionFactory {
     external
     view
     returns (IRedemptionStrategy fundingStrategy, bytes memory strategyData);
+
+  function getMinBorrowNative() external view returns (uint256);
 }
