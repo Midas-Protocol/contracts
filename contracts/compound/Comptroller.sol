@@ -254,12 +254,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Check supply cap
     uint256 supplyCap = supplyCaps[cToken];
     // Supply cap of 0 corresponds to unlimited supplying
-    // supplyCapWhitelist[cToken][minter] is defaulted to false
     if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
       CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
       uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
-      uint256 nonWhitelistedTotalSupply = totalUnderlyingSupply -
-        asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
+      uint256 whitelistedSuppliersSupply = asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
+      uint256 nonWhitelistedTotalSupply;
+      if (whitelistedSuppliersSupply >= totalUnderlyingSupply) nonWhitelistedTotalSupply = 0;
+      else nonWhitelistedTotalSupply = totalUnderlyingSupply - whitelistedSuppliersSupply;
+
       require(nonWhitelistedTotalSupply + mintAmount < supplyCap, "!supply cap");
     }
 
@@ -465,11 +467,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Check borrow cap
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
-    // borrowCapWhitelist[cToken][minter] is defaulted to false
     if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      uint256 nonWhitelistedTotalBorrows = totalBorrows -
-        asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
+      uint256 whitelistedBorrowersBorrows = asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
+      uint256 nonWhitelistedTotalBorrows;
+      if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
+      else nonWhitelistedTotalBorrows = totalBorrows - whitelistedBorrowersBorrows;
+
       require(nonWhitelistedTotalBorrows + borrowAmount < borrowCap, "!borrow:cap");
     }
 
