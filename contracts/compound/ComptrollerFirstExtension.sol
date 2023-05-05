@@ -3,10 +3,14 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
-import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerErrorReporter {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
   /// @notice Emitted when supply cap for a cToken is changed
   event NewSupplyCap(CTokenInterface indexed cToken, uint256 newSupplyCap);
 
@@ -234,7 +238,17 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     bool whitelisted
   ) public {
     require(hasAdminRights(), "!admin");
-    borrowCapForCollateralWhitelist[cTokenBorrow][cTokenCollateral][account] = whitelisted;
+
+    if (whitelisted) borrowCapForCollateralWhitelist[cTokenBorrow][cTokenCollateral].add(account);
+    else borrowCapForCollateralWhitelist[cTokenBorrow][cTokenCollateral].remove(account);
+  }
+
+  function isBorrowCapForCollateralWhitelisted(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    address account
+  ) public view returns (bool) {
+    return borrowCapForCollateralWhitelist[cTokenBorrow][cTokenCollateral].contains(account);
   }
 
   function _blacklistBorrowingAgainstCollateral(
@@ -253,29 +267,68 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     bool whitelisted
   ) public {
     require(hasAdminRights(), "!admin");
-    borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral][account] = whitelisted;
+
+    if (whitelisted) borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral].add(account);
+    else borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral].remove(account);
+  }
+
+  function isBlacklistBorrowingAgainstCollateralWhitelisted(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    address account
+  ) public view returns (bool) {
+    return borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral].contains(account);
   }
 
   function _supplyCapWhitelist(
     address cToken,
     address account,
-    bool whitelist
+    bool whitelisted
   ) public {
     require(hasAdminRights(), "!admin");
-    supplyCapWhitelist[cToken][account] = whitelist;
+
+    if (whitelisted) supplyCapWhitelist[cToken].add(account);
+    else supplyCapWhitelist[cToken].remove(account);
+  }
+
+  function isSupplyCapWhitelisted(
+    address cToken,
+    address account
+  ) public view returns (bool) {
+    return supplyCapWhitelist[cToken].contains(account);
+  }
+
+  function getWhitelistedSuppliersSupply(address cToken) public view returns (uint256 supplied) {
+    address[] memory whitelistedSuppliers = supplyCapWhitelist[cToken].values();
+    for (uint256 i = 0; i < whitelistedSuppliers.length; i++) {
+      supplied += CTokenExtensionInterface(cToken).balanceOf(whitelistedSuppliers[i]);
+    }
   }
 
   function _borrowCapWhitelist(
     address cToken,
     address account,
-    bool whitelist
+    bool whitelisted
   ) public {
     require(hasAdminRights(), "!admin");
-    borrowCapWhitelist[cToken][account] = whitelist;
+
+    if (whitelisted) borrowCapWhitelist[cToken].add(account);
+    else borrowCapWhitelist[cToken].remove(account);
+  }
+
+  function isBorrowCapWhitelisted(address cToken, address account) public view returns (bool) {
+    return borrowCapWhitelist[cToken].contains(account);
+  }
+
+  function getWhitelistedBorrowersBorrows(address cToken) public view returns (uint256 borrowed) {
+    address[] memory whitelistedBorrowers = borrowCapWhitelist[cToken].values();
+    for (uint256 i = 0; i < whitelistedBorrowers.length; i++) {
+      borrowed += CTokenInterface(cToken).borrowBalanceStored(whitelistedBorrowers[i]);
+    }
   }
 
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 23;
+    uint8 fnsCount = 29;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
     functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
@@ -300,6 +353,12 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     functionSelectors[--fnsCount] = this._removeFlywheel.selector;
     functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
     functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }

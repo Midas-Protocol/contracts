@@ -51,11 +51,6 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     }
   }
 
-  // _setBorrowCapForCollateralWhitelist
-  // _blacklistBorrowingAgainstCollateralWhitelist
-  // _supplyCapWhitelist
-  // _borrowCapWhitelist
-
   // TODO test with the latest block and contracts and/or without the FSL
   function testBorrowCapForCollateralWhitelist() public debuggingOnly forkAtBlock(BSC_MAINNET, 27827185) {
     emit log("");

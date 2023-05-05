@@ -13,12 +13,16 @@ import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol"
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
 contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondBase {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
   /// @notice Emitted when an admin supports a market
   event MarketListed(CTokenInterface cToken);
 
@@ -251,10 +255,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 supplyCap = supplyCaps[cToken];
     // Supply cap of 0 corresponds to unlimited supplying
     // supplyCapWhitelist[cToken][minter] is defaulted to false
-    if (supplyCap != 0 && !supplyCapWhitelist[cToken][minter]) {
+    if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
       CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
       uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
-      require(totalUnderlyingSupply + mintAmount < supplyCap, "!supply cap");
+      uint256 nonWhitelistedTotalSupply = totalUnderlyingSupply - asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
+      require(nonWhitelistedTotalSupply + mintAmount < supplyCap, "!supply cap");
     }
 
     // Keep the flywheel moving
@@ -460,9 +465,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
     // borrowCapWhitelist[cToken][minter] is defaulted to false
-    if (borrowCap != 0 && !borrowCapWhitelist[cToken][borrower]) {
+    if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      require(totalBorrows + borrowAmount < borrowCap, "!borrow:cap");
+      uint256 nonWhitelistedTotalBorrows = totalBorrows - asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
+      require(nonWhitelistedTotalBorrows + borrowAmount < borrowCap, "!borrow:cap");
     }
 
     // Keep the flywheel moving
@@ -841,7 +847,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
           // if the borrowed asset is capped against this collateral & account is not whitelisted
           if (
             borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)] &&
-            !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(asset)][account]
+            !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(asset)].contains(account)
           ) {
             assetAsCollateralValueCap = 0;
           } else {
@@ -851,7 +857,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
             // check if set to any value & account is not whitelisted
             if (
               vars.borrowCapForCollateral != 0 &&
-              !borrowCapForCollateralWhitelist[address(cTokenModify)][address(asset)][account]
+              !borrowCapForCollateralWhitelist[address(cTokenModify)][address(asset)].contains(account)
             ) {
               // this asset usage as collateral is capped at the native value of the borrow cap
               assetAsCollateralValueCap = (vars.borrowCapForCollateral * vars.borrowedAssetPrice) / 1e18;
