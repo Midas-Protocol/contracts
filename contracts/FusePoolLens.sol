@@ -488,7 +488,9 @@ contract FusePoolLens is Initializable {
       assets[i] = address(poolMarkets[i]);
       supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
       uint256 assetTotalSupplied = poolMarkets[i].getTotalUnderlyingSupplied();
-      nonWhitelistedTotalSupply[i] = assetTotalSupplied - comptroller.getWhitelistedSuppliersSupply(assets[i]);
+      uint256 whitelistedSuppliersSupply = comptroller.getWhitelistedSuppliersSupply(assets[i]);
+      if (whitelistedSuppliersSupply >= assetTotalSupplied) nonWhitelistedTotalSupply[i] = 0;
+      else nonWhitelistedTotalSupply[i] = assetTotalSupplied - whitelistedSuppliersSupply;
     }
 
     return (assets, supplyCapsPerAsset, nonWhitelistedTotalSupply);
@@ -532,7 +534,9 @@ contract FusePoolLens is Initializable {
     (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
     uint256 totalBorrows = asset.totalBorrows();
-    nonWhitelistedTotalBorrows = totalBorrows - comptroller.getWhitelistedBorrowersBorrows(address(asset));
+    uint256 whitelistedBorrowersBorrows = comptroller.getWhitelistedBorrowersBorrows(address(asset));
+    if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
+    else nonWhitelistedTotalBorrows = totalBorrows - whitelistedBorrowersBorrows;
   }
 
   /**
