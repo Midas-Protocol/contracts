@@ -272,8 +272,8 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
   }
 
   function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  private
-  returns (uint256 outputAmount)
+    private
+    returns (uint256 outputAmount)
   {
     uint256 inputAmount = inputToken.balanceOf(address(this));
     (IRedemptionStrategy redemptionStrategy, bytes memory strategyData) = factory.getRedemptionStrategy(
