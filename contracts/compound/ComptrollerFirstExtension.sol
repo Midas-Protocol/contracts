@@ -298,7 +298,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   function getWhitelistedSuppliersSupply(address cToken) public view returns (uint256 supplied) {
     address[] memory whitelistedSuppliers = supplyCapWhitelist[cToken].values();
     for (uint256 i = 0; i < whitelistedSuppliers.length; i++) {
-      supplied += CTokenExtensionInterface(cToken).balanceOfUnderlying(whitelistedSuppliers[i]);
+      supplied += CTokenExtensionInterface(cToken).balanceOfUnderlyingHypo(whitelistedSuppliers[i]);
     }
   }
 
