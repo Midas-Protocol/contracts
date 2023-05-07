@@ -152,22 +152,21 @@ contract ContractsUpgradesTest is BaseTest {
     }
   }
 
-  address newDeployer = 0x27521eae4eE4153214CaDc3eCD703b9B0326C908;
-
   function testPauseGuardiansBsc() public debuggingOnly fork(BSC_MAINNET) {
-    _testPauseGuardians(newDeployer);
+    _testPauseGuardians();
   }
 
   function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testPauseGuardians(newDeployer);
+    _testPauseGuardians();
   }
 
   function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testPauseGuardians(newDeployer);
+    _testPauseGuardians();
   }
 
-  function _testPauseGuardians(address deployer) internal {
+  function _testPauseGuardians() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    address deployer = ap.getAddress("deployer");
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
