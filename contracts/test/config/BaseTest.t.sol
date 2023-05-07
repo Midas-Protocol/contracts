@@ -187,7 +187,7 @@ abstract contract BaseTest is Test {
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
     }
-    if(ap.getAddress("deployer") == address(0)) {
+    if (ap.getAddress("deployer") == address(0)) {
       ap.setAddress("deployer", 0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
     }
   }
