@@ -213,8 +213,8 @@ contract FlywheelPerformanceFeeTest is BaseTest {
       address[] memory fws = poolExt.getRewardsDistributors();
       for (uint256 j = 0; j < fws.length; j++) {
         address fr = MidasFlywheelCore(fws[j]).feeRecipient();
-        if (fr != 0x27521eae4eE4153214CaDc3eCD703b9B0326C908) emit log_named_address("flywheel fr", fws[j]);
-        assertEq(fr, 0x27521eae4eE4153214CaDc3eCD703b9B0326C908, "fee recipient not correct");
+        if (fr != ap.getAddress("deployer")) emit log_named_address("flywheel fr", fws[j]);
+        assertEq(fr, ap.getAddress("deployer"), "fee recipient not correct");
       }
     }
   }

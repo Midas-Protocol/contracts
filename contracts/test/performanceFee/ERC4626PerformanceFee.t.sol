@@ -178,8 +178,8 @@ contract ERC4626PerformanceFeeTest is BaseTest {
           MidasERC4626 plugin = MidasERC4626(address(_plugin));
 
           address fr = plugin.feeRecipient();
-          if (fr != 0x27521eae4eE4153214CaDc3eCD703b9B0326C908) emit log_named_address("plugin fr", address(plugin));
-          assertEq(fr, 0x27521eae4eE4153214CaDc3eCD703b9B0326C908, "fee recipient not correct");
+          if (fr != ap.getAddress("deployer")) emit log_named_address("plugin fr", address(plugin));
+          assertEq(fr, ap.getAddress("deployer"), "fee recipient not correct");
         } catch {
           continue;
         }
