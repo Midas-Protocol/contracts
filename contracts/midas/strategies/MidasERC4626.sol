@@ -18,7 +18,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
   uint256 public vaultShareHWM;
   uint256 public performanceFee;
-  address public feeRecipient; // TODO whats the default address?
+  address public feeRecipient;
 
   /* ========== EVENTS ========== */
 
@@ -42,6 +42,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     __ERC4626_init(asset_);
 
     vaultShareHWM = 10**asset_.decimals();
+    feeRecipient = msg.sender;
   }
 
   function _asset() internal view returns (ERC20Upgradeable) {

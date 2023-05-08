@@ -382,9 +382,9 @@ contract FusePoolLens is Initializable {
   {
     ICToken[] memory poolMarkets = comptroller.getAllMarkets();
 
-    collateral = new address[](poolMarkets.length - 1);
-    borrowCapsAgainstCollateral = new uint256[](poolMarkets.length - 1);
-    borrowingBlacklistedAgainstCollateral = new bool[](poolMarkets.length - 1);
+    collateral = new address[](poolMarkets.length);
+    borrowCapsAgainstCollateral = new uint256[](poolMarkets.length);
+    borrowingBlacklistedAgainstCollateral = new bool[](poolMarkets.length);
 
     for (uint256 i = 0; i < poolMarkets.length; i++) {
       address collateralAddress = address(poolMarkets[i]);
@@ -456,14 +456,44 @@ contract FusePoolLens is Initializable {
   function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
     ICToken[] memory poolMarkets = comptroller.getAllMarkets();
 
-    address[] memory assets = new address[](poolMarkets.length - 1);
-    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length - 1);
+    address[] memory assets = new address[](poolMarkets.length);
+    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
     for (uint256 i = 0; i < poolMarkets.length; i++) {
       assets[i] = address(poolMarkets[i]);
       supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
     }
 
     return (assets, supplyCapsPerAsset);
+  }
+
+  /**
+   * @notice returns the total supply cap for each asset in the pool and the total non-whitelist supplied assets
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getSupplyCapsDataForPool(IComptroller comptroller)
+    public
+    view
+    returns (
+      address[] memory,
+      uint256[] memory,
+      uint256[] memory
+    )
+  {
+    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+
+    address[] memory assets = new address[](poolMarkets.length);
+    uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
+    uint256[] memory nonWhitelistedTotalSupply = new uint256[](poolMarkets.length);
+    for (uint256 i = 0; i < poolMarkets.length; i++) {
+      assets[i] = address(poolMarkets[i]);
+      supplyCapsPerAsset[i] = comptroller.supplyCaps(assets[i]);
+      uint256 assetTotalSupplied = poolMarkets[i].getTotalUnderlyingSupplied();
+      uint256 whitelistedSuppliersSupply = comptroller.getWhitelistedSuppliersSupply(assets[i]);
+      if (whitelistedSuppliersSupply >= assetTotalSupplied) nonWhitelistedTotalSupply[i] = 0;
+      else nonWhitelistedTotalSupply[i] = assetTotalSupplied - whitelistedSuppliersSupply;
+    }
+
+    return (assets, supplyCapsPerAsset, nonWhitelistedTotalSupply);
   }
 
   /**
@@ -483,6 +513,30 @@ contract FusePoolLens is Initializable {
     IComptroller comptroller = IComptroller(asset.comptroller());
     (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
+  }
+
+  /**
+   * @notice returns the total borrow cap, the per collateral borrowing cap/blacklist for the asset and the total non-whitelist borrows
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getBorrowCapsDataForAsset(ICToken asset)
+    public
+    view
+    returns (
+      address[] memory collateral,
+      uint256[] memory borrowCapsPerCollateral,
+      bool[] memory collateralBlacklisted,
+      uint256 totalBorrowCap,
+      uint256 nonWhitelistedTotalBorrows
+    )
+  {
+    IComptroller comptroller = IComptroller(asset.comptroller());
+    (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
+    totalBorrowCap = comptroller.borrowCaps(address(asset));
+    uint256 totalBorrows = asset.totalBorrows();
+    uint256 whitelistedBorrowersBorrows = comptroller.getWhitelistedBorrowersBorrows(address(asset));
+    if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
+    else nonWhitelistedTotalBorrows = totalBorrows - whitelistedBorrowersBorrows;
   }
 
   /**
