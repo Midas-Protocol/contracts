@@ -5,6 +5,9 @@ import "./ILeveredPositionFactory.sol";
 import "./LeveredPosition.sol";
 import "../SafeOwnableUpgradeable.sol";
 import "../../compound/IFuseFeeDistributor.sol";
+import { IRouter } from "../../external/solidly/IRouter.sol";
+
+import "../../liquidators/SolidlySwapLiquidator.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -18,9 +21,18 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   mapping(address => LeveredPosition[]) public positionsByAccount;
   mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => IRedemptionStrategy)) public redemptionStrategies;
 
+  // TODO store here?
+  IRedemptionStrategy public solidlyLiquidator;
+
+  constructor() {
+    _disableInitializers();
+  }
+
   function initialize(IFuseFeeDistributor _ffd) public initializer {
     __SafeOwnable_init(msg.sender);
     ffd = _ffd;
+
+    solidlyLiquidator = new SolidlySwapLiquidator();
   }
 
   function createPosition(ICErc20 _collateralMarket, ICErc20 _stableMarket) public returns (LeveredPosition) {
@@ -89,5 +101,38 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     external
     view
     returns (IRedemptionStrategy strategy, bytes memory strategyData)
-  {}
+  {
+    strategy = redemptionStrategies[inputToken][outputToken];
+    if (address(strategy) == address(solidlyLiquidator)) {
+      IRouter solidlyRouter = IRouter(0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
+      address tokenTo = address(outputToken);
+
+      // Check if stable pair exists
+      address volatilePair = solidlyRouter.pairFor(address(inputToken), tokenTo, false);
+      address stablePair = solidlyRouter.pairFor(address(inputToken), tokenTo, true);
+
+      require(
+        solidlyRouter.isPair(stablePair) || solidlyRouter.isPair(volatilePair),
+        "Invalid SolidlyLiquidator swap path."
+      );
+
+      bool stable;
+      if (!solidlyRouter.isPair(stablePair)) {
+        stable = false;
+      } else if (!solidlyRouter.isPair(volatilePair)) {
+        stable = true;
+      } else {
+        (uint256 stableR0, uint256 stableR1) = solidlyRouter.getReserves(address(inputToken), tokenTo, true);
+        (uint256 volatileR0, uint256 volatileR1) = solidlyRouter.getReserves(address(inputToken), tokenTo, false);
+        // Determine which swap has higher liquidity
+        if (stableR0 > volatileR0 && stableR1 > volatileR1) {
+          stable = true;
+        } else {
+          stable = false;
+        }
+      }
+
+      strategyData = abi.encode(solidlyRouter, outputToken, stable);
+    }
+  }
 }
