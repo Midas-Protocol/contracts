@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "./config/MarketsTest.t.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 
-import "../midas/levered/LeveredPositionStrategy.sol";
+import "../midas/levered/LeveredPosition.sol";
 import { AddressesProvider } from "../midas/AddressesProvider.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
@@ -12,7 +12,7 @@ import "../external/algebra/IAlgebraFactory.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
+contract LeveredPositionTest is MarketsTest, ILeveredPositionFactory {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
   IFundsConversionStrategy jarvisFunder;
@@ -52,7 +52,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     vm.prank(jBRLWhale);
     jBRL.transfer(positionOwner, 1e22);
 
-    LeveredPositionStrategy position = new LeveredPositionStrategy(positionOwner, collateralMarket, stableMarket);
+    LeveredPosition position = new LeveredPosition(positionOwner, collateralMarket, stableMarket);
 
     jBRL.approve(address(position), 1e36);
 
@@ -62,10 +62,9 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
     position.adjustLeverageRatio(2.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
     emit log_named_uint("withdraw amount", position.closePosition());
-    emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
   }
 
-  function _openHayAnkrLeveredPosition(address positionOwner) internal returns (LeveredPositionStrategy position) {
+  function _openHayAnkrLeveredPosition(address positionOwner) internal returns (LeveredPosition position) {
     collateralMarket = ICErc20(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa); // ankrBNB market
     stableMarket = ICErc20(0x10b6f851225c203eE74c369cE876BEB56379FCa3); // HAY market
     address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
@@ -73,7 +72,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
 
     IERC20Upgradeable ankrBnb = IERC20Upgradeable(collateralMarket.underlying());
 
-    position = new LeveredPositionStrategy(positionOwner, collateralMarket, stableMarket);
+    position = new LeveredPosition(positionOwner, collateralMarket, stableMarket);
 
     vm.prank(ankrBnbWhale);
     ankrBnb.transfer(positionOwner, 10e18);
@@ -85,7 +84,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   }
 
   function testOpenHayAnkrLeveredPosition() public fork(BSC_MAINNET) {
-    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+    LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
 
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
 
@@ -94,7 +93,7 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   }
 
   function testHayAnkrLeverUpDown() public fork(BSC_MAINNET) {
-    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+    LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
     uint256 targetLeverageRatio = 1.8e18;
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
     emit log_named_uint("base collateral", position.baseCollateral());
@@ -108,14 +107,14 @@ contract LeveredPositionStrategyTest is MarketsTest, ILeveredPositionFactory {
   function testHayAnkrAnyLeverageRatio(uint256 targetLeverageRatio) public fork(BSC_MAINNET) {
     vm.assume(targetLeverageRatio > 1.05e18 && targetLeverageRatio < 3e18);
 
-    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+    LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
     emit log_named_uint("base collateral", position.baseCollateral());
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
   }
 
   function testHayAnkrMaxLeverageRatio() public fork(BSC_MAINNET) {
-    LeveredPositionStrategy position = _openHayAnkrLeveredPosition(address(this));
+    LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
     uint256 targetLeverageRatio = position.getMaxLeverageRatio();
     position.adjustLeverageRatio(targetLeverageRatio);
     assertApproxEqAbs(position.getCurrentLeverageRatio(), targetLeverageRatio, 1e4, "target max ratio not matching");

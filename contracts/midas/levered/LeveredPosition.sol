@@ -13,7 +13,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 // TODO upgradeable?
-contract LeveredPositionStrategy is IFlashLoanReceiver {
+contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   // @notice maximum slippage in swaps, in bps
@@ -59,7 +59,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
     fundingAsset.safeTransferFrom(msg.sender, address(this), amount);
     baseCollateral += _supplyCollateral(fundingAsset);
 
-    if (!pool.checkMembership(msg.sender, address(collateralMarket))) {
+    if (!pool.checkMembership(msg.sender, collateralMarket)) {
       address[] memory cTokens = new address[](1);
       cTokens[0] = address(collateralMarket);
       pool.enterMarkets(cTokens);
@@ -75,6 +75,7 @@ contract LeveredPositionStrategy is IFlashLoanReceiver {
 
     _leverDown(0);
 
+    // TODO redeem(type(uint256).max) to leave no dust?
     uint256 maxRedeem = pool.getMaxRedeemOrBorrow(address(this), collateralMarket, false);
     require(collateralMarket.redeemUnderlying(maxRedeem) == 0, "redeem failed");
 
