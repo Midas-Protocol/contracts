@@ -141,30 +141,30 @@ contract LeveredPositionTest is MarketsTest, ILeveredPositionFactory {
     }
   }
 
-  function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
-  {
-    // JarvisLiquidatorFunder
-    {
-      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
-      for (uint256 i = 0; i < pools.length; i++) {
-        AddressesProvider.JarvisPool memory pool = pools[i];
-        if (pool.collateralToken == address(fundingToken)) {
-          require(address(outputToken) == pool.syntheticToken, "!output token mismatch");
-          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
-          fundingStrategy = jarvisFunder;
-          break;
-        } else if (pool.syntheticToken == address(fundingToken)) {
-          require(address(outputToken) == pool.collateralToken, "!output token mismatch");
-          strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
-          fundingStrategy = jarvisFunder;
-          break;
-        }
-      }
-    }
-  }
+  //  function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
+  //    external
+  //    view
+  //    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
+  //  {
+  //    // JarvisLiquidatorFunder
+  //    {
+  //      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
+  //      for (uint256 i = 0; i < pools.length; i++) {
+  //        AddressesProvider.JarvisPool memory pool = pools[i];
+  //        if (pool.collateralToken == address(fundingToken)) {
+  //          require(address(outputToken) == pool.syntheticToken, "!output token mismatch");
+  //          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
+  //          fundingStrategy = jarvisFunder;
+  //          break;
+  //        } else if (pool.syntheticToken == address(fundingToken)) {
+  //          require(address(outputToken) == pool.collateralToken, "!output token mismatch");
+  //          strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
+  //          fundingStrategy = jarvisFunder;
+  //          break;
+  //        }
+  //      }
+  //    }
+  //  }
 
   function getMinBorrowNative() external view returns (uint256) {
     return 0.31e18; // BNB = $324

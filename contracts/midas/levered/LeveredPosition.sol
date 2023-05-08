@@ -59,7 +59,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     fundingAsset.safeTransferFrom(msg.sender, address(this), amount);
     baseCollateral += _supplyCollateral(fundingAsset);
 
-    if (!pool.checkMembership(msg.sender, collateralMarket)) {
+    if (!pool.checkMembership(address(this), collateralMarket)) {
       address[] memory cTokens = new address[](1);
       cTokens[0] = address(collateralMarket);
       pool.enterMarkets(cTokens);
