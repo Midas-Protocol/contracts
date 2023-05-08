@@ -23,10 +23,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     ffd = _ffd;
   }
 
-  function createPosition(
-    ICErc20 _collateralMarket,
-    ICErc20 _stableMarket
-  ) public returns (LeveredPosition) {
+  function createPosition(ICErc20 _collateralMarket, ICErc20 _stableMarket) public returns (LeveredPosition) {
     require(isValidPair(_collateralMarket, _stableMarket), "!pair not valid");
 
     LeveredPosition levPos = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
@@ -56,7 +53,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return address(redemptionStrategies[inputToken][outputToken]) != address(0);
   }
 
-  function _setPairWhitelisted(ICErc20 _collateralMarket, ICErc20 _stableMarket, bool _whitelisted) public onlyOwner {
+  function _setPairWhitelisted(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    bool _whitelisted
+  ) public onlyOwner {
     marketsPairsWhitelist[_collateralMarket][_stableMarket] = _whitelisted;
   }
 
@@ -64,7 +65,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return ffd.minBorrowEth();
   }
 
-  function _addRedemptionStrategy(IRedemptionStrategy strategy, IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) public onlyOwner {
+  function _addRedemptionStrategy(
+    IRedemptionStrategy strategy,
+    IERC20Upgradeable inputToken,
+    IERC20Upgradeable outputToken
+  ) public onlyOwner {
     redemptionStrategies[inputToken][outputToken] = strategy;
   }
 
@@ -81,9 +86,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function getRedemptionStrategy(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (IRedemptionStrategy strategy, bytes memory strategyData) {
-
-  }
+    external
+    view
+    returns (IRedemptionStrategy strategy, bytes memory strategyData)
+  {}
 }
