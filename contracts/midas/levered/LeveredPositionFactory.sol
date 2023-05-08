@@ -11,14 +11,17 @@ import "../../liquidators/SolidlySwapLiquidator.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeable {
   using SafeERC20Upgradeable for IERC20Upgradeable;
+  using EnumerableSet for EnumerableSet.AddressSet;
 
   IFuseFeeDistributor public ffd;
 
+  mapping(address => EnumerableSet.AddressSet) private positionsByAccount;
+
   mapping(ICErc20 => mapping(ICErc20 => bool)) public marketsPairsWhitelist;
-  mapping(address => LeveredPosition[]) public positionsByAccount;
   mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => IRedemptionStrategy)) public redemptionStrategies;
 
   // TODO store here?
@@ -47,8 +50,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     require(isValidPair(_collateralMarket, _stableMarket), "!pair not valid");
 
     LeveredPosition position = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
-    LeveredPosition[] storage userPositions = positionsByAccount[msg.sender];
-    userPositions.push(position);
+    EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
+    userPositions.add(address(position));
     return position;
   }
 
@@ -65,9 +68,22 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return position;
   }
 
+  // @return true if removed, otherwise false
+  function removeClosedPosition(address closedPosition) public returns (bool) {
+    EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
+    require(userPositions.contains(closedPosition), "!no such position");
+    require(LeveredPosition(closedPosition).isPositionClosed(), "!not closed");
+
+    return userPositions.remove(closedPosition);
+  }
+
   /*----------------------------------------------------------------
                             View Functions
   ----------------------------------------------------------------*/
+
+  function getPositionsByAccount(address account) public view returns (address[] memory) {
+    return positionsByAccount[account].values();
+  }
 
   function isValidPair(ICErc20 _collateralMarket, ICErc20 _stableMarket) public view returns (bool) {
     return marketsPairsWhitelist[_collateralMarket][_stableMarket];

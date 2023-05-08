@@ -177,6 +177,10 @@ contract LeveredPosition is IFlashLoanReceiver {
     return (address(redemptionStrategy) != address(0));
   }
 
+  function isPositionClosed() public view returns (bool) {
+    return stableMarket.borrowBalanceStored(address(this)) == 0;
+  }
+
   /*----------------------------------------------------------------
                             Internal Functions
   ----------------------------------------------------------------*/
