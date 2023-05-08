@@ -25,7 +25,11 @@ contract LeveredPositionTest is MarketsTest {
     super.afterForkSetUp();
     jarvisFunder = new JarvisLiquidatorFunder();
     LeveredPositionFactory impl = new LeveredPositionFactory();
-    TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(address(impl), ap.getAddress("DefaultProxyAdmin"), "");
+    TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
+      address(impl),
+      ap.getAddress("DefaultProxyAdmin"),
+      ""
+    );
     factory = LeveredPositionFactory(address(factoryProxy));
     factory.initialize(IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))));
 
