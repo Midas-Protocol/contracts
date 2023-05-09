@@ -54,4 +54,8 @@ contract SOhmLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(staking.OHM());
     outputAmount = inputAmount;
   }
+
+  function name() public pure returns (string memory) {
+    return "SOhmLiquidator";
+  }
 }

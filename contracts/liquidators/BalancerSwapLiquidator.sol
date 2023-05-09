@@ -38,4 +38,8 @@ contract BalancerSwapLiquidator is IRedemptionStrategy {
     outputAmount = IERC20Upgradeable(outputTokenAddress).balanceOf(address(this));
     return (IERC20Upgradeable(outputTokenAddress), outputAmount);
   }
+
+  function name() public pure returns (string memory) {
+    return "BalancerSwapLiquidator";
+  }
 }

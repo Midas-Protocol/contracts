@@ -31,4 +31,8 @@ contract UniswapV2LiquidatorFunder is UniswapV2Liquidator, IFundsConversionStrat
     inputAmount = amounts[0];
     inputToken = IERC20Upgradeable(swapPath[0]);
   }
+
+  function name() public pure override(UniswapV2Liquidator, IRedemptionStrategy) returns (string memory) {
+    return "UniswapV2LiquidatorFunder";
+  }
 }

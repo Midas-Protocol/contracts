@@ -40,4 +40,8 @@ contract AlgebraSwapLiquidator is IRedemptionStrategy {
 
     outputAmount = swapRouter.exactInputSingle(params);
   }
+
+  function name() public pure returns (string memory) {
+    return "AlgebraSwapLiquidator";
+  }
 }

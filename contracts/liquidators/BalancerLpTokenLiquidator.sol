@@ -46,4 +46,8 @@ contract BalancerLpTokenLiquidator is IRedemptionStrategy {
 
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "BalancerLpTokenLiquidator";
+  }
 }

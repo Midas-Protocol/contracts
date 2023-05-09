@@ -32,4 +32,8 @@ contract SushiBarLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(sushiBar.sushi());
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "SushiBarLiquidator";
+  }
 }

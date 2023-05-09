@@ -93,4 +93,8 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
       return binSearch(curvePool, i, j, mid, high, value);
     }
   }
+
+  function name() public pure override(CurveSwapLiquidator, IRedemptionStrategy) returns (string memory) {
+    return "CurveSwapLiquidatorFunder";
+  }
 }

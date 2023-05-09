@@ -63,4 +63,8 @@ contract WombatLpTokenLiquidator is IRedemptionStrategy {
     outputAmount = IWombatPool(poolAddress).withdraw(_outputToken, inputAmount, 0, address(this), block.timestamp);
     outputToken = IERC20Upgradeable(_outputToken);
   }
+
+  function name() public pure returns (string memory) {
+    return "WombatLpTokenLiquidator";
+  }
 }

@@ -9,19 +9,38 @@ import { AddressesProvider } from "../midas/AddressesProvider.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
 import "../external/algebra/IAlgebraFactory.sol";
+import "../midas/levered/LeveredPositionFactory.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-contract LeveredPositionTest is MarketsTest, ILeveredPositionFactory {
+contract LeveredPositionTest is MarketsTest {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
-  IFundsConversionStrategy jarvisFunder;
-  IRedemptionStrategy solidlyLiquidator;
+  LeveredPositionFactory factory;
+  LiquidatorsRegistry registry;
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
-    jarvisFunder = new JarvisLiquidatorFunder();
-    solidlyLiquidator = new SolidlySwapLiquidator();
+
+    SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
+    IERC20Upgradeable ankrBnb = IERC20Upgradeable(0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827);
+    IERC20Upgradeable hay = IERC20Upgradeable(0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5);
+
+    // create and configure the liquidators registry
+    registry = new LiquidatorsRegistry();
+    registry._setRedemptionStrategy(solidlyLiquidator, ankrBnb, hay);
+    registry._setRedemptionStrategy(solidlyLiquidator, hay, ankrBnb);
+
+    // create and initialize the levered positions factory
+    LeveredPositionFactory impl = new LeveredPositionFactory();
+    TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
+      address(impl),
+      ap.getAddress("DefaultProxyAdmin"),
+      ""
+    );
+    factory = LeveredPositionFactory(address(factoryProxy));
+    factory.initialize(IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))), registry);
   }
 
   function upgradePoolAndMarkets() internal {
@@ -34,6 +53,7 @@ contract LeveredPositionTest is MarketsTest, ILeveredPositionFactory {
     collateralMarket = ICErc20(0x82A3103bc306293227B756f7554AfAeE82F8ab7a); // jBRL market
     stableMarket = ICErc20(0xa7213deB44f570646Ea955771Cc7f39B58841363); // bUSD market
     upgradePoolAndMarkets();
+    factory._setPairWhitelisted(collateralMarket, stableMarket, true);
 
     vm.startPrank(ap.owner());
     ap.setJarvisPool(
@@ -52,13 +72,12 @@ contract LeveredPositionTest is MarketsTest, ILeveredPositionFactory {
     vm.prank(jBRLWhale);
     jBRL.transfer(positionOwner, 1e22);
 
-    LeveredPosition position = new LeveredPosition(positionOwner, collateralMarket, stableMarket);
+    LeveredPosition position = factory.createPosition(collateralMarket, stableMarket);
 
     jBRL.approve(address(position), 1e36);
 
     position.fundPosition(IERC20Upgradeable(jBRLAddress), 1e22);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
     position.adjustLeverageRatio(2.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
     emit log_named_uint("withdraw amount", position.closePosition());
@@ -69,104 +88,84 @@ contract LeveredPositionTest is MarketsTest, ILeveredPositionFactory {
     stableMarket = ICErc20(0x10b6f851225c203eE74c369cE876BEB56379FCa3); // HAY market
     address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
     upgradePoolAndMarkets();
+    factory._setPairWhitelisted(collateralMarket, stableMarket, true);
 
     IERC20Upgradeable ankrBnb = IERC20Upgradeable(collateralMarket.underlying());
-
-    position = new LeveredPosition(positionOwner, collateralMarket, stableMarket);
 
     vm.prank(ankrBnbWhale);
     ankrBnb.transfer(positionOwner, 10e18);
 
     vm.startPrank(positionOwner);
-    ankrBnb.approve(address(position), 1e36);
-    position.fundPosition(ankrBnb, 10e18);
+    ankrBnb.approve(address(factory), 1e36);
+    position = factory.createAndFundPosition(collateralMarket, stableMarket, ankrBnb, 10e18);
     vm.stopPrank();
   }
 
   function testOpenHayAnkrLeveredPosition() public fork(BSC_MAINNET) {
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
-
-    emit log_named_uint("min diff", position.getMinLeverageRatioDiff());
-    emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
   }
 
-  function testHayAnkrLeverUpDown() public fork(BSC_MAINNET) {
+  function testHayAnkrAnyLeverageRatio(uint64 ratioDiff) public fork(BSC_MAINNET) {
+    // ratioDiff is between 0 and 2^64 ~= 18.446e18
+    uint256 targetLeverageRatio = 1.03e18 + uint256(ratioDiff);
+
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-    uint256 targetLeverageRatio = 1.8e18;
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    emit log_named_uint("max lev ratio", maxRatio);
+    vm.assume(targetLeverageRatio < maxRatio);
+
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
     emit log_named_uint("base collateral", position.baseCollateral());
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
-
-    uint256 targetDeleverRatio = 1.2e18;
-    uint256 deleverageRatioRealized = position.adjustLeverageRatio(targetDeleverRatio);
-    assertApproxEqAbs(deleverageRatioRealized, targetDeleverRatio, 1e4, "target delever ratio not matching");
   }
 
-  function testHayAnkrAnyLeverageRatio(uint256 targetLeverageRatio) public fork(BSC_MAINNET) {
-    vm.assume(targetLeverageRatio > 1.05e18 && targetLeverageRatio < 3e18);
-
+  function testHayAnkrMinMaxLeverageRatio() public fork(BSC_MAINNET) {
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-    uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
-    emit log_named_uint("base collateral", position.baseCollateral());
-    assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    emit log_named_uint("max ratio", maxRatio);
+    uint256 minRatioDiff = position.getMinLeverageRatioDiff();
+    emit log_named_uint("min ratio diff", minRatioDiff);
+
+    assertGt(maxRatio, minRatioDiff, "max ratio <= min ratio diff");
+
+    uint256 currentRatio = position.getCurrentLeverageRatio();
+    vm.expectRevert("borrow stable failed");
+    // 10% off for the swaps slippage accounting
+    position.adjustLeverageRatio(currentRatio + ((90 * minRatioDiff) / 100));
+    position.adjustLeverageRatio(currentRatio + minRatioDiff);
   }
 
   function testHayAnkrMaxLeverageRatio() public fork(BSC_MAINNET) {
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-    uint256 targetLeverageRatio = position.getMaxLeverageRatio();
-    position.adjustLeverageRatio(targetLeverageRatio);
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), targetLeverageRatio, 1e4, "target max ratio not matching");
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    emit log_named_uint("max ratio", maxRatio);
+    uint256 minRatioDiff = position.getMinLeverageRatioDiff();
+    emit log_named_uint("min ratio diff", minRatioDiff);
+    position.adjustLeverageRatio(maxRatio);
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
   }
 
-  function getRedemptionStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (IRedemptionStrategy strategy, bytes memory strategyData)
-  {
-    // hay/ankrBnb -> SolidlySwapLiquidator
-    {
-      address ankrBnb = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827; // token1
-      address hay = 0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5; // token0
-      bool hayAndAnkrBnb = address(fundingToken) == hay && address(outputToken) == ankrBnb;
-      bool ankrBnbAndHay = address(fundingToken) == ankrBnb && address(outputToken) == hay;
-      address pool = 0xC6dB38F34DA75393E9aac841c08104348997D509; // VolatileV1 AMM - HAY/ankrBNB
-      address router = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
+  function testHayAnkrLeverMaxDown() public fork(BSC_MAINNET) {
+    uint256 leverageRatioRealized;
+    LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
+    assertApproxEqAbs(leverageRatioRealized, maxRatio, 1e4, "target ratio not matching");
 
-      if (ankrBnbAndHay || hayAndAnkrBnb) {
-        strategy = solidlyLiquidator;
-        strategyData = abi.encode(router, outputToken, false);
-      }
+    // decrease the ratio in 10 equal steps
+    uint256 targetLeverDownRatio;
+    uint256 ratioDiffStep = (maxRatio - 1e18) / 9;
+    for (uint256 i = 0; i < 10; i++) {
+      targetLeverDownRatio = leverageRatioRealized - ratioDiffStep;
+      leverageRatioRealized = position.adjustLeverageRatio(targetLeverDownRatio);
+      assertApproxEqAbs(leverageRatioRealized, targetLeverDownRatio, 1e4, "target lever down ratio not matching");
     }
-  }
 
-  function getFundingStrategy(IERC20Upgradeable fundingToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (IFundsConversionStrategy fundingStrategy, bytes memory strategyData)
-  {
-    // JarvisLiquidatorFunder
-    {
-      AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
-      for (uint256 i = 0; i < pools.length; i++) {
-        AddressesProvider.JarvisPool memory pool = pools[i];
-        if (pool.collateralToken == address(fundingToken)) {
-          require(address(outputToken) == pool.syntheticToken, "!output token mismatch");
-          strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
-          fundingStrategy = jarvisFunder;
-          break;
-        } else if (pool.syntheticToken == address(fundingToken)) {
-          require(address(outputToken) == pool.collateralToken, "!output token mismatch");
-          strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
-          fundingStrategy = jarvisFunder;
-          break;
-        }
-      }
-    }
-  }
+    uint256 withdrawAmount = position.closePosition();
+    emit log_named_uint("withdraw amount", withdrawAmount);
 
-  function getMinBorrowNative() external view returns (uint256) {
-    return 0.31e18; // BNB = $324
+    assertEq(position.baseCollateral(), 0, "!nonzero base collateral");
+    assertEq(position.getCurrentLeverageRatio(), 0, "!nonzero leverage ratio");
   }
 }
