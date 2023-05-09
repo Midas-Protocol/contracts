@@ -28,14 +28,7 @@ contract LeveredPositionTest is MarketsTest {
     IERC20Upgradeable hay = IERC20Upgradeable(0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5);
 
     // create and configure the liquidators registry
-    LiquidatorsRegistry lrImpl = new LiquidatorsRegistry();
-    TransparentUpgradeableProxy registryProxy = new TransparentUpgradeableProxy(
-      address(lrImpl),
-      ap.getAddress("DefaultProxyAdmin"),
-      ""
-    );
-    registry = LiquidatorsRegistry(address(registryProxy));
-    registry.initialize();
+    registry = new LiquidatorsRegistry();
     registry._setRedemptionStrategy(solidlyLiquidator, ankrBnb, hay);
     registry._setRedemptionStrategy(solidlyLiquidator, hay, ankrBnb);
 

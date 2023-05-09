@@ -42,11 +42,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   ----------------------------------------------------------------*/
 
   function createPosition(ICErc20 _collateralMarket, ICErc20 _stableMarket) public returns (LeveredPosition) {
-    require(isWhitelistedPair(_collateralMarket, _stableMarket), "!pair not valid");
+    require(marketsPairsWhitelist[_collateralMarket][_stableMarket], "!pair not valid");
 
     LeveredPosition position = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
-    EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
-    userPositions.add(address(position));
+    positionsByAccount[msg.sender].add(address(position));
     return position;
   }
 
@@ -78,10 +77,6 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   function getPositionsByAccount(address account) public view returns (address[] memory) {
     return positionsByAccount[account].values();
-  }
-
-  function isWhitelistedPair(ICErc20 _collateralMarket, ICErc20 _stableMarket) public view returns (bool) {
-    return marketsPairsWhitelist[_collateralMarket][_stableMarket];
   }
 
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) public view returns (bool) {

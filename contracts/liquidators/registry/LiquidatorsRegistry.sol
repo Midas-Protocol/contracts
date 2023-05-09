@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import "../../midas/SafeOwnableUpgradeable.sol";
 import "../IRedemptionStrategy.sol";
+import "../../midas/DiamondExtension.sol";
+import "./LiquidatorsRegistryStorage.sol";
 import { IRouter } from "../../external/solidly/IRouter.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-contract LiquidatorsRegistry is SafeOwnableUpgradeable {
-  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => IRedemptionStrategy)) public redemptionStrategiesByTokens;
-  mapping(string => IRedemptionStrategy) public redemptionStrategiesByName;
-
-  constructor() {
-    _disableInitializers();
-  }
-
-  function initialize() public initializer {
-    __SafeOwnable_init(msg.sender);
+contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
+  /**
+   * @dev register a logic extension
+   * @param extensionToAdd the extension whose functions are to be added
+   * @param extensionToReplace the extension whose functions are to be removed/replaced
+   */
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) public override {
+    require(msg.sender == owner(), "!unauthorized - no admin rights");
+    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
   function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
