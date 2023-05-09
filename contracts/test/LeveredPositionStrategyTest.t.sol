@@ -75,7 +75,6 @@ contract LeveredPositionTest is MarketsTest {
 
     position.fundPosition(IERC20Upgradeable(jBRLAddress), 1e22);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
-    emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
     position.adjustLeverageRatio(2.5e18);
     emit log_named_uint("current ratio", position.getCurrentLeverageRatio());
     emit log_named_uint("withdraw amount", position.closePosition());
@@ -90,51 +89,80 @@ contract LeveredPositionTest is MarketsTest {
 
     IERC20Upgradeable ankrBnb = IERC20Upgradeable(collateralMarket.underlying());
 
-    position = factory.createPosition(collateralMarket, stableMarket);
-
     vm.prank(ankrBnbWhale);
     ankrBnb.transfer(positionOwner, 10e18);
 
     vm.startPrank(positionOwner);
-    ankrBnb.approve(address(position), 1e36);
-    position.fundPosition(ankrBnb, 10e18);
+    ankrBnb.approve(address(factory), 1e36);
+    position = factory.createAndFundPosition(collateralMarket, stableMarket, ankrBnb, 10e18);
     vm.stopPrank();
   }
 
   function testOpenHayAnkrLeveredPosition() public fork(BSC_MAINNET) {
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
-
-    emit log_named_uint("min diff", position.getMinLeverageRatioDiff());
-    emit log_named_uint("max lev ratio", position.getMaxLeverageRatio());
   }
 
-  function testHayAnkrLeverUpDown() public fork(BSC_MAINNET) {
+  function testHayAnkrAnyLeverageRatio(uint64 ratioDiff) public fork(BSC_MAINNET) {
+    // ratioDiff is between 0 and 2^64 ~= 18.446e18
+    uint256 targetLeverageRatio = 1.03e18 + uint256(ratioDiff);
+
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-    uint256 targetLeverageRatio = 1.8e18;
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    emit log_named_uint("max lev ratio", maxRatio);
+    vm.assume(targetLeverageRatio < maxRatio);
+
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
     emit log_named_uint("base collateral", position.baseCollateral());
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
-
-    uint256 targetDeleverRatio = 1.2e18;
-    uint256 deleverageRatioRealized = position.adjustLeverageRatio(targetDeleverRatio);
-    assertApproxEqAbs(deleverageRatioRealized, targetDeleverRatio, 1e4, "target delever ratio not matching");
   }
 
-  function testHayAnkrAnyLeverageRatio(uint256 targetLeverageRatio) public fork(BSC_MAINNET) {
-    vm.assume(targetLeverageRatio > 1.05e18 && targetLeverageRatio < 3e18);
-
+  function testHayAnkrMinMaxLeverageRatio() public fork(BSC_MAINNET) {
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-    uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
-    emit log_named_uint("base collateral", position.baseCollateral());
-    assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    emit log_named_uint("max ratio", maxRatio);
+    uint256 minRatioDiff = position.getMinLeverageRatioDiff();
+    emit log_named_uint("min ratio diff", minRatioDiff);
+
+    assertGt(maxRatio, minRatioDiff, "max ratio <= min ratio diff");
+
+    uint256 currentRatio = position.getCurrentLeverageRatio();
+    vm.expectRevert("borrow stable failed");
+    // 10% off for the swaps slippage accounting
+    position.adjustLeverageRatio(currentRatio + (90 * minRatioDiff / 100));
+    position.adjustLeverageRatio(currentRatio + minRatioDiff);
   }
 
   function testHayAnkrMaxLeverageRatio() public fork(BSC_MAINNET) {
     LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
-    uint256 targetLeverageRatio = position.getMaxLeverageRatio();
-    position.adjustLeverageRatio(targetLeverageRatio);
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), targetLeverageRatio, 1e4, "target max ratio not matching");
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    emit log_named_uint("max ratio", maxRatio);
+    uint256 minRatioDiff = position.getMinLeverageRatioDiff();
+    emit log_named_uint("min ratio diff", minRatioDiff);
+    position.adjustLeverageRatio(maxRatio);
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
+  }
+
+  function testHayAnkrLeverMaxDown() public fork(BSC_MAINNET) {
+    uint256 leverageRatioRealized;
+    LeveredPosition position = _openHayAnkrLeveredPosition(address(this));
+    uint256 maxRatio = position.getMaxLeverageRatio();
+    leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
+    assertApproxEqAbs(leverageRatioRealized, maxRatio, 1e4, "target ratio not matching");
+
+    // decrease the ratio in 10 equal steps
+    uint256 targetLeverDownRatio;
+    uint256 ratioDiffStep = (maxRatio - 1e18) / 9;
+    for (uint256 i = 0; i < 10; i++) {
+      targetLeverDownRatio = leverageRatioRealized - ratioDiffStep;
+      leverageRatioRealized = position.adjustLeverageRatio(targetLeverDownRatio);
+      assertApproxEqAbs(leverageRatioRealized, targetLeverDownRatio, 1e4, "target lever down ratio not matching");
+    }
+
+    uint256 withdrawAmount = position.closePosition();
+    emit log_named_uint("withdraw amount", withdrawAmount);
+
+    assertEq(position.baseCollateral(), 0, "!nonzero base collateral");
+    assertEq(position.getCurrentLeverageRatio(), 0, "!nonzero leverage ratio");
   }
 }
