@@ -129,7 +129,7 @@ contract LeveredPositionTest is MarketsTest {
     uint256 currentRatio = position.getCurrentLeverageRatio();
     vm.expectRevert("borrow stable failed");
     // 10% off for the swaps slippage accounting
-    position.adjustLeverageRatio(currentRatio + (90 * minRatioDiff / 100));
+    position.adjustLeverageRatio(currentRatio + ((90 * minRatioDiff) / 100));
     position.adjustLeverageRatio(currentRatio + minRatioDiff);
   }
 
