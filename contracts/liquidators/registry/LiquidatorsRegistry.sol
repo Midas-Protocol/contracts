@@ -56,13 +56,17 @@ contract LiquidatorsRegistry is SafeOwnableUpgradeable {
     returns (IRedemptionStrategy strategy, bytes memory strategyData)
   {
     strategy = redemptionStrategiesByTokens[inputToken][outputToken];
-    
+
     if (address(strategy) == address(redemptionStrategiesByName["SolidlySwapLiquidator"])) {
       strategyData = solidlySwapLiquidatorData(inputToken, outputToken);
     }
   }
 
-  function solidlySwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) internal view returns (bytes memory strategyData) {
+  function solidlySwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    view
+    returns (bytes memory strategyData)
+  {
     // assuming bsc for the chain
     IRouter solidlyRouter = IRouter(0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
     address tokenTo = address(outputToken);
