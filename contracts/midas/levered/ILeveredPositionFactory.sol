@@ -24,7 +24,7 @@ interface ILeveredPositionFactory {
     uint256 _fundingAmount
   ) external returns (LeveredPosition);
 
-  function isValidPair(ICErc20 _collateralMarket, ICErc20 _stableMarket) external view returns (bool);
+  function isWhitelistedPair(ICErc20 _collateralMarket, ICErc20 _stableMarket) external view returns (bool);
 
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (bool);
 }
