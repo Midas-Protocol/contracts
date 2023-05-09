@@ -36,8 +36,8 @@ contract LeveredPositionTest is MarketsTest {
     );
     registry = LiquidatorsRegistry(address(registryProxy));
     registry.initialize();
-    registry._addRedemptionStrategy(solidlyLiquidator, ankrBnb, hay);
-    registry._addRedemptionStrategy(solidlyLiquidator, hay, ankrBnb);
+    registry._setRedemptionStrategy(solidlyLiquidator, ankrBnb, hay);
+    registry._setRedemptionStrategy(solidlyLiquidator, hay, ankrBnb);
 
     // create and initialize the levered positions factory
     LeveredPositionFactory impl = new LeveredPositionFactory();
