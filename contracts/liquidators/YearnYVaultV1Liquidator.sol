@@ -32,4 +32,8 @@ contract YearnYVaultV1Liquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(yVault.token());
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "YearnYVaultV1Liquidator";
+  }
 }

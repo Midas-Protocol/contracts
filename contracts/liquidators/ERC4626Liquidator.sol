@@ -102,4 +102,8 @@ contract ERC4626Liquidator is IRedemptionStrategy {
     );
     outputAmount = swapRouter.exactInputSingle(params);
   }
+
+  function name() public pure returns (string memory) {
+    return "ERC4626Liquidator";
+  }
 }

@@ -5,8 +5,8 @@ import "./ILeveredPositionFactory.sol";
 import "./LeveredPosition.sol";
 import "../SafeOwnableUpgradeable.sol";
 import "../../compound/IFuseFeeDistributor.sol";
-import { IRouter } from "../../external/solidly/IRouter.sol";
 
+import "../../liquidators/registry/LiquidatorsRegistry.sol";
 import "../../liquidators/SolidlySwapLiquidator.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -18,14 +18,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   using EnumerableSet for EnumerableSet.AddressSet;
 
   IFuseFeeDistributor public ffd;
+  LiquidatorsRegistry public liquidatorsRegistry;
 
   mapping(address => EnumerableSet.AddressSet) private positionsByAccount;
-
   mapping(ICErc20 => mapping(ICErc20 => bool)) public marketsPairsWhitelist;
-  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => IRedemptionStrategy)) public redemptionStrategies;
-
-  // TODO store here?
-  IRedemptionStrategy public solidlyLiquidator;
 
   /*----------------------------------------------------------------
                         Initializer Functions
@@ -35,11 +31,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     _disableInitializers();
   }
 
-  function initialize(IFuseFeeDistributor _ffd) public initializer {
+  function initialize(IFuseFeeDistributor _ffd, LiquidatorsRegistry _registry) public initializer {
     __SafeOwnable_init(msg.sender);
     ffd = _ffd;
-
-    solidlyLiquidator = new SolidlySwapLiquidator();
+    liquidatorsRegistry = _registry;
   }
 
   /*----------------------------------------------------------------
@@ -90,7 +85,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) public view returns (bool) {
-    return address(redemptionStrategies[inputToken][outputToken]) != address(0);
+    return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 
   function getMinBorrowNative() external view returns (uint256) {
@@ -102,38 +97,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     view
     returns (IRedemptionStrategy strategy, bytes memory strategyData)
   {
-    strategy = redemptionStrategies[inputToken][outputToken];
-    if (address(strategy) == address(solidlyLiquidator)) {
-      IRouter solidlyRouter = IRouter(0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
-      address tokenTo = address(outputToken);
-
-      // Check if stable pair exists
-      address volatilePair = solidlyRouter.pairFor(address(inputToken), tokenTo, false);
-      address stablePair = solidlyRouter.pairFor(address(inputToken), tokenTo, true);
-
-      require(
-        solidlyRouter.isPair(stablePair) || solidlyRouter.isPair(volatilePair),
-        "Invalid SolidlyLiquidator swap path."
-      );
-
-      bool stable;
-      if (!solidlyRouter.isPair(stablePair)) {
-        stable = false;
-      } else if (!solidlyRouter.isPair(volatilePair)) {
-        stable = true;
-      } else {
-        (uint256 stableR0, uint256 stableR1) = solidlyRouter.getReserves(address(inputToken), tokenTo, true);
-        (uint256 volatileR0, uint256 volatileR1) = solidlyRouter.getReserves(address(inputToken), tokenTo, false);
-        // Determine which swap has higher liquidity
-        if (stableR0 > volatileR0 && stableR1 > volatileR1) {
-          stable = true;
-        } else {
-          stable = false;
-        }
-      }
-
-      strategyData = abi.encode(solidlyRouter, outputToken, stable);
-    }
+    return liquidatorsRegistry.getRedemptionStrategy(inputToken, outputToken);
   }
 
   /*----------------------------------------------------------------
@@ -146,25 +110,5 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     bool _whitelisted
   ) public onlyOwner {
     marketsPairsWhitelist[_collateralMarket][_stableMarket] = _whitelisted;
-  }
-
-  function _addRedemptionStrategy(
-    IRedemptionStrategy strategy,
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) public onlyOwner {
-    redemptionStrategies[inputToken][outputToken] = strategy;
-  }
-
-  function _addRedemptionStrategies(
-    IRedemptionStrategy[] calldata strategies,
-    IERC20Upgradeable[] calldata inputTokens,
-    IERC20Upgradeable[] calldata outputTokens
-  ) public onlyOwner {
-    require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
-
-    for (uint256 i = 0; i < strategies.length; i++) {
-      redemptionStrategies[inputTokens[i]][outputTokens[i]] = strategies[i];
-    }
   }
 }

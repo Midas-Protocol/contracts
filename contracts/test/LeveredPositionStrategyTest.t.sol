@@ -17,13 +17,29 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 contract LeveredPositionTest is MarketsTest {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
-  IFundsConversionStrategy jarvisFunder;
-  IRedemptionStrategy solidlyLiquidator;
   LeveredPositionFactory factory;
+  LiquidatorsRegistry registry;
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
-    jarvisFunder = new JarvisLiquidatorFunder();
+
+    SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
+    IERC20Upgradeable ankrBnb = IERC20Upgradeable(0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827);
+    IERC20Upgradeable hay = IERC20Upgradeable(0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5);
+
+    // create and configure the liquidators registry
+    LiquidatorsRegistry lrImpl = new LiquidatorsRegistry();
+    TransparentUpgradeableProxy registryProxy = new TransparentUpgradeableProxy(
+      address(lrImpl),
+      ap.getAddress("DefaultProxyAdmin"),
+      ""
+    );
+    registry = LiquidatorsRegistry(address(registryProxy));
+    registry.initialize();
+    registry._addRedemptionStrategy(solidlyLiquidator, ankrBnb, hay);
+    registry._addRedemptionStrategy(solidlyLiquidator, hay, ankrBnb);
+
+    // create and initialize the levered positions factory
     LeveredPositionFactory impl = new LeveredPositionFactory();
     TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
       address(impl),
@@ -31,13 +47,7 @@ contract LeveredPositionTest is MarketsTest {
       ""
     );
     factory = LeveredPositionFactory(address(factoryProxy));
-    factory.initialize(IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))));
-
-    solidlyLiquidator = factory.solidlyLiquidator();
-    IERC20Upgradeable ankrBnb = IERC20Upgradeable(0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827);
-    IERC20Upgradeable hay = IERC20Upgradeable(0x0782b6d8c4551B9760e74c0545a9bCD90bdc41E5);
-    factory._addRedemptionStrategy(solidlyLiquidator, ankrBnb, hay);
-    factory._addRedemptionStrategy(solidlyLiquidator, hay, ankrBnb);
+    factory.initialize(IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))), registry);
   }
 
   function upgradePoolAndMarkets() internal {

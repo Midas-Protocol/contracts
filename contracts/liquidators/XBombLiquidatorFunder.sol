@@ -83,4 +83,8 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
       revert("unknown input token");
     }
   }
+
+  function name() public pure returns (string memory) {
+    return "XBombLiquidatorFunder";
+  }
 }

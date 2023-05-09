@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { IFundsConversionStrategy, IRedemptionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import "./LeveredPosition.sol";
 

@@ -52,4 +52,8 @@ contract UniswapV2Liquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(swapPath[swapPath.length - 1]);
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure virtual returns (string memory) {
+    return "UniswapV2Liquidator";
+  }
 }

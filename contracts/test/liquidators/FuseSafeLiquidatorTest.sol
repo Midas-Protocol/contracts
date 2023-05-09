@@ -22,6 +22,10 @@ contract MockRedemptionStrategy is IRedemptionStrategy {
   ) external returns (IERC20Upgradeable, uint256) {
     return (IERC20Upgradeable(address(0)), 1);
   }
+
+  function name() public pure returns (string memory) {
+    return "MockRedemptionStrategy";
+  }
 }
 
 contract FuseSafeLiquidatorTest is BaseTest {

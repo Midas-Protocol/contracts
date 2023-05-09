@@ -47,4 +47,8 @@ contract UniswapV3Liquidator is IRedemptionStrategy {
 
     outputAmount = swapRouter.exactInputSingle(params);
   }
+
+  function name() public pure virtual override returns (string memory) {
+    return "UniswapV3Liquidator";
+  }
 }

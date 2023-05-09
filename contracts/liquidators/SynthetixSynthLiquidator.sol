@@ -40,4 +40,8 @@ contract SynthetixSynthLiquidator is IRedemptionStrategy {
     SYNTHETIX.exchange(ISynth(inputSynthLogic).currencyKey(), inputAmount, ISynth(outputSynthLogic).currencyKey());
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "SynthetixSynthLiquidator";
+  }
 }

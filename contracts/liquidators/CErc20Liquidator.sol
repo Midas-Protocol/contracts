@@ -33,4 +33,8 @@ contract CErc20Liquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(cErc20.underlying());
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "CErc20Liquidator";
+  }
 }
