@@ -22,7 +22,11 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
    * @param extensionToAdd the extension whose functions are to be added
    * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) public override onlyOwner {
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace)
+    public
+    override
+    onlyOwner
+  {
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
@@ -88,7 +92,7 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
       // TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
   }
-  
+
   function isStrategy(IRedemptionStrategy strategy, string memory name) internal view returns (bool) {
     return address(strategy) == address(redemptionStrategiesByName[name]);
   }
@@ -156,28 +160,31 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   }
 
   function solidlyLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     IPair lpToken = IPair(address(inputToken));
-    require(address(outputToken) == lpToken.token0() || address(outputToken) == lpToken.token1(), "Output token does not match either of the pair tokens!");
+    require(
+      address(outputToken) == lpToken.token0() || address(outputToken) == lpToken.token1(),
+      "Output token does not match either of the pair tokens!"
+    );
 
     strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_LIQUIDATOR"), outputToken);
   }
 
   function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     strategyData = abi.encode(outputToken);
   }
 
   function uniswapV2LiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     IERC20Upgradeable[] memory swapPath = new IERC20Upgradeable[](2);
     swapPath[0] = inputToken;
@@ -186,17 +193,17 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   }
 
   function algebraSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     strategyData = abi.encode(outputToken, ap.getAddress("ALGEBRA_SWAP_ROUTER"));
   }
 
   function uniswapLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     IUniswapV2Pair lpToken = IUniswapV2Pair(address(inputToken));
     address token0 = lpToken.token0();
@@ -218,9 +225,9 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   }
 
   function saddleLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     SaddleLpPriceOracle saddleLpPriceOracle = SaddleLpPriceOracle(ap.getAddress("SaddleLpPriceOracle"));
     address[] memory tokens = saddleLpPriceOracle.getUnderlyingTokens(address(inputToken));
@@ -237,11 +244,13 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   }
 
   function curveLpTokenLiquidatorNoRegistryData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
-    CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(ap.getAddress("CurveLpTokenPriceOracleNoRegistry"));
+    CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(
+      ap.getAddress("CurveLpTokenPriceOracleNoRegistry")
+    );
     address[] memory tokens = curveLpOracle.getUnderlyingTokens(address(inputToken));
 
     address wnative = ap.getAddress("wtoken");
@@ -256,9 +265,9 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   }
 
   function curveSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     address curveV1Oracle = ap.getAddress("CurveLpTokenPriceOracleNoRegistry");
     address curveV2Oracle = ap.getAddress("CurveV2LpTokenPriceOracleNoRegistry");
@@ -268,9 +277,9 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   }
 
   function jarvisLiquidatorFunderData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
     for (uint256 i = 0; i < pools.length; i++) {
