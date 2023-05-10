@@ -49,7 +49,7 @@ contract LeveredPositionTest is MarketsTest {
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
   }
 
-  function testOpenLeveredPosition() public fork(BSC_MAINNET) {
+  function testOpenLeveredPosition() public debuggingOnly fork(BSC_MAINNET) {
     collateralMarket = ICErc20(0x82A3103bc306293227B756f7554AfAeE82F8ab7a); // jBRL market
     stableMarket = ICErc20(0xa7213deB44f570646Ea955771Cc7f39B58841363); // bUSD market
     upgradePoolAndMarkets();

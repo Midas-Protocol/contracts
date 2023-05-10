@@ -68,7 +68,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       ankr,
       inputAmount,
-      abi.encode(solidlySwapRouter, ankrBnbAddress, true)
+      abi.encode(solidlySwapRouter, ankrBnbAddress, false)
     );
 
     uint256 outputValue = mpo.price(ankrBnbAddress) * outputAmount;
