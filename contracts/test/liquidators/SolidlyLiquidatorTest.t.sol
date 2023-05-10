@@ -31,7 +31,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       hay,
       inputAmount,
-      abi.encode(solidlySwapRouter, stableToken, false)
+      abi.encode(solidlySwapRouter, stableToken, true)
     );
 
     assertEq(address(outputToken), stableToken, "!busd output");
