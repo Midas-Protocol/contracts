@@ -351,11 +351,11 @@ contract CTokenFirstExtension is
 
   function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) public view returns (uint256) {
     return
-    interestRateModel.getBorrowRate(
-      asCToken().getCash() - borrowAmount,
-      totalBorrows + borrowAmount,
-      totalReserves + totalAdminFees + totalFuseFees
-    );
+      interestRateModel.getBorrowRate(
+        asCToken().getCash() - borrowAmount,
+        totalBorrows + borrowAmount,
+        totalReserves + totalAdminFees + totalFuseFees
+      );
   }
 
   /**

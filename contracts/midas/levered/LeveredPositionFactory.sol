@@ -33,7 +33,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     _disableInitializers();
   }
 
-  function initialize(IFuseFeeDistributor _ffd, LiquidatorsRegistry _registry, uint256 _blocksPerYear) public initializer {
+  function initialize(
+    IFuseFeeDistributor _ffd,
+    LiquidatorsRegistry _registry,
+    uint256 _blocksPerYear
+  ) public initializer {
     __SafeOwnable_init(msg.sender);
     ffd = _ffd;
     liquidatorsRegistry = _registry;
@@ -118,10 +122,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     if (_whitelisted) {
       collaterals.add(address(_collateralMarket));
       borrowableMarketsByCollateral[_collateralMarket].add(address(_stableMarket));
-    }
-    else{
+    } else {
       borrowableMarketsByCollateral[_collateralMarket].remove(address(_stableMarket));
-      if (borrowableMarketsByCollateral[_collateralMarket].length() == 0) collaterals.remove(address(_collateralMarket));
+      if (borrowableMarketsByCollateral[_collateralMarket].length() == 0)
+        collaterals.remove(address(_collateralMarket));
     }
   }
 }

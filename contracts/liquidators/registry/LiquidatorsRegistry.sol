@@ -92,8 +92,8 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
       strategyData = curveSwapLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "JarvisLiquidatorFunder")) {
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
-    //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
-    //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
+      //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
+      //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
   }
 

@@ -39,7 +39,11 @@ contract LeveredPositionTest is MarketsTest {
       ""
     );
     factory = LeveredPositionFactory(address(factoryProxy));
-    factory.initialize(IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))), registry, blocksPerYear);
+    factory.initialize(
+      IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
+      registry,
+      blocksPerYear
+    );
   }
 
   function upgradePoolAndMarkets() internal {
@@ -74,7 +78,12 @@ contract LeveredPositionTest is MarketsTest {
     _configurePair(jbrlMarket, busdMarket, liquidator, jbrlWhale);
   }
 
-  function _configurePair(address _colllat, address _stable, IRedemptionStrategy _liquidator, address _whale) internal {
+  function _configurePair(
+    address _colllat,
+    address _stable,
+    IRedemptionStrategy _liquidator,
+    address _whale
+  ) internal {
     collateralMarket = ICErc20(_colllat);
     stableMarket = ICErc20(_stable);
     upgradePoolAndMarkets();
@@ -98,7 +107,10 @@ contract LeveredPositionTest is MarketsTest {
     _configurePair(ankrBnbMarket, hayMarket, solidlyLiquidator, ankrBnbWhale);
   }
 
-  function _openLeveredPosition(address positionOwner, uint256 depositAmount) internal returns (LeveredPosition position) {
+  function _openLeveredPosition(address positionOwner, uint256 depositAmount)
+    internal
+    returns (LeveredPosition position)
+  {
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     collateralToken.transfer(positionOwner, depositAmount);
 
