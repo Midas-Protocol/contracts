@@ -348,6 +348,10 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
     }
 
+    uint256 totalUnderlyingSupplied = asCTokenExtensionInterface().getTotalUnderlyingSupplied();
+    // don't allow dust tokens/assets to be left after
+    if (totalUnderlyingSupplied - redeemAmountIn < 1000) redeemAmountIn = totalUnderlyingSupplied;
+
     /* If redeemTokensIn > 0: */
     if (redeemTokensIn > 0) {
       /*
@@ -383,6 +387,9 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
       vars.redeemAmount = redeemAmountIn;
     }
+
+    // don't allow dust tokens/assets to be left after
+    if (totalSupply - vars.redeemTokens < 1000) vars.redeemTokens = totalSupply;
 
     /* Fail if redeem not allowed */
     uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
