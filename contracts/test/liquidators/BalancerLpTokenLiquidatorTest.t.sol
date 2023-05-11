@@ -68,6 +68,14 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
+  function testWmaticMaticXLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+    address lpToken = 0xC17636e36398602dd37Bb5d1B3a9008c7629005f; // WMATIC-MaticX stable
+    address lpTokenWhale = 0x48534d027f8962692122dB440714fFE88Ab1fA85;
+    address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
+
+    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
   function testJbrlBrzLiquidatorRedeem() public fork(POLYGON_MAINNET) {
     address lpToken = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA; // jBRL-BRZ stable
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
@@ -81,6 +89,15 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpToken = 0x48e6B98ef6329f8f0A30eBB8c7C960330d648085; // bb-am-USD
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
     address outputTokenAddress = 0xF93579002DBE8046c43FEfE86ec78b1112247BB8; // linear aaver usdc
+
+    testRedeem(swapLiquidator, amount, lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testBoostedAaaveWmaticMaticXRedeem() public fork(POLYGON_MAINNET) {
+    uint256 amount = 1e18;
+    address lpToken = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917; // Balancer MaticX Boosted Aave WMATIC StablePool
+    address lpTokenWhale = 0x35F37B3EF311F684Edd24901aF82311F516C228c;
+    address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
     testRedeem(swapLiquidator, amount, lpTokenWhale, lpToken, outputTokenAddress);
   }
