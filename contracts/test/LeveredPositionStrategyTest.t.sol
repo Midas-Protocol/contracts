@@ -6,10 +6,15 @@ import { Unitroller } from "../compound/Unitroller.sol";
 
 import "../midas/levered/LeveredPosition.sol";
 import { AddressesProvider } from "../midas/AddressesProvider.sol";
-import "../liquidators/JarvisLiquidatorFunder.sol";
-import "../liquidators/SolidlySwapLiquidator.sol";
 import "../external/algebra/IAlgebraFactory.sol";
 import "../midas/levered/LeveredPositionFactory.sol";
+
+import "../liquidators/JarvisLiquidatorFunder.sol";
+import "../liquidators/SolidlySwapLiquidator.sol";
+import "../liquidators/CurveSwapLiquidator.sol";
+import "../liquidators/BalancerLpTokenLiquidator.sol";
+import "../liquidators/BalancerSwapLiquidator.sol";
+
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -76,6 +81,24 @@ contract LeveredPositionTest is MarketsTest {
 
     JarvisLiquidatorFunder liquidator = new JarvisLiquidatorFunder();
     _configurePair(jbrlMarket, busdMarket, liquidator, jbrlWhale);
+  }
+
+  function _configureWmaticStMaticPair() internal {
+    address wmaticMarket = address(1);
+    address stmaticMarket = address(2);
+    address wmaticWhale = 0x3D76fc671E392831CE66099bc3677414f7Ac4bb7;
+
+    CurveSwapLiquidator csl = new CurveSwapLiquidator();
+    _configurePair(wmaticMarket, stmaticMarket, csl, wmaticWhale);
+  }
+
+  function _configureWmaticMaticXPair() internal {
+    address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
+    address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
+    address wmaticWhale = 0x3D76fc671E392831CE66099bc3677414f7Ac4bb7;
+
+    BalancerSwapLiquidator lpTokenLiquidator = new BalancerSwapLiquidator();
+    _configurePair(wmaticMarket, maticxMarket, lpTokenLiquidator, wmaticWhale);
   }
 
   function _configurePair(
