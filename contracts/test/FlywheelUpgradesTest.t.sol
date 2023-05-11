@@ -96,22 +96,22 @@ contract FlywheelUpgradesTest is BaseTest {
   }
 
   function testPolygonFlywheelAllowance() public fork(POLYGON_MAINNET) {
-    testAllPoolsMarketsAllowance();
+    _testAllPoolsMarketsAllowance();
   }
 
   function testBscFlywheelAllowance() public fork(BSC_MAINNET) {
-    testAllPoolsMarketsAllowance();
+    _testAllPoolsMarketsAllowance();
   }
 
   function testMoonbeamFlywheelAllowance() public fork(MOONBEAM_MAINNET) {
-    testAllPoolsMarketsAllowance();
+    _testAllPoolsMarketsAllowance();
   }
 
   function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
-    testAllPoolsMarketsAllowance();
+    _testAllPoolsMarketsAllowance();
   }
 
-  function testAllPoolsMarketsAllowance() internal {
+  function _testAllPoolsMarketsAllowance() internal {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {

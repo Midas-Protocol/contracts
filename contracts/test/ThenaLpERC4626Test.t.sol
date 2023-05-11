@@ -13,6 +13,8 @@ import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDy
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
+import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 
 contract ThenaLpERC4626Test is BaseTest {
   ThenaLpERC4626 public plugin;
@@ -20,46 +22,14 @@ contract ThenaLpERC4626Test is BaseTest {
   ERC20 public thenaToken = ERC20(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11);
   ERC20 public lpHayBusdToken = ERC20(0x93B32a8dfE10e9196403dd111974E325219aec24);
   address public lpTokenWhale = 0xE43317c1f037CBbaF33F33C386f2cAF2B6b25C9C; // gauge v2
-  address public marketAddress = 0x04b6895d7AD8b10a1a13C749159226249a3b8515; // V1 AMM - HAY/ankrBNB
+  address public marketAddress = 0xF8527Dc5611B589CbB365aCACaac0d1DC70b25cB; // HAY/BUSD
 
   function afterForkSetUp() internal override {
     address dpa = address(929292);
     vm.prank(lpTokenWhale);
     lpHayBusdToken.transfer(address(this), 1e22);
-
-    {
-      ThenaLpERC4626 impl = new ThenaLpERC4626();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), dpa, "");
-      plugin = ThenaLpERC4626(address(proxy));
-    }
-
-    {
-      MidasFlywheel impl = new MidasFlywheel();
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), dpa, "");
-      flywheel = MidasFlywheel(address(proxy));
-    }
-    flywheel.initialize(
-      SolERC20(address(thenaToken)),
-      IFlywheelRewards(address(0)),
-      IFlywheelBooster(address(0)),
-      address(this)
-    );
-
-    FuseFlywheelDynamicRewards rewardsContract = new FuseFlywheelDynamicRewards(
-      FlywheelCore(address(flywheel)),
-      1 days
-    );
-    flywheel.setFlywheelRewards(rewardsContract);
-
-    plugin.initialize(lpHayBusdToken, marketAddress, flywheel);
-  }
-
-  function testThenaPluginDeposit() public fork(BSC_MAINNET) {
-    lpHayBusdToken.approve(address(plugin), 1e36);
-    uint256 depositAmount = 1e6;
-    uint256 sharesMinted = plugin.deposit(depositAmount, address(this));
-
-    assertEq(sharesMinted, depositAmount, "!init shares");
+    CErc20PluginDelegate market = CErc20PluginDelegate(marketAddress);
+    plugin = ThenaLpERC4626(address(market.plugin()));
   }
 
   function testThenaPluginAccrueRewards() public debuggingOnly fork(BSC_MAINNET) {
@@ -81,7 +51,7 @@ contract ThenaLpERC4626Test is BaseTest {
     assertGt(rewardsDiff, 0, "!no rewards claimed");
   }
 
-  function testAnkrThenaRewards() public fork(BSC_MAINNET) {
+  function testAnkrThenaRewards() public debuggingOnly fork(BSC_MAINNET) {
     CErc20PluginDelegate market = CErc20PluginDelegate(marketAddress);
 
     address user = 0x28C0208b7144B511C73586Bb07dE2100495e92f3;

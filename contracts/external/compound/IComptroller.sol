@@ -115,4 +115,8 @@ interface IComptroller {
   function borrowingAgainstCollateralBlacklist(address borrowed, address collateral) external view returns (bool);
 
   function isDeprecated(ICToken cToken) external view returns (bool);
+
+  function getWhitelistedSuppliersSupply(address cToken) external view returns (uint256 supplied);
+
+  function getWhitelistedBorrowersBorrows(address cToken) external view returns (uint256 borrowed);
 }

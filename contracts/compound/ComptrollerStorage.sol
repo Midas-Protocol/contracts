@@ -4,6 +4,8 @@ pragma solidity >=0.8.0;
 import "./IFuseFeeDistributor.sol";
 import "./PriceOracle.sol";
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 contract UnitrollerAdminStorage {
   /*
    * Administrator for Fuse
@@ -173,4 +175,17 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
 
   /// @dev blacklist to disallow the borrowing of an asset against specific collateral
   mapping(address => mapping(address => bool)) public borrowingAgainstCollateralBlacklist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the borrowing against specific collateral cap
+  mapping(address => mapping(address => EnumerableSet.AddressSet)) internal borrowCapForCollateralWhitelist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the borrow cap
+  mapping(address => mapping(address => EnumerableSet.AddressSet))
+    internal borrowingAgainstCollateralBlacklistWhitelist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the supply cap
+  mapping(address => EnumerableSet.AddressSet) internal supplyCapWhitelist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the borrow cap
+  mapping(address => EnumerableSet.AddressSet) internal borrowCapWhitelist;
 }

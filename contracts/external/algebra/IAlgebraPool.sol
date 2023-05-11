@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.0;
 
+import "./IAlgebraPoolState.sol";
+import "./IAlgebraPoolActions.sol";
+
 /// @title Pool state that can change
 /// @dev Credit to Uniswap Labs under GPL-2.0-or-later license:
 /// https://github.com/Uniswap/v3-core/tree/main/contracts/interfaces
-interface IAlgebraPool {
+interface IAlgebraPool is IAlgebraPoolState, IAlgebraPoolActions {
   /**
    * @notice Returns the cumulative tick and liquidity as of each timestamp `secondsAgo` from the current block timestamp
    * @dev To get a time weighted average tick or liquidity-in-range, you must call this with two values, one representing

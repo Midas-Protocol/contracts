@@ -7,18 +7,28 @@ import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { DiamondExtension } from "../../midas/DiamondExtension.sol";
 import { CTokenFirstExtension } from "../../compound/CTokenFirstExtension.sol";
+import { ComptrollerFirstExtension, Comptroller } from "../../compound/Comptroller.sol";
+import { Unitroller } from "../../compound/Unitroller.sol";
 
 contract MarketsTest is BaseTest {
   FuseFeeDistributor internal ffd;
+
   CErc20Delegate internal cErc20Delegate;
   CErc20PluginRewardsDelegate internal cErc20PluginRewardsDelegate;
   CTokenFirstExtension internal newCTokenExtension;
+
+  address payable internal latestComptrollerImplementation;
+  ComptrollerFirstExtension internal comptrollerExtension;
 
   function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
     newCTokenExtension = new CTokenFirstExtension();
+
+    comptrollerExtension = new ComptrollerFirstExtension();
+    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
+    latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
 
   function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
@@ -58,5 +68,39 @@ contract MarketsTest is BaseTest {
       : abi.encode(address(0));
     vm.prank(asDelegate.fuseAdmin());
     asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
+  }
+
+  function _prepareComptrollerUpgrade(address oldCompImpl) internal {
+    // whitelist the upgrade
+    vm.startPrank(ffd.owner());
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(oldCompImpl),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    // whitelist the new pool creation
+    ffd._editComptrollerImplementationWhitelist(
+      asArray(address(0)),
+      asArray(latestComptrollerImplementation),
+      asArray(true)
+    );
+    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    extensions[0] = comptrollerExtension;
+    ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
+    vm.stopPrank();
+  }
+
+  function _upgradeExistingPool(address poolAddress) internal {
+    Unitroller asUnitroller = Unitroller(payable(poolAddress));
+    // change the implementation to the new that can add extensions
+    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
+
+    _prepareComptrollerUpgrade(oldComptrollerImplementation);
+
+    // upgrade to the new comptroller
+    vm.startPrank(asUnitroller.admin());
+    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
+    Comptroller(latestComptrollerImplementation)._become(asUnitroller);
+    vm.stopPrank();
   }
 }
