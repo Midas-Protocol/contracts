@@ -23,6 +23,8 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   BalancerRateProviderOracle rateProviderOracle;
   MasterPriceOracle mpo;
 
+  address MATICx_AaveMATIC_pool = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
+  address stMATIC_AaveMATIC_pool = 0x216690738Aac4aa0C4770253CA26a28f0115c595;
   address stMATIC_WMATIC_pool = 0x8159462d255C1D24915CB51ec361F700174cD994;
   address jBRL_BRZ_pool = 0xE22483774bd8611bE2Ad2F4194078DaC9159F4bA;
   address jEUR_agEUR_pool = 0xa48D164F6eB0EDC68bd03B56fa59E12F24499aD1;
@@ -33,6 +35,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   address linearAaveUsdtPool = 0xFf4ce5AAAb5a627bf82f4A571AB1cE94Aa365eA6;
   address linearAaveUsdcPool = 0xF93579002DBE8046c43FEfE86ec78b1112247BB8;
   address linearAaveDaiPool = 0x178E029173417b1F9C8bC16DCeC6f697bC323746;
+  address linearAaveWmaticPool = 0xE4885Ed2818Cc9E840A25f94F9b2A28169D1AEA7;
 
   address boostedTetuPool = 0xb3d658d5b95BF04E2932370DD1FF976fe18dd66A;
   address linearTetuUsdtPool = 0x7c82A23B4C48D796dee36A9cA215b641C6a8709d;
@@ -66,6 +69,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
     linearLpOracle = new BalancerLpLinearPoolPriceOracle();
     linearLpOracle.initialize(linearAaveLps);
+    linearLpOracle.registerToken(linearAaveWmaticPool);
 
     vm.startPrank(linearLpOracle.owner());
     for (uint256 i = 0; i < linearTetuLps.length; i++) {
@@ -86,6 +90,9 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
       tetuLinearlpOracles[i] = linearLpOracle;
     }
 
+    IPriceOracle[] memory linearAaveWmaticOracle = new IPriceOracle[](1);
+    linearAaveWmaticOracle[0] = linearLpOracle;
+
     IPriceOracle[] memory csMATICOracle = new IPriceOracle[](1);
     csMATICOracle[0] = rateProviderOracle;
 
@@ -93,6 +100,7 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     mpo.add(linearAaveLps, aaveLinerlpOracles);
     mpo.add(linearTetuLps, tetuLinearlpOracles);
     mpo.add(asArray(csMATIC), csMATICOracle);
+    mpo.add(asArray(linearAaveWmaticPool), linearAaveWmaticOracle);
     vm.stopPrank();
   }
 
@@ -222,6 +230,48 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
 
     assertTrue(price > 0);
     assertEq(price, expectedRate);
+  }
+
+  function testMaticXAaveMaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    IBalancerStablePool stablePool = IBalancerStablePool(MATICx_AaveMATIC_pool);
+
+    // Updates cache of getTokenRate
+    stablePool.updateTokenRateCache(linearAaveWmaticPool);
+
+    uint256 price = _getLpTokenPrice(MATICx_AaveMATIC_pool, stableLpOracle);
+
+    // Find min price among the three underlying linear pools
+    uint256[] memory poolTokenPrices = new uint256[](2);
+    poolTokenPrices[0] = (mpo.price(linearAaveWmaticPool) * 1e18) / IBalancerLinearPool(linearAaveWmaticPool).getRate();
+    poolTokenPrices[1] = mpo.price(MATICx);
+
+    uint256 mainTokenPrice = _getMinValue(poolTokenPrices);
+    uint256 stablePoolRate = IBalancerStablePool(MATICx_AaveMATIC_pool).getRate();
+    uint256 expectedRate = (mainTokenPrice * stablePoolRate) / 1e18;
+
+    assertTrue(price > 0);
+    assertApproxEqRel(price, expectedRate, 1e16, "!price");
+  }
+
+  function testStMaticAaveMaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
+    IBalancerStablePool stablePool = IBalancerStablePool(stMATIC_AaveMATIC_pool);
+
+    // Updates cache of getTokenRate
+    stablePool.updateTokenRateCache(linearAaveWmaticPool);
+
+    uint256 price = _getLpTokenPrice(stMATIC_AaveMATIC_pool, stableLpOracle);
+
+    // Find min price among the three underlying linear pools
+    uint256[] memory poolTokenPrices = new uint256[](2);
+    poolTokenPrices[0] = (mpo.price(linearAaveWmaticPool) * 1e18) / IBalancerLinearPool(linearAaveWmaticPool).getRate();
+    poolTokenPrices[1] = mpo.price(MATICx);
+
+    uint256 mainTokenPrice = _getMinValue(poolTokenPrices);
+    uint256 stablePoolRate = IBalancerStablePool(stMATIC_AaveMATIC_pool).getRate();
+    uint256 expectedRate = (mainTokenPrice * stablePoolRate) / 1e18;
+
+    assertTrue(price > 0);
+    assertApproxEqRel(price, expectedRate, 1e16, "!price");
   }
 
   // Tests for LinearPools
