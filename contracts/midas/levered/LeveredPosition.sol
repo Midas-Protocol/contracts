@@ -259,9 +259,11 @@ contract LeveredPosition is IFlashLoanReceiver {
       borrowsToRepay = ((amountToRedeemValueScaled / stableAssetPrice) * stableCollateralFactor) / 1e18;
     }
 
-    CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
-    // the execution will first receive a callback to receiveFlashLoan()
-    // then it continues from here
+    if (borrowsToRepay > 0) {
+      CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
+      // the execution will first receive a callback to receiveFlashLoan()
+      // then it continues from here
+    }
   }
 
   function _leverDownPostFL(uint256 _flashLoanedCollateral, uint256 _amountToRedeem) internal {

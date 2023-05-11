@@ -349,6 +349,15 @@ contract CTokenFirstExtension is
       );
   }
 
+  function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) public view returns (uint256) {
+    return
+    interestRateModel.getBorrowRate(
+      asCToken().getCash() - borrowAmount,
+      totalBorrows + borrowAmount,
+      totalReserves + totalAdminFees + totalFuseFees
+    );
+  }
+
   /**
    * @notice Returns the current per-block supply interest rate for this cToken
    * @return The supply interest rate per block, scaled by 1e18

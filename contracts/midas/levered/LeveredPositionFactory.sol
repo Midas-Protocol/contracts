@@ -19,9 +19,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   IFuseFeeDistributor public ffd;
   LiquidatorsRegistry public liquidatorsRegistry;
+  uint256 public blocksPerYear;
 
   mapping(address => EnumerableSet.AddressSet) private positionsByAccount;
-  mapping(ICErc20 => mapping(ICErc20 => bool)) public marketsPairsWhitelist;
+  EnumerableSet.AddressSet private collaterals;
+  mapping(ICErc20 => EnumerableSet.AddressSet) private borrowableMarketsByCollateral;
 
   /*----------------------------------------------------------------
                         Initializer Functions
@@ -31,10 +33,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     _disableInitializers();
   }
 
-  function initialize(IFuseFeeDistributor _ffd, LiquidatorsRegistry _registry) public initializer {
+  function initialize(IFuseFeeDistributor _ffd, LiquidatorsRegistry _registry, uint256 _blocksPerYear) public initializer {
     __SafeOwnable_init(msg.sender);
     ffd = _ffd;
     liquidatorsRegistry = _registry;
+    blocksPerYear = _blocksPerYear;
   }
 
   /*----------------------------------------------------------------
@@ -42,7 +45,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   ----------------------------------------------------------------*/
 
   function createPosition(ICErc20 _collateralMarket, ICErc20 _stableMarket) public returns (LeveredPosition) {
-    require(marketsPairsWhitelist[_collateralMarket][_stableMarket], "!pair not valid");
+    require(borrowableMarketsByCollateral[_collateralMarket].contains(address(_stableMarket)), "!pair not whitelisted");
 
     LeveredPosition position = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
     positionsByAccount[msg.sender].add(address(position));
@@ -79,6 +82,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return positionsByAccount[account].values();
   }
 
+  function getWhitelistedCollateralMarkets() public view returns (address[] memory) {
+    return collaterals.values();
+  }
+
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) public view returns (bool) {
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
@@ -95,6 +102,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return liquidatorsRegistry.getRedemptionStrategy(inputToken, outputToken);
   }
 
+  function getBorrowRateAfter(ICErc20 _stableMarket, uint256 borrowAmount) public view returns (uint256) {
+    return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount) * blocksPerYear;
+  }
+
   /*----------------------------------------------------------------
                             Admin Functions
   ----------------------------------------------------------------*/
@@ -104,6 +115,13 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     ICErc20 _stableMarket,
     bool _whitelisted
   ) public onlyOwner {
-    marketsPairsWhitelist[_collateralMarket][_stableMarket] = _whitelisted;
+    if (_whitelisted) {
+      collaterals.add(address(_collateralMarket));
+      borrowableMarketsByCollateral[_collateralMarket].add(address(_stableMarket));
+    }
+    else{
+      borrowableMarketsByCollateral[_collateralMarket].remove(address(_stableMarket));
+      if (borrowableMarketsByCollateral[_collateralMarket].length() == 0) collaterals.remove(address(_collateralMarket));
+    }
   }
 }

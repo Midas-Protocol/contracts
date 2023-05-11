@@ -15,7 +15,11 @@ import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.s
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
-  //address public constant SOLIDLY_SWAP_LIQUIDATOR = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
+  //address public constant SOLIDLY_SWAP_ROUTER = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
+
+  constructor(AddressesProvider _ap) SafeOwnable() {
+    ap = _ap;
+  }
 
   /**
    * @dev register a logic extension
@@ -88,8 +92,8 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
       strategyData = curveSwapLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "JarvisLiquidatorFunder")) {
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
-    } else if (isStrategy(strategy, "ERC4626Liquidator")) {
-      // TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
+    //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
+    //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
   }
 
@@ -128,7 +132,7 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
     returns (bytes memory strategyData)
   {
     // assuming bsc for the chain
-    IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_LIQUIDATOR"));
+    IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_ROUTER"));
     address tokenTo = address(outputToken);
 
     // Check if stable pair exists
@@ -170,7 +174,7 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
       "Output token does not match either of the pair tokens!"
     );
 
-    strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_LIQUIDATOR"), outputToken);
+    strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_ROUTER"), outputToken);
   }
 
   function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -288,6 +292,8 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
         strategyData = abi.encode(pool.syntheticToken, pool.liquidityPool, pool.expirationTime);
         //outputToken = pool.collateralToken;
         break;
+      } else if (pool.collateralToken == address(inputToken)) {
+        strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
       }
     }
   }
