@@ -124,4 +124,5 @@ contract XBombSwap {
 }
 
 contract TestingStable is ERC20PresetMinterPauser {
+  constructor (string calldata _name, string calldata _symbol) ERC20PresetMinterPauser(_name, _symbol) {}
 }
