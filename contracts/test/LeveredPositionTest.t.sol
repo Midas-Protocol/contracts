@@ -14,6 +14,9 @@ import "../liquidators/SolidlySwapLiquidator.sol";
 import "../liquidators/CurveSwapLiquidator.sol";
 import "../liquidators/BalancerLpTokenLiquidator.sol";
 import "../liquidators/BalancerSwapLiquidator.sol";
+import "../liquidators/registry/LiquidatorsRegistry.sol";
+import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
+import "../liquidators/registry/ILiquidatorsRegistry.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -34,6 +37,8 @@ contract LeveredPositionTest is MarketsTest {
 
     // create and configure the liquidators registry
     registry = new LiquidatorsRegistry(ap);
+    LiquidatorsRegistryExtension ext = new LiquidatorsRegistryExtension();
+    registry._registerExtension(ext, DiamondExtension(address(0)));
 
     // create and initialize the levered positions factory
     LeveredPositionFactory impl = new LeveredPositionFactory();
@@ -45,7 +50,7 @@ contract LeveredPositionTest is MarketsTest {
     factory = LeveredPositionFactory(address(factoryProxy));
     factory.initialize(
       IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
-      registry,
+      ILiquidatorsRegistry(address(registry)),
       blocksPerYear
     );
   }

@@ -6,7 +6,7 @@ import "./LeveredPosition.sol";
 import "../SafeOwnableUpgradeable.sol";
 import "../../compound/IFuseFeeDistributor.sol";
 
-import "../../liquidators/registry/LiquidatorsRegistry.sol";
+import "../../liquidators/registry/ILiquidatorsRegistry.sol";
 import "../../liquidators/SolidlySwapLiquidator.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -18,7 +18,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   using EnumerableSet for EnumerableSet.AddressSet;
 
   IFuseFeeDistributor public ffd;
-  LiquidatorsRegistry public liquidatorsRegistry;
+  ILiquidatorsRegistry public liquidatorsRegistry;
   uint256 public blocksPerYear;
 
   mapping(address => EnumerableSet.AddressSet) private positionsByAccount;
@@ -35,7 +35,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   function initialize(
     IFuseFeeDistributor _ffd,
-    LiquidatorsRegistry _registry,
+    ILiquidatorsRegistry _registry,
     uint256 _blocksPerYear
   ) public initializer {
     __SafeOwnable_init(msg.sender);
@@ -98,12 +98,19 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return ffd.minBorrowEth();
   }
 
-  function getRedemptionStrategy(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     view
-    returns (IRedemptionStrategy strategy, bytes memory strategyData)
+    returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
   {
-    return liquidatorsRegistry.getRedemptionStrategy(inputToken, outputToken);
+    return liquidatorsRegistry.getRedemptionStrategies(inputToken, outputToken);
+  }
+
+  function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  external
+  view
+  returns (bool) {
+    return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 
   function getBorrowRateAfter(ICErc20 _stableMarket, uint256 borrowAmount) public view returns (uint256) {

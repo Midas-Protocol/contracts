@@ -180,8 +180,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function isFundingAssetSupported(IERC20Upgradeable fundingAsset) public view returns (bool) {
-    (IRedemptionStrategy redemptionStrategy, ) = factory.getRedemptionStrategy(fundingAsset, collateralAsset);
-    return (address(redemptionStrategy) != address(0));
+    return factory.hasRedemptionStrategyForTokens(fundingAsset, collateralAsset);
   }
 
   function isPositionClosed() public view returns (bool) {
@@ -285,11 +284,18 @@ contract LeveredPosition is IFlashLoanReceiver {
     returns (uint256 outputAmount)
   {
     uint256 inputAmount = inputToken.balanceOf(address(this));
-    (IRedemptionStrategy redemptionStrategy, bytes memory strategyData) = factory.getRedemptionStrategy(
+    (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = factory.getRedemptionStrategies(
       inputToken,
       outputToken
     );
-    (, outputAmount) = convertCustomFunds(inputToken, inputAmount, redemptionStrategy, strategyData);
+
+    for (uint256 i = 0; i < redemptionStrategies.length; i++) {
+      IRedemptionStrategy redemptionStrategy = redemptionStrategies[i];
+      bytes memory strategyData = strategiesData[i];
+      (outputToken, outputAmount) = convertCustomFunds(inputToken, inputAmount, redemptionStrategy, strategyData);
+      inputAmount = outputAmount;
+      inputToken = outputToken;
+    }
   }
 
   function convertCustomFunds(
