@@ -39,35 +39,3 @@ contract XBombLiquidatorTest is BaseTest {
     assertEq(outputAmount, xbombToken.toREWARD(balance));
   }
 }
-
-contract XBombSwap {
-  IERC20Upgradeable public testingBomb;
-  IERC20Upgradeable public testingStable;
-
-  constructor(IERC20Upgradeable _testingBomb, IERC20Upgradeable _testingStable) {
-    testingBomb = _testingBomb;
-    testingStable = _testingStable;
-  }
-
-  function leave(uint256 _share) external {
-    testingBomb.transferFrom(msg.sender, address(this), _share);
-    testingStable.transfer(msg.sender, _share);
-  }
-
-  function enter(uint256 _amount) external {
-    testingStable.transferFrom(msg.sender, address(this), _amount);
-    testingBomb.transfer(msg.sender, _amount);
-  }
-
-  function getExchangeRate() external view returns (uint256) {
-    return 1e18;
-  }
-
-  function toREWARD(uint256 stakedAmount) external view returns (uint256) {
-    return stakedAmount;
-  }
-
-  function toSTAKED(uint256 rewardAmount) external view returns (uint256) {
-    return rewardAmount;
-  }
-}
