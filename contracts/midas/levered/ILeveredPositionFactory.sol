@@ -9,14 +9,14 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 
 interface ILeveredPositionFactory {
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
+    external
+    view
+    returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
 
   function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (bool);
+    external
+    view
+    returns (bool);
 
   function getMinBorrowNative() external view returns (uint256);
 

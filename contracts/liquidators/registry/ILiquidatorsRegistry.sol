@@ -7,16 +7,17 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 
 interface ILiquidatorsRegistry {
   function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (bool);
+    external
+    view
+    returns (bool);
+
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
+    external
+    view
+    returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
 
   function getRedemptionStrategy(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (IRedemptionStrategy strategy, bytes memory strategyData);
+    external
+    view
+    returns (IRedemptionStrategy strategy, bytes memory strategyData);
 }

@@ -107,9 +107,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (bool) {
+    external
+    view
+    returns (bool)
+  {
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 

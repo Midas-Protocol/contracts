@@ -284,10 +284,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     returns (uint256 outputAmount)
   {
     uint256 inputAmount = inputToken.balanceOf(address(this));
-    (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = factory.getRedemptionStrategies(
-      inputToken,
-      outputToken
-    );
+    (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = factory
+      .getRedemptionStrategies(inputToken, outputToken);
 
     for (uint256 i = 0; i < redemptionStrategies.length; i++) {
       IRedemptionStrategy redemptionStrategy = redemptionStrategies[i];
