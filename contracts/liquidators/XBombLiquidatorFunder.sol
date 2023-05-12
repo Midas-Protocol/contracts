@@ -42,7 +42,10 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb) = abi.decode(strategyData, (address, address, IERC20Upgradeable));
+    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb) = abi.decode(
+      strategyData,
+      (address, address, IERC20Upgradeable)
+    );
     if (inputTokenAddress == xbomb) {
       // burns the xBOMB and returns the underlying BOMB to the liquidator
       IXBomb(xbomb).leave(inputAmount);
@@ -124,5 +127,5 @@ contract XBombSwap {
 }
 
 contract TestingStable is ERC20PresetMinterPauser {
-  constructor (string memory _name, string memory _symbol) ERC20PresetMinterPauser(_name, _symbol) {}
+  constructor(string memory _name, string memory _symbol) ERC20PresetMinterPauser(_name, _symbol) {}
 }

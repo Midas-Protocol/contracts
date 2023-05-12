@@ -267,9 +267,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function jarvisLiquidatorFunderData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
     for (uint256 i = 0; i < pools.length; i++) {
@@ -286,9 +286,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
   // TODO remove after testing
   function xBombLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     if (block.chainid == 97) {
       IERC20Upgradeable chapelBomb = IERC20Upgradeable(0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768);
