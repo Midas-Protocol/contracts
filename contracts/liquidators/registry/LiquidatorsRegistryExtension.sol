@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
+import "./ILiquidatorsRegistry.sol";
+import "./LiquidatorsRegistryStorage.sol";
+
 import "../IRedemptionStrategy.sol";
 import "../../midas/DiamondExtension.sol";
-import "./LiquidatorsRegistryStorage.sol";
+
 import { IRouter } from "../../external/solidly/IRouter.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
@@ -13,7 +16,7 @@ import { CurveV2LpTokenPriceOracleNoRegistry } from "../../oracles/default/Curve
 import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "./ILiquidatorsRegistry.sol";
+import { XBombSwap } from "../XBombLiquidatorFunder.sol";
 
 contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExtension, ILiquidatorsRegistry {
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
@@ -73,6 +76,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = curveSwapLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "JarvisLiquidatorFunder")) {
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "XBombLiquidatorFunder")) {
+      strategyData = xBombLiquidatorData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
       //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
@@ -262,9 +267,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function jarvisLiquidatorFunderData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    internal
-    view
-    returns (bytes memory strategyData)
+  internal
+  view
+  returns (bytes memory strategyData)
   {
     AddressesProvider.JarvisPool[] memory pools = ap.getJarvisPools();
     for (uint256 i = 0; i < pools.length; i++) {
@@ -276,6 +281,29 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       } else if (pool.collateralToken == address(inputToken)) {
         strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
       }
+    }
+  }
+
+  // TODO remove after testing
+  function xBombLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  internal
+  view
+  returns (bytes memory strategyData)
+  {
+    if (block.chainid == 97) {
+      IERC20Upgradeable chapelBomb = IERC20Upgradeable(0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768);
+      IERC20Upgradeable chapelTUsd = IERC20Upgradeable(0x4f1885D25eF219D3D4Fa064809D6D4985FAb9A0b);
+      XBombSwap xbombSwap = XBombSwap(0x47Bf57bB81c82Af4116cA2FF76D063C698cFCd76);
+
+      if (inputToken == chapelBomb) {
+        strategyData = abi.encode(xbombSwap, xbombSwap, chapelTUsd);
+      } else if (inputToken == chapelTUsd) {
+        strategyData = abi.encode(chapelTUsd, xbombSwap, chapelTUsd);
+      }
+    } else {
+      address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
+      address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
+      strategyData = abi.encode(inputToken, xbomb, bomb);
     }
   }
 }
