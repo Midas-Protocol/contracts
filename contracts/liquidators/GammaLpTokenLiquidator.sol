@@ -33,12 +33,7 @@ contract GammaLpTokenLiquidator is IRedemptionStrategy {
 
     // First withdraw the underlying tokens
     uint256[4] memory minAmounts;
-    vault.withdraw(
-      inputAmount,
-      address(this),
-      address(this),
-      minAmounts
-    );
+    vault.withdraw(inputAmount, address(this), address(this), minAmounts);
 
     // then swap one of the underlying for the other
     IERC20Upgradeable token0 = IERC20Upgradeable(vault.token0());
@@ -58,7 +53,8 @@ contract GammaLpTokenLiquidator is IRedemptionStrategy {
 
     tokenToSwap.approve(address(swapRouter), swapAmount);
 
-    swapRouter.exactInputSingle(ISwapRouter.ExactInputSingleParams(
+    swapRouter.exactInputSingle(
+      ISwapRouter.ExactInputSingleParams(
         address(tokenToSwap),
         _outputToken,
         address(this),
@@ -66,7 +62,8 @@ contract GammaLpTokenLiquidator is IRedemptionStrategy {
         swapAmount,
         0, // amountOutMinimum
         0 // limitSqrtPrice
-      ));
+      )
+    );
 
     outputToken = IERC20Upgradeable(_outputToken);
     outputAmount = outputToken.balanceOf(address(this));

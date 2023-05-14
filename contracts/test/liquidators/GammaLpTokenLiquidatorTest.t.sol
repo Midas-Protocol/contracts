@@ -26,11 +26,7 @@ contract GammaLpTokenLiquidatorTest is BaseTest {
 
     address outputTokenAddress = ap.getAddress("wtoken"); // WBNB
     bytes memory strategyData = abi.encode(outputTokenAddress, algebraSwapRouter);
-    (, uint256 outputAmount) = liquidator.redeem(
-      vault,
-      withdrawAmount,
-      strategyData
-    );
+    (, uint256 outputAmount) = liquidator.redeem(vault, withdrawAmount, strategyData);
 
     emit log_named_uint("wbnb redeemed", outputAmount);
     assertGt(outputAmount, 0, "!failed to withdraw and swap");
