@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0;
 
-interface IHypervisor {
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+
+interface IHypervisor is IERC20Upgradeable {
   function baseLower() external view returns (int24);
 
   function baseUpper() external view returns (int24);
@@ -16,10 +18,6 @@ interface IHypervisor {
 
   function token1() external view returns (address);
 
-  function balanceOf(address) external view returns (uint256);
-
-  function approve(address, uint256) external returns (bool);
-
   function getBasePosition()
     external
     view
@@ -28,8 +26,6 @@ interface IHypervisor {
       uint256 total0,
       uint256 total1
     );
-
-  function totalSupply() external view returns (uint256);
 
   function getTotalAmounts() external view returns (uint256 total0, uint256 total1);
 

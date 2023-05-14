@@ -15,7 +15,7 @@ import { BasePriceOracle } from "../BasePriceOracle.sol";
 
 /**
  * @title GammaPoolPriceOracle
- * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
+ * @author Carlo Mazzaferro <carlo.mazzaferro@gmail.com> (https://github.com/carlomazzaferro)
  * @notice GammaPoolPriceOracle is a price oracle for Gelato Gamma wrapped Uniswap V3 LP tokens.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
