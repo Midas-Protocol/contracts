@@ -59,7 +59,7 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
 
     // read-only re-entrancy protection - this call is always unsuccessful but we need to make sure
     // it didn't fail due to a re-entrancy attack
-    (, bytes memory revertData) = address(vault).staticcall{gas: 50000}(
+    (, bytes memory revertData) = address(vault).staticcall{ gas: 50000 }(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
