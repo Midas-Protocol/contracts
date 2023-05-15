@@ -17,7 +17,6 @@ contract DiaStDotPriceOracleTest is BaseTest {
     oracle = new DiaStDotPriceOracle();
     oracle.initialize(mpo, DiaStDotOracle(0xFEfe38321199e016c8d5e734A40eCCC0DBeC3711), multiUsdc);
     oracle.reinitialize();
-    vm.stopPrank();
   }
 
   function testDiaStDotOraclePrice() public forkAtBlock(MOONBEAM_MAINNET, 1959099) {
