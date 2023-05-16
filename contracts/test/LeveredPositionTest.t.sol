@@ -27,7 +27,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   LeveredPositionFactory factory;
   LiquidatorsRegistry registry;
 
-  function afterForkSetUp() internal override virtual {
+  function afterForkSetUp() internal virtual override {
     super.afterForkSetUp();
 
     uint256 blocksPerYear;
@@ -83,8 +83,8 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function _openLeveredPosition(address positionOwner, uint256 depositAmount)
-  internal
-  returns (LeveredPosition position)
+    internal
+    returns (LeveredPosition position)
   {
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     collateralToken.transfer(positionOwner, depositAmount);

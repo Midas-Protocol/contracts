@@ -90,6 +90,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return collaterals.values();
   }
 
+  function getBorrowableMarketsByCollateral(ICErc20 _collateralMarket) public view returns (address[] memory) {
+    return borrowableMarketsByCollateral[_collateralMarket].values();
+  }
+
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) public view returns (bool) {
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
@@ -114,8 +118,24 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 
-  function getBorrowRateAfter(ICErc20 _stableMarket, uint256 borrowAmount) public view returns (uint256) {
+  function getBorrowRateAtRatio(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    uint256 _baseCollateral,
+    uint256 _targetLeverageRatio
+  ) public view returns (uint256) {
+    IComptroller pool = IComptroller(_stableMarket.comptroller());
+    IPriceOracle oracle = pool.oracle();
+    uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
+    uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
+
+    uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _baseCollateral * collateralAssetPrice) /
+      (stableAssetPrice * 1e18);
     return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount) * blocksPerYear;
+  }
+
+  function getBorrowRate(ICErc20 _stableMarket) public view returns (uint256) {
+    return _stableMarket.borrowRatePerBlock() * blocksPerYear;
   }
 
   /*----------------------------------------------------------------
