@@ -91,15 +91,19 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return collateralMarkets.values();
   }
 
-  function getCollateralMarkets() public view returns (
-    address[] memory markets,
-    string[] memory names,
-    string[] memory symbols
-  ) {
+  function getCollateralMarkets()
+    public
+    view
+    returns (
+      address[] memory markets,
+      string[] memory names,
+      string[] memory symbols
+    )
+  {
     markets = collateralMarkets.values();
     names = new string[](markets.length);
     symbols = new string[](markets.length);
-  for (uint256 i = 0; i < markets.length; i++) {
+    for (uint256 i = 0; i < markets.length; i++) {
       ERC20Upgradeable underlying = ERC20Upgradeable(ICErc20(markets[i]).underlying());
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
