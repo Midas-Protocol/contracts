@@ -21,13 +21,13 @@ import "../liquidators/registry/ILiquidatorsRegistry.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-contract LeveredPositionTest is MarketsTest {
+abstract contract LeveredPositionTest is MarketsTest {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
   LeveredPositionFactory factory;
   LiquidatorsRegistry registry;
 
-  function afterForkSetUp() internal override {
+  function afterForkSetUp() internal override virtual {
     super.afterForkSetUp();
 
     uint256 blocksPerYear;
@@ -61,50 +61,6 @@ contract LeveredPositionTest is MarketsTest {
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
   }
 
-  function testJbrlBusdLeveredPosition() public debuggingOnly fork(BSC_MAINNET) {
-    _configureJbrlBusdPair();
-    LeveredPosition position = _openLeveredPosition(address(this), 1000e18);
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
-    position.adjustLeverageRatio(1.5e18);
-    emit log_named_uint("withdraw amount", position.closePosition());
-  }
-
-  function _configureJbrlBusdPair() internal {
-    address jbrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a;
-    address busdMarket = 0xa7213deB44f570646Ea955771Cc7f39B58841363;
-    address jbrlWhale = 0xBe9E8Ec25866B21bA34e97b9393BCabBcB4A5C86;
-
-    vm.startPrank(ap.owner());
-    ap.setJarvisPool(
-      ICErc20(jbrlMarket).underlying(), // syntheticToken
-      ICErc20(busdMarket).underlying(), // collateralToken
-      0x0fD8170Dc284CD558325029f6AEc1538c7d99f49, // liquidityPool
-      60 * 40 // expirationTime
-    );
-    vm.stopPrank();
-
-    JarvisLiquidatorFunder liquidator = new JarvisLiquidatorFunder();
-    _configurePair(jbrlMarket, busdMarket, liquidator, jbrlWhale);
-  }
-
-  function _configureWmaticStMaticPair() internal {
-    address wmaticMarket = address(1);
-    address stmaticMarket = address(2);
-    address wmaticWhale = 0x3D76fc671E392831CE66099bc3677414f7Ac4bb7;
-
-    CurveSwapLiquidator csl = new CurveSwapLiquidator();
-    _configurePair(wmaticMarket, stmaticMarket, csl, wmaticWhale);
-  }
-
-  function _configureWmaticMaticXPair() internal {
-    address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
-    address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
-    address wmaticWhale = 0x3D76fc671E392831CE66099bc3677414f7Ac4bb7;
-
-    BalancerSwapLiquidator lpTokenLiquidator = new BalancerSwapLiquidator();
-    _configurePair(wmaticMarket, maticxMarket, lpTokenLiquidator, wmaticWhale);
-  }
-
   function _configurePair(
     address _colllat,
     address _stable,
@@ -121,22 +77,14 @@ contract LeveredPositionTest is MarketsTest {
     registry._setRedemptionStrategy(_liquidator, collateralToken, stableToken);
     registry._setRedemptionStrategy(_liquidator, stableToken, collateralToken);
 
-    uint256 allTokens = collateralToken.balanceOf(_whale);
+    uint256 someTokens = collateralToken.balanceOf(_whale) / 10;
     vm.prank(_whale);
-    collateralToken.transfer(address(this), allTokens);
-  }
-
-  function _configureHayAnkrPair() internal {
-    address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
-    address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
-    address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
-    SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
-    _configurePair(ankrBnbMarket, hayMarket, solidlyLiquidator, ankrBnbWhale);
+    collateralToken.transfer(address(this), someTokens);
   }
 
   function _openLeveredPosition(address positionOwner, uint256 depositAmount)
-    internal
-    returns (LeveredPosition position)
+  internal
+  returns (LeveredPosition position)
   {
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     collateralToken.transfer(positionOwner, depositAmount);
@@ -147,26 +95,15 @@ contract LeveredPositionTest is MarketsTest {
     vm.stopPrank();
   }
 
-  function testOpenHayAnkrLeveredPosition() public fork(BSC_MAINNET) {
-    _configureHayAnkrPair();
-    _testOpenLeveredPosition();
-  }
-
-  function _testOpenLeveredPosition() internal {
+  function testOpenHayAnkrLeveredPosition() public {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
   }
 
-  function testHayAnkrAnyLeverageRatio(uint64 ratioDiff) public fork(BSC_MAINNET) {
-    _configureHayAnkrPair();
-    _testAnyLeverageRatio(ratioDiff);
-  }
-
-  function _testAnyLeverageRatio(uint64 ratioDiff) internal {
+  function testHayAnkrAnyLeverageRatio(uint64 ratioDiff) public {
     // ratioDiff is between 0 and 2^64 ~= 18.446e18
     uint256 targetLeverageRatio = 1.03e18 + uint256(ratioDiff);
 
-    _configureHayAnkrPair();
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max lev ratio", maxRatio);
@@ -177,12 +114,7 @@ contract LeveredPositionTest is MarketsTest {
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
   }
 
-  function testHayAnkrMinMaxLeverageRatio() public fork(BSC_MAINNET) {
-    _configureHayAnkrPair();
-    _testMinMaxLeverageRatio();
-  }
-
-  function _testMinMaxLeverageRatio() internal {
+  function testHayAnkrMinMaxLeverageRatio() public {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
@@ -198,12 +130,7 @@ contract LeveredPositionTest is MarketsTest {
     position.adjustLeverageRatio(currentRatio + minRatioDiff);
   }
 
-  function testHayAnkrMaxLeverageRatio() public fork(BSC_MAINNET) {
-    _configureHayAnkrPair();
-    _testMaxLeverageRatio();
-  }
-
-  function _testMaxLeverageRatio() internal {
+  function testHayAnkrMaxLeverageRatio() public {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
@@ -213,12 +140,7 @@ contract LeveredPositionTest is MarketsTest {
     assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
   }
 
-  function testHayAnkrLeverMaxDown() public fork(BSC_MAINNET) {
-    _configureHayAnkrPair();
-    _testLeverMaxDown();
-  }
-
-  function _testLeverMaxDown() internal {
+  function testHayAnkrLeverMaxDown() public {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     uint256 leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
@@ -240,3 +162,93 @@ contract LeveredPositionTest is MarketsTest {
     assertEq(position.getCurrentLeverageRatio(), 0, "!nonzero leverage ratio");
   }
 }
+
+contract HayAnkrLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(BSC_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
+    address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
+    address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
+
+    // TODO set up in the deploy script
+    vm.prank(ap.owner());
+    ap.setAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER", 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
+
+    SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
+    _configurePair(ankrBnbMarket, hayMarket, solidlyLiquidator, ankrBnbWhale);
+  }
+}
+
+contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(POLYGON_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    address wmaticMarket = 0x4017cd39950d1297BBd9713D939bC5d9c6F2Be53;
+    address stmaticMarket = 0xc1B068007114dC0F14f322Ef201491717f3e52cD;
+    address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+
+    CurveSwapLiquidator csl = new CurveSwapLiquidator();
+    _configurePair(wmaticMarket, stmaticMarket, csl, wmaticWhale);
+  }
+}
+
+contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(BSC_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    address jbrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a;
+    address busdMarket = 0xa7213deB44f570646Ea955771Cc7f39B58841363;
+    address jbrlWhale = 0xBe9E8Ec25866B21bA34e97b9393BCabBcB4A5C86;
+
+    vm.startPrank(ap.owner());
+    ap.setJarvisPool(
+      ICErc20(jbrlMarket).underlying(), // syntheticToken
+      ICErc20(busdMarket).underlying(), // collateralToken
+      0x0fD8170Dc284CD558325029f6AEc1538c7d99f49, // liquidityPool
+      60 * 40 // expirationTime
+    );
+    vm.stopPrank();
+
+    JarvisLiquidatorFunder liquidator = new JarvisLiquidatorFunder();
+    _configurePair(jbrlMarket, busdMarket, liquidator, jbrlWhale);
+  }
+}
+
+contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(POLYGON_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
+    address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
+    address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+
+    BalancerSwapLiquidator lpTokenLiquidator = new BalancerSwapLiquidator();
+    _configurePair(wmaticMarket, maticxMarket, lpTokenLiquidator, wmaticWhale);
+  }
+}
+
+/*
+contract XYLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(X_CHAIN_ID) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    address xMarket = 0x...1;
+    address yMarket = 0x...2;
+    address xWhale = 0x...3;
+
+    IRedemptionStrategy liquidator = new IRedemptionStrategy();
+    _configurePair(xMarket, yMarket, liquidator, xWhale);
+  }
+}
+*/

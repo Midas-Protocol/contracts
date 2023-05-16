@@ -118,7 +118,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     returns (bytes memory strategyData)
   {
     // assuming bsc for the chain
-    IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_ROUTER"));
+    IRouter solidlyRouter = IRouter(ap.getAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER"));
     address tokenTo = address(outputToken);
 
     // Check if stable pair exists
@@ -160,7 +160,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       "Output token does not match either of the pair tokens!"
     );
 
-    strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_ROUTER"), outputToken);
+    strategyData = abi.encode(ap.getAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER"), outputToken);
   }
 
   function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -187,7 +187,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (bytes memory strategyData)
   {
-    strategyData = abi.encode(outputToken, ap.getAddress("ALGEBRA_SWAP_ROUTER"));
+    strategyData = abi.encode(outputToken, ap.getAddress("chainConfig.chainAddresses.ALGEBRA_SWAP_ROUTER"));
   }
 
   function uniswapLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
