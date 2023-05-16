@@ -11,6 +11,7 @@ import "../../liquidators/SolidlySwapLiquidator.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeable {
@@ -22,7 +23,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   uint256 public blocksPerYear;
 
   mapping(address => EnumerableSet.AddressSet) private positionsByAccount;
-  EnumerableSet.AddressSet private collaterals;
+  EnumerableSet.AddressSet private collateralMarkets;
   mapping(ICErc20 => EnumerableSet.AddressSet) private borrowableMarketsByCollateral;
 
   /*----------------------------------------------------------------
@@ -87,7 +88,22 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function getWhitelistedCollateralMarkets() public view returns (address[] memory) {
-    return collaterals.values();
+    return collateralMarkets.values();
+  }
+
+  function getCollateralMarkets() public view returns (
+    address[] memory markets,
+    string[] memory names,
+    string[] memory symbols
+  ) {
+    markets = collateralMarkets.values();
+    names = new string[](markets.length);
+    symbols = new string[](markets.length);
+  for (uint256 i = 0; i < markets.length; i++) {
+      ERC20Upgradeable underlying = ERC20Upgradeable(ICErc20(markets[i]).underlying());
+      names[i] = underlying.name();
+      symbols[i] = underlying.symbol();
+    }
   }
 
   function getBorrowableMarketsByCollateral(ICErc20 _collateralMarket) public view returns (address[] memory) {
@@ -134,8 +150,32 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount) * blocksPerYear;
   }
 
-  function getBorrowRate(ICErc20 _stableMarket) public view returns (uint256) {
-    return _stableMarket.borrowRatePerBlock() * blocksPerYear;
+  function getBorrowRates(address[] memory _markets) public view returns (uint256[] memory rates) {
+    rates = new uint256[](_markets.length);
+    for (uint256 i = 0; i < _markets.length; i++) {
+      rates[i] = ICErc20(_markets[i]).borrowRatePerBlock() * blocksPerYear;
+    }
+  }
+
+  function getBorrowableMarketsAndRates(ICErc20 _collateralMarket)
+    public
+    view
+    returns (
+      address[] memory markets,
+      string[] memory names,
+      string[] memory symbols,
+      uint256[] memory rates
+    )
+  {
+    markets = borrowableMarketsByCollateral[_collateralMarket].values();
+    names = new string[](markets.length);
+    symbols = new string[](markets.length);
+    for (uint256 i = 0; i < markets.length; i++) {
+      ERC20Upgradeable underlying = ERC20Upgradeable(ICErc20(markets[i]).underlying());
+      names[i] = underlying.name();
+      symbols[i] = underlying.symbol();
+    }
+    rates = getBorrowRates(markets);
   }
 
   /*----------------------------------------------------------------
@@ -148,12 +188,12 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     bool _whitelisted
   ) public onlyOwner {
     if (_whitelisted) {
-      collaterals.add(address(_collateralMarket));
+      collateralMarkets.add(address(_collateralMarket));
       borrowableMarketsByCollateral[_collateralMarket].add(address(_stableMarket));
     } else {
       borrowableMarketsByCollateral[_collateralMarket].remove(address(_stableMarket));
       if (borrowableMarketsByCollateral[_collateralMarket].length() == 0)
-        collaterals.remove(address(_collateralMarket));
+        collateralMarkets.remove(address(_collateralMarket));
     }
   }
 }
