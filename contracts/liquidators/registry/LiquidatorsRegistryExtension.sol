@@ -19,6 +19,8 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import { XBombSwap } from "../XBombLiquidatorFunder.sol";
 
 contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExtension, ILiquidatorsRegistry {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
     uint8 fnsCount = 3;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
