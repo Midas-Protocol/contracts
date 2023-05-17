@@ -8,7 +8,6 @@ import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { LiquidityAmounts } from "../../../external/uniswap/LiquidityAmounts.sol";
-import { TickMath } from "../../../external/uniswap/TickMath.sol";
 import { IUniswapV3Pool } from "../../../external/uniswap/IUniswapV3Pool.sol";
 
 import { IHypervisor } from "../../../external/gamma/IHypervisor.sol";
