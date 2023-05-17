@@ -91,6 +91,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return collateralMarkets.values();
   }
 
+  // @dev returns lists of the market addresses, names and symbols of the underlying assets of those collateral markets that are whitelisted
   function getCollateralMarkets()
     public
     view
@@ -138,6 +139,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 
+  // @dev returns the Rate for the chosen borrowable at the specified  leverage ratio and supply amount
   function getBorrowRateAtRatio(
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket,
@@ -161,6 +163,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     }
   }
 
+  // @dev returns lists of the market addresses, names, symbols and the current Rate for each Borrowable asset
   function getBorrowableMarketsAndRates(ICErc20 _collateralMarket)
     public
     view

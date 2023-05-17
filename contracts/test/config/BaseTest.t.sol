@@ -75,6 +75,12 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier whenForking() {
+    if (vm.activeFork() > 0) {
+      _;
+    }
+  }
+
   function shouldRunForChain(uint256 chainid) internal returns (bool) {
     bool run = true;
     try vm.envUint("TEST_RUN_CHAINID") returns (uint256 envChainId) {

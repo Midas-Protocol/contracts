@@ -95,12 +95,12 @@ abstract contract LeveredPositionTest is MarketsTest {
     vm.stopPrank();
   }
 
-  function testOpenHayAnkrLeveredPosition() public {
+  function testOpenLeveredPosition() public whenForking {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
   }
 
-  function testHayAnkrAnyLeverageRatio(uint64 ratioDiff) public {
+  function testAnyLeverageRatio(uint64 ratioDiff) public whenForking {
     // ratioDiff is between 0 and 2^64 ~= 18.446e18
     uint256 targetLeverageRatio = 1.03e18 + uint256(ratioDiff);
 
@@ -114,7 +114,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
   }
 
-  function testHayAnkrMinMaxLeverageRatio() public {
+  function testMinMaxLeverageRatio() public whenForking {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
@@ -130,7 +130,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     position.adjustLeverageRatio(currentRatio + minRatioDiff);
   }
 
-  function testHayAnkrMaxLeverageRatio() public {
+  function testMaxLeverageRatio() public whenForking {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
@@ -140,7 +140,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
   }
 
-  function testHayAnkrLeverMaxDown() public {
+  function testLeverMaxDown() public whenForking {
     LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     uint256 leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
