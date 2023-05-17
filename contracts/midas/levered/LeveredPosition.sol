@@ -17,7 +17,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   // @notice maximum slippage in swaps, in bps
-  uint256 public constant MAX_SLIPPAGE = 800;
+  uint256 public constant MAX_SLIPPAGE = 900;
 
   // @notice the base collateral is the amount of collateral that is not funded by borrowing stables
   uint256 public baseCollateral;
@@ -170,7 +170,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 maxBorrowValueScaled = maxBorrow * stableAssetPrice;
 
     // accounting for swaps slippage
-    uint256 maxTopUpCollateralSwapValueScaled = (maxBorrowValueScaled * 10000) / (10000 + MAX_SLIPPAGE);
+    uint256 maxTopUpCollateralSwapValueScaled = (maxBorrowValueScaled * (10000 - MAX_SLIPPAGE)) / 10000;
 
     uint256 maxTopUpRepay = maxTopUpCollateralSwapValueScaled / collateralAssetPrice;
     uint256 maxCollateralToRepay = (maxTopUpRepay * stableCollateralFactor) / (1e18 - stableCollateralFactor);
@@ -223,12 +223,12 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   // @dev supply the flash loaned collateral and then borrow stables with it
-  function _leverUpPostFL(uint256 borrowAmount) internal {
+  function _leverUpPostFL(uint256 stableToBorrow) internal {
     // supply the flash loaned collateral
     _supplyCollateral(collateralAsset);
 
     // borrow stables that will be swapped to repay the FL
-    require(stableMarket.borrow(borrowAmount) == 0, "borrow stable failed");
+    require(stableMarket.borrow(stableToBorrow) == 0, "borrow stable failed");
 
     // swap for the FL asset
     convertAllTo(stableAsset, collateralAsset);

@@ -31,8 +31,6 @@ abstract contract BaseTest is Test {
 
   constructor() {
     configureAddressesProvider(0);
-    // create a dummy default fork id 0
-    vm.createFork("https://polygon-rpc.com/");
   }
 
   uint256 constant CRITICAL = 100;
@@ -78,10 +76,8 @@ abstract contract BaseTest is Test {
   }
 
   modifier whenForking() {
-    try vm.activeFork() returns (uint256 _forkId) {
-      if (_forkId > 0) {
-        _;
-      }
+    try vm.activeFork() returns (uint256) {
+      _;
     } catch {}
   }
 
