@@ -67,7 +67,6 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
     */
 
-
     strategies = new IRedemptionStrategy[](1);
     strategiesData = new bytes[](1);
 
