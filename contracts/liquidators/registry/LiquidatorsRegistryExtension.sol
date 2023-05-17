@@ -49,9 +49,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     strategiesData = new bytes[](10);
     address[] memory tokenPath = new address[](10);
 
-    while (tokenToRedeem != targetOutputToken && redemptionStrategies.contains(tokenToRedeem)) {
-
-    }
+    while (tokenToRedeem != targetOutputToken && redemptionStrategies.contains(tokenToRedeem)) {}
     /*
   if (targetOutputToken) {
     let tokenToRedeem = inputToken;
