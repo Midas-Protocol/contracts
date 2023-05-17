@@ -99,19 +99,23 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       address[] memory markets,
       address[] memory underlyings,
       string[] memory names,
-      string[] memory symbols
+      string[] memory symbols,
+      uint256[] memory rates
     )
   {
     markets = collateralMarkets.values();
     underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
+    rates = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
-      address underlyingAddress = ICErc20(markets[i]).underlying();
+      ICErc20 market = ICErc20(markets[i]);
+      address underlyingAddress = market.underlying();
       ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
       underlyings[i] = underlyingAddress;
+      rates[i] = market.supplyRatePerBlock() * blocksPerYear;
     }
   }
 
