@@ -38,8 +38,13 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
     IERC20Upgradeable inputToken,
     IERC20Upgradeable outputToken
   ) public onlyOwner {
+    IRedemptionStrategy oldStrategy = redemptionStrategiesByName[strategy.name()];
+
     redemptionStrategiesByTokens[inputToken][outputToken] = strategy;
     redemptionStrategiesByName[strategy.name()] = strategy;
+
+    redemptionStrategies.remove(address(oldStrategy));
+    redemptionStrategies.add(address(strategy));
   }
 
   function _setRedemptionStrategies(
@@ -50,8 +55,13 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
     require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
 
     for (uint256 i = 0; i < strategies.length; i++) {
+      IRedemptionStrategy oldStrategy = redemptionStrategiesByName[strategies[i].name()];
+
       redemptionStrategiesByTokens[inputTokens[i]][outputTokens[i]] = strategies[i];
       redemptionStrategiesByName[strategies[i].name()] = strategies[i];
+
+      redemptionStrategies.remove(address(oldStrategy));
+      redemptionStrategies.add(address(strategy));
     }
   }
 }

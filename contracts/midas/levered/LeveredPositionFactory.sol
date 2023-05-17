@@ -211,4 +211,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
         collateralMarkets.remove(address(_collateralMarket));
     }
   }
+
+  function setLiquidatorsRegistry(ILiquidatorsRegistry _liquidatorsRegistry) external onlyOwner {
+    liquidatorsRegistry = _liquidatorsRegistry;
+  }
 }

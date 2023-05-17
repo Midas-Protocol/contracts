@@ -6,10 +6,14 @@ import { SafeOwnable } from "../../midas/SafeOwnable.sol";
 import { AddressesProvider } from "../../midas/AddressesProvider.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract LiquidatorsRegistryStorage is SafeOwnable {
-  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => IRedemptionStrategy)) public redemptionStrategiesByTokens;
-  mapping(string => IRedemptionStrategy) public redemptionStrategiesByName;
+  using EnumerableSet for EnumerableSet.AddressSet;
 
   AddressesProvider public ap;
+
+  EnumerableSet.AddressSet internal redemptionStrategies;
+  mapping(string => IRedemptionStrategy) public redemptionStrategiesByName;
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => IRedemptionStrategy)) public redemptionStrategiesByTokens;
 }
