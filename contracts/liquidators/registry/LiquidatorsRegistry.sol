@@ -47,6 +47,8 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
 
     redemptionStrategies.remove(address(oldStrategy));
     redemptionStrategies.add(address(strategy));
+
+    outputTokensByInputToken[inputToken] = outputToken;
   }
 
   function _setRedemptionStrategies(
@@ -64,6 +66,8 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
 
       redemptionStrategies.remove(address(oldStrategy));
       redemptionStrategies.add(address(strategies[i]));
+
+      outputTokensByInputToken[inputTokens[i]] = outputTokens[i];
     }
   }
 }

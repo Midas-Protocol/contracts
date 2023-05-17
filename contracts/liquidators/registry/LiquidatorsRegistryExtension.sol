@@ -43,11 +43,20 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
   {
+    address tokenToRedeem = address(inputToken);
+    address targetOutputToken = address(outputToken);
+    strategies = new IRedemptionStrategy[](10);
+    strategiesData = new bytes[](10);
+    address[] memory tokenPath = new address[](10);
+
+    while (tokenToRedeem != targetOutputToken && redemptionStrategies.contains(tokenToRedeem)) {
+
+    }
     /*
-  if (expectedOutputToken) {
+  if (targetOutputToken) {
     let tokenToRedeem = inputToken;
     // chain redemptions as long as it is redeemable and is not the needed output token
-    while (tokenToRedeem != expectedOutputToken && tokenToRedeem in fuse.redemptionStrategies) {
+    while (tokenToRedeem != targetOutputToken && tokenToRedeem in fuse.redemptionStrategies) {
       const { strategyAddress, strategyData, outputToken } = (await getStrategyAndData(
         fuse,
         tokenToRedeem

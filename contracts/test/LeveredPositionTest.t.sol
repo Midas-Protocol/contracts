@@ -35,24 +35,29 @@ abstract contract LeveredPositionTest is MarketsTest {
       blocksPerYear = 20 * 24 * 365 * 60;
     }
 
-    // create and configure the liquidators registry
-    registry = new LiquidatorsRegistry(ap);
-    LiquidatorsRegistryExtension ext = new LiquidatorsRegistryExtension();
-    registry._registerExtension(ext, DiamondExtension(address(0)));
+    if (block.chainid == BSC_CHAPEL) {
+      registry = LiquidatorsRegistry(ap.getAddress("LiquidatorsRegistry"));
+      factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    } else {
+      // create and configure the liquidators registry
+      registry = new LiquidatorsRegistry(ap);
+      LiquidatorsRegistryExtension ext = new LiquidatorsRegistryExtension();
+      registry._registerExtension(ext, DiamondExtension(address(0)));
 
-    // create and initialize the levered positions factory
-    LeveredPositionFactory impl = new LeveredPositionFactory();
-    TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
-      address(impl),
-      ap.getAddress("DefaultProxyAdmin"),
-      ""
-    );
-    factory = LeveredPositionFactory(address(factoryProxy));
-    factory.initialize(
-      IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
-      ILiquidatorsRegistry(address(registry)),
-      blocksPerYear
-    );
+      // create and initialize the levered positions factory
+      LeveredPositionFactory impl = new LeveredPositionFactory();
+      TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
+        address(impl),
+        ap.getAddress("DefaultProxyAdmin"),
+        ""
+      );
+      factory = LeveredPositionFactory(address(factoryProxy));
+      factory.initialize(
+        IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
+        ILiquidatorsRegistry(address(registry)),
+        blocksPerYear
+      );
+    }
   }
 
   function upgradePoolAndMarkets() internal {
