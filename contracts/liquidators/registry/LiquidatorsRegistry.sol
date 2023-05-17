@@ -16,6 +16,8 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "./ILiquidatorsRegistry.sol";
 
 contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
   constructor(AddressesProvider _ap) SafeOwnable() {
     ap = _ap;
   }
@@ -61,7 +63,7 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
       redemptionStrategiesByName[strategies[i].name()] = strategies[i];
 
       redemptionStrategies.remove(address(oldStrategy));
-      redemptionStrategies.add(address(strategy));
+      redemptionStrategies.add(address(strategies[i]));
     }
   }
 }

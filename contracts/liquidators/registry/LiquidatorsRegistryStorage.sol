@@ -9,8 +9,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract LiquidatorsRegistryStorage is SafeOwnable {
-  using EnumerableSet for EnumerableSet.AddressSet;
-
   AddressesProvider public ap;
 
   EnumerableSet.AddressSet internal redemptionStrategies;
