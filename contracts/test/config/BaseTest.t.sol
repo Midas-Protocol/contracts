@@ -76,9 +76,11 @@ abstract contract BaseTest is Test {
   }
 
   modifier whenForking() {
-    if (vm.activeFork() > 0) {
-      _;
-    }
+    try vm.activeFork() returns (uint256 _forkId) {
+      if (_forkId > 0) {
+        _;
+      }
+    } catch {}
   }
 
   function shouldRunForChain(uint256 chainid) internal returns (bool) {
