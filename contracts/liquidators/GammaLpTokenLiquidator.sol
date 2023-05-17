@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./IRedemptionStrategy.sol";
 import { IHypervisor } from "../external/gamma/IHypervisor.sol";
-import { ISwapRouter } from"../external/algebra/ISwapRouter.sol";
+import { ISwapRouter } from "../external/algebra/ISwapRouter.sol";
 
 /**
  * @title GammaLpTokenLiquidator
