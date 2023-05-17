@@ -31,6 +31,8 @@ abstract contract BaseTest is Test {
 
   constructor() {
     configureAddressesProvider(0);
+    // create a dummy default fork id 0
+    vm.createFork("https://polygon-rpc.com/");
   }
 
   uint256 constant CRITICAL = 100;
