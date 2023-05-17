@@ -97,17 +97,21 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     view
     returns (
       address[] memory markets,
+      address[] memory underlyings,
       string[] memory names,
       string[] memory symbols
     )
   {
     markets = collateralMarkets.values();
+    underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
-      ERC20Upgradeable underlying = ERC20Upgradeable(ICErc20(markets[i]).underlying());
+      address underlyingAddress = ICErc20(markets[i]).underlying();
+      ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
+      underlyings[i] = underlyingAddress;
     }
   }
 
@@ -169,18 +173,22 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     view
     returns (
       address[] memory markets,
+      address[] memory underlyings,
       string[] memory names,
       string[] memory symbols,
       uint256[] memory rates
     )
   {
     markets = borrowableMarketsByCollateral[_collateralMarket].values();
+    underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
-      ERC20Upgradeable underlying = ERC20Upgradeable(ICErc20(markets[i]).underlying());
+      address underlyingAddress = ICErc20(markets[i]).underlying();
+      ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
+      underlyings[i] = underlyingAddress;
     }
     rates = getBorrowRates(markets);
   }
