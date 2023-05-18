@@ -92,7 +92,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = solidlyLpTokenLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "UniswapV2LiquidatorFunder")) {
       strategyData = uniswapV2LiquidatorData(inputToken, outputToken);
-    } else if (isStrategy(strategy, "AlgebraSwapLiquidator")) {
+    } else if (isStrategy(strategy, "AlgebraSwapLiquidator") || isStrategy(strategy, "GammaLpTokenLiquidator")) {
       strategyData = algebraSwapLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "BalancerSwapLiquidator") || isStrategy(strategy, "BalancerLpTokenLiquidator")) {
       strategyData = balancerLiquidatorData(inputToken, outputToken);
