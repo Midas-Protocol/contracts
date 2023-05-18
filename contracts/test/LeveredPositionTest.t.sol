@@ -84,10 +84,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     _configureLiquidator(collateralToken, stableToken, _liquidator);
   }
 
-  function _configurePair(
-    address _collat,
-    address _stable
-  ) internal {
+  function _configurePair(address _collat, address _stable) internal {
     collateralMarket = ICErc20(_collat);
     stableMarket = ICErc20(_stable);
     upgradePoolAndMarkets();
@@ -246,7 +243,7 @@ contract HayAnkrLeveredPositionTest is LeveredPositionTest {
     _fundMarketAndSelf(ICErc20(ankrBnbMarket), ankrBnbWhale);
 
     position = _openLeveredPosition(address(this), depositAmount);
- }
+  }
 }
 
 contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
@@ -299,7 +296,7 @@ contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
     _configurePair(jbrlMarket, busdMarket, liquidator);
     _fundMarketAndSelf(ICErc20(jbrlMarket), jbrlWhale);
 
-   position = _openLeveredPosition(address(this), depositAmount);
+    position = _openLeveredPosition(address(this), depositAmount);
   }
 }
 

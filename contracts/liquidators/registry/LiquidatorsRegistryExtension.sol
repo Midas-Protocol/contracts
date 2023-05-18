@@ -54,12 +54,12 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     uint256 k = 0;
     while (tokenToRedeem != targetOutputToken) {
       IERC20Upgradeable redeemedToken = outputTokensByInputToken[tokenToRedeem];
-      for (uint256 i = 0; i < tokenPath.length; i++) { // tokenPath.length = 10
+      for (uint256 i = 0; i < tokenPath.length; i++) {
         if (redeemedToken == tokenPath[i]) break;
       }
 
       (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(tokenToRedeem, redeemedToken);
-      if(address(strategy) == address(0)) break;
+      if (address(strategy) == address(0)) break;
 
       strategiesTemp[k] = strategy;
       strategiesDataTemp[k] = strategyData;
@@ -317,15 +317,21 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function balancerLinearPoolTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     // TODO
     address poolAddress;
-    if (address(inputToken) == ap.getAddress("wtoken") && address(outputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4) {
+    if (
+      address(inputToken) == ap.getAddress("wtoken") &&
+      address(outputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4
+    ) {
       poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
-    } else if (address(inputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4 && address(outputToken) == ap.getAddress("wtoken")) {
+    } else if (
+      address(inputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4 &&
+      address(outputToken) == ap.getAddress("wtoken")
+    ) {
       poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
     }
 
