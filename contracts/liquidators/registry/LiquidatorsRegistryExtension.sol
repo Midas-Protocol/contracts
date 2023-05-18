@@ -378,20 +378,18 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     // TODO
     address poolAddress;
     if (
-      address(inputToken) == ap.getAddress("wtoken") &&
-      address(outputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4
-    ||
-      address(inputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4 &&
-      address(outputToken) == ap.getAddress("wtoken")
+      (address(inputToken) == ap.getAddress("wtoken") &&
+        address(outputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4) ||
+      (address(inputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4 &&
+        address(outputToken) == ap.getAddress("wtoken"))
     ) {
       poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
     }
     if (
-      address(inputToken) == ap.getAddress("wtoken") &&
-      address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6
-    ||
-      address(inputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6 &&
-      address(outputToken) == ap.getAddress("wtoken")
+      (address(inputToken) == ap.getAddress("wtoken") &&
+        address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
+      (address(inputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6 &&
+        address(outputToken) == ap.getAddress("wtoken"))
     ) {
       poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
     }
