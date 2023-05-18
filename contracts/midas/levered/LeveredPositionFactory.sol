@@ -100,7 +100,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       address[] memory underlyings,
       string[] memory names,
       string[] memory symbols,
-      uint256[] memory rates
+      uint256[] memory rates,
+      uint256[] memory ratesPerBlock
     )
   {
     markets = collateralMarkets.values();
@@ -108,6 +109,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     names = new string[](markets.length);
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
+    ratesPerBlock = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       address underlyingAddress = market.underlying();
@@ -116,6 +118,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       symbols[i] = underlying.symbol();
       underlyings[i] = underlyingAddress;
       rates[i] = market.supplyRatePerBlock() * blocksPerYear;
+      ratesPerBlock[i] = market.supplyRatePerBlock();
     }
   }
 
