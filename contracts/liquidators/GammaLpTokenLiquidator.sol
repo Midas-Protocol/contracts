@@ -64,4 +64,8 @@ contract GammaLpTokenLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(_outputToken);
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public view returns (string memory) {
+    return "GammaLpTokenLiquidator";
+  }
 }
