@@ -45,41 +45,38 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
   {
-    address tokenToRedeem = address(inputToken);
-    address targetOutputToken = address(outputToken);
-    strategies = new IRedemptionStrategy[](10);
-    strategiesData = new bytes[](10);
-    address[] memory tokenPath = new address[](10);
+    IERC20Upgradeable tokenToRedeem = inputToken;
+    IERC20Upgradeable targetOutputToken = outputToken;
+    IRedemptionStrategy[] memory strategiesTemp = new IRedemptionStrategy[](10);
+    bytes[] memory strategiesDataTemp = new bytes[](10);
+    IERC20Upgradeable[] memory tokenPath = new IERC20Upgradeable[](10);
 
-    while (tokenToRedeem != targetOutputToken && redemptionStrategies.contains(tokenToRedeem)) {}
-    /*
-  if (targetOutputToken) {
-    let tokenToRedeem = inputToken;
-    // chain redemptions as long as it is redeemable and is not the needed output token
-    while (tokenToRedeem != targetOutputToken && tokenToRedeem in fuse.redemptionStrategies) {
-      const { strategyAddress, strategyData, outputToken } = (await getStrategyAndData(
-        fuse,
-        tokenToRedeem
-      )) as StrategyAndData;
+    uint256 k = 0;
+    while (tokenToRedeem != targetOutputToken) {
+      IERC20Upgradeable redeemedToken = outputTokensByInputToken[tokenToRedeem];
+      for (uint256 i = 0; i < tokenPath.length; i++) { // tokenPath.length = 10
+        if (redeemedToken == tokenPath[i]) break;
+      }
 
-      // avoid going in an endless loop
-      // it is not mission critical to reach the expected output token,
-      // so just break instead of throwing
-      if (tokenPath.find((p) => p == outputToken)) break;
+      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(tokenToRedeem, redeemedToken);
+      if(address(strategy) == address(0)) break;
 
-      tokenPath.push(outputToken);
-      strategies.push(strategyAddress);
-      datas.push(strategyData);
+      strategiesTemp[k] = strategy;
+      strategiesDataTemp[k] = strategyData;
+      tokenPath[k] = redeemedToken;
+      tokenToRedeem = redeemedToken;
 
-      tokenToRedeem = outputToken;
+      k++;
+      if (k == 10) break;
     }
-  }
-    */
 
-    strategies = new IRedemptionStrategy[](1);
-    strategiesData = new bytes[](1);
+    strategies = new IRedemptionStrategy[](k);
+    strategiesData = new bytes[](k);
 
-    (strategies[0], strategiesData[0]) = getRedemptionStrategy(inputToken, outputToken);
+    for (uint8 i = 0; i < k; i++) {
+      strategies[i] = strategiesTemp[i];
+      strategiesData[i] = strategiesDataTemp[i];
+    }
   }
 
   function getRedemptionStrategy(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -111,6 +108,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
     } else if (isStrategy(strategy, "XBombLiquidatorFunder")) {
       strategyData = xBombLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "BalancerLinearPoolTokenLiquidator")) {
+      strategyData = balancerLinearPoolTokenLiquidatorData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
       //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
@@ -315,6 +314,22 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
         strategyData = abi.encode(pool.collateralToken, pool.liquidityPool, pool.expirationTime);
       }
     }
+  }
+
+  function balancerLinearPoolTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  internal
+  view
+  returns (bytes memory strategyData)
+  {
+    // TODO
+    address poolAddress;
+    if (address(inputToken) == ap.getAddress("wtoken") && address(outputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4) {
+      poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
+    } else if (address(inputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4 && address(outputToken) == ap.getAddress("wtoken")) {
+      poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
+    }
+
+    strategyData = abi.encode(poolAddress, outputToken);
   }
 
   // TODO remove after testing

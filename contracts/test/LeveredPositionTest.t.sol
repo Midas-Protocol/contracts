@@ -14,6 +14,8 @@ import "../liquidators/SolidlySwapLiquidator.sol";
 import "../liquidators/CurveSwapLiquidator.sol";
 import "../liquidators/BalancerLpTokenLiquidator.sol";
 import "../liquidators/BalancerSwapLiquidator.sol";
+import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
+
 import "../liquidators/registry/LiquidatorsRegistry.sol";
 import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import "../liquidators/registry/ILiquidatorsRegistry.sol";
@@ -26,6 +28,8 @@ abstract contract LeveredPositionTest is MarketsTest {
   ICErc20 stableMarket;
   LeveredPositionFactory factory;
   LiquidatorsRegistry registry;
+  uint256 depositAmount;
+  LeveredPosition position;
 
   function afterForkSetUp() internal virtual override {
     super.afterForkSetUp();
@@ -33,6 +37,8 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 blocksPerYear;
     if (block.chainid == BSC_MAINNET) {
       blocksPerYear = 20 * 24 * 365 * 60;
+    } else if (block.chainid == POLYGON_MAINNET) {
+      blocksPerYear = 26 * 24 * 365 * 60;
     }
 
     if (block.chainid == BSC_CHAPEL) {
@@ -67,24 +73,74 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function _configurePair(
-    address _colllat,
+    address _collat,
     address _stable,
-    IRedemptionStrategy _liquidator,
-    address _whale
+    IRedemptionStrategy _liquidator
   ) internal {
-    collateralMarket = ICErc20(_colllat);
-    stableMarket = ICErc20(_stable);
-    upgradePoolAndMarkets();
-    factory._setPairWhitelisted(collateralMarket, stableMarket, true);
+    _configurePair(_collat, _stable);
 
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     IERC20Upgradeable stableToken = IERC20Upgradeable(stableMarket.underlying());
-    registry._setRedemptionStrategy(_liquidator, collateralToken, stableToken);
-    registry._setRedemptionStrategy(_liquidator, stableToken, collateralToken);
+    _configureLiquidator(collateralToken, stableToken, _liquidator);
+  }
 
-    uint256 someTokens = collateralToken.balanceOf(_whale) / 10;
-    vm.prank(_whale);
-    collateralToken.transfer(address(this), someTokens);
+  function _configurePair(
+    address _collat,
+    address _stable
+  ) internal {
+    collateralMarket = ICErc20(_collat);
+    stableMarket = ICErc20(_stable);
+    upgradePoolAndMarkets();
+    factory._setPairWhitelisted(collateralMarket, stableMarket, true);
+  }
+
+  function _fundMarketAndSelf(ICErc20 market, address whale) internal {
+    IERC20Upgradeable token = IERC20Upgradeable(market.underlying());
+    uint256 allTokens = token.balanceOf(whale);
+    vm.prank(whale);
+    token.transfer(address(this), allTokens / 20);
+
+    if (token.balanceOf(address(market)) < allTokens / 2) {
+      vm.startPrank(whale);
+      token.approve(address(market), allTokens / 2);
+      market.mint(allTokens / 2);
+      vm.stopPrank();
+    }
+  }
+
+  function _configureLiquidator(
+    address inputMarket,
+    address outputMarket,
+    IRedemptionStrategy strategy
+  ) internal {
+    _configureLiquidator(ICErc20(inputMarket), ICErc20(outputMarket), strategy);
+  }
+
+  function _configureLiquidator(
+    ICErc20 inputMarket,
+    ICErc20 outputMarket,
+    IRedemptionStrategy strategy
+  ) internal {
+    IERC20Upgradeable inputToken = IERC20Upgradeable(inputMarket.underlying());
+    IERC20Upgradeable outputToken = IERC20Upgradeable(outputMarket.underlying());
+    _configureLiquidator(inputToken, outputToken, strategy);
+  }
+
+  function _configureLiquidator(
+    IERC20Upgradeable inputToken,
+    IERC20Upgradeable outputToken,
+    IRedemptionStrategy strategy
+  ) internal {
+    registry._setRedemptionStrategy(strategy, inputToken, outputToken);
+    registry._setRedemptionStrategy(strategy, outputToken, inputToken);
+  }
+
+  function _configureLiquidators(
+    IERC20Upgradeable[] memory inputTokens,
+    IERC20Upgradeable[] memory outputTokens,
+    IRedemptionStrategy[] memory strategies
+  ) internal {
+    registry._setRedemptionStrategies(strategies, inputTokens, outputTokens);
   }
 
   function _openLeveredPosition(address positionOwner, uint256 depositAmount)
@@ -101,15 +157,16 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function testOpenLeveredPosition() public whenForking {
-    LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
   }
 
   function testAnyLeverageRatio(uint64 ratioDiff) public whenForking {
     // ratioDiff is between 0 and 2^64 ~= 18.446e18
+    uint256 minRatioDiff = position.getMinLeverageRatioDiff();
+    emit log_named_uint("min ratio diff", minRatioDiff);
+    vm.assume(minRatioDiff < ratioDiff);
     uint256 targetLeverageRatio = 1.03e18 + uint256(ratioDiff);
 
-    LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max lev ratio", maxRatio);
     vm.assume(targetLeverageRatio < maxRatio);
@@ -120,7 +177,6 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function testMinMaxLeverageRatio() public whenForking {
-    LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
     uint256 minRatioDiff = position.getMinLeverageRatioDiff();
@@ -136,7 +192,6 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function testMaxLeverageRatio() public whenForking {
-    LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
     uint256 minRatioDiff = position.getMinLeverageRatioDiff();
@@ -146,16 +201,18 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function testLeverMaxDown() public whenForking {
-    LeveredPosition position = _openLeveredPosition(address(this), 10e18);
     uint256 maxRatio = position.getMaxLeverageRatio();
     uint256 leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
     assertApproxEqAbs(leverageRatioRealized, maxRatio, 1e4, "target ratio not matching");
 
+    uint256 minRatioDiff = position.getMinLeverageRatioDiff();
+    emit log_named_uint("min ratio diff", minRatioDiff);
+
     // decrease the ratio in 10 equal steps
-    uint256 targetLeverDownRatio;
     uint256 ratioDiffStep = (maxRatio - 1e18) / 9;
-    for (uint256 i = 0; i < 10; i++) {
-      targetLeverDownRatio = leverageRatioRealized - ratioDiffStep;
+    while (leverageRatioRealized > 1e18) {
+      uint256 targetLeverDownRatio = leverageRatioRealized - ratioDiffStep;
+      if (targetLeverDownRatio - 1e18 < minRatioDiff) targetLeverDownRatio = 1e18;
       leverageRatioRealized = position.adjustLeverageRatio(targetLeverDownRatio);
       assertApproxEqAbs(leverageRatioRealized, targetLeverDownRatio, 1e4, "target lever down ratio not matching");
     }
@@ -174,6 +231,8 @@ contract HayAnkrLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
+    depositAmount = 10e18;
+
     address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
     address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
     address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
@@ -183,8 +242,11 @@ contract HayAnkrLeveredPositionTest is LeveredPositionTest {
     ap.setAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER", 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
 
     SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
-    _configurePair(ankrBnbMarket, hayMarket, solidlyLiquidator, ankrBnbWhale);
-  }
+    _configurePair(ankrBnbMarket, hayMarket, solidlyLiquidator);
+    _fundMarketAndSelf(ICErc20(ankrBnbMarket), ankrBnbWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
+ }
 }
 
 contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
@@ -193,12 +255,22 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
+    depositAmount = 200e18;
+
     address wmaticMarket = 0x4017cd39950d1297BBd9713D939bC5d9c6F2Be53;
     address stmaticMarket = 0xc1B068007114dC0F14f322Ef201491717f3e52cD;
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+    address stmaticWhale = 0x52997D5abC01e9BFDd29cccB183ffc60F6d6bF8c;
 
-    CurveSwapLiquidator csl = new CurveSwapLiquidator();
-    _configurePair(wmaticMarket, stmaticMarket, csl, wmaticWhale);
+    _configurePair(wmaticMarket, stmaticMarket);
+    _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
+    _fundMarketAndSelf(ICErc20(stmaticMarket), stmaticWhale);
+
+    //1030000000000000000
+    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
+    _configureLiquidator(wmaticMarket, stmaticMarket, linearSwapLiquidator);
+
+    position = _openLeveredPosition(address(this), depositAmount);
   }
 }
 
@@ -207,6 +279,8 @@ contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
+
+    depositAmount = 2000e18;
 
     address jbrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a;
     address busdMarket = 0xa7213deB44f570646Ea955771Cc7f39B58841363;
@@ -222,7 +296,10 @@ contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
     vm.stopPrank();
 
     JarvisLiquidatorFunder liquidator = new JarvisLiquidatorFunder();
-    _configurePair(jbrlMarket, busdMarket, liquidator, jbrlWhale);
+    _configurePair(jbrlMarket, busdMarket, liquidator);
+    _fundMarketAndSelf(ICErc20(jbrlMarket), jbrlWhale);
+
+   position = _openLeveredPosition(address(this), depositAmount);
   }
 }
 
@@ -232,12 +309,17 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
+    depositAmount = 200e18;
+
     address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
     address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
 
     BalancerSwapLiquidator lpTokenLiquidator = new BalancerSwapLiquidator();
-    _configurePair(wmaticMarket, maticxMarket, lpTokenLiquidator, wmaticWhale);
+    _configurePair(wmaticMarket, maticxMarket, lpTokenLiquidator);
+    _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
   }
 }
 

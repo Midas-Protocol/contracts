@@ -87,7 +87,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
-  function testWmaticStmaticLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+  function testWmaticStmaticLPLiquidatorRedeem() public fork(POLYGON_MAINNET) {
     address lpToken = 0x8159462d255C1D24915CB51ec361F700174cD994; // stMATIC-WMATIC stable
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
@@ -95,7 +95,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
-  function testWmaticMaticXLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+  function testWmaticMaticXLPLiquidatorRedeem() public fork(POLYGON_MAINNET) {
     address lpToken = 0xC17636e36398602dd37Bb5d1B3a9008c7629005f; // WMATIC-MaticX stable
     address lpTokenWhale = 0x48534d027f8962692122dB440714fFE88Ab1fA85;
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
@@ -137,6 +137,16 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
 
     bytes memory data = abi.encode(outputTokenAddress);
     swapLiquidator.redeem(erc4626Token, balance, data);
+  }
+
+  function testWmaticStmaticLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+    address wmatic = ap.getAddress("wtoken");
+    address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+    address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
+    uint256 amount = 100e18;
+    address poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
+
+    testRedeemLinearPool(amount, wmaticWhale, wmatic, poolAddress, stmatic);
   }
 
   function testLinearAaveRedeem() public fork(POLYGON_MAINNET) {
