@@ -81,7 +81,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
-  function _removeRedemptionStrategy(address strategyToRemove, string calldata name, IERC20Upgradeable inputToken) external onlyOwner {
+  function _removeRedemptionStrategy(
+    address strategyToRemove,
+    string calldata name,
+    IERC20Upgradeable inputToken
+  ) external onlyOwner {
     IERC20Upgradeable outputToken = outputTokensByInputToken[inputToken];
 
     redemptionStrategiesByName[name] = IRedemptionStrategy(address(0));

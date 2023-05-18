@@ -67,7 +67,10 @@ contract MidasFlywheelLensRouter {
     return _getMarketRewardsInfo(markets, pool);
   }
 
-  function _getMarketRewardsInfo(CErc20Token[] memory markets, IComptroller comptroller) internal returns (MarketRewardsInfo[] memory) {
+  function _getMarketRewardsInfo(CErc20Token[] memory markets, IComptroller comptroller)
+    internal
+    returns (MarketRewardsInfo[] memory)
+  {
     MidasFlywheelCore[] memory flywheels = comptroller.getAccruingFlywheels();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
