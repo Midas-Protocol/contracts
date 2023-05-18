@@ -125,7 +125,3 @@ contract XBombSwap {
     return rewardAmount;
   }
 }
-
-contract TestingStable is ERC20PresetMinterPauser {
-  constructor(string memory _name, string memory _symbol) ERC20PresetMinterPauser(_name, _symbol) {}
-}

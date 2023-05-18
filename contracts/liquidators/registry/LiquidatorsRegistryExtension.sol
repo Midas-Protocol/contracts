@@ -22,11 +22,14 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   using EnumerableSet for EnumerableSet.AddressSet;
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 3;
+    uint8 fnsCount = 6;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this.hasRedemptionStrategyForTokens.selector;
+    functionSelectors[--fnsCount] = this._setRedemptionStrategy.selector;
+    functionSelectors[--fnsCount] = this._setRedemptionStrategies.selector;
+    functionSelectors[--fnsCount] = this._removeRedemptionStrategy.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -38,6 +41,53 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   {
     IRedemptionStrategy strategy = redemptionStrategiesByTokens[inputToken][outputToken];
     return address(strategy) != address(0);
+  }
+
+  function _setRedemptionStrategy(
+    IRedemptionStrategy strategy,
+    IERC20Upgradeable inputToken,
+    IERC20Upgradeable outputToken
+  ) public onlyOwner {
+    string memory name = strategy.name();
+    IRedemptionStrategy oldStrategy = redemptionStrategiesByName[name];
+
+    redemptionStrategiesByTokens[inputToken][outputToken] = strategy;
+    redemptionStrategiesByName[name] = strategy;
+
+    redemptionStrategies.remove(address(oldStrategy));
+    redemptionStrategies.add(address(strategy));
+
+    outputTokensByInputToken[inputToken] = outputToken;
+  }
+
+  function _setRedemptionStrategies(
+    IRedemptionStrategy[] calldata strategies,
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens
+  ) public onlyOwner {
+    require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
+
+    for (uint256 i = 0; i < strategies.length; i++) {
+      string memory name = strategies[i].name();
+      IRedemptionStrategy oldStrategy = redemptionStrategiesByName[name];
+
+      redemptionStrategiesByTokens[inputTokens[i]][outputTokens[i]] = strategies[i];
+      redemptionStrategiesByName[name] = strategies[i];
+
+      redemptionStrategies.remove(address(oldStrategy));
+      redemptionStrategies.add(address(strategies[i]));
+
+      outputTokensByInputToken[inputTokens[i]] = outputTokens[i];
+    }
+  }
+
+  function _removeRedemptionStrategy(address strategyToRemove, string calldata name, IERC20Upgradeable inputToken) external onlyOwner {
+    IERC20Upgradeable outputToken = outputTokensByInputToken[inputToken];
+
+    redemptionStrategiesByName[name] = IRedemptionStrategy(address(0));
+    redemptionStrategiesByTokens[inputToken][outputToken] = IRedemptionStrategy(address(0));
+    outputTokensByInputToken[inputToken] = IERC20Upgradeable(address(0));
+    redemptionStrategies.remove(strategyToRemove);
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -359,5 +409,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
       strategyData = abi.encode(inputToken, xbomb, bomb);
     }
+  }
+
+  function asExtension() public view returns (LiquidatorsRegistryExtension) {
+    return this;
   }
 }

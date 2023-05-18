@@ -128,8 +128,8 @@ abstract contract LeveredPositionTest is MarketsTest {
     IERC20Upgradeable outputToken,
     IRedemptionStrategy strategy
   ) internal {
-    registry._setRedemptionStrategy(strategy, inputToken, outputToken);
-    registry._setRedemptionStrategy(strategy, outputToken, inputToken);
+    registry.asExtension()._setRedemptionStrategy(strategy, inputToken, outputToken);
+    registry.asExtension()._setRedemptionStrategy(strategy, outputToken, inputToken);
   }
 
   function _configureLiquidators(
@@ -137,19 +137,19 @@ abstract contract LeveredPositionTest is MarketsTest {
     IERC20Upgradeable[] memory outputTokens,
     IRedemptionStrategy[] memory strategies
   ) internal {
-    registry._setRedemptionStrategies(strategies, inputTokens, outputTokens);
+    registry.asExtension()._setRedemptionStrategies(strategies, inputTokens, outputTokens);
   }
 
   function _openLeveredPosition(address positionOwner, uint256 depositAmount)
     internal
-    returns (LeveredPosition position)
+    returns (LeveredPosition _position)
   {
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     collateralToken.transfer(positionOwner, depositAmount);
 
     vm.startPrank(positionOwner);
     collateralToken.approve(address(factory), depositAmount);
-    position = factory.createAndFundPosition(collateralMarket, stableMarket, collateralToken, depositAmount);
+    _position = factory.createAndFundPosition(collateralMarket, stableMarket, collateralToken, depositAmount);
     vm.stopPrank();
   }
 

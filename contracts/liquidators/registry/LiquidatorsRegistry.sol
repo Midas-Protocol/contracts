@@ -14,6 +14,7 @@ import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.s
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "./ILiquidatorsRegistry.sol";
+import "./LiquidatorsRegistryExtension.sol";
 
 contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
   using EnumerableSet for EnumerableSet.AddressSet;
@@ -35,39 +36,7 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
-  function _setRedemptionStrategy(
-    IRedemptionStrategy strategy,
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) public onlyOwner {
-    IRedemptionStrategy oldStrategy = redemptionStrategiesByName[strategy.name()];
-
-    redemptionStrategiesByTokens[inputToken][outputToken] = strategy;
-    redemptionStrategiesByName[strategy.name()] = strategy;
-
-    redemptionStrategies.remove(address(oldStrategy));
-    redemptionStrategies.add(address(strategy));
-
-    outputTokensByInputToken[inputToken] = outputToken;
-  }
-
-  function _setRedemptionStrategies(
-    IRedemptionStrategy[] calldata strategies,
-    IERC20Upgradeable[] calldata inputTokens,
-    IERC20Upgradeable[] calldata outputTokens
-  ) public onlyOwner {
-    require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
-
-    for (uint256 i = 0; i < strategies.length; i++) {
-      IRedemptionStrategy oldStrategy = redemptionStrategiesByName[strategies[i].name()];
-
-      redemptionStrategiesByTokens[inputTokens[i]][outputTokens[i]] = strategies[i];
-      redemptionStrategiesByName[strategies[i].name()] = strategies[i];
-
-      redemptionStrategies.remove(address(oldStrategy));
-      redemptionStrategies.add(address(strategies[i]));
-
-      outputTokensByInputToken[inputTokens[i]] = outputTokens[i];
-    }
+  function asExtension() public view returns (LiquidatorsRegistryExtension) {
+    return LiquidatorsRegistryExtension(address(this));
   }
 }
