@@ -311,10 +311,12 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
     address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
     address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+    address maticxWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    BalancerSwapLiquidator lpTokenLiquidator = new BalancerSwapLiquidator();
-    _configurePair(wmaticMarket, maticxMarket, lpTokenLiquidator);
+    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
+    _configurePair(wmaticMarket, maticxMarket, linearSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
+    _fundMarketAndSelf(ICErc20(maticxMarket), maticxWhale);
 
     position = _openLeveredPosition(address(this), depositAmount);
   }
