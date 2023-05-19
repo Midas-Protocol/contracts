@@ -140,16 +140,16 @@ abstract contract LeveredPositionTest is MarketsTest {
     registry.asExtension()._setRedemptionStrategies(strategies, inputTokens, outputTokens);
   }
 
-  function _openLeveredPosition(address positionOwner, uint256 depositAmount)
+  function _openLeveredPosition(address _positionOwner, uint256 _depositAmount)
     internal
     returns (LeveredPosition _position)
   {
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
-    collateralToken.transfer(positionOwner, depositAmount);
+    collateralToken.transfer(_positionOwner, _depositAmount);
 
-    vm.startPrank(positionOwner);
-    collateralToken.approve(address(factory), depositAmount);
-    _position = factory.createAndFundPosition(collateralMarket, stableMarket, collateralToken, depositAmount);
+    vm.startPrank(_positionOwner);
+    collateralToken.approve(address(factory), _depositAmount);
+    _position = factory.createAndFundPosition(collateralMarket, stableMarket, collateralToken, _depositAmount);
     vm.stopPrank();
   }
 
