@@ -5,8 +5,6 @@ import "../external/bomb/IXBomb.sol";
 import "./IRedemptionStrategy.sol";
 import "./IFundsConversionStrategy.sol";
 
-import "openzeppelin-contracts/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
-
 /**
  * @title XBombLiquidatorFunder
  * @notice Exchanges seized xBOMB collateral for underlying BOMB tokens for use as a step in a liquidation.

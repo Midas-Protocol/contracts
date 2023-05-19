@@ -2,20 +2,12 @@
 pragma solidity >=0.8.0;
 
 import "./config/MarketsTest.t.sol";
-import { Unitroller } from "../compound/Unitroller.sol";
 
 import "../midas/levered/LeveredPosition.sol";
-import { AddressesProvider } from "../midas/AddressesProvider.sol";
-import "../external/algebra/IAlgebraFactory.sol";
 import "../midas/levered/LeveredPositionFactory.sol";
-
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
-import "../liquidators/CurveSwapLiquidator.sol";
-import "../liquidators/BalancerLpTokenLiquidator.sol";
-import "../liquidators/BalancerSwapLiquidator.sol";
 import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
-
 import "../liquidators/registry/LiquidatorsRegistry.sol";
 import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import "../liquidators/registry/ILiquidatorsRegistry.sol";
@@ -263,7 +255,6 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(stmaticMarket), stmaticWhale);
 
-    //1030000000000000000
     BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
     _configureLiquidator(wmaticMarket, stmaticMarket, linearSwapLiquidator);
 

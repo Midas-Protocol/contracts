@@ -5,9 +5,7 @@ import "./ILeveredPositionFactory.sol";
 import "./LeveredPosition.sol";
 import "../SafeOwnableUpgradeable.sol";
 import "../../compound/IFuseFeeDistributor.sol";
-
 import "../../liquidators/registry/ILiquidatorsRegistry.sol";
-import "../../liquidators/SolidlySwapLiquidator.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
