@@ -53,7 +53,7 @@ contract MidasFlywheelLensRouter {
     address rewardToken;
   }
 
-  function getMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
+  function getPoolMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
     CErc20Token[] memory markets = comptroller.getAllMarkets();
     return _getMarketRewardsInfo(markets, comptroller);
   }
