@@ -98,6 +98,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       address[] memory underlyings,
       string[] memory names,
       string[] memory symbols,
+      uint8[] memory decimals,
       uint256[] memory rates,
       uint256[] memory ratesPerBlock
     )
@@ -107,14 +108,16 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     names = new string[](markets.length);
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
+    decimals = new uint8[](markets.length);
     ratesPerBlock = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       address underlyingAddress = market.underlying();
+      underlyings[i] = underlyingAddress;
       ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
-      underlyings[i] = underlyingAddress;
+      decimals[i] = underlying.decimals();
       rates[i] = market.supplyRatePerBlock() * blocksPerYear;
       ratesPerBlock[i] = market.supplyRatePerBlock();
     }
@@ -181,19 +184,22 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       address[] memory underlyings,
       string[] memory names,
       string[] memory symbols,
-      uint256[] memory rates
+      uint256[] memory rates,
+      uint8[] memory decimals
     )
   {
     markets = borrowableMarketsByCollateral[_collateralMarket].values();
     underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
+    decimals = new uint8[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       address underlyingAddress = ICErc20(markets[i]).underlying();
       ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
       underlyings[i] = underlyingAddress;
+      decimals[i] = underlying.decimals();
     }
     rates = getBorrowRates(markets);
   }
