@@ -8,6 +8,7 @@ import "../midas/levered/LeveredPositionFactory.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
 import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
+import "../liquidators/AlgebraSwapLiquidator.sol";
 import "../liquidators/registry/LiquidatorsRegistry.sol";
 import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import "../liquidators/registry/ILiquidatorsRegistry.sol";
@@ -29,6 +30,8 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 blocksPerYear;
     if (block.chainid == BSC_MAINNET) {
       blocksPerYear = 20 * 24 * 365 * 60;
+      vm.prank(ap.owner());
+      ap.setAddress("chainConfig.chainAddresses.ALGEBRA_SWAP_ROUTER", 0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0);
     } else if (block.chainid == POLYGON_MAINNET) {
       blocksPerYear = 26 * 24 * 365 * 60;
     }
@@ -313,6 +316,28 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
   }
 }
 
+contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(BSC_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    depositAmount = 2e18;
+
+    address stkBnbMarket = 0xAcfbf93d8fD1A9869bAb2328669dDba33296a421;
+    address wbnbMarket = 0x3Af258d24EBdC03127ED6cEb8e58cA90835fbca5;
+    address stkBnbWhale = 0x84b78452A97C5afDa1400943333F691448069A29; // algebra pool
+    address wbnbWhale = 0x84b78452A97C5afDa1400943333F691448069A29; // algebra pool
+
+    AlgebraSwapLiquidator liquidator = new AlgebraSwapLiquidator();
+    _configurePair(stkBnbMarket, wbnbMarket, liquidator);
+    _fundMarketAndSelf(ICErc20(stkBnbMarket), stkBnbWhale);
+    _fundMarketAndSelf(ICErc20(wbnbMarket), wbnbWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
+  }
+}
+
 /*
 contract XYLeveredPositionTest is LeveredPositionTest {
   function setUp() public fork(X_CHAIN_ID) {}
@@ -325,7 +350,11 @@ contract XYLeveredPositionTest is LeveredPositionTest {
     address xWhale = 0x...3;
 
     IRedemptionStrategy liquidator = new IRedemptionStrategy();
-    _configurePair(xMarket, yMarket, liquidator, xWhale);
+    _configurePair(xMarket, yMarket, liquidator);
+    _fundMarketAndSelf(ICErc20(xMarket), xWhale);
+    _fundMarketAndSelf(ICErc20(yMarket), yWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
   }
 }
 */
