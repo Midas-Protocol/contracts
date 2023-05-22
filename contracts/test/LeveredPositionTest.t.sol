@@ -9,6 +9,8 @@ import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
 import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
 import "../liquidators/AlgebraSwapLiquidator.sol";
+import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
+
 import "../liquidators/registry/LiquidatorsRegistry.sol";
 import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import "../liquidators/registry/ILiquidatorsRegistry.sol";
@@ -21,7 +23,6 @@ abstract contract LeveredPositionTest is MarketsTest {
   ICErc20 stableMarket;
   LeveredPositionFactory factory;
   LiquidatorsRegistry registry;
-  uint256 depositAmount;
   LeveredPosition position;
 
   function afterForkSetUp() internal virtual override {
@@ -92,7 +93,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     vm.prank(whale);
     token.transfer(address(this), allTokens / 20);
 
-    if (token.balanceOf(address(market)) < allTokens / 2) {
+    if (market.getCash() < allTokens / 2) {
       vm.startPrank(whale);
       token.approve(address(market), allTokens / 2);
       market.mint(allTokens / 2);
@@ -223,7 +224,7 @@ contract HayAnkrLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    depositAmount = 10e18;
+    uint256 depositAmount10e18;
 
     address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
     address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
@@ -247,19 +248,17 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    depositAmount = 200e18;
+    uint256 depositAmount200e18;
 
     address wmaticMarket = 0x4017cd39950d1297BBd9713D939bC5d9c6F2Be53;
     address stmaticMarket = 0xc1B068007114dC0F14f322Ef201491717f3e52cD;
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
     address stmaticWhale = 0x52997D5abC01e9BFDd29cccB183ffc60F6d6bF8c;
 
-    _configurePair(wmaticMarket, stmaticMarket);
+    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
+    _configurePair(wmaticMarket, stmaticMarket, linearSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(stmaticMarket), stmaticWhale);
-
-    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configureLiquidator(wmaticMarket, stmaticMarket, linearSwapLiquidator);
 
     position = _openLeveredPosition(address(this), depositAmount);
   }
@@ -271,7 +270,7 @@ contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    depositAmount = 2000e18;
+    uint256 depositAmount2000e18;
 
     address jbrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a;
     address busdMarket = 0xa7213deB44f570646Ea955771Cc7f39B58841363;
@@ -300,7 +299,7 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    depositAmount = 200e18;
+    uint256 depositAmount200e18;
 
     address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
     address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
@@ -322,7 +321,7 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    depositAmount = 2e18;
+    uint256 depositAmount2e18;
 
     address stkBnbMarket = 0xAcfbf93d8fD1A9869bAb2328669dDba33296a421;
     address wbnbMarket = 0x3Af258d24EBdC03127ED6cEb8e58cA90835fbca5;
@@ -338,12 +337,47 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
   }
 }
 
+interface TwoBrl {
+  function minter() external view returns (address);
+
+  function mint(address payable _to, uint256 _value) external returns (bool);
+}
+
+contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(BSC_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    uint256 depositAmount = 1000e18;
+
+    address twoBrlMarket = 0xf0a2852958aD041a9Fb35c312605482Ca3Ec17ba; // 2brl as collateral
+    address jBrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a; // jbrl as borrowable
+    address payable twoBrlWhale = payable(address(177)); // empty account
+    address jBrlWhale = 0xA0695f78AF837F570bcc50f53e58Cda300798B65; // solidly pair BRZ-JBRL
+
+    TwoBrl twoBrl = TwoBrl(ICErc20(twoBrlMarket).underlying());
+    vm.prank(twoBrl.minter());
+    twoBrl.mint(twoBrlWhale, depositAmount * 100);
+
+    // TODO jBRL -> 2brl needs a reverse curve LP token liquidator
+    CurveLpTokenLiquidatorNoRegistry lpTokenLiquidator = new CurveLpTokenLiquidatorNoRegistry();
+    _configurePair(twoBrlMarket, jBrlMarket, lpTokenLiquidator);
+    _fundMarketAndSelf(ICErc20(twoBrlMarket), twoBrlWhale);
+    _fundMarketAndSelf(ICErc20(jBrlMarket), jBrlWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
+  }
+}
+
 /*
 contract XYLeveredPositionTest is LeveredPositionTest {
   function setUp() public fork(X_CHAIN_ID) {}
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
+
+    uint256 depositAmount = 1e18;
 
     address xMarket = 0x...1;
     address yMarket = 0x...2;

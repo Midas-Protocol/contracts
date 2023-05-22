@@ -353,6 +353,10 @@ abstract contract CTokenInterface is CTokenBaseInterface {
   function _withdrawAdminFees(uint256 withdrawAmount) external virtual returns (uint256);
 
   function _withdrawFuseFees(uint256 withdrawAmount) external virtual returns (uint256);
+
+  function selfTransferOut(address to, uint256 amount) external virtual;
+
+  function selfTransferIn(address from, uint256 amount) external virtual returns (uint256);
 }
 
 abstract contract CErc20Interface is CTokenInterface {
