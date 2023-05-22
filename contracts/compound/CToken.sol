@@ -941,6 +941,16 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    */
   function doTransferOut(address to, uint256 amount) internal virtual;
 
+  function selfTransferOut(address to, uint256 amount) external override {
+    require(msg.sender == address(this), "!self");
+    doTransferOut(to, amount);
+  }
+
+  function selfTransferIn(address from, uint256 amount) external override returns (uint256){
+    require(msg.sender == address(this), "!self");
+    return doTransferIn(from, amount);
+  }
+
   /**
    * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
    * @param withdrawAmount Amount of fees to withdraw

@@ -600,14 +600,12 @@ contract CTokenFirstExtension is
     // TODO is this enough to prevent manipulation?
     accrueInterest();
 
-    IERC20 token = IERC20(underlying);
-
     totalBorrows += amount;
-    SafeERC20.safeTransfer(token, msg.sender, amount);
+    asCToken().selfTransferOut(msg.sender, amount);
 
     IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
 
-    SafeERC20.safeTransferFrom(token, msg.sender, address(this), amount);
+    asCToken().selfTransferIn(msg.sender, amount);
     totalBorrows -= amount;
 
     emit Flash(msg.sender, amount);
