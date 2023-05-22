@@ -18,4 +18,6 @@ interface ICErc20 is ICToken {
   ) external returns (uint256);
 
   function balanceOfUnderlyingHypo(address owner) external view returns (uint256);
+
+  function flash(uint256 amount, bytes calldata data) external virtual;
 }

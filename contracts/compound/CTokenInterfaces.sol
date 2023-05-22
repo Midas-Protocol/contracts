@@ -209,11 +209,11 @@ abstract contract CTokenBaseInterface is CErc20Storage {
    * @notice Event emitted when interest is accrued
    */
   event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
+
+  event Flash(address receiver, uint256 amount);
 }
 
 abstract contract CTokenExtensionInterface is CTokenBaseInterface {
-  event Flash(address receiver, uint256 amount);
-
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external virtual returns (bool);
@@ -259,8 +259,6 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
   function exchangeRateHypothetical() external view virtual returns (uint256);
 
   function multicall(bytes[] calldata data) external payable virtual returns (bytes[] memory results);
-
-  function flash(uint256 amount, bytes calldata data) external virtual;
 }
 
 abstract contract CTokenInterface is CTokenBaseInterface {
@@ -353,6 +351,8 @@ abstract contract CTokenInterface is CTokenBaseInterface {
   function _withdrawAdminFees(uint256 withdrawAmount) external virtual returns (uint256);
 
   function _withdrawFuseFees(uint256 withdrawAmount) external virtual returns (uint256);
+
+  function flash(uint256 amount, bytes calldata data) external virtual;
 }
 
 abstract contract CErc20Interface is CTokenInterface {

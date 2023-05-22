@@ -217,7 +217,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     // accounting for swaps slippage
     stableToBorrow = (stableToBorrow * (10000 + MAX_SLIPPAGE)) / 10000;
 
-    CTokenExtensionInterface(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
+    collateralMarket.flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
     // the execution will first receive a callback to receiveFlashLoan()
     // then it continues from here
   }
@@ -259,7 +259,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     }
 
     if (borrowsToRepay > 0) {
-      CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
+      stableMarket.flash(borrowsToRepay, abi.encode(amountToRedeem));
       // the execution will first receive a callback to receiveFlashLoan()
       // then it continues from here
     }

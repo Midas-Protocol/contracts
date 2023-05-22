@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
 import { CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
@@ -22,7 +21,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 23;
+    uint8 fnsCount = 22;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -46,7 +45,6 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterDeposit.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterWithdraw.selector;
     functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
-    functionSelectors[--fnsCount] = this.flash.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -594,23 +592,6 @@ contract CTokenFirstExtension is
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "!balance");
     return balance;
-  }
-
-  function flash(uint256 amount, bytes calldata data) public override {
-    // TODO is this enough to prevent manipulation?
-    accrueInterest();
-
-    IERC20 token = IERC20(underlying);
-
-    totalBorrows += amount;
-    SafeERC20.safeTransfer(token, msg.sender, amount);
-
-    IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
-
-    SafeERC20.safeTransferFrom(token, msg.sender, address(this), amount);
-    totalBorrows -= amount;
-
-    emit Flash(msg.sender, amount);
   }
 
   /**

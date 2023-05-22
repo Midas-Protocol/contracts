@@ -10,6 +10,7 @@ import { InterestRateModel } from "./InterestRateModel.sol";
 import { DiamondBase, DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
+import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -1011,6 +1012,21 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     doTransferOut(UnitrollerAdminStorage(address(comptroller)).admin(), withdrawAmount);
 
     return uint256(Error.NO_ERROR);
+  }
+
+  function flash(uint256 amount, bytes calldata data) public override {
+    // TODO is this enough to prevent manipulation?
+    asCTokenExtensionInterface().accrueInterest();
+
+    totalBorrows += amount;
+    doTransferOut(msg.sender, amount);
+
+    IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
+
+    doTransferIn(msg.sender, amount);
+    totalBorrows -= amount;
+
+    emit Flash(msg.sender, amount);
   }
 
   /**
