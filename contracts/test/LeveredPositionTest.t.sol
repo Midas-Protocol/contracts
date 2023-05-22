@@ -89,6 +89,12 @@ abstract contract LeveredPositionTest is MarketsTest {
 
   function _fundMarketAndSelf(ICErc20 market, address whale) internal {
     IERC20Upgradeable token = IERC20Upgradeable(market.underlying());
+
+    if (whale == address(0)) {
+      whale = address(911);
+      //vm.deal(address(token), whale, 100e18);
+    }
+
     uint256 allTokens = token.balanceOf(whale);
     vm.prank(whale);
     token.transfer(address(this), allTokens / 20);
@@ -224,7 +230,7 @@ contract HayAnkrLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount10e18;
+    uint256 depositAmount = 10e18;
 
     address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
     address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
@@ -248,7 +254,7 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount200e18;
+    uint256 depositAmount = 200e18;
 
     address wmaticMarket = 0x4017cd39950d1297BBd9713D939bC5d9c6F2Be53;
     address stmaticMarket = 0xc1B068007114dC0F14f322Ef201491717f3e52cD;
@@ -270,7 +276,7 @@ contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount2000e18;
+    uint256 depositAmount = 2000e18;
 
     address jbrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a;
     address busdMarket = 0xa7213deB44f570646Ea955771Cc7f39B58841363;
@@ -299,7 +305,7 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount200e18;
+    uint256 depositAmount = 200e18;
 
     address wmaticMarket = 0x9871E541C19258Cc05769181bBE1dA814958F5A8;
     address maticxMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
@@ -321,7 +327,7 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount2e18;
+    uint256 depositAmount = 2e18;
 
     address stkBnbMarket = 0xAcfbf93d8fD1A9869bAb2328669dDba33296a421;
     address wbnbMarket = 0x3Af258d24EBdC03127ED6cEb8e58cA90835fbca5;
@@ -370,6 +376,33 @@ contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
   }
 }
 
+contract Par2EurLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(POLYGON_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    uint256 depositAmount = 100e18;
+
+    address twoEurMarket = 0x1944FA4a490f85Ed99e2c6fF9234F94DE16fdbde;
+    address parMarket = 0xCA1A940B02E15FF71C128f877b29bdb739785299;
+    address twoEurWhale = address(888);
+    address balancer = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
+    address parWhale = 0xFa22D298E3b0bc1752E5ef2849cEc1149d596674; // uniswap pool
+
+    IERC20Upgradeable twoEur = IERC20Upgradeable(ICErc20(twoEurMarket).underlying());
+    vm.prank(balancer);
+    twoEur.transfer(twoEurWhale, 80 * depositAmount);
+
+    BalancerLinearPoolTokenLiquidator liquidator = new BalancerLinearPoolTokenLiquidator();
+    _configurePair(twoEurMarket, parMarket, liquidator);
+    _fundMarketAndSelf(ICErc20(twoEurMarket), twoEurWhale);
+    _fundMarketAndSelf(ICErc20(parMarket), parWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
+  }
+}
+
 /*
 contract XYLeveredPositionTest is LeveredPositionTest {
   function setUp() public fork(X_CHAIN_ID) {}
@@ -382,6 +415,7 @@ contract XYLeveredPositionTest is LeveredPositionTest {
     address xMarket = 0x...1;
     address yMarket = 0x...2;
     address xWhale = 0x...3;
+    address yWhale = 0x...4;
 
     IRedemptionStrategy liquidator = new IRedemptionStrategy();
     _configurePair(xMarket, yMarket, liquidator);

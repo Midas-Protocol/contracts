@@ -946,7 +946,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     doTransferOut(to, amount);
   }
 
-  function selfTransferIn(address from, uint256 amount) external override returns (uint256){
+  function selfTransferIn(address from, uint256 amount) external override returns (uint256) {
     require(msg.sender == address(this), "!self");
     return doTransferIn(from, amount);
   }

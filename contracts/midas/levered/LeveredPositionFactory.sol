@@ -100,6 +100,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       string[] memory symbols,
       uint8[] memory decimals,
       uint256[] memory rates,
+      uint256[] memory totalUnderlyingSupplied,
       uint256[] memory ratesPerBlock
     )
   {
@@ -108,6 +109,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     names = new string[](markets.length);
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
+    totalUnderlyingSupplied = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
     ratesPerBlock = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
@@ -118,6 +120,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
       decimals[i] = underlying.decimals();
+      totalUnderlyingSupplied[i] = market.getTotalUnderlyingSupplied();
       rates[i] = market.supplyRatePerBlock() * blocksPerYear;
       ratesPerBlock[i] = market.supplyRatePerBlock();
     }
@@ -165,13 +168,13 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
     uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _baseCollateral * collateralAssetPrice) /
       (stableAssetPrice * 1e18);
-    return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount) * blocksPerYear;
+    return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount);
   }
 
   function getBorrowRates(address[] memory _markets) public view returns (uint256[] memory rates) {
     rates = new uint256[](_markets.length);
     for (uint256 i = 0; i < _markets.length; i++) {
-      rates[i] = ICErc20(_markets[i]).borrowRatePerBlock() * blocksPerYear;
+      rates[i] = ICErc20(_markets[i]).borrowRatePerBlock();
     }
   }
 
