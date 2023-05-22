@@ -387,17 +387,17 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
     if (
       (address(inputToken) == ap.getAddress("wtoken") &&
-      address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
+        address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
       (address(inputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6 &&
-      address(outputToken) == ap.getAddress("wtoken"))
+        address(outputToken) == ap.getAddress("wtoken"))
     ) {
       poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
     }
     if (
       (address(inputToken) == 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128 &&
-      address(outputToken) == 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E) ||
+        address(outputToken) == 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E) ||
       (address(inputToken) == 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E &&
-      address(outputToken) == 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128)
+        address(outputToken) == 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128)
     ) {
       poolAddress = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E; // Balancer 2EUR Stable Pool
     }
