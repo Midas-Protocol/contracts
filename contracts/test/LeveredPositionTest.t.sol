@@ -15,6 +15,8 @@ import "../liquidators/registry/LiquidatorsRegistry.sol";
 import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import "../liquidators/registry/ILiquidatorsRegistry.sol";
 
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -35,6 +37,8 @@ abstract contract LeveredPositionTest is MarketsTest {
       ap.setAddress("chainConfig.chainAddresses.ALGEBRA_SWAP_ROUTER", 0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0);
     } else if (block.chainid == POLYGON_MAINNET) {
       blocksPerYear = 26 * 24 * 365 * 60;
+      vm.prank(ap.owner());
+      ap.setAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER", 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
     }
 
     if (block.chainid == BSC_CHAPEL) {
@@ -68,16 +72,13 @@ abstract contract LeveredPositionTest is MarketsTest {
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
   }
 
-  function _configurePair(
+  function _configurePairAndLiquidator(
     address _collat,
     address _stable,
     IRedemptionStrategy _liquidator
   ) internal {
     _configurePair(_collat, _stable);
-
-    IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
-    IERC20Upgradeable stableToken = IERC20Upgradeable(stableMarket.underlying());
-    _configureLiquidator(collateralToken, stableToken, _liquidator);
+    _configureTwoWayLiquidator(_collat, _stable, _liquidator);
   }
 
   function _configurePair(address _collat, address _stable) internal {
@@ -85,6 +86,39 @@ abstract contract LeveredPositionTest is MarketsTest {
     stableMarket = ICErc20(_stable);
     upgradePoolAndMarkets();
     factory._setPairWhitelisted(collateralMarket, stableMarket, true);
+  }
+
+  function _configureTwoWayLiquidator(
+    address inputMarket,
+    address outputMarket,
+    IRedemptionStrategy strategy
+  ) internal {
+    IERC20Upgradeable inputToken = underlying(inputMarket);
+    IERC20Upgradeable outputToken = underlying(outputMarket);
+    registry.asExtension()._setRedemptionStrategy(strategy, inputToken, outputToken);
+    registry.asExtension()._setRedemptionStrategy(strategy, outputToken, inputToken);
+  }
+
+  function underlying(address market) internal returns (IERC20Upgradeable) {
+    return IERC20Upgradeable(ICErc20(market).underlying());
+  }
+
+  struct Liquidator {
+    IERC20Upgradeable inputToken;
+    IERC20Upgradeable outputToken;
+    IRedemptionStrategy strategy;
+  }
+
+  function _configureMultipleLiquidators(Liquidator[] memory liquidators) internal {
+    IRedemptionStrategy[] memory strategies = new IRedemptionStrategy[](liquidators.length);
+    IERC20Upgradeable[] memory inputTokens = new IERC20Upgradeable[](liquidators.length);
+    IERC20Upgradeable[] memory outputTokens = new IERC20Upgradeable[](liquidators.length);
+    for (uint256 i = 0; i < liquidators.length; i++) {
+      strategies[i] = liquidators[i].strategy;
+      inputTokens[i] = liquidators[i].inputToken;
+      outputTokens[i] = liquidators[i].outputToken;
+    }
+    registry.asExtension()._setRedemptionStrategies(strategies, inputTokens, outputTokens);
   }
 
   function _fundMarketAndSelf(ICErc20 market, address whale) internal {
@@ -105,41 +139,6 @@ abstract contract LeveredPositionTest is MarketsTest {
       market.mint(allTokens / 2);
       vm.stopPrank();
     }
-  }
-
-  function _configureLiquidator(
-    address inputMarket,
-    address outputMarket,
-    IRedemptionStrategy strategy
-  ) internal {
-    _configureLiquidator(ICErc20(inputMarket), ICErc20(outputMarket), strategy);
-  }
-
-  function _configureLiquidator(
-    ICErc20 inputMarket,
-    ICErc20 outputMarket,
-    IRedemptionStrategy strategy
-  ) internal {
-    IERC20Upgradeable inputToken = IERC20Upgradeable(inputMarket.underlying());
-    IERC20Upgradeable outputToken = IERC20Upgradeable(outputMarket.underlying());
-    _configureLiquidator(inputToken, outputToken, strategy);
-  }
-
-  function _configureLiquidator(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken,
-    IRedemptionStrategy strategy
-  ) internal {
-    registry.asExtension()._setRedemptionStrategy(strategy, inputToken, outputToken);
-    registry.asExtension()._setRedemptionStrategy(strategy, outputToken, inputToken);
-  }
-
-  function _configureLiquidators(
-    IERC20Upgradeable[] memory inputTokens,
-    IERC20Upgradeable[] memory outputTokens,
-    IRedemptionStrategy[] memory strategies
-  ) internal {
-    registry.asExtension()._setRedemptionStrategies(strategies, inputTokens, outputTokens);
   }
 
   function _openLeveredPosition(address _positionOwner, uint256 _depositAmount)
@@ -236,12 +235,8 @@ contract HayAnkrLeveredPositionTest is LeveredPositionTest {
     address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
     address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
 
-    // TODO set up in the deploy script
-    vm.prank(ap.owner());
-    ap.setAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER", 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
-
     SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
-    _configurePair(ankrBnbMarket, hayMarket, solidlyLiquidator);
+    _configurePairAndLiquidator(ankrBnbMarket, hayMarket, solidlyLiquidator);
     _fundMarketAndSelf(ICErc20(ankrBnbMarket), ankrBnbWhale);
 
     position = _openLeveredPosition(address(this), depositAmount);
@@ -262,7 +257,7 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
     address stmaticWhale = 0x52997D5abC01e9BFDd29cccB183ffc60F6d6bF8c;
 
     BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePair(wmaticMarket, stmaticMarket, linearSwapLiquidator);
+    _configurePairAndLiquidator(wmaticMarket, stmaticMarket, linearSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(stmaticMarket), stmaticWhale);
 
@@ -292,7 +287,7 @@ contract JbrlBusdLeveredPositionTest is LeveredPositionTest {
     vm.stopPrank();
 
     JarvisLiquidatorFunder liquidator = new JarvisLiquidatorFunder();
-    _configurePair(jbrlMarket, busdMarket, liquidator);
+    _configurePairAndLiquidator(jbrlMarket, busdMarket, liquidator);
     _fundMarketAndSelf(ICErc20(jbrlMarket), jbrlWhale);
 
     position = _openLeveredPosition(address(this), depositAmount);
@@ -313,7 +308,7 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
     address maticxWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
     BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePair(wmaticMarket, maticxMarket, linearSwapLiquidator);
+    _configurePairAndLiquidator(wmaticMarket, maticxMarket, linearSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(maticxMarket), maticxWhale);
 
@@ -335,7 +330,7 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
     address wbnbWhale = 0x84b78452A97C5afDa1400943333F691448069A29; // algebra pool
 
     AlgebraSwapLiquidator liquidator = new AlgebraSwapLiquidator();
-    _configurePair(stkBnbMarket, wbnbMarket, liquidator);
+    _configurePairAndLiquidator(stkBnbMarket, wbnbMarket, liquidator);
     _fundMarketAndSelf(ICErc20(stkBnbMarket), stkBnbWhale);
     _fundMarketAndSelf(ICErc20(wbnbMarket), wbnbWhale);
 
@@ -368,7 +363,7 @@ contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
 
     // TODO jBRL -> 2brl needs a reverse curve LP token liquidator
     CurveLpTokenLiquidatorNoRegistry lpTokenLiquidator = new CurveLpTokenLiquidatorNoRegistry();
-    _configurePair(twoBrlMarket, jBrlMarket, lpTokenLiquidator);
+    _configurePairAndLiquidator(twoBrlMarket, jBrlMarket, lpTokenLiquidator);
     _fundMarketAndSelf(ICErc20(twoBrlMarket), twoBrlWhale);
     _fundMarketAndSelf(ICErc20(jBrlMarket), jBrlWhale);
 
@@ -395,11 +390,60 @@ contract Par2EurLeveredPositionTest is LeveredPositionTest {
     twoEur.transfer(twoEurWhale, 80 * depositAmount);
 
     BalancerLinearPoolTokenLiquidator liquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePair(twoEurMarket, parMarket, liquidator);
+    _configurePairAndLiquidator(twoEurMarket, parMarket, liquidator);
     _fundMarketAndSelf(ICErc20(twoEurMarket), twoEurWhale);
     _fundMarketAndSelf(ICErc20(parMarket), parWhale);
 
     position = _openLeveredPosition(address(this), depositAmount);
+  }
+}
+
+contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(POLYGON_MAINNET) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    uint256 depositAmount = 1000e18;
+
+    address maticXBbaWMaticMarket = 0x13e763D25D78c3Fd6FEA534231BdaEBE7Fa52945;
+    address maticXMarket = 0x0db51E5255E44751b376738d8979D969AD70bff6;
+    address maticXBbaWMaticWhale = 0xB0B28d7A74e62DF5F6F9E0d9Ae0f4e7982De9585;
+    address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
+
+    ComptrollerFirstExtension pool = ComptrollerFirstExtension(ICErc20(maticXBbaWMaticMarket).comptroller());
+    //    Liquidator[] memory ls = new Liquidator[](2);
+    //    {
+    //      Liquidator memory bbaToMaticX;
+    //      bbaToMaticX.inputToken = underlying(maticXBbaWMaticMarket);
+    //      bbaToMaticX.outputToken = underlying(maticXMarket);
+    //      bbaToMaticX.strategy = new BalancerLinearPoolTokenLiquidator();
+    //      ls[0] = bbaToMaticX;
+    //
+    //      Liquidator memory maticXBbaTo;
+    //      maticXBbaTo.inputToken = underlying(maticXMarket);
+    //      maticXBbaTo.outputToken = underlying(maticXBbaWMaticMarket);
+    //      maticXBbaTo.strategy = new BalancerLinearPoolTokenLiquidator();
+    //      ls[1] = maticXBbaTo;
+    //    }
+    //
+    //    _configurePair(maticXBbaWMaticMarket, maticXMarket);
+    //    _configureMultipleLiquidators(ls);
+
+    _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerLinearPoolTokenLiquidator());
+
+    vm.prank(pool.admin());
+    pool._supplyCapWhitelist(address(maticXBbaWMaticMarket), maticXBbaWMaticWhale, true);
+
+    _fundMarketAndSelf(ICErc20(maticXBbaWMaticMarket), maticXBbaWMaticWhale);
+    _fundMarketAndSelf(ICErc20(maticXMarket), maticXWhale);
+
+    position = _openLeveredPosition(address(this), depositAmount);
+
+    {
+      vm.prank(pool.admin());
+      pool._supplyCapWhitelist(address(maticXBbaWMaticMarket), address(position), true);
+    }
   }
 }
 

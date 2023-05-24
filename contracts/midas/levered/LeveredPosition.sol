@@ -12,12 +12,12 @@ import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-// TODO upgradeable?
 contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
+  // TODO extract as a constructor param or query it from the factory ?
   // @notice maximum slippage in swaps, in bps
-  uint256 public constant MAX_SLIPPAGE = 900;
+  uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
   // @notice the base collateral is the amount of collateral that is not funded by borrowing stables
   uint256 public baseCollateral;

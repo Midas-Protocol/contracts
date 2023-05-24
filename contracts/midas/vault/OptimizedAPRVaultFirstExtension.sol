@@ -23,8 +23,6 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
   using SafeERC20 for IERC20;
   using Math for uint256;
 
-  event RewardDestinationUpdate(address indexed newDestination);
-
   error AssetInvalid();
   error InvalidConfig();
 
