@@ -64,7 +64,7 @@ contract BalancerLpLinearPoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     address mainToken = pool.getMainToken();
 
     // read-only re-entracy protection - this call is always unsuccessful
-    (, bytes memory revertData) = address(vault).staticcall(
+    (, bytes memory revertData) = address(vault).staticcall{ gas: 5000 }(
       abi.encodeWithSelector(vault.manageUserBalance.selector, new address[](0))
     );
     require(keccak256(revertData) != REENTRANCY_ERROR_HASH, "Balancer vault view reentrancy");
