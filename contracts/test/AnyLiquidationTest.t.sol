@@ -52,7 +52,7 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function afterForkSetUp() internal override {
-    //upgradeAp();
+    super.afterForkSetUp();
 
     uniswapRouter = ap.getAddress("IUniswapV2Router02");
     curveV1Oracle = CurveLpTokenPriceOracleNoRegistry(ap.getAddress("CurveLpTokenPriceOracleNoRegistry"));
@@ -127,8 +127,6 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   struct LiquidationData {
-    FusePoolDirectory.FusePool[] pools;
-    address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
     ICToken[] markets;
@@ -140,20 +138,20 @@ contract AnyLiquidationTest is BaseTest {
     ICErc20 collateralMarket;
     IComptroller comptroller;
     address borrower;
-    uint256 borrowAmount;
+    uint256 repayAmount;
     address flashSwapFundingToken;
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(uint256 random, LiquidationData memory vars)
+  function getPoolAndBorrower(uint256 random, FusePoolDirectory.FusePool[] memory pools)
     internal
     view
     returns (IComptroller, address)
   {
-    if (vars.pools.length == 0) revert("no pools to pick from");
+    if (pools.length == 0) revert("no pools to pick from");
 
-    uint256 i = random % vars.pools.length; // random pool
-    IComptroller comptroller = IComptroller(vars.pools[i].comptroller);
+    uint256 i = random % pools.length; // random pool
+    IComptroller comptroller = IComptroller(pools[i].comptroller);
 
     address bscBombPool = 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459;
     if (address(comptroller) == bscBombPool) {
@@ -240,41 +238,40 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  uint256 dec_28_2022 = 1672218645;
-
   function doTestAnyLiquidation(uint256 random) internal {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    (, vars.pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory")).getActivePools();
+    (, FusePoolDirectory.FusePool[] memory pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory"))
+      .getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it
-      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, vars);
+      (vars.comptroller, vars.borrower) = getPoolAndBorrower(random, pools);
 
       if (address(vars.comptroller) != address(0) && vars.borrower != address(0)) {
-        // find a market in which the borrower has debt and reduce his collateral price
-        vars.markets = vars.comptroller.getAllMarkets();
-        (vars.debtMarket, vars.collateralMarket, vars.borrowAmount) = setUpDebtAndCollateralMarkets(random, vars);
+        if (address(vars.comptroller) != 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) {
+          // find a market in which the borrower has debt and reduce his collateral price
+          vars.markets = vars.comptroller.getAllMarkets();
+          (vars.debtMarket, vars.collateralMarket, vars.repayAmount) = setUpDebtAndCollateralMarkets(random, vars);
 
-        // TODO implement redemption strategies for these collaterals
-        address bscBnbxMarket = 0xa47A7672EF042Ec2838E9425C083Efd982BFa362;
-        address mimo80par20Market = 0xcb67Bd2aE0597eDb2426802CdF34bb4085d9483A;
-        if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
-          if (
-            vars.debtMarket.underlying() != ap.getAddress("wtoken") &&
-            address(vars.collateralMarket) != bscBnbxMarket &&
-            address(vars.collateralMarket) != mimo80par20Market
-          ) {
-            emit log("found testable markets at random number");
-            emit log_uint(random);
-            break;
+          if (address(vars.debtMarket) != address(0) && address(vars.collateralMarket) != address(0)) {
+            if (vars.debtMarket.underlying() != ap.getAddress("wtoken")) {
+              emit log("found testable markets at random number");
+              emit log_uint(random);
+              break;
+            }
           }
         }
       }
       random++;
     }
 
+    vars.repayAmount = vars.repayAmount / 100;
+    liquidateSpecificPosition(vars);
+  }
+
+  function liquidateSpecificPosition(LiquidationData memory vars) internal {
     emit log("debt and collateral markets");
     emit log_address(address(vars.debtMarket));
     emit log_address(address(vars.collateralMarket));
@@ -300,12 +297,6 @@ contract AnyLiquidationTest is BaseTest {
           strategy.contractInterface,
           strategy.inputToken
         );
-
-        // TODO remove when fixed
-        if (debtTokenToFund == 0x5b5bD8913D766D005859CE002533D4838B0Ebbb5 && block.timestamp < dec_28_2022 + 20 days) {
-          emit log("implement https://github.com/Midas-Protocol/contracts/pull/519");
-          return;
-        }
       }
 
       vars.flashSwapFundingToken = debtTokenToFund;
@@ -357,7 +348,7 @@ contract AnyLiquidationTest is BaseTest {
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
         FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
-          vars.borrowAmount / 100,
+          vars.repayAmount,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
@@ -377,18 +368,6 @@ contract AnyLiquidationTest is BaseTest {
     } catch Error(string memory reason) {
       if (compareStrings(reason, "Number of tokens less than minimum limit")) {
         emit log("jarvis pool failing, that's ok");
-      } else if (compareStrings(reason, "No enough liquidity")) {
-        if (block.timestamp < dec_28_2022 + 20 days) {
-          emit log("jarvis pool getMintTradeInfo failing");
-        } else {
-          revert(reason);
-        }
-      } else if (compareStrings(reason, "No enough liquidity for covering mint operation")) {
-        if (block.timestamp < dec_28_2022 + 20 days) {
-          emit log("jarvis pool getMintTradeInfo failing internally");
-        } else {
-          revert(reason);
-        }
       } else {
         revert(reason);
       }
@@ -435,10 +414,7 @@ contract AnyLiquidationTest is BaseTest {
       strategyData = abi.encode(preferredOutputToken, ap.getAddress("wtoken"), address(curveV1Oracle));
     } else if (compareStrings(strategyContract, "SaddleLpTokenLiquidator")) {
       address[] memory underlyingTokens = curveV1Oracle.getUnderlyingTokens(inputToken);
-      (address preferredOutputToken, uint8 outputTokenIndex) = pickPreferredToken(
-        underlyingTokens,
-        strategyOutputToken
-      );
+      (address preferredOutputToken, ) = pickPreferredToken(underlyingTokens, strategyOutputToken);
       outputToken = preferredOutputToken;
       if (outputToken == address(0) || outputToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
         outputToken = ap.getAddress("wtoken");
@@ -504,6 +480,10 @@ contract AnyLiquidationTest is BaseTest {
       address xbomb = inputToken;
       address bomb = outputToken;
       strategyData = abi.encode(inputToken, xbomb, bomb);
+    } else if (compareStrings(strategyContract, "AlgebraSwapLiquidator")) {
+      address ALGEBRA_SWAP_ROUTER = 0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0;
+      outputToken = strategyOutputToken;
+      strategyData = abi.encode(outputToken, ALGEBRA_SWAP_ROUTER);
     } else {
       emit log(strategyContract);
       emit log_address(address(strategy));
@@ -647,10 +627,10 @@ contract AnyLiquidationTest is BaseTest {
   }
 
   function testRawLiquidation() public debuggingOnly fork(POLYGON_MAINNET) {
-    vm.prank(0x19F2bfCA57FDc1B7406337391d2F54063CaE8748);
+    vm.prank(ap.getAddress("deployer"));
     _functionCall(
       address(fsl),
-      hex"f6cd5bbd0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000a4f4406d3dc6482db1397d0ad260fd223c8f37fc000000000000000000000000000000000000000000000ef5c403da86335c444b000000000000000000000000456b363d3da38d3823ce2e1955362bbd761b324b00000000000000000000000028d0d45e593764c4ce88ccd1c033d0e2e8ce9af30000000000000000000000006e7a5fafcec6bb1e78bae2a1f0b612012bf1482700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d500b1d8e8ef31e21c99d1db9a6444d3adf1270000000000000000000000000a5e0829caced8ffdd4de3c43696c57f7d7a678ff000000000000000000000000a5e0829caced8ffdd4de3c43696c57f7d7a678ff00000000000000000000000000000000000000000000000000000000000001c000000000000000000000000000000000000000000000000000000000000001e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000ac64c0391a54eba34e23429847986d437be82da00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960",
+      hex"a68ee119000000000000000000000000f93a5f0a4925eec32cd585641c88a498523f383c0000000000000000000000000000000000000000000000000000013f7702e3b7000000000000000000000000a9736ba05de1213145f688e4619e5a7e0dcf4c72000000000000000000000000b3d83f2cab787adcb99d4c768f1eb42c8734b5630000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070085a09d30d6f8c4ecf6ee10120d1847383bb570000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
       "raw liquidation failed"
     );
   }

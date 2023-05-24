@@ -34,23 +34,10 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
    */
   function initialize(address[] memory _lpTokens, address[] memory _pools) public initializer {
     require(_lpTokens.length == _pools.length, "No LP tokens supplied or array lengths not equal.");
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
 
     for (uint256 i = 0; i < _pools.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
-    }
-  }
-
-  function reinitialize(address[] memory _lpTokens) public reinitializer(2) onlyOwnerOrAdmin {
-    for (uint256 i = 0; i < _lpTokens.length; i++) {
-      bool skip = false;
-      for (uint256 j = 0; j < lpTokens.length; j++) {
-        if (lpTokens[j] == _lpTokens[i]) {
-          skip = true;
-          break;
-        }
-      }
-      if (!skip) lpTokens.push(_lpTokens[i]);
     }
   }
 

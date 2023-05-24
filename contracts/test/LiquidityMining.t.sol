@@ -153,11 +153,11 @@ contract LiquidityMiningTest is BaseTest {
     flywheelsToClaim.push(MidasFlywheelCore(address(flywheel)));
   }
 
-  function _initialize(uint8 baseDecimal, uint8 rewardDecimal) internal {
-    setUpBaseContracts(baseDecimal, rewardDecimal);
+  function _initialize(uint8 _baseDecimal, uint8 _rewardDecimal) internal {
+    setUpBaseContracts(_baseDecimal, _rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
-    deposit(1 * 10**baseDecimal);
+    deposit(1 * 10**_baseDecimal);
     vm.warp(block.timestamp + 1);
   }
 

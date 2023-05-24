@@ -241,7 +241,11 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
 
   function totalBorrowsCurrent() external virtual returns (uint256);
 
+  function getTotalUnderlyingSupplied() public view virtual returns (uint256);
+
   function balanceOfUnderlying(address owner) external virtual returns (uint256);
+
+  function balanceOfUnderlyingHypo(address owner) external view virtual returns (uint256);
 
   function multicall(bytes[] calldata data) external payable virtual returns (bytes[] memory results);
 }

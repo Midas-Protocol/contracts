@@ -2,7 +2,10 @@
 pragma solidity >=0.8.0;
 
 import { UniswapV3PriceOracle } from "../../../oracles/default/UniswapV3PriceOracle.sol";
+import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceOracleV2.sol";
+import { ConcentratedLiquidityBasePriceOracle } from "../../../oracles/default/ConcentratedLiquidityBasePriceOracle.sol";
 import { IUniswapV3Pool } from "../../../external/uniswap/IUniswapV3Pool.sol";
+import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -13,20 +16,73 @@ contract UniswapV3PriceOracleTest is BaseTest {
   address stable;
 
   function afterForkSetUp() internal override {
-    // Not using the address provider yet -- config just added
-    // TODO: use ap when deployment is done
-    stable = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8; // USDC
+    // TODO: remove this after deployment
+    if (block.chainid == ETHEREUM_MAINNET) {
+      return;
+    }
+    stable = ap.getAddress("stableToken"); // USDC or arbitrum
     wtoken = ap.getAddress("wtoken"); // WETH
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     oracle = new UniswapV3PriceOracle();
 
     vm.prank(mpo.admin());
-    oracle.initialize(wtoken, stable);
+    oracle.initialize(wtoken, asArray(stable));
   }
 
-  function testArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 55624326) {
+  function testForkedPolygonAssets() public forkAtBlock(POLYGON_MAINNET, 40828111) {
+    address[] memory underlyings = new address[](1);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
+
+    underlyings[0] = 0xE5417Af564e4bFDA1c483642db72007871397896; // GNS (18 decimals)
+
+    // GNS-MATIC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xEFa98Fdf168f372E5e9e9b910FcDfd65856f3986,
+      10 minutes,
+      wtoken
+    );
+
+    uint256[] memory expPrices = new uint256[](1);
+    expPrices[0] = 6496778484267765489; // (6496778484267765489 / 1e18) * 1.067 = $6.93 (27/03/2023)
+
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    for (uint256 i = 0; i < prices.length; i++) {
+      assertEq(prices[i], expPrices[i], "!Price Error");
+    }
+
+    bool[] memory cardinalityChecks = getCardinality(configs);
+    for (uint256 i = 0; i < cardinalityChecks.length; i++) {
+      assertEq(cardinalityChecks[i], true, "!Cardinality Error");
+    }
+  }
+
+  function testArbitrumAssets() public fork(ARBITRUM_ONE) {
+    address[] memory underlyings = new address[](1);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
+
+    underlyings[0] = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f; // WBTC (18 decimals)
+    // WBTC-USDC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xA62aD78825E3a55A77823F00Fe0050F567c1e4EE,
+      10 minutes,
+      stable
+    );
+    vm.prank(oracle.owner());
+    oracle.setPoolFeeds(underlyings, configs);
+    vm.roll(1);
+
+    vm.prank(address(mpo));
+    uint256 oraclePrice = oracle.price(underlyings[0]);
+    uint256 mpoPrice = mpo.price(underlyings[0]);
+    assertApproxEqRel(oraclePrice, mpoPrice, 1e16, "Oracle price != MPO price by > 1%");
+  }
+
+  function testForkedArbitrumAssets() public forkAtBlock(ARBITRUM_ONE, 76531543) {
     address[] memory underlyings = new address[](7);
-    UniswapV3PriceOracle.AssetConfig[] memory configs = new UniswapV3PriceOracle.AssetConfig[](7);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](7);
 
     underlyings[0] = 0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a; // GMX (18 decimals)
     underlyings[1] = 0x6C2C06790b3E3E3c38e12Ee22F8183b37a13EE55; // DPX (18 decimals)
@@ -37,56 +93,56 @@ contract UniswapV3PriceOracleTest is BaseTest {
     underlyings[6] = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f; // WBTC (8 decimals)
 
     // GMX-ETH
-    configs[0] = UniswapV3PriceOracle.AssetConfig(
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0x80A9ae39310abf666A87C743d6ebBD0E8C42158E,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.NATIVE
+      wtoken
     );
     // DPX-ETH
-    configs[1] = UniswapV3PriceOracle.AssetConfig(
+    configs[1] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0xb52781C275431bD48d290a4318e338FE0dF89eb9,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.NATIVE
+      wtoken
     );
     // MAGIC-ETH
-    configs[2] = UniswapV3PriceOracle.AssetConfig(
+    configs[2] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0x7e7FB3CCEcA5F2ac952eDF221fd2a9f62E411980,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.NATIVE
+      wtoken
     );
     // USDs-USDC
-    configs[3] = UniswapV3PriceOracle.AssetConfig(
+    configs[3] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0x50450351517117Cb58189edBa6bbaD6284D45902,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.USD
+      stable
     );
     // USDT-USDC
-    configs[4] = UniswapV3PriceOracle.AssetConfig(
+    configs[4] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0x13398E27a21Be1218b6900cbEDF677571df42A48,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.USD
+      stable
     );
     // GMX-USDC
-    configs[5] = UniswapV3PriceOracle.AssetConfig(
+    configs[5] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0xBed2589feFAE17d62A8a4FdAC92fa5895cAe90d2,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.USD
+      stable
     );
     // WBTC-USDC
-    configs[6] = UniswapV3PriceOracle.AssetConfig(
+    configs[6] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
       0xA62aD78825E3a55A77823F00Fe0050F567c1e4EE,
       10 minutes,
-      UniswapV3PriceOracle.FeedBaseCurrency.USD
+      stable
     );
 
     uint256[] memory expPrices = new uint256[](7);
-    expPrices[0] = 32303551248749710; // (32303551248749710 / 1e18) * 1600 = 51.7 (26/01/2022)
-    expPrices[1] = 186352358731969434;
-    expPrices[2] = 817348875792654;
-    expPrices[3] = 616728830044297; // (616728830044297 / 1e18) * 1600 = 0,985 (26/01/2022)
-    expPrices[4] = 617962412544658;
-    expPrices[5] = 32303551248749710;
-    expPrices[6] = 14272222356770933950; //  (14272222356770933950 / 1e18) * 1600 = 22,835 (26/01/2022)
+    expPrices[0] = 40593178272890829; // (40593178272890829 / 1e18) * 1807 = $75.4 (03/04/2023)
+    expPrices[1] = 143330393236690077; // (143330393236690077 / 1e18) * 1807 = $259 (03/04/2023)
+    expPrices[2] = 751649566984753; //  (751649566984753 / 1e18) * 1807 = $1.35 (03/04/2023
+    expPrices[3] = 556167462143161; // (556167462143161 / 1e18) * 1807 = $1.005 (03/04/2023
+    expPrices[4] = 559233394986996; // (559233394986996 / 1e18) * 1807 = $1.01 (03/04/2023
+    expPrices[5] = 40593178272890829; // (40593178272890829 / 1e18) * 1807 = $75.4 (03/04/2023)
+    expPrices[6] = 15531111568051631540; //  (15531111568051631540 / 1e18) * 1807 = $28.064,6 (03/04/2023)
 
     emit log_named_uint("USDC PRICE", mpo.price(stable));
     uint256[] memory prices = getPriceFeed(underlyings, configs);
@@ -98,6 +154,117 @@ contract UniswapV3PriceOracleTest is BaseTest {
     for (uint256 i = 0; i < cardinalityChecks.length; i++) {
       assertEq(cardinalityChecks[i], true, "!Cardinality Error");
     }
+  }
+
+  function testEthereumAssets() public fork(ETHEREUM_MAINNET) {
+    // TODO: Remove these after mainnet deployment
+    // Initialise MPO
+    stable = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    wtoken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    setUpBaseOracles();
+
+    // Initialise Uniswap Oracle
+    oracle = new UniswapV3PriceOracle();
+    vm.prank(mpo.admin());
+    oracle.initialize(wtoken, asArray(stable));
+
+    address[] memory underlyings = new address[](2);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](2);
+
+    underlyings[0] = 0x68037790A0229e9Ce6EaA8A99ea92964106C4703; // PAR (18 decimals)
+    underlyings[1] = 0x0ab87046fBb341D058F17CBC4c1133F25a20a52f; // gOHM decimals)
+    // PAR-USDC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xD7Dcb0eb6AaB643b85ba74cf9997c840fE32e695,
+      10 minutes,
+      stable
+    );
+    // GOHM-USDC
+    configs[1] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xcF7e21b96a7DAe8e1663b5A266FD812CBE973E70,
+      10 minutes,
+      stable
+    );
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    uint256 mpoPrice = mpo.price(underlyings[0]);
+    // Compare univ3 (PAR/USDC) vs Chainlink prices (EUR/USD)
+    assertApproxEqRel(prices[0], mpoPrice, 1e16, "Oracle price != MPO price by > 1%");
+    assertGt(prices[1], mpo.price(wtoken), "gOHM price is > eth price");
+
+    bool[] memory cardinalityChecks = getCardinality(configs);
+    for (uint256 i = 0; i < cardinalityChecks.length; i++) {
+      assertEq(cardinalityChecks[i], true, "!Cardinality Error");
+    }
+  }
+
+  function testForkedEthereumAssets() public forkAtBlock(ETHEREUM_MAINNET, 17065696) {
+    // TODO: Remove these after mainnet deployment
+    // Initialise MPO
+    stable = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    wtoken = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    setUpBaseOracles();
+
+    // Initialise Uniswap Oracle
+    oracle = new UniswapV3PriceOracle();
+    vm.prank(mpo.admin());
+    oracle.initialize(wtoken, asArray(stable));
+
+    address[] memory underlyings = new address[](1);
+    ConcentratedLiquidityBasePriceOracle.AssetConfig[]
+      memory configs = new ConcentratedLiquidityBasePriceOracle.AssetConfig[](1);
+
+    underlyings[0] = 0x0ab87046fBb341D058F17CBC4c1133F25a20a52f; // gOHM decimals)
+    // GOHM-USDC
+    configs[0] = ConcentratedLiquidityBasePriceOracle.AssetConfig(
+      0xcF7e21b96a7DAe8e1663b5A266FD812CBE973E70,
+      10 minutes,
+      wtoken
+    );
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+
+    // 17/04/2024
+    // - ETH Price = 2096  USD
+    // - gOHM Price = 2,745.22 USD
+    // - gOHM Price = 1.30 ETH
+    assertEq(prices[0], 1296264965685839645, "!price");
+  }
+
+  function setUpBaseOracles() public {
+    // TODO: Remove these after mainnet deployment
+    if (block.chainid == ETHEREUM_MAINNET) {
+      setUpMpoAndAddresses();
+      IPriceOracle[] memory oracles = new IPriceOracle[](2);
+      ChainlinkPriceOracleV2 chainlinkOracle = new ChainlinkPriceOracleV2(
+        mpo.admin(),
+        true,
+        wtoken,
+        0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+      );
+      vm.prank(chainlinkOracle.admin());
+      chainlinkOracle.setPriceFeeds(
+        asArray(stable),
+        asArray(0x986b5E1e1755e3C2440e960477f25201B0a8bbD4),
+        ChainlinkPriceOracleV2.FeedBaseCurrency.ETH
+      );
+      chainlinkOracle.setPriceFeeds(
+        asArray(0x68037790A0229e9Ce6EaA8A99ea92964106C4703), // PAR
+        asArray(0xb49f677943BC038e9857d61E7d053CaA2C1734C1), // EUR/USD price feed
+        ChainlinkPriceOracleV2.FeedBaseCurrency.USD
+      );
+      oracles[0] = IPriceOracle(address(chainlinkOracle));
+      oracles[1] = IPriceOracle(address(chainlinkOracle));
+
+      vm.prank(mpo.admin());
+      mpo.add(asArray(stable, 0x68037790A0229e9Ce6EaA8A99ea92964106C4703), oracles);
+    }
+  }
+
+  function setUpMpoAndAddresses() public {
+    address[] memory assets = new address[](0);
+    IPriceOracle[] memory oracles = new IPriceOracle[](0);
+    mpo = new MasterPriceOracle();
+    mpo.initialize(assets, oracles, IPriceOracle(address(0)), address(this), true, address(wtoken));
   }
 
   function getPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { PriceOracle } from "./PriceOracle.sol";
@@ -13,12 +13,16 @@ import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol"
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
 contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondBase {
+  using EnumerableSet for EnumerableSet.AddressSet;
+
   /// @notice Emitted when an admin supports a market
   event MarketListed(CTokenInterface cToken);
 
@@ -70,19 +74,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
 
   constructor(address payable _fuseAdmin) {
     fuseAdmin = _fuseAdmin;
-  }
-
-  function isMarketExploited(address cToken) internal pure returns (bool) {
-    address agEurMarketAddress = 0x5aa0197D0d3E05c4aA070dfA2f54Cd67A447173A;
-    address jchfMarketAddress = 0x62Bdc203403e7d44b75f357df0897f2e71F607F3;
-    address jeurMarketAddress = 0xe150e792e0a18C9984a0630f051a607dEe3c265d;
-    address jgbpMarketAddress = 0x7ADf374Fa8b636420D41356b1f714F18228e7ae2;
-
-    return
-      cToken == agEurMarketAddress ||
-      cToken == jchfMarketAddress ||
-      cToken == jeurMarketAddress ||
-      cToken == jgbpMarketAddress;
   }
 
   /*** Assets You Are In ***/
@@ -250,10 +241,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!mintGuardianPaused[cToken], "!mint:paused");
 
-    // Shh - currently unused
-    minter;
-    mintAmount;
-
     // Make sure market is listed
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -267,26 +254,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Check supply cap
     uint256 supplyCap = supplyCaps[cToken];
     // Supply cap of 0 corresponds to unlimited supplying
-    if (supplyCap != 0) {
-      uint256 totalCash = CTokenInterface(cToken).getCash();
-      uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      uint256 totalReserves = CTokenInterface(cToken).totalReserves();
-      uint256 totalFuseFees = CTokenInterface(cToken).totalFuseFees();
-      uint256 totalAdminFees = CTokenInterface(cToken).totalAdminFees();
+    if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
+      CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
+      uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
+      uint256 whitelistedSuppliersSupply = asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
+      uint256 nonWhitelistedTotalSupply;
+      if (whitelistedSuppliersSupply >= totalUnderlyingSupply) nonWhitelistedTotalSupply = 0;
+      else nonWhitelistedTotalSupply = totalUnderlyingSupply - whitelistedSuppliersSupply;
 
-      // totalUnderlyingSupply = totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)
-      (MathError mathErr, uint256 totalUnderlyingSupply) = addThenSubUInt(
-        totalCash,
-        totalBorrows,
-        add_(add_(totalReserves, totalFuseFees), totalAdminFees)
-      );
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-
-      uint256 nextTotalUnderlyingSupply;
-      (mathErr, nextTotalUnderlyingSupply) = addUInt(totalUnderlyingSupply, mintAmount);
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-
-      require(nextTotalUnderlyingSupply < supplyCap, "!supply cap");
+      require(nonWhitelistedTotalSupply + mintAmount < supplyCap, "!supply cap");
     }
 
     // Keep the flywheel moving
@@ -323,12 +299,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address redeemer,
     uint256 redeemTokens
   ) internal view returns (uint256) {
-    if (!markets[cToken].isListed) {
-      return uint256(Error.MARKET_NOT_LISTED);
+    uint256 totalSupplyNew = CTokenInterface(cToken).totalSupply() - redeemTokens;
+    if (totalSupplyNew != 0 && totalSupplyNew < 1000) {
+      // don't let the total supply go too low to prevent inflation attacks
+      return uint256(Error.REJECTION);
     }
 
-    if (isMarketExploited(cToken)) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
+    if (!markets[cToken].isListed) {
+      return uint256(Error.MARKET_NOT_LISTED);
     }
 
     /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
@@ -369,6 +347,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Shh - currently unused
     cToken;
     redeemer;
+
+    require(markets[msg.sender].isListed, "!market");
 
     // Require tokens is zero or amount is also zero
     if (redeemTokens == 0 && redeemAmount > 0) {
@@ -487,11 +467,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     // Check borrow cap
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
-    if (borrowCap != 0) {
+    if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
-      (MathError mathErr, uint256 nextTotalBorrows) = addUInt(totalBorrows, borrowAmount);
-      if (mathErr != MathError.NO_ERROR) return uint256(Error.MATH_ERROR);
-      require(nextTotalBorrows < borrowCap, "!borrow:cap");
+      uint256 whitelistedBorrowersBorrows = asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
+      uint256 nonWhitelistedTotalBorrows;
+      if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
+      else nonWhitelistedTotalBorrows = totalBorrows - whitelistedBorrowersBorrows;
+
+      require(nonWhitelistedTotalBorrows + borrowAmount < borrowCap, "!borrow:cap");
     }
 
     // Keep the flywheel moving
@@ -594,18 +577,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (isMarketExploited(cTokenBorrowed) || isMarketExploited(cTokenCollateral)) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
-
-    // Get borrowers's underlying borrow balance
+    // Get borrowers' underlying borrow balance
     uint256 borrowBalance = CTokenInterface(cTokenBorrowed).borrowBalanceStored(borrower);
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(CTokenInterface(cTokenBorrowed))) {
       require(borrowBalance >= repayAmount, "!borrow>repay");
     } else {
-      /* The borrower must have shortfall in order to be liquidatable */
+      /* The borrower must have shortfall in order to be liquidateable */
       (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
         borrower,
         CTokenInterface(address(0)),
@@ -658,10 +637,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
-    if (isMarketExploited(cTokenBorrowed) || isMarketExploited(cTokenCollateral)) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
-
     // Make sure cToken Comptrollers are identical
     if (CTokenInterface(cTokenCollateral).comptroller() != CTokenInterface(cTokenBorrowed).comptroller()) {
       return uint256(Error.COMPTROLLER_MISMATCH);
@@ -689,10 +664,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!transferGuardianPaused, "!transfer:paused");
-
-    if (isMarketExploited(cToken)) {
-      return uint256(Error.INSUFFICIENT_LIQUIDITY);
-    }
 
     // Currently the only consideration is whether or not
     //  the src is allowed to redeem this many tokens
@@ -762,8 +733,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     Exp exchangeRate;
     Exp oraclePrice;
     Exp tokensToDenom;
-    uint256 totalBorrowCapForCollateral;
-    uint256 totalBorrowsBefore;
+    uint256 borrowCapForCollateral;
     uint256 borrowedAssetPrice;
   }
 
@@ -849,7 +819,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 oErr;
 
     if (address(cTokenModify) != address(0)) {
-      vars.totalBorrowsBefore = cTokenModify.totalBorrows();
       vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
     }
 
@@ -880,24 +849,24 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       uint256 assetAsCollateralValueCap = type(uint256).max;
       // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
       if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
-        // if the borrowed asset is capped against this collateral
         if (address(cTokenModify) != address(0)) {
-          bool blacklisted = borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)];
-          if (blacklisted) {
+          // if the borrowed asset is capped against this collateral & account is not whitelisted
+          if (
+            borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)] &&
+            !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(asset)].contains(account)
+          ) {
             assetAsCollateralValueCap = 0;
           } else {
-            // the value of the collateral is capped regardless if any amount is to be borrowed
-            vars.totalBorrowCapForCollateral = borrowCapForAssetForCollateral[address(cTokenModify)][address(asset)];
-            // check if set to any value
-            if (vars.totalBorrowCapForCollateral != 0) {
-              // check for underflow
-              if (vars.totalBorrowCapForCollateral >= vars.totalBorrowsBefore) {
-                uint256 borrowAmountCap = vars.totalBorrowCapForCollateral - vars.totalBorrowsBefore;
-                assetAsCollateralValueCap = (borrowAmountCap * vars.borrowedAssetPrice) / 1e18;
-              } else {
-                // should never happen, but better to not revert on this underflow
-                assetAsCollateralValueCap = 0;
-              }
+            // for each user the value of this kind of collateral is capped regardless of the amount borrowed
+            // denominated in the borrowed asset
+            vars.borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(asset)];
+            // check if set to any value & account is not whitelisted
+            if (
+              vars.borrowCapForCollateral != 0 &&
+              !borrowCapForCollateralWhitelist[address(cTokenModify)][address(asset)].contains(account)
+            ) {
+              // this asset usage as collateral is capped at the native value of the borrow cap
+              assetAsCollateralValueCap = (vars.borrowCapForCollateral * vars.borrowedAssetPrice) / 1e18;
             }
           }
         }

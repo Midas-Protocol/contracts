@@ -31,7 +31,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
@@ -437,24 +437,24 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
 
-  function autoUpgradePool(address poolAddress) external onlyOwner {
-    IComptroller pool = IComptroller(poolAddress);
+  function autoUpgradePool(IComptroller pool) external onlyOwner {
+    ICToken[] memory markets = pool.getAllMarkets();
     bool autoImplOnBefore = pool.autoImplementation();
-
     pool._toggleAutoImplementations(true);
 
+    // auto upgrade the pool
     pool.enterMarkets(new address[](0));
-
-    ICToken[] memory markets = pool.getAllMarkets();
 
     for (uint8 i = 0; i < markets.length; i++) {
       address marketAddress = address(markets[i]);
-      address implBefore = CErc20PluginDelegate(marketAddress).implementation();
-      address newImpl = _latestCErc20Delegate[implBefore].implementation;
-
-      if (newImpl != address(0) && newImpl != implBefore) CTokenExtensionInterface(marketAddress).accrueInterest();
+      // auto upgrade the market
+      CTokenExtensionInterface(marketAddress).accrueInterest();
     }
 
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
+  }
+
+  function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
+    pool._toggleAutoImplementations(enabled);
   }
 }

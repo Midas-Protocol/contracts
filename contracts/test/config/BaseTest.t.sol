@@ -5,12 +5,12 @@ import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
 import { AddressesProvider } from "../../midas/AddressesProvider.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 abstract contract BaseTest is Test {
+  uint128 constant ETHEREUM_MAINNET = 1;
   uint128 constant BSC_MAINNET = 56;
   uint128 constant MOONBEAM_MAINNET = 1284;
   uint128 constant POLYGON_MAINNET = 137;
@@ -120,6 +120,8 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
       } else if (chainid == FANTOM_OPERA) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom")) + 100;
+      } else if (chainid == ETHEREUM_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum")) + 100;
       }
     }
     return forkIds[chainid] - 100;
@@ -145,6 +147,8 @@ abstract contract BaseTest is Test {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
       } else if (chainid == FANTOM_OPERA) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
+      } else if (chainid == ETHEREUM_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
       }
     }
     return forkIds[chainidWithOffset] - 100;
@@ -163,8 +167,9 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
+      dpa = ProxyAdmin(0x9b30a238A94c5a456a02ceC01e41f1c91d54e915);
     } else if (chainid == NEON_DEVNET) {
-      ap = AddressesProvider(0x22A4D1bf93e84E107795c82f0c718a083dD1c215);
+      ap = AddressesProvider(0x3F56f8571988D03Cdc7E51fdaB19ADb032CCbe21);
     } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (chainid == FANTOM_OPERA) {
@@ -181,6 +186,10 @@ abstract contract BaseTest is Test {
     }
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
+    }
+    if (ap.getAddress("deployer") == address(0)) {
+      vm.prank(ap.owner());
+      ap.setAddress("deployer", 0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
     }
   }
 
@@ -227,6 +236,13 @@ abstract contract BaseTest is Test {
     return array;
   }
 
+  function asArray(uint256 value0, uint256 value1) public pure returns (uint256[] memory) {
+    uint256[] memory array = new uint256[](2);
+    array[0] = value0;
+    array[1] = value1;
+    return array;
+  }
+
   function asArray(uint256 value) public pure returns (uint256[] memory) {
     uint256[] memory array = new uint256[](1);
     array[0] = value;
@@ -256,5 +272,49 @@ abstract contract BaseTest is Test {
     array[1] = value1;
     array[2] = value2;
     return array;
+  }
+
+  function sqrt(uint256 x) public pure returns (uint256) {
+    if (x == 0) return 0;
+    uint256 xx = x;
+    uint256 r = 1;
+
+    if (xx >= 0x100000000000000000000000000000000) {
+      xx >>= 128;
+      r <<= 64;
+    }
+    if (xx >= 0x10000000000000000) {
+      xx >>= 64;
+      r <<= 32;
+    }
+    if (xx >= 0x100000000) {
+      xx >>= 32;
+      r <<= 16;
+    }
+    if (xx >= 0x10000) {
+      xx >>= 16;
+      r <<= 8;
+    }
+    if (xx >= 0x100) {
+      xx >>= 8;
+      r <<= 4;
+    }
+    if (xx >= 0x10) {
+      xx >>= 4;
+      r <<= 2;
+    }
+    if (xx >= 0x8) {
+      r <<= 1;
+    }
+
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1; // Seven iterations should be enough
+    uint256 r1 = x / r;
+    return (r < r1 ? r : r1);
   }
 }

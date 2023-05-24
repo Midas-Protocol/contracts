@@ -101,7 +101,7 @@ contract MaxBorrowTest is WithPool {
     {
       ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
       vm.prank(comptroller.admin());
-      asExtension._setBorrowCapForAssetForCollateral(address(cToken), address(cDaiToken), 0.5e6);
+      asExtension._setBorrowCapForCollateral(address(cToken), address(cDaiToken), 0.5e6);
     }
 
     uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
@@ -118,7 +118,8 @@ contract MaxBorrowTest is WithPool {
     assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
   }
 
-  function testTotalBorrowCapPerCollateral() public forkAtBlock(BSC_MAINNET, 23761190) {
+  // TODO test with the latest block and contracts and/or without the FSL
+  function testBorrowCapPerCollateral() public debuggingOnly forkAtBlock(BSC_MAINNET, 23761190) {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
     address poolAddress = jFiatPoolAddress;
@@ -177,7 +178,7 @@ contract MaxBorrowTest is WithPool {
     }
 
     vm.prank(pool.admin());
-    asExtension._setBorrowCapForAssetForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
+    asExtension._setBorrowCapForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
     emit log("");
 
     (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(

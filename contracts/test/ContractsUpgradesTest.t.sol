@@ -24,9 +24,9 @@ contract ContractsUpgradesTest is BaseTest {
     address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
 
     // before upgrade
-    FusePoolDirectory oldImpl = FusePoolDirectory(contractToTest);
-    FusePoolDirectory.FusePool[] memory poolsBefore = oldImpl.getAllPools();
-    address ownerBefore = oldImpl.owner();
+    FusePoolDirectory fpdBefore = FusePoolDirectory(contractToTest);
+    FusePoolDirectory.FusePool[] memory poolsBefore = fpdBefore.getAllPools();
+    address ownerBefore = fpdBefore.owner();
     emit log_address(ownerBefore);
 
     uint256 lenBefore = poolsBefore.length;
@@ -43,11 +43,11 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FusePoolDirectory newImpl = FusePoolDirectory(contractToTest);
-    address ownerAfter = newImpl.owner();
+    FusePoolDirectory fpd = FusePoolDirectory(contractToTest);
+    address ownerAfter = fpd.owner();
     emit log_address(ownerAfter);
 
-    (, FusePoolDirectory.FusePool[] memory poolsAfter) = oldImpl.getActivePools();
+    (, FusePoolDirectory.FusePool[] memory poolsAfter) = fpd.getActivePools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 
@@ -152,22 +152,21 @@ contract ContractsUpgradesTest is BaseTest {
     }
   }
 
-  address newDeployer = 0x27521eae4eE4153214CaDc3eCD703b9B0326C908;
-
   function testPauseGuardiansBsc() public debuggingOnly fork(BSC_MAINNET) {
-    _testPauseGuardians(newDeployer);
+    _testPauseGuardians();
   }
 
   function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testPauseGuardians(newDeployer);
+    _testPauseGuardians();
   }
 
   function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testPauseGuardians(newDeployer);
+    _testPauseGuardians();
   }
 
-  function _testPauseGuardians(address deployer) internal {
+  function _testPauseGuardians() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    address deployer = ap.getAddress("deployer");
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 

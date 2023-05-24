@@ -65,7 +65,7 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
         // fetch the estimated redeemable collateral in BUSD, less the fee paid
         (uint256 redeemableCollateralAmount, ) = pool.getRedeemTradeInfo(inputAmount);
 
-        (uint256 collateralAmountReceived, uint256 feePaid) = pool.redeem(
+        (uint256 collateralAmountReceived, ) = pool.redeem(
           ISynthereumLiquidityPool.RedeemParams(inputAmount, redeemableCollateralAmount, block.timestamp, address(this))
         );
 
@@ -77,7 +77,7 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
       // mint jBRL from the supplied bUSD
       (uint256 synthTokensReceived, ) = pool.getMintTradeInfo(inputAmount);
 
-      (uint256 syntheticTokensMinted, uint256 feePaid) = pool.mint(
+      (uint256 syntheticTokensMinted, ) = pool.mint(
         ISynthereumLiquidityPool.MintParams(synthTokensReceived, inputAmount, block.timestamp, address(this))
       );
 

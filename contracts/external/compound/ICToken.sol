@@ -45,17 +45,21 @@ interface ICToken {
 
   function totalBorrows() external view returns (uint256);
 
-  function borrowBalanceCurrent(address account) external returns (uint256);
-
   function borrowBalanceStored(address account) external view returns (uint256);
 
   function borrowIndex() external view returns (uint256);
+
+  function borrowBalanceCurrent(address account) external returns (uint256);
+
+  function getTotalUnderlyingSupplied() external view returns (uint256);
 
   function exchangeRateCurrent() external returns (uint256);
 
   function exchangeRateStored() external view returns (uint256);
 
-  function accrueInterest() external virtual returns (uint256);
+  function exchangeRateHypothetical() external view returns (uint256);
+
+  function accrueInterest() external returns (uint256);
 
   function getCash() external view returns (uint256);
 
@@ -69,7 +73,17 @@ interface ICToken {
 
   function borrow(uint256 borrowAmount) external returns (uint256);
 
+  function repayBorrow(uint256 repayAmount) external returns (uint256);
+
   function protocolSeizeShareMantissa() external view returns (uint256);
 
   function feeSeizeShareMantissa() external view returns (uint256);
+
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256);
+
+  function _setAdminFee(uint256 newAdminFeeMantissa) external returns (uint256);
+
+  function supplyRatePerBlockAfterDeposit(uint256 mintAmount) external view returns (uint256);
+
+  function supplyRatePerBlockAfterWithdraw(uint256 withdrawAmount) external view returns (uint256);
 }

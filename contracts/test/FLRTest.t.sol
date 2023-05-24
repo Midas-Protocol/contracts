@@ -21,6 +21,7 @@ import { CErc20 } from "../compound/CErc20.sol";
 
 import { MidasFlywheelLensRouter, IComptroller, CErc20Token, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 
 contract FLRTest is BaseTest {
   address rewardToken;

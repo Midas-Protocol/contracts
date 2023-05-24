@@ -14,8 +14,9 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
    */
   address public pendingOwner;
 
-  function __SafeOwnable_init() internal onlyInitializing {
+  function __SafeOwnable_init(address owner_) internal onlyInitializing {
     __Ownable_init();
+    _transferOwnership(owner_);
   }
 
   struct AddressSlot {
@@ -91,7 +92,7 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
   }
 
   function transferOwnership(address newOwner) public override onlyOwner {
-    // do not remove this overriding fn
-    revert("not used anymore");
+    emit NewPendingOwner(pendingOwner, newOwner);
+    pendingOwner = newOwner;
   }
 }
