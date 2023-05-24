@@ -404,9 +404,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
     if (
       (address(inputToken) == 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917 &&
-      address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
+        address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
       (address(inputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6 &&
-      address(outputToken) == 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917)
+        address(outputToken) == 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917)
     ) {
       poolAddress = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
     }
