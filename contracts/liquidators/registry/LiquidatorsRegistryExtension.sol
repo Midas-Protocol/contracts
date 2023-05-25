@@ -375,40 +375,38 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (bytes memory strategyData)
   {
-    // TODO
+    // TODO figure out how to query these pools on-chain
     address poolAddress;
+    address wnative = ap.getAddress("wtoken");
+    address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
+    address maticx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
+    address twoeur = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E;
+    address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
+    address maticxBbaWmatic = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
+
     if (
-      (address(inputToken) == ap.getAddress("wtoken") &&
-        address(outputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4) ||
-      (address(inputToken) == 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4 &&
-        address(outputToken) == ap.getAddress("wtoken"))
+      (address(inputToken) == wnative && address(outputToken) == stmatic) ||
+      (address(inputToken) == stmatic && address(outputToken) == wnative)
     ) {
       poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
     }
     if (
-      (address(inputToken) == ap.getAddress("wtoken") &&
-        address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
-      (address(inputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6 &&
-        address(outputToken) == ap.getAddress("wtoken"))
+      (address(inputToken) == wnative && address(outputToken) == maticx) ||
+      (address(inputToken) == maticx && address(outputToken) == wnative)
     ) {
       poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
     }
     if (
-      (address(inputToken) == 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128 &&
-        address(outputToken) == 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E) ||
-      (address(inputToken) == 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E &&
-        address(outputToken) == 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128)
+      (address(inputToken) == par && address(outputToken) == twoeur) ||
+      (address(inputToken) == twoeur && address(outputToken) == par)
     ) {
-      poolAddress = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E; // Balancer 2EUR Stable Pool
+      poolAddress = twoeur; // Balancer 2EUR Stable Pool
     }
-
     if (
-      (address(inputToken) == 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917 &&
-        address(outputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6) ||
-      (address(inputToken) == 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6 &&
-        address(outputToken) == 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917)
+      (address(inputToken) == maticxBbaWmatic && address(outputToken) == maticx) ||
+      (address(inputToken) == maticx && address(outputToken) == maticxBbaWmatic)
     ) {
-      poolAddress = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
+      poolAddress = maticxBbaWmatic;
     }
 
     strategyData = abi.encode(poolAddress, outputToken);
