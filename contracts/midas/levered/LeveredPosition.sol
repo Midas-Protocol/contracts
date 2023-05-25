@@ -15,6 +15,18 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
+  error OnlyWhenClosed();
+  error NotPositionOwner();
+  error RepayFlashLoanFailed(address asset, uint256 currentBalance, uint256 repayAmount);
+
+  error AccrueFailed(uint256 errorCode);
+  error ExitFailed(uint256 errorCode);
+  error RedeemFailed(uint256 errorCode);
+  error SupplyCollateralFailed(uint256 errorCode);
+  error BorrowStableFailed(uint256 errorCode);
+  error RepayBorrowFailed(uint256 errorCode);
+  error RedeemCollateralFailed(uint256 errorCode);
+
   // @notice the base collateral is the amount of collateral that is not funded by borrowing stables
   uint256 public baseCollateral;
   address public immutable positionOwner;
@@ -67,16 +79,19 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function closePosition(address withdrawTo) public returns (uint256 withdrawAmount) {
-    require(msg.sender == positionOwner, "only owner");
+    if(msg.sender != positionOwner) revert NotPositionOwner();
 
     _leverDown(type(uint256).max);
 
     // calling accrue and exit allows to redeem the full underlying balance
-    require(collateralMarket.accrueInterest() == 0, "accrue failed");
-    require(pool.exitMarket(address(collateralMarket)) == 0, "exit failed");
+    uint256 errorCode = collateralMarket.accrueInterest();
+    if (errorCode != 0) revert AccrueFailed(errorCode);
+    errorCode = pool.exitMarket(address(collateralMarket));
+    if(errorCode != 0) revert ExitFailed(errorCode);
 
     // redeem all cTokens should leave no dust
-    require(collateralMarket.redeem(collateralMarket.balanceOf(address(this))) == 0, "redeem failed");
+    errorCode = collateralMarket.redeem(collateralMarket.balanceOf(address(this)));
+    if(errorCode != 0) revert RedeemFailed(errorCode);
 
     // baseCollateral should become 0 here
     baseCollateral = collateralMarket.balanceOfUnderlyingHypo(address(this));
@@ -87,7 +102,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function adjustLeverageRatio(uint256 targetRatioMantissa) public returns (uint256) {
-    require(msg.sender == positionOwner, "only owner");
+    if(msg.sender != positionOwner) revert NotPositionOwner();
 
     // anything under 1:1 means removing the leverage
     if (targetRatioMantissa < 1e18) _leverDown(type(uint256).max);
@@ -109,12 +124,22 @@ contract LeveredPosition is IFlashLoanReceiver {
       // increasing the leverage ratio
       uint256 borrowAmount = abi.decode(data, (uint256));
       _leverUpPostFL(borrowAmount);
-      require(collateralAsset.balanceOf(address(this)) >= borrowedAmount, "!cannot repay collateral FL");
+      uint256 positionCollateralBalance = collateralAsset.balanceOf(address(this));
+      if (positionCollateralBalance < borrowedAmount) revert RepayFlashLoanFailed(
+        address(collateralAsset),
+        positionCollateralBalance,
+        borrowedAmount
+      );
     } else if (msg.sender == address(stableMarket)) {
       // decreasing the leverage ratio
       uint256 amountToRedeem = abi.decode(data, (uint256));
       _leverDownPostFL(borrowedAmount, amountToRedeem);
-      require(stableAsset.balanceOf(address(this)) >= borrowedAmount, "!cannot repay stable FL");
+      uint256 positionStableBalance = stableAsset.balanceOf(address(this));
+      if (positionStableBalance < borrowedAmount) revert RepayFlashLoanFailed(
+        address(stableAsset),
+        positionStableBalance,
+        borrowedAmount
+      );
     } else {
       revert("!fl not from either markets");
     }
@@ -124,8 +149,8 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function withdrawStableLeftovers(address withdrawTo) public returns (uint256) {
-    require(msg.sender == positionOwner, "only owner");
-    require(baseCollateral == 0, "only when closed");
+    if(msg.sender != positionOwner) revert NotPositionOwner();
+    if(baseCollateral > 0) revert OnlyWhenClosed();
 
     uint256 stableLeftovers = stableAsset.balanceOf(address(this));
     stableAsset.safeTransfer(withdrawTo, stableLeftovers);
@@ -197,7 +222,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     // supply the collateral
     amountToSupply = collateralAsset.balanceOf(address(this));
     collateralAsset.approve(address(collateralMarket), amountToSupply);
-    require(collateralMarket.mint(amountToSupply) == 0, "supply collateral failed");
+    uint256 errorCode = collateralMarket.mint(amountToSupply);
+    if(errorCode != 0) revert SupplyCollateralFailed(errorCode);
   }
 
   // @dev flash loan the needed amount, then borrow stables and swap them for the amount needed to repay the FL
@@ -225,7 +251,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     _supplyCollateral(collateralAsset);
 
     // borrow stables that will be swapped to repay the FL
-    require(stableMarket.borrow(stableToBorrow) == 0, "borrow stable failed");
+    uint256 errorCode = stableMarket.borrow(stableToBorrow);
+    if (errorCode != 0) revert BorrowStableFailed(errorCode);
 
     // swap for the FL asset
     convertAllTo(stableAsset, collateralAsset);
@@ -267,10 +294,12 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
     uint256 repayAmount = _flashLoanedCollateral < borrowBalance ? _flashLoanedCollateral : borrowBalance;
     stableAsset.approve(address(stableMarket), repayAmount);
-    require(stableMarket.repayBorrow(repayAmount) == 0, "repay failed");
+    uint256 errorCode = stableMarket.repayBorrow(repayAmount);
+    if (errorCode != 0) revert RepayBorrowFailed(errorCode);
 
     // redeem the corresponding amount needed to repay the FL
-    require(collateralMarket.redeemUnderlying(_amountToRedeem) == 0, "redeem failed");
+    errorCode = collateralMarket.redeemUnderlying(_amountToRedeem);
+    if (errorCode != 0) revert RedeemCollateralFailed(errorCode);
 
     // swap for the FL asset
     convertAllTo(collateralAsset, stableAsset);

@@ -302,7 +302,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     address token1 = lpToken.token1();
     bool token0IsOutputToken = address(outputToken) == lpToken.token0();
     bool token1IsOutputToken = address(outputToken) == lpToken.token1();
-    require(token0IsOutputToken || token1IsOutputToken, "Output token does not match either of the pair tokens!");
+    require(token0IsOutputToken || token1IsOutputToken, "Output token does not match either of the pair tokens");
 
     address[] memory swapPath = new address[](2);
     swapPath[0] = token0IsOutputToken ? token1 : token0;
@@ -449,9 +449,5 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
       strategyData = abi.encode(inputToken, xbomb, bomb);
     }
-  }
-
-  function asExtension() public view returns (LiquidatorsRegistryExtension) {
-    return this;
   }
 }

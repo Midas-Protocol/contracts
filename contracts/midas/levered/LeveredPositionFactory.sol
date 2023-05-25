@@ -16,6 +16,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   using SafeERC20Upgradeable for IERC20Upgradeable;
   using EnumerableSet for EnumerableSet.AddressSet;
 
+  error PairNotWhitelisted();
+  error NoSuchPosition();
+  error PositionNotClosed();
+
   // @notice maximum slippage in swaps, in bps
   uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
@@ -53,7 +57,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   ----------------------------------------------------------------*/
 
   function createPosition(ICErc20 _collateralMarket, ICErc20 _stableMarket) public returns (LeveredPosition) {
-    require(borrowableMarketsByCollateral[_collateralMarket].contains(address(_stableMarket)), "!pair not whitelisted");
+    if (!borrowableMarketsByCollateral[_collateralMarket].contains(address(_stableMarket))) revert PairNotWhitelisted();
 
     LeveredPosition position = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
     positionsByAccount[msg.sender].add(address(position));
@@ -76,8 +80,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   // @return true if removed, otherwise false
   function removeClosedPosition(address closedPosition) public returns (bool) {
     EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
-    require(userPositions.contains(closedPosition), "!no such position");
-    require(LeveredPosition(closedPosition).isPositionClosed(), "!not closed");
+    if (!userPositions.contains(closedPosition)) revert NoSuchPosition();
+    if (!LeveredPosition(closedPosition).isPositionClosed()) revert PositionNotClosed();
 
     return userPositions.remove(closedPosition);
   }
@@ -225,6 +229,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     ICErc20 _stableMarket,
     bool _whitelisted
   ) public onlyOwner {
+    require(_collateralMarket.comptroller() == _stableMarket.comptroller(), "markets not of the same pool");
+
     if (_whitelisted) {
       collateralMarkets.add(address(_collateralMarket));
       borrowableMarketsByCollateral[_collateralMarket].add(address(_stableMarket));
