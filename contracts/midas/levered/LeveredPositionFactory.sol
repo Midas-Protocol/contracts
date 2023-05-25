@@ -139,7 +139,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 
-  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256 slippage) {
+  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    view
+    returns (uint256 slippage)
+  {
     slippage = conversionSlippage[inputToken][outputToken];
     if (slippage == 0) return MAX_SLIPPAGE;
   }
