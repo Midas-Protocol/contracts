@@ -6,7 +6,7 @@ import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 interface ILiquidatorsRegistry {
-  function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     view
     returns (bool);

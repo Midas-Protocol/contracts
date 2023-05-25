@@ -26,7 +26,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
-    functionSelectors[--fnsCount] = this.hasRedemptionStrategyForTokens.selector;
+    functionSelectors[--fnsCount] = this.isRedemptionPathSupported.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this._removeRedemptionStrategy.selector;
@@ -34,7 +34,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return functionSelectors;
   }
 
-  function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     public
     view
     returns (bool)

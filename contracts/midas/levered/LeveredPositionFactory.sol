@@ -143,7 +143,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) public view returns (bool) {
-    return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
+    return liquidatorsRegistry.isRedemptionPathSupported(inputToken, outputToken);
   }
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

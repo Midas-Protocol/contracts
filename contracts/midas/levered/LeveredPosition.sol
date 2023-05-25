@@ -79,7 +79,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function closePosition(address withdrawTo) public returns (uint256 withdrawAmount) {
-    if(msg.sender != positionOwner) revert NotPositionOwner();
+    if (msg.sender != positionOwner) revert NotPositionOwner();
 
     _leverDown(type(uint256).max);
 
@@ -87,11 +87,11 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 errorCode = collateralMarket.accrueInterest();
     if (errorCode != 0) revert AccrueFailed(errorCode);
     errorCode = pool.exitMarket(address(collateralMarket));
-    if(errorCode != 0) revert ExitFailed(errorCode);
+    if (errorCode != 0) revert ExitFailed(errorCode);
 
     // redeem all cTokens should leave no dust
     errorCode = collateralMarket.redeem(collateralMarket.balanceOf(address(this)));
-    if(errorCode != 0) revert RedeemFailed(errorCode);
+    if (errorCode != 0) revert RedeemFailed(errorCode);
 
     // baseCollateral should become 0 here
     baseCollateral = collateralMarket.balanceOfUnderlyingHypo(address(this));
@@ -102,7 +102,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function adjustLeverageRatio(uint256 targetRatioMantissa) public returns (uint256) {
-    if(msg.sender != positionOwner) revert NotPositionOwner();
+    if (msg.sender != positionOwner) revert NotPositionOwner();
 
     // anything under 1:1 means removing the leverage
     if (targetRatioMantissa < 1e18) _leverDown(type(uint256).max);
@@ -125,21 +125,15 @@ contract LeveredPosition is IFlashLoanReceiver {
       uint256 borrowAmount = abi.decode(data, (uint256));
       _leverUpPostFL(borrowAmount);
       uint256 positionCollateralBalance = collateralAsset.balanceOf(address(this));
-      if (positionCollateralBalance < borrowedAmount) revert RepayFlashLoanFailed(
-        address(collateralAsset),
-        positionCollateralBalance,
-        borrowedAmount
-      );
+      if (positionCollateralBalance < borrowedAmount)
+        revert RepayFlashLoanFailed(address(collateralAsset), positionCollateralBalance, borrowedAmount);
     } else if (msg.sender == address(stableMarket)) {
       // decreasing the leverage ratio
       uint256 amountToRedeem = abi.decode(data, (uint256));
       _leverDownPostFL(borrowedAmount, amountToRedeem);
       uint256 positionStableBalance = stableAsset.balanceOf(address(this));
-      if (positionStableBalance < borrowedAmount) revert RepayFlashLoanFailed(
-        address(stableAsset),
-        positionStableBalance,
-        borrowedAmount
-      );
+      if (positionStableBalance < borrowedAmount)
+        revert RepayFlashLoanFailed(address(stableAsset), positionStableBalance, borrowedAmount);
     } else {
       revert("!fl not from either markets");
     }
@@ -149,8 +143,8 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function withdrawStableLeftovers(address withdrawTo) public returns (uint256) {
-    if(msg.sender != positionOwner) revert NotPositionOwner();
-    if(baseCollateral > 0) revert OnlyWhenClosed();
+    if (msg.sender != positionOwner) revert NotPositionOwner();
+    if (baseCollateral > 0) revert OnlyWhenClosed();
 
     uint256 stableLeftovers = stableAsset.balanceOf(address(this));
     stableAsset.safeTransfer(withdrawTo, stableLeftovers);
@@ -223,7 +217,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     amountToSupply = collateralAsset.balanceOf(address(this));
     collateralAsset.approve(address(collateralMarket), amountToSupply);
     uint256 errorCode = collateralMarket.mint(amountToSupply);
-    if(errorCode != 0) revert SupplyCollateralFailed(errorCode);
+    if (errorCode != 0) revert SupplyCollateralFailed(errorCode);
   }
 
   // @dev flash loan the needed amount, then borrow stables and swap them for the amount needed to repay the FL
