@@ -210,7 +210,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     assertGt(maxRatio, minRatioDiff, "max ratio <= min ratio diff");
 
     uint256 currentRatio = position.getCurrentLeverageRatio();
-    vm.expectRevert("borrow stable failed");
+    vm.expectRevert(abi.encode(LeveredPosition.BorrowStableFailed.selector, 0x3fa));
     // 10% off for the swaps slippage accounting
     position.adjustLeverageRatio(currentRatio + ((90 * minRatioDiff) / 100));
     position.adjustLeverageRatio(currentRatio + minRatioDiff);
