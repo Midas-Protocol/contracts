@@ -100,6 +100,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     view
     returns (
       address[] memory markets,
+      address[] memory poolOfMarket,
       address[] memory underlyings,
       string[] memory names,
       string[] memory symbols,
@@ -110,6 +111,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     )
   {
     markets = collateralMarkets.values();
+    poolOfMarket = new address[](markets.length);
     underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
@@ -119,6 +121,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     ratesPerBlock = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
+      poolOfMarket[i] = market.comptroller();
       address underlyingAddress = market.underlying();
       underlyings[i] = underlyingAddress;
       ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
