@@ -597,7 +597,6 @@ contract CTokenFirstExtension is
   }
 
   function flash(uint256 amount, bytes calldata data) public override {
-    // TODO is this enough to prevent manipulation?
     accrueInterest();
 
     totalBorrows += amount;

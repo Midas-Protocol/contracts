@@ -123,7 +123,6 @@ contract LeveredPosition is IFlashLoanReceiver {
     IERC20Upgradeable(assetAddress).approve(msg.sender, borrowedAmount);
   }
 
-  // TODO figure out if needed
   function withdrawStableLeftovers(address withdrawTo) public returns (uint256) {
     require(msg.sender == positionOwner, "only owner");
     require(baseCollateral == 0, "only when closed");
