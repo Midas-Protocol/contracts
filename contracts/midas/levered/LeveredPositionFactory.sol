@@ -16,6 +16,9 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   using SafeERC20Upgradeable for IERC20Upgradeable;
   using EnumerableSet for EnumerableSet.AddressSet;
 
+  // @notice maximum slippage in swaps, in bps
+  uint256 public constant MAX_SLIPPAGE = 900; // 9%
+
   IFuseFeeDistributor public ffd;
   ILiquidatorsRegistry public liquidatorsRegistry;
   uint256 public blocksPerYear;
@@ -23,6 +26,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   mapping(address => EnumerableSet.AddressSet) private positionsByAccount;
   EnumerableSet.AddressSet private collateralMarkets;
   mapping(ICErc20 => EnumerableSet.AddressSet) private borrowableMarketsByCollateral;
+
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
 
   /*----------------------------------------------------------------
                         Initializer Functions
@@ -134,6 +139,11 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
   }
 
+  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256 slippage) {
+    slippage = conversionSlippage[inputToken][outputToken];
+    if (slippage == 0) return MAX_SLIPPAGE;
+  }
+
   function getMinBorrowNative() external view returns (uint256) {
     return ffd.minBorrowEth();
   }
@@ -228,5 +238,17 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   function _setLiquidatorsRegistry(ILiquidatorsRegistry _liquidatorsRegistry) external onlyOwner {
     liquidatorsRegistry = _liquidatorsRegistry;
+  }
+
+  function _setSlippages(
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens,
+    uint256[] calldata slippages
+  ) external onlyOwner {
+    require(slippages.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
+
+    for (uint256 i = 0; i < slippages.length; i++) {
+      conversionSlippage[inputTokens[i]][outputTokens[i]] = slippages[i];
+    }
   }
 }

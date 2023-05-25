@@ -432,8 +432,10 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
 
     _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerLinearPoolTokenLiquidator());
 
-    vm.prank(pool.admin());
-    pool._supplyCapWhitelist(address(maticXBbaWMaticMarket), maticXBbaWMaticWhale, true);
+    {
+      vm.prank(pool.admin());
+      pool._supplyCapWhitelist(address(maticXBbaWMaticMarket), maticXBbaWMaticWhale, true);
+    }
 
     _fundMarketAndSelf(ICErc20(maticXBbaWMaticMarket), maticXBbaWMaticWhale);
     _fundMarketAndSelf(ICErc20(maticXMarket), maticXWhale);

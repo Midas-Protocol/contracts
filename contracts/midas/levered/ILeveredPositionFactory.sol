@@ -30,4 +30,6 @@ interface ILeveredPositionFactory {
   ) external returns (LeveredPosition);
 
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (bool);
+
+  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256);
 }

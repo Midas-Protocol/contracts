@@ -15,10 +15,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
-  // TODO extract as a constructor param or query it from the factory ?
-  // @notice maximum slippage in swaps, in bps
-  uint256 public constant MAX_SLIPPAGE = 900; // 9%
-
   // @notice the base collateral is the amount of collateral that is not funded by borrowing stables
   uint256 public baseCollateral;
   address public immutable positionOwner;
@@ -170,7 +166,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 maxBorrowValueScaled = maxBorrow * stableAssetPrice;
 
     // accounting for swaps slippage
-    uint256 maxTopUpCollateralSwapValueScaled = (maxBorrowValueScaled * (10000 - MAX_SLIPPAGE)) / 10000;
+    uint256 assumedSlippage = factory.getSlippage(stableAsset, collateralAsset);
+    uint256 maxTopUpCollateralSwapValueScaled = (maxBorrowValueScaled * (10000 - assumedSlippage)) / 10000;
 
     uint256 maxTopUpRepay = maxTopUpCollateralSwapValueScaled / collateralAssetPrice;
     uint256 maxCollateralToRepay = (maxTopUpRepay * stableCollateralFactor) / (1e18 - stableCollateralFactor);
@@ -215,7 +212,8 @@ contract LeveredPosition is IFlashLoanReceiver {
 
     uint256 stableToBorrow = flashLoanedCollateralValueScaled / stableAssetPrice;
     // accounting for swaps slippage
-    stableToBorrow = (stableToBorrow * (10000 + MAX_SLIPPAGE)) / 10000;
+    uint256 assumedSlippage = factory.getSlippage(stableAsset, collateralAsset);
+    stableToBorrow = (stableToBorrow * (10000 + assumedSlippage)) / 10000;
 
     CTokenExtensionInterface(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
     // the execution will first receive a callback to receiveFlashLoan()
