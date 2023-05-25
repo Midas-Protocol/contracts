@@ -39,8 +39,24 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (bool)
   {
-    IRedemptionStrategy strategy = redemptionStrategiesByTokens[inputToken][outputToken];
-    return address(strategy) != address(0);
+    if (inputToken == outputToken) return false;
+
+    IERC20Upgradeable tokenToRedeem = inputToken;
+
+    uint256 k = 0;
+    while (tokenToRedeem != outputToken) {
+      IERC20Upgradeable redeemedToken = outputTokensByInputToken[tokenToRedeem];
+
+      IRedemptionStrategy strategy = redemptionStrategiesByTokens[inputToken][outputToken];
+      if (address(strategy) == address(0)) return false;
+
+      tokenToRedeem = redeemedToken;
+
+      k++;
+      if (k == 10) break;
+    }
+
+    return tokenToRedeem == outputToken;
   }
 
   function _setRedemptionStrategy(

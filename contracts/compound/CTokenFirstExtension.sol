@@ -22,7 +22,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 23;
+    uint8 fnsCount = 24;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -45,6 +45,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.exchangeRateHypothetical.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterDeposit.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterWithdraw.selector;
+    functionSelectors[--fnsCount] = this.borrowRatePerBlockAfterBorrow.selector;
     functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
     functionSelectors[--fnsCount] = this.flash.selector;
 

@@ -176,7 +176,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function isFundingAssetSupported(IERC20Upgradeable fundingAsset) public view returns (bool) {
-    return factory.hasRedemptionStrategyForTokens(fundingAsset, collateralAsset);
+    return factory.isFundingAllowed(fundingAsset, collateralAsset);
   }
 
   function isPositionClosed() public view returns (bool) {

@@ -160,14 +160,6 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return liquidatorsRegistry.getRedemptionStrategies(inputToken, outputToken);
   }
 
-  function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (bool)
-  {
-    return liquidatorsRegistry.hasRedemptionStrategyForTokens(inputToken, outputToken);
-  }
-
   // @dev returns the Rate for the chosen borrowable at the specified  leverage ratio and supply amount
   function getBorrowRateAtRatio(
     ICErc20 _collateralMarket,

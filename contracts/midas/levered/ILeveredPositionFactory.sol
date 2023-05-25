@@ -13,11 +13,6 @@ interface ILeveredPositionFactory {
     view
     returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
 
-  function hasRedemptionStrategyForTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (bool);
-
   function getMinBorrowNative() external view returns (uint256);
 
   function createPosition(ICErc20 _collateralMarket, ICErc20 _stableMarket) external returns (LeveredPosition);
