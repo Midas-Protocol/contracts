@@ -21,12 +21,10 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
-
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
     LeveredPositionFactory factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
     factory.getCollateralMarkets();
   }
-
 }
 
 abstract contract LeveredPositionTest is MarketsTest {
