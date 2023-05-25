@@ -19,7 +19,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   // @notice maximum slippage in swaps, in bps
   uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
-  IFuseFeeDistributor public ffd;
+  IFuseFeeDistributor public fuseFeeDistributor;
   ILiquidatorsRegistry public liquidatorsRegistry;
   uint256 public blocksPerYear;
 
@@ -38,12 +38,12 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function initialize(
-    IFuseFeeDistributor _ffd,
+    IFuseFeeDistributor _fuseFeeDistributor,
     ILiquidatorsRegistry _registry,
     uint256 _blocksPerYear
   ) public initializer {
     __SafeOwnable_init(msg.sender);
-    ffd = _ffd;
+    fuseFeeDistributor = _fuseFeeDistributor;
     liquidatorsRegistry = _registry;
     blocksPerYear = _blocksPerYear;
   }
@@ -152,7 +152,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   function getMinBorrowNative() external view returns (uint256) {
-    return ffd.minBorrowEth();
+    return fuseFeeDistributor.minBorrowEth();
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

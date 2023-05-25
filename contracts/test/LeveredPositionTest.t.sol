@@ -20,10 +20,30 @@ import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
+import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+
 contract LeveredPositionFactoryTest is BaseTest {
+  LeveredPositionFactory factory;
+  MasterPriceOracle mpo;
+
+  function afterForkSetUp() internal override {
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+  }
+
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    LeveredPositionFactory factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
-    factory.getCollateralMarkets();
+    factory.getBorrowRateAtRatio(
+      ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
+      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD),
+      990950010006960400000000000000,
+      1000000000000000000
+    );
+  }
+
+  function testChapelAssetPrice() public debuggingOnly fork(BSC_CHAPEL) {
+    uint256 p = mpo.price(0xf97e8F094c4428e6436b3bf86264D176A2606bC4);
+    assertGt(p, 0, "zero price");
   }
 }
 
@@ -106,7 +126,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     registry.asExtension()._setRedemptionStrategy(strategy, outputToken, inputToken);
   }
 
-  function underlying(address market) internal returns (IERC20Upgradeable) {
+  function underlying(address market) internal view returns (IERC20Upgradeable) {
     return IERC20Upgradeable(ICErc20(market).underlying());
   }
 
