@@ -135,7 +135,7 @@ contract MaxBorrowTest is WithPool {
     CTokenInterface[] memory markets = asExtension.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
       CTokenInterface market = markets[i];
-      uint256 borrowed = market.borrowBalanceStored(someBorrower);
+      uint256 borrowed = market.asCTokenExtensionInterface().borrowBalanceStored(someBorrower);
       if (borrowed > 0) {
         emit log("borrower has borrowed");
         emit log_uint(borrowed);
@@ -158,7 +158,7 @@ contract MaxBorrowTest is WithPool {
 
     CTokenInterface marketToBorrow = markets[0];
     CTokenInterface cappedCollateralMarket = markets[6];
-    uint256 borrowAmount = marketToBorrow.borrowBalanceStored(someBorrower);
+    uint256 borrowAmount = marketToBorrow.asCTokenExtensionInterface().borrowBalanceStored(someBorrower);
 
     {
       (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(

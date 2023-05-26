@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import "flywheel/interfaces/IFlywheelBooster.sol";
-import "../../../compound/CToken.sol";
+import { CTokenExtensionInterface } from "../../../compound/CTokenInterfaces.sol";
 
 contract LooplessFlywheelBooster is IFlywheelBooster {
   string public constant BOOSTER_TYPE = "LooplessFlywheelBooster";
@@ -13,7 +13,7 @@ contract LooplessFlywheelBooster is IFlywheelBooster {
       @return the boosted supply
      */
   function boostedTotalSupply(ERC20 strategy) external view returns (uint256) {
-    return CToken(address(strategy)).totalSupply();
+    return CTokenExtensionInterface(address(strategy)).totalSupply();
   }
 
   /**
@@ -23,10 +23,9 @@ contract LooplessFlywheelBooster is IFlywheelBooster {
       @return the boosted balance
      */
   function boostedBalanceOf(ERC20 strategy, address user) external view returns (uint256) {
-    CToken asCToken = CToken(address(strategy));
+    CTokenExtensionInterface asMarket = CTokenExtensionInterface(address(strategy));
     uint256 cTokensBalance = strategy.balanceOf(user);
-    uint256 cTokensBorrow = (asCToken.borrowBalanceStored(user) * 1e18) /
-      asCToken.asCTokenExtensionInterface().exchangeRateStored();
+    uint256 cTokensBorrow = (asMarket.borrowBalanceStored(user) * 1e18) / asMarket.exchangeRateStored();
     return (cTokensBalance > cTokensBorrow) ? cTokensBalance - cTokensBorrow : 0;
   }
 }

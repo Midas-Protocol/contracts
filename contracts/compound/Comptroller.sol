@@ -164,9 +164,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @return Whether or not the account successfully exited the market
    */
   function exitMarket(address cTokenAddress) external override returns (uint256) {
-    CTokenInterface cToken = CTokenInterface(cTokenAddress);
+    // TODO
+    require(markets[cTokenAddress].isListed, "!Comptroller:exitMarket");
+
+    CTokenExtensionInterface cTokenExt = CTokenExtensionInterface(cTokenAddress);
     /* Get sender tokensHeld and amountOwed underlying from the cToken */
-    (uint256 oErr, uint256 tokensHeld, uint256 amountOwed, ) = cToken.getAccountSnapshot(msg.sender);
+    (uint256 oErr, uint256 tokensHeld, uint256 amountOwed, ) = cTokenExt.getAccountSnapshot(msg.sender);
     require(oErr == 0, "!exitMarket"); // semi-opaque error code
 
     /* Fail if the sender has a borrow balance */
@@ -180,7 +183,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return failOpaque(Error.REJECTION, FailureInfo.EXIT_MARKET_REJECTION, allowed);
     }
 
-    Market storage marketToExit = markets[address(cToken)];
+    Market storage marketToExit = markets[cTokenAddress];
 
     /* Return true if the sender is not already ‘in’ the market */
     if (!marketToExit.accountMembership[msg.sender]) {
@@ -196,7 +199,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 len = userAssetList.length;
     uint256 assetIndex = len;
     for (uint256 i = 0; i < len; i++) {
-      if (userAssetList[i] == cToken) {
+      if (userAssetList[i] == CTokenInterface(cTokenAddress)) {
         assetIndex = i;
         break;
       }
@@ -219,7 +222,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       borrowers[msg.sender] = false; // Tell the contract that the sender is no longer a borrower (so it knows to add the borrower back if they enter a market in the future)
     }
 
-    emit MarketExited(cToken, msg.sender);
+    emit MarketExited(CTokenInterface(cTokenAddress), msg.sender);
 
     return uint256(Error.NO_ERROR);
   }
@@ -255,7 +258,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 supplyCap = supplyCaps[cToken];
     // Supply cap of 0 corresponds to unlimited supplying
     if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
-      CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
+      CTokenExtensionInterface asExt = CTokenExtensionInterface(cToken);
       uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
       uint256 whitelistedSuppliersSupply = asComptrollerFirstExtension().getWhitelistedSuppliersSupply(cToken);
       uint256 nonWhitelistedTotalSupply;
@@ -578,7 +581,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Get borrowers' underlying borrow balance
-    uint256 borrowBalance = CTokenInterface(cTokenBorrowed).borrowBalanceStored(borrower);
+    uint256 borrowBalance = CTokenExtensionInterface(cTokenBorrowed).borrowBalanceStored(borrower);
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(CTokenInterface(cTokenBorrowed))) {
@@ -828,7 +831,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       CTokenInterface asset = assets[i];
 
       // Read the balances and exchange rate from the cToken
-      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = asset.getAccountSnapshot(account);
+      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = CTokenExtensionInterface(address(asset)).getAccountSnapshot(account);
       if (oErr != 0) {
         // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
         return (Error.SNAPSHOT_ERROR, 0, 0);

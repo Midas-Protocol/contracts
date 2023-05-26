@@ -577,6 +577,111 @@ contract CTokenFirstExtension is
   }
 
   /**
+   * @notice Returns the current total borrows plus accrued interest
+   * @return The total borrows with interest
+   */
+  function totalBorrowsHypo() public view override returns (uint256) {
+    if (accrualBlockNumber == block.number) {
+      return totalBorrows;
+    }
+    else {
+      uint256 cashPrior = asCToken().getCash();
+      InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
+      return accrual.totalBorrows;
+    }
+  }
+
+  /**
+   * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
+   * @param account The address whose balance should be calculated after updating borrowIndex
+   * @return The calculated balance
+   */
+  function borrowBalanceHypo(address account) public view override returns (uint256) {
+    if (accrualBlockNumber == block.number) {
+      return borrowBalanceStored(account);
+    } else {
+      uint256 cashPrior = asCToken().getCash();
+      InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
+      return borrowBalanceAtIndex(account, accrual.borrowIndex);
+    }
+  }
+
+  /**
+   * @notice Get a snapshot of the account's balances, and the cached exchange rate
+   * @dev This is used by comptroller to more efficiently perform liquidity checks.
+   * @param account Address of the account to snapshot
+   * @return (possible error, token balance, borrow balance, exchange rate mantissa)
+   */
+  function getAccountSnapshot(address account)
+  external
+  view
+  override
+  returns (
+    uint256,
+    uint256,
+    uint256,
+    uint256
+  )
+  {
+    uint256 cTokenBalance = accountTokens[account];
+    uint256 borrowBalance;
+    uint256 exchangeRateMantissa;
+
+    borrowBalance = borrowBalanceStored(account);
+
+    exchangeRateMantissa = exchangeRateStored();
+
+    return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
+  }
+
+  /**
+   * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
+   * @param account The address whose balance should be calculated after updating borrowIndex
+   * @return The calculated balance
+   */
+  function borrowBalanceCurrent(address account) external override nonReentrant(false) returns (uint256) {
+    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
+    return borrowBalanceStored(account);
+  }
+
+  /**
+   * @notice Return the borrow balance of account based on stored data
+   * @param account The address whose balance should be calculated
+   * @return The calculated balance
+   */
+  function borrowBalanceStored(address account) public view override returns (uint256) {
+    return borrowBalanceAtIndex(account, borrowIndex);
+  }
+
+  function borrowBalanceAtIndex(address account, uint256 _borrowIndex) internal view returns (uint256) {
+    /* Note: we do not assert that the market is up to date */
+    MathError mathErr;
+    uint256 principalTimesIndex;
+    uint256 result;
+
+    /* Get borrowBalance and borrowIndex */
+    BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
+
+    /* If borrowBalance = 0 then borrowIndex is likely also 0.
+     * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
+     */
+    if (borrowSnapshot.principal == 0) {
+      return 0;
+    }
+
+    /* Calculate new borrow balance using the interest index:
+     *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
+     */
+    (mathErr, principalTimesIndex) = mulUInt(borrowSnapshot.principal, _borrowIndex);
+    require(mathErr == MathError.NO_ERROR, "!mulUInt overflow check failed");
+
+    (mathErr, result) = divUInt(principalTimesIndex, borrowSnapshot.interestIndex);
+    require(mathErr == MathError.NO_ERROR, "!divUInt overflow check failed");
+
+    return result;
+  }
+
+  /**
    * @notice Get the underlying balance of the `owner`
    * @dev This also accrues interest in a transaction
    * @param owner The address of the account to query

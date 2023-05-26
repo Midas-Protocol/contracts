@@ -103,7 +103,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   function getMinBorrowEth(CTokenInterface _ctoken) public view returns (uint256) {
-    (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
+    (, , uint256 borrowBalance, ) = CTokenExtensionInterface(address(_ctoken)).getAccountSnapshot(_msgSender());
     if (borrowBalance == 0) return minBorrowEth;
     IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
     BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));

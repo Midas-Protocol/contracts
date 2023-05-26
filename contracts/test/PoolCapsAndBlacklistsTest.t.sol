@@ -11,8 +11,8 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
   ComptrollerFirstExtension asExtension;
   address borrower = 0x28C0208b7144B511C73586Bb07dE2100495e92f3; // ANKR account
   address otherSupplier = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc; // Supplier of ankrBNBAnkrMkt
-  CErc20Delegate ankrBNBAnkrMkt = CErc20Delegate(0x71693C84486B37096192c9942852f542543639Bf);
-  CErc20Delegate ankrBNBMkt = CErc20Delegate(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa);
+  CTokenExtensionInterface ankrBNBAnkrMkt = CTokenExtensionInterface(0x71693C84486B37096192c9942852f542543639Bf);
+  CTokenExtensionInterface ankrBNBMkt = CTokenExtensionInterface(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa);
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
@@ -25,12 +25,12 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     {
       uint256 borrowedAnkr = ankrBNBMkt.borrowBalanceStored(borrower);
       emit log_named_uint("Ankr borrower balance", borrowedAnkr);
-      uint256 collateralAnkr = ankrBNBAnkrMkt.asCTokenExtensionInterface().balanceOf(borrower);
+      uint256 collateralAnkr = ankrBNBAnkrMkt.balanceOf(borrower);
       emit log_named_uint("Ankr collateral balance of ankrBNB-ANKR", collateralAnkr);
 
       uint256 borrowedOther = ankrBNBMkt.borrowBalanceStored(otherSupplier);
       emit log_named_uint("Other supplier borrower balance", borrowedOther);
-      uint256 collateralOther = ankrBNBAnkrMkt.asCTokenExtensionInterface().balanceOf(otherSupplier);
+      uint256 collateralOther = ankrBNBAnkrMkt.balanceOf(otherSupplier);
       emit log_named_uint("Other supplier collateral balance of ankrBNB-ANKR", collateralOther);
 
       emit log("");

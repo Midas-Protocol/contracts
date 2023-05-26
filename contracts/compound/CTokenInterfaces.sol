@@ -238,6 +238,17 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
 
   function _setInterestRateModel(InterestRateModel newInterestRateModel) external virtual returns (uint256);
 
+  function getAccountSnapshot(address account)
+  external
+  view
+  virtual
+  returns (
+    uint256,
+    uint256,
+    uint256,
+    uint256
+  );
+
   function borrowRatePerBlock() external view virtual returns (uint256);
 
   function supplyRatePerBlock() external view virtual returns (uint256);
@@ -249,6 +260,14 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
   function accrueInterest() public virtual returns (uint256);
 
   function totalBorrowsCurrent() external virtual returns (uint256);
+
+  function totalBorrowsHypo() external view virtual returns (uint256);
+
+  function borrowBalanceCurrent(address account) external virtual returns (uint256);
+
+  function borrowBalanceStored(address account) public view virtual returns (uint256);
+
+  function borrowBalanceHypo(address account) public view virtual returns (uint256);
 
   function getTotalUnderlyingSupplied() public view virtual returns (uint256);
 
@@ -324,21 +343,6 @@ abstract contract CTokenInterface is CTokenBaseInterface {
    * @notice Event emitted when the reserves are reduced
    */
   event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
-
-  function getAccountSnapshot(address account)
-    external
-    view
-    virtual
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    );
-
-  function borrowBalanceCurrent(address account) external virtual returns (uint256);
-
-  function borrowBalanceStored(address account) public view virtual returns (uint256);
 
   function getCash() external view virtual returns (uint256);
 

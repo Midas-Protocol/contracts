@@ -98,77 +98,6 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
   }
 
   /**
-   * @notice Get a snapshot of the account's balances, and the cached exchange rate
-   * @dev This is used by comptroller to more efficiently perform liquidity checks.
-   * @param account Address of the account to snapshot
-   * @return (possible error, token balance, borrow balance, exchange rate mantissa)
-   */
-  function getAccountSnapshot(address account)
-    external
-    view
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    )
-  {
-    uint256 cTokenBalance = accountTokens[account];
-    uint256 borrowBalance;
-    uint256 exchangeRateMantissa;
-
-    borrowBalance = borrowBalanceStored(account);
-
-    exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
-
-    return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
-  }
-
-  /**
-   * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
-   * @param account The address whose balance should be calculated after updating borrowIndex
-   * @return The calculated balance
-   */
-  function borrowBalanceCurrent(address account) external override nonReentrant(false) returns (uint256) {
-    require(asCTokenExtensionInterface().accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return borrowBalanceStored(account);
-  }
-
-  /**
-   * @notice Return the borrow balance of account based on stored data
-   * @param account The address whose balance should be calculated
-   * @return The calculated balance
-   */
-  function borrowBalanceStored(address account) public view override returns (uint256) {
-    /* Note: we do not assert that the market is up to date */
-    MathError mathErr;
-    uint256 principalTimesIndex;
-    uint256 result;
-
-    /* Get borrowBalance and borrowIndex */
-    BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
-
-    /* If borrowBalance = 0 then borrowIndex is likely also 0.
-     * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
-     */
-    if (borrowSnapshot.principal == 0) {
-      return 0;
-    }
-
-    /* Calculate new borrow balance using the interest index:
-     *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
-     */
-    (mathErr, principalTimesIndex) = mulUInt(borrowSnapshot.principal, borrowIndex);
-    require(mathErr == MathError.NO_ERROR, "!mulUInt overflow check failed");
-
-    (mathErr, result) = divUInt(principalTimesIndex, borrowSnapshot.interestIndex);
-    require(mathErr == MathError.NO_ERROR, "!divUInt overflow check failed");
-
-    return result;
-  }
-
-  /**
    * @notice Get cash balance of this cToken in the underlying asset
    * @return The quantity of underlying asset owned by this contract
    */
@@ -503,7 +432,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
      *  accountBorrowsNew = accountBorrows + borrowAmount
      *  totalBorrowsNew = totalBorrows + borrowAmount
      */
-    vars.accountBorrows = borrowBalanceStored(borrower);
+    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceStored(borrower);
 
     (vars.mathErr, vars.accountBorrowsNew) = addUInt(vars.accountBorrows, borrowAmount);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -629,7 +558,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     vars.borrowerIndex = accountBorrows[borrower].interestIndex;
 
     /* We fetch the amount the borrower owes, with accumulated interest */
-    vars.accountBorrows = borrowBalanceStored(borrower);
+    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceStored(borrower);
 
     /* If repayAmount == -1, repayAmount = accountBorrows */
     if (repayAmount == type(uint256).max) {

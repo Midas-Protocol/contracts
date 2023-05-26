@@ -175,6 +175,11 @@ contract FLRTest is BaseTest {
     }
   }
 
+  function testChapelRouter() public fork(BSC_CHAPEL) {
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
+    router.getPoolMarketRewardsInfo(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
+  }
+
   function testMoonbeamLensRouter() public fork(MOONBEAM_MAINNET) {
     vm.mockCall(
       0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,

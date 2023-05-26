@@ -320,7 +320,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   function getWhitelistedBorrowersBorrows(address cToken) public view returns (uint256 borrowed) {
     address[] memory whitelistedBorrowers = borrowCapWhitelist[cToken].values();
     for (uint256 i = 0; i < whitelistedBorrowers.length; i++) {
-      borrowed += CTokenInterface(cToken).borrowBalanceStored(whitelistedBorrowers[i]);
+      borrowed += CTokenExtensionInterface(cToken).borrowBalanceStored(whitelistedBorrowers[i]);
     }
   }
 
