@@ -99,6 +99,21 @@ contract GammaPoolPriceOracleTest is BaseTest {
       uint256 expectedPrice = priceAtWithdraw(WBTC_WBNB_THENA_WHALE, WBTC_WBNB_THENA_GAMMA_VAULT, withdrawAmount);
       assertApproxEqRel(price_WBTC_WBNB, expectedPrice, 1e16, "!WBTC_WBNB price");
     }
+
+    {
+      address ANKR_AnkrBNB_WIDE_THENA_GAMMA_VAULT = 0x31257f40e65585cC45fDABEb12002C25bC95eE80; // Wide
+      address ANKR_AnkrBNB_WIDE_THENA_WHALE = 0x7E4F069107cf0EE090AF5e4e075dC6Fcc644C61D; // thena gauge
+
+      vm.prank(address(mpo));
+      uint256 price_ANKR_AnkrBNB = oracle.price(ANKR_AnkrBNB_WIDE_THENA_GAMMA_VAULT);
+
+      uint256 expectedPrice = priceAtWithdraw(
+        ANKR_AnkrBNB_WIDE_THENA_WHALE,
+        ANKR_AnkrBNB_WIDE_THENA_GAMMA_VAULT,
+        withdrawAmount
+      );
+      assertApproxEqRel(price_ANKR_AnkrBNB, expectedPrice, 1e16, "!WBTC_WBNB price");
+    }
   }
 
   function priceAtWithdraw(
