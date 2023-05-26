@@ -41,12 +41,12 @@ contract MinBorrowTest is BaseTest {
     cTokens[1] = address(busdMarket);
     comptroller.enterMarkets(cTokens);
 
-    uint256 minBorrowEth = ffd.getMinBorrowEth(busdMarket);
+    uint256 minBorrowEth = ffd.getMinBorrowEth(busdMarket.asCTokenExtensionInterface());
     assertEq(minBorrowEth, baseMinBorrowEth, "!minBorrowEth for default min borrow eth");
 
     busdMarket.borrow(300e18);
 
-    minBorrowEth = ffd.getMinBorrowEth(busdMarket);
+    minBorrowEth = ffd.getMinBorrowEth(busdMarket.asCTokenExtensionInterface());
     assertEq(minBorrowEth, 0, "!minBorrowEth after borrowing less amount than min amount");
   }
 }
