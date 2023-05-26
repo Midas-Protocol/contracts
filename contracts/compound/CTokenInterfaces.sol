@@ -239,15 +239,15 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
   function _setInterestRateModel(InterestRateModel newInterestRateModel) external virtual returns (uint256);
 
   function getAccountSnapshot(address account)
-  external
-  view
-  virtual
-  returns (
-    uint256,
-    uint256,
-    uint256,
-    uint256
-  );
+    external
+    view
+    virtual
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
 
   function borrowRatePerBlock() external view virtual returns (uint256);
 

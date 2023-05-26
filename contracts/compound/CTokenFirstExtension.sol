@@ -583,8 +583,7 @@ contract CTokenFirstExtension is
   function totalBorrowsHypo() public view override returns (uint256) {
     if (accrualBlockNumber == block.number) {
       return totalBorrows;
-    }
-    else {
+    } else {
       uint256 cashPrior = asCToken().getCash();
       InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
       return accrual.totalBorrows;
@@ -613,15 +612,15 @@ contract CTokenFirstExtension is
    * @return (possible error, token balance, borrow balance, exchange rate mantissa)
    */
   function getAccountSnapshot(address account)
-  external
-  view
-  override
-  returns (
-    uint256,
-    uint256,
-    uint256,
-    uint256
-  )
+    external
+    view
+    override
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    )
   {
     uint256 cTokenBalance = accountTokens[account];
     uint256 borrowBalance;

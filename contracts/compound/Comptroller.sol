@@ -831,7 +831,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       CTokenInterface asset = assets[i];
 
       // Read the balances and exchange rate from the cToken
-      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = CTokenExtensionInterface(address(asset)).getAccountSnapshot(account);
+      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = CTokenExtensionInterface(
+        address(asset)
+      ).getAccountSnapshot(account);
       if (oErr != 0) {
         // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
         return (Error.SNAPSHOT_ERROR, 0, 0);
