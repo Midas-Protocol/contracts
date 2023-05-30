@@ -263,9 +263,6 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
     if (ratioDiff == type(uint256).max) {
-      // calling accrue allows to repay the full borrowed balance
-      uint256 errorCode = stableMarket.accrueInterest();
-      if (errorCode != 0) revert AccrueFailed(errorCode);
       // if max levering down, then derive the amount to redeem from the debt to be repaid
       borrowsToRepay = stableMarket.borrowBalanceHypo(address(this));
       uint256 borrowsToRepayValueScaled = borrowsToRepay * stableAssetPrice;
