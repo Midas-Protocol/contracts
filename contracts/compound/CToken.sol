@@ -152,7 +152,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
     MintLocalVars memory vars;
 
-    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
+    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateHypothetical();
 
     // Check max supply
     // unused function
@@ -270,8 +270,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
     RedeemLocalVars memory vars;
 
-    /* exchangeRate = invoke Exchange Rate Stored() */
-    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
+    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateHypothetical();
 
     if (redeemAmountIn == type(uint256).max) {
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
@@ -432,7 +431,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
      *  accountBorrowsNew = accountBorrows + borrowAmount
      *  totalBorrowsNew = totalBorrows + borrowAmount
      */
-    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceStored(borrower);
+    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceHypo(borrower);
 
     (vars.mathErr, vars.accountBorrowsNew) = addUInt(vars.accountBorrows, borrowAmount);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -558,7 +557,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     vars.borrowerIndex = accountBorrows[borrower].interestIndex;
 
     /* We fetch the amount the borrower owes, with accumulated interest */
-    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceStored(borrower);
+    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceHypo(borrower);
 
     /* If repayAmount == -1, repayAmount = accountBorrows */
     if (repayAmount == type(uint256).max) {
@@ -807,7 +806,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
     vars.liquidatorSeizeTokens = seizeTokens - vars.protocolSeizeTokens - vars.feeSeizeTokens;
 
-    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateStored();
+    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateHypothetical();
 
     vars.protocolSeizeAmount = mul_ScalarTruncate(
       Exp({ mantissa: vars.exchangeRateMantissa }),

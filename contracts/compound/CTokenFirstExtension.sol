@@ -611,9 +611,9 @@ contract CTokenFirstExtension is
     uint256 borrowBalance;
     uint256 exchangeRateMantissa;
 
-    borrowBalance = borrowBalanceStored(account);
+    borrowBalance = borrowBalanceHypo(account);
 
-    exchangeRateMantissa = exchangeRateStored();
+    exchangeRateMantissa = exchangeRateHypothetical();
 
     return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
   }

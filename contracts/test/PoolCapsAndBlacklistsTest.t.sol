@@ -23,12 +23,12 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
 
     // just some logging
     {
-      uint256 borrowedAnkr = ankrBNBMkt.borrowBalanceStored(borrower);
+      uint256 borrowedAnkr = ankrBNBMkt.borrowBalanceHypo(borrower);
       emit log_named_uint("Ankr borrower balance", borrowedAnkr);
       uint256 collateralAnkr = ankrBNBAnkrMkt.balanceOf(borrower);
       emit log_named_uint("Ankr collateral balance of ankrBNB-ANKR", collateralAnkr);
 
-      uint256 borrowedOther = ankrBNBMkt.borrowBalanceStored(otherSupplier);
+      uint256 borrowedOther = ankrBNBMkt.borrowBalanceHypo(otherSupplier);
       emit log_named_uint("Other supplier borrower balance", borrowedOther);
       uint256 collateralOther = ankrBNBAnkrMkt.balanceOf(otherSupplier);
       emit log_named_uint("Other supplier collateral balance of ankrBNB-ANKR", collateralOther);

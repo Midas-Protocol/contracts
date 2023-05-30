@@ -471,7 +471,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
     if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
-      uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
+      uint256 totalBorrows = CTokenExtensionInterface(cToken).totalBorrowsHypo();
       uint256 whitelistedBorrowersBorrows = asComptrollerFirstExtension().getWhitelistedBorrowersBorrows(cToken);
       uint256 nonWhitelistedTotalBorrows;
       if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
@@ -581,7 +581,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     }
 
     // Get borrowers' underlying borrow balance
-    uint256 borrowBalance = CTokenExtensionInterface(cTokenBorrowed).borrowBalanceStored(borrower);
+    uint256 borrowBalance = CTokenExtensionInterface(cTokenBorrowed).borrowBalanceHypo(borrower);
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(CTokenInterface(cTokenBorrowed))) {
@@ -944,7 +944,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
      *   = actualRepayAmount * (liquidationIncentive * priceBorrowed) / (priceCollateral * exchangeRate)
      */
     CTokenInterface collateralCToken = CTokenInterface(cTokenCollateral);
-    uint256 exchangeRateMantissa = collateralCToken.asCTokenExtensionInterface().exchangeRateStored(); // Note: reverts on error
+    uint256 exchangeRateMantissa = collateralCToken.asCTokenExtensionInterface().exchangeRateHypothetical(); // Note: reverts on error
     uint256 seizeTokens;
     Exp memory numerator;
     Exp memory denominator;
