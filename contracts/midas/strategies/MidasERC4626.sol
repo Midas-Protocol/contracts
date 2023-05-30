@@ -149,7 +149,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     uint256 shareValue = convertToAssets(10**_asset().decimals());
 
     require(shareValue > vaultShareHWM, "shareValue !> vaultShareHWM");
-    // chache value
+    // cache value
     uint256 supply = totalSupply();
 
     uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;

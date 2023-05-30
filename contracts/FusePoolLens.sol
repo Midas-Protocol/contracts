@@ -234,7 +234,8 @@ contract FusePoolLens is Initializable {
       ICToken cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
-      uint256 assetTotalBorrow = cToken.totalBorrowsCurrent();
+      cToken.accrueInterest();
+      uint256 assetTotalBorrow = cToken.totalBorrows();
       uint256 assetTotalSupply = cToken.getCash() +
         assetTotalBorrow -
         (cToken.totalReserves() + cToken.totalAdminFees() + cToken.totalFuseFees());
@@ -319,6 +320,8 @@ contract FusePoolLens is Initializable {
       ICToken cToken = cTokens[i];
       asset.cToken = address(cToken);
 
+      cToken.accrueInterest();
+
       // Get underlying asset data
       if (cToken.isCEther()) {
         asset.underlyingName = name;
@@ -337,7 +340,7 @@ contract FusePoolLens is Initializable {
       asset.supplyRatePerBlock = cToken.supplyRatePerBlock();
       asset.borrowRatePerBlock = cToken.borrowRatePerBlock();
       asset.liquidity = cToken.getCash();
-      asset.totalBorrow = cToken.totalBorrowsCurrent();
+      asset.totalBorrow = cToken.totalBorrows();
       asset.totalSupply =
         asset.liquidity +
         asset.totalBorrow -

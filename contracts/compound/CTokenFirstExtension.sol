@@ -399,7 +399,7 @@ contract CTokenFirstExtension is
    */
   function exchangeRateCurrent() public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return exchangeRateStored();
+    return exchangeRateHypothetical();
   }
 
   /**
@@ -408,7 +408,12 @@ contract CTokenFirstExtension is
    * @return Calculated exchange rate scaled by 1e18
    */
   function exchangeRateStored() public view override returns (uint256) {
-    return
+    return exchangeRateHypothetical();
+  }
+
+  function exchangeRateHypothetical() public view override returns (uint256) {
+    if (block.number == accrualBlockNumber) {
+      return
       _exchangeRateHypothetical(
         totalSupply,
         initialExchangeRateMantissa,
@@ -418,11 +423,6 @@ contract CTokenFirstExtension is
         totalAdminFees,
         totalFuseFees
       );
-  }
-
-  function exchangeRateHypothetical() public view override returns (uint256) {
-    if (block.number == accrualBlockNumber) {
-      return exchangeRateStored();
     } else {
       uint256 cashPrior = asCToken().getCash();
       InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
@@ -573,7 +573,7 @@ contract CTokenFirstExtension is
    */
   function totalBorrowsCurrent() public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return totalBorrows;
+    return totalBorrowsHypo();
   }
 
   /**
@@ -587,21 +587,6 @@ contract CTokenFirstExtension is
       uint256 cashPrior = asCToken().getCash();
       InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
       return accrual.totalBorrows;
-    }
-  }
-
-  /**
-   * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
-   * @param account The address whose balance should be calculated after updating borrowIndex
-   * @return The calculated balance
-   */
-  function borrowBalanceHypo(address account) public view override returns (uint256) {
-    if (accrualBlockNumber == block.number) {
-      return borrowBalanceStored(account);
-    } else {
-      uint256 cashPrior = asCToken().getCash();
-      InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
-      return borrowBalanceAtIndex(account, accrual.borrowIndex);
     }
   }
 
@@ -640,7 +625,7 @@ contract CTokenFirstExtension is
    */
   function borrowBalanceCurrent(address account) external override nonReentrant(false) returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return borrowBalanceStored(account);
+    return borrowBalanceHypo(account);
   }
 
   /**
@@ -649,10 +634,24 @@ contract CTokenFirstExtension is
    * @return The calculated balance
    */
   function borrowBalanceStored(address account) public view override returns (uint256) {
-    return borrowBalanceAtIndex(account, borrowIndex);
+    return borrowBalanceHypo(account);
   }
 
-  function borrowBalanceAtIndex(address account, uint256 _borrowIndex) internal view returns (uint256) {
+  /**
+   * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
+   * @param account The address whose balance should be calculated after updating borrowIndex
+   * @return The calculated balance
+   */
+  function borrowBalanceHypo(address account) public view override returns (uint256) {
+    uint256 _borrowIndex;
+    if (accrualBlockNumber == block.number) {
+      _borrowIndex = borrowIndex;
+    } else {
+      uint256 cashPrior = asCToken().getCash();
+      InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
+      _borrowIndex = accrual.borrowIndex;
+    }
+
     /* Note: we do not assert that the market is up to date */
     MathError mathErr;
     uint256 principalTimesIndex;
@@ -688,10 +687,7 @@ contract CTokenFirstExtension is
    */
   function balanceOfUnderlying(address owner) public override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    Exp memory exchangeRate = Exp({ mantissa: exchangeRateStored() });
-    (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
-    require(mErr == MathError.NO_ERROR, "!balance");
-    return balance;
+    return balanceOfUnderlyingHypo(owner);
   }
 
   function balanceOfUnderlyingHypo(address owner) public view override returns (uint256) {
