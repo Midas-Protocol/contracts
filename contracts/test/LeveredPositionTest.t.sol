@@ -35,8 +35,8 @@ contract LeveredPositionFactoryTest is BaseTest {
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
     vm.prank(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
     factory.getBorrowRateAtRatio(
-      ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
       ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD),
+      ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
       990950010006960400000000000000,
       1000000000000000000
     );
