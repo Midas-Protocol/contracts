@@ -5,7 +5,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 
 abstract contract CErc20Token is ERC20 {
-  function exchangeRateCurrent() external virtual returns (uint256);
+  function exchangeRateHypothetical() external view virtual returns (uint256);
 
   function underlying() external view virtual returns (address);
 
@@ -47,7 +47,7 @@ contract MidasFlywheelLensRouter {
     uint256 rewardSpeedPerSecondPerToken;
     /// @dev comptroller oracle price of reward token
     uint256 rewardTokenPrice;
-    /// @dev APR scaled by 1e18. Calculated as rewardSpeedPerSecondPerToken * rewardTokenPrice * 365.25 days / underlyingPrice * 1e18 / market.exchangeRateCurrent()
+    /// @dev APR scaled by 1e18. Calculated as rewardSpeedPerSecondPerToken * rewardTokenPrice * 365.25 days / underlyingPrice * 1e18 / market.exchangeRate
     uint256 formattedAPR;
     address flywheel;
     address rewardToken;
@@ -101,7 +101,7 @@ contract MidasFlywheelLensRouter {
           market,
           rewardTokenDecimals[j]
         );
-        uint256 apr = getApr(rewardSpeedPerSecondPerToken, rewardTokenPrices[j], price, market.exchangeRateCurrent());
+        uint256 apr = getApr(rewardSpeedPerSecondPerToken, rewardTokenPrices[j], price, market.exchangeRateHypothetical());
 
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken, // scaled in 1e18

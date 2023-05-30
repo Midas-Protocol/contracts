@@ -91,7 +91,6 @@ contract FLRTest is BaseTest {
         address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
       )
     );
-    emit log_named_uint("exchangeRateCurrent", CErc20Token(mkt).exchangeRateCurrent());
 
     vm.warp(block.timestamp + 10);
 

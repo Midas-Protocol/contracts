@@ -267,7 +267,7 @@ contract LeveredPosition is IFlashLoanReceiver {
       uint256 errorCode = stableMarket.accrueInterest();
       if (errorCode != 0) revert AccrueFailed(errorCode);
       // if max levering down, then derive the amount to redeem from the debt to be repaid
-      borrowsToRepay = stableMarket.borrowBalanceCurrent(address(this));
+      borrowsToRepay = stableMarket.borrowBalanceStored(address(this));
       uint256 borrowsToRepayValueScaled = borrowsToRepay * stableAssetPrice;
       // not accounting for swaps slippage
       amountToRedeem = ((borrowsToRepayValueScaled / collateralAssetPrice) * 1e18) / stableCollateralFactor;
@@ -288,7 +288,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
   function _leverDownPostFL(uint256 _flashLoanedCollateral, uint256 _amountToRedeem) internal {
     // repay the borrows
-    uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
+    uint256 borrowBalance = stableMarket.borrowBalanceStored(address(this));
     uint256 repayAmount = _flashLoanedCollateral < borrowBalance ? _flashLoanedCollateral : borrowBalance;
     stableAsset.approve(address(stableMarket), repayAmount);
     uint256 errorCode = stableMarket.repayBorrow(repayAmount);

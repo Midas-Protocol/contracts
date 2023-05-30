@@ -53,6 +53,8 @@ interface ICToken {
 
   function borrowBalanceCurrent(address account) external returns (uint256);
 
+  function borrowBalanceHypo(address account) external view override returns (uint256);
+
   function exchangeRateCurrent() external returns (uint256);
 
   function exchangeRateStored() external view returns (uint256);
