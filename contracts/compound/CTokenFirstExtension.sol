@@ -414,15 +414,15 @@ contract CTokenFirstExtension is
   function exchangeRateHypothetical() public view override returns (uint256) {
     if (block.number == accrualBlockNumber) {
       return
-      _exchangeRateHypothetical(
-        totalSupply,
-        initialExchangeRateMantissa,
-        asCToken().getCash(),
-        totalBorrows,
-        totalReserves,
-        totalAdminFees,
-        totalFuseFees
-      );
+        _exchangeRateHypothetical(
+          totalSupply,
+          initialExchangeRateMantissa,
+          asCToken().getCash(),
+          totalBorrows,
+          totalReserves,
+          totalAdminFees,
+          totalFuseFees
+        );
     } else {
       uint256 cashPrior = asCToken().getCash();
       InterestAccrual memory accrual = accrueInterestHypothetical(block.number, cashPrior);
