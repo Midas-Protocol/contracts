@@ -37,6 +37,8 @@ interface ICToken {
 
   function balanceOfUnderlying(address owner) external returns (uint256);
 
+  function balanceOfUnderlyingHypo(address owner) external view returns (uint256);
+
   function borrowRatePerBlock() external view returns (uint256);
 
   function supplyRatePerBlock() external view returns (uint256);
@@ -53,7 +55,7 @@ interface ICToken {
 
   function borrowBalanceCurrent(address account) external returns (uint256);
 
-  function borrowBalanceHypo(address account) external view override returns (uint256);
+  function borrowBalanceHypo(address account) external view returns (uint256);
 
   function exchangeRateCurrent() external returns (uint256);
 

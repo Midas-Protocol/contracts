@@ -345,7 +345,7 @@ contract FusePoolLens is Initializable {
         asset.liquidity +
         asset.totalBorrow -
         (cToken.totalReserves() + cToken.totalAdminFees() + cToken.totalFuseFees());
-      asset.supplyBalance = cToken.balanceOfUnderlying(user);
+      asset.supplyBalance = cToken.balanceOfUnderlyingHypo(user);
       asset.borrowBalance = cToken.borrowBalanceStored(user); // We would use borrowBalanceCurrent but we already accrue interest above
       asset.membership = comptroller.checkMembership(user, cToken);
       asset.exchangeRate = cToken.exchangeRateStored(); // We would use exchangeRateCurrent but we already accrue interest above
