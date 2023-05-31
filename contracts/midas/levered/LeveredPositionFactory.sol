@@ -33,6 +33,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
 
+  EnumerableSet.AddressSet private accountsWithOpenPositions;
+
   /*----------------------------------------------------------------
                         Initializer Functions
   ----------------------------------------------------------------*/
@@ -60,7 +62,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     if (!borrowableMarketsByCollateral[_collateralMarket].contains(address(_stableMarket))) revert PairNotWhitelisted();
 
     LeveredPosition position = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
+
+    accountsWithOpenPositions.add(msg.sender);
     positionsByAccount[msg.sender].add(address(position));
+
     return position;
   }
 
@@ -78,12 +83,13 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   // @return true if removed, otherwise false
-  function removeClosedPosition(address closedPosition) public returns (bool) {
+  function removeClosedPosition(address closedPosition) public returns (bool removed) {
     EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
     if (!userPositions.contains(closedPosition)) revert NoSuchPosition();
     if (!LeveredPosition(closedPosition).isPositionClosed()) revert PositionNotClosed();
 
-    return userPositions.remove(closedPosition);
+    removed = userPositions.remove(closedPosition);
+    if (userPositions.length() == 0) accountsWithOpenPositions.remove(msg.sender);
   }
 
   /*----------------------------------------------------------------
@@ -92,6 +98,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   function getPositionsByAccount(address account) public view returns (address[] memory) {
     return positionsByAccount[account].values();
+  }
+
+  function getAccountsWithOpenPositions() public view returns (address[] memory) {
+    return accountsWithOpenPositions.values();
   }
 
   function getWhitelistedCollateralMarkets() public view returns (address[] memory) {
