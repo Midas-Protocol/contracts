@@ -4,7 +4,6 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
-import { IUnitroller } from "./external/compound/IUnitroller.sol"; // TODO
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { Unitroller } from "./compound/Unitroller.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
@@ -172,7 +171,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     );
 
     // Setup Unitroller
-    IUnitroller unitroller = IUnitroller(proxy);
+    Unitroller unitroller = Unitroller(payable(proxy));
     require(
       unitroller._setPendingImplementation(implementation) == 0,
       "Failed to set pending implementation on Unitroller."
