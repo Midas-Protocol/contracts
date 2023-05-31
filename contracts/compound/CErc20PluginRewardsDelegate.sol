@@ -11,7 +11,7 @@ contract CErc20PluginRewardsDelegate is CErc20PluginDelegate {
   /// @notice token approval function
   function approve(address _token, address _spender) external {
     require(hasAdminRights(), "!admin");
-    require(_token != _underlying && _token != address(plugin), "!");
+    require(_token != underlying && _token != address(plugin), "!");
 
     EIP20Interface(_token).approve(_spender, type(uint256).max);
   }

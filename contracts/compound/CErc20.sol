@@ -47,15 +47,11 @@ contract CErc20 is CToken, CErc20Base {
     );
 
     // Set underlying and sanity check it
-    _underlying = underlying_;
-    EIP20Interface(_underlying).totalSupply();
+    underlying = underlying_;
+    EIP20Interface(underlying).totalSupply();
   }
 
   /*** User Interface ***/
-
-  function underlying() external view returns (address) {
-    return _underlying;
-  }
 
   /**
    * @notice Sender supplies assets into the market and receives cTokens in exchange
@@ -143,8 +139,7 @@ contract CErc20 is CToken, CErc20Base {
    * @return The quantity of underlying tokens owned by this contract
    */
   function getCashPrior() internal view virtual override returns (uint256) {
-    EIP20Interface token = EIP20Interface(_underlying);
-    return token.balanceOf(address(this));
+    return EIP20Interface(underlying).balanceOf(address(this));
   }
 
   /**
@@ -157,14 +152,14 @@ contract CErc20 is CToken, CErc20Base {
    *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
    */
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
-    uint256 balanceBefore = EIP20Interface(_underlying).balanceOf(address(this));
+    uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20Interface(_underlying).transferFrom.selector, from, address(this), amount),
+      abi.encodeWithSelector(EIP20Interface.transferFrom.selector, from, address(this), amount),
       "TOKEN_TRANSFER_IN_FAILED"
     );
 
     // Calculate the amount that was *actually* transferred
-    uint256 balanceAfter = EIP20Interface(_underlying).balanceOf(address(this));
+    uint256 balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
     require(balanceAfter >= balanceBefore, "TOKEN_TRANSFER_IN_OVERFLOW");
     return balanceAfter - balanceBefore; // underflow already checked above, just subtract
   }
@@ -180,7 +175,7 @@ contract CErc20 is CToken, CErc20Base {
    */
   function doTransferOut(address to, uint256 amount) internal virtual override {
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20Interface(_underlying).transfer.selector, to, amount),
+      abi.encodeWithSelector(EIP20Interface.transfer.selector, to, amount),
       "TOKEN_TRANSFER_OUT_FAILED"
     );
   }
@@ -192,7 +187,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param errorMessage The revert string to return on failure.
    */
   function _callOptionalReturn(bytes memory data, string memory errorMessage) internal {
-    bytes memory returndata = _functionCall(_underlying, data, errorMessage);
+    bytes memory returndata = _functionCall(underlying, data, errorMessage);
     if (returndata.length > 0) require(abi.decode(returndata, (bool)), errorMessage);
   }
 }

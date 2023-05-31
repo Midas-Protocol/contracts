@@ -703,7 +703,7 @@ contract CTokenFirstExtension is
     totalBorrows += amount;
     asCToken().selfTransferOut(msg.sender, amount);
 
-    IFlashLoanReceiver(msg.sender).receiveFlashLoan(_underlying, amount, data);
+    IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
 
     asCToken().selfTransferIn(msg.sender, amount);
     totalBorrows -= amount;

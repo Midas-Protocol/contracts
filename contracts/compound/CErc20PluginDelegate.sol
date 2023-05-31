@@ -61,9 +61,9 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     plugin = IERC4626(_plugin);
 
-    EIP20Interface(_underlying).approve(_plugin, type(uint256).max);
+    EIP20Interface(underlying).approve(_plugin, type(uint256).max);
 
-    uint256 amount = EIP20Interface(_underlying).balanceOf(address(this));
+    uint256 amount = EIP20Interface(underlying).balanceOf(address(this));
     if (amount != 0) {
       deposit(amount);
     }
@@ -91,7 +91,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferIn(address from, uint256 amount) internal override returns (uint256) {
     // Perform the EIP-20 transfer in
-    require(EIP20Interface(_underlying).transferFrom(from, address(this), amount), "send");
+    require(EIP20Interface.transferFrom(from, address(this), amount), "send");
 
     deposit(amount);
     return amount;

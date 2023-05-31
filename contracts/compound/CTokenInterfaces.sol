@@ -167,7 +167,7 @@ contract CErc20Storage is CTokenStorage {
   /**
    * @notice Underlying asset for this CToken
    */
-  address internal _underlying;
+  address public underlying;
 }
 
 abstract contract CTokenBaseEvents {
@@ -365,8 +365,6 @@ interface CTokenInterface {
 }
 
 interface CErc20Interface is CTokenInterface {
-  /*** User Interface ***/
-
   function mint(uint256 mintAmount) external returns (uint256);
 
   function redeem(uint256 redeemTokens) external returns (uint256);
