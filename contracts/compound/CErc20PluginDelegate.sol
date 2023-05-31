@@ -91,7 +91,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferIn(address from, uint256 amount) internal override returns (uint256) {
     // Perform the EIP-20 transfer in
-    require(EIP20Interface.transferFrom(from, address(this), amount), "send");
+    require(EIP20Interface(underlying).transferFrom(from, address(this), amount), "send");
 
     deposit(amount);
     return amount;
