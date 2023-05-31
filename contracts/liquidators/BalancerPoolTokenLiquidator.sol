@@ -37,7 +37,10 @@ contract BalancerPoolTokenLiquidator is IRedemptionStrategy {
      * @return outputToken The underlying ERC20 token outputted.
      * @return outputAmount The quantity of underlying tokens outputted.
      */
-  function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+  function redeem(IERC20Upgradeable inputToken, uint256 inputAmount, bytes memory strategyData)
+  external
+  override
+  returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Exit Balancer pool
     IBalancerPool balancerPool = IBalancerPool(address(inputToken));
     address[] memory tokens = balancerPool.getFinalTokens();

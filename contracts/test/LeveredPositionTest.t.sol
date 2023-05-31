@@ -45,7 +45,6 @@ contract LeveredPositionFactoryTest is BaseTest {
     uint256 p = mpo.price(0xf97e8F094c4428e6436b3bf86264D176A2606bC4);
     emit log_named_uint("rewards tok price", p);
     assertGt(p, 0, "zero price");
-
   }
 }
 
