@@ -5,10 +5,9 @@ import "./helpers/WithPool.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
-import "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -22,7 +21,7 @@ contract MaxBorrowTest is WithPool {
 
   struct LiquidationData {
     address[] cTokens;
-    CTokenInterface[] allMarkets;
+    ICErc20[] allMarkets;
     MockAsset usdc;
     MockAsset dai;
   }
@@ -58,7 +57,7 @@ contract MaxBorrowTest is WithPool {
     // TODO no need to upgrade after the next deploy
     upgradePool(address(comptroller));
 
-    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    vars.allMarkets = comptroller.getAllMarkets();
 
     CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
 
@@ -92,29 +91,27 @@ contract MaxBorrowTest is WithPool {
       assertEq(cToken.totalSupply(), 1e6 * 5);
       assertEq(cDaiToken.totalSupply(), 1e18 * 5);
 
-      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
-      uint256 maxDaiBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cDaiToken)));
+      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
+      uint256 maxDaiBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cDaiToken)));
       assertApproxEqAbs((maxBorrow * 1e18) / 10**cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
     }
 
     // borrow cap for collateral test
     {
-      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
       vm.prank(comptroller.admin());
-      asExtension._setBorrowCapForCollateral(address(cToken), address(cDaiToken), 0.5e6);
+      comptroller._setBorrowCapForCollateral(address(cToken), address(cDaiToken), 0.5e6);
     }
 
-    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
     assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
 
     // blacklist
     {
-      ComptrollerFirstExtension asExtension = comptroller.asComptrollerFirstExtension();
       vm.prank(comptroller.admin());
-      asExtension._blacklistBorrowingAgainstCollateral(address(cToken), address(cDaiToken), true);
+      comptroller._blacklistBorrowingAgainstCollateral(address(cToken), address(cDaiToken), true);
     }
 
-    uint256 maxBorrowAfterBlacklist = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
+    uint256 maxBorrowAfterBlacklist = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
     assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
   }
 
@@ -132,10 +129,10 @@ contract MaxBorrowTest is WithPool {
     address[] memory borrowers = asExtension.getAllBorrowers();
     address someBorrower = borrowers[1];
 
-    CTokenInterface[] memory markets = asExtension.getAllMarkets();
+    ICErc20[] memory markets = asExtension.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
-      CTokenInterface market = markets[i];
-      uint256 borrowed = market.asCTokenExtensionInterface().borrowBalanceHypo(someBorrower);
+      ICErc20 market = markets[i];
+      uint256 borrowed = market.borrowBalanceHypo(someBorrower);
       if (borrowed > 0) {
         emit log("borrower has borrowed");
         emit log_uint(borrowed);
@@ -145,7 +142,7 @@ contract MaxBorrowTest is WithPool {
         emit log("");
       }
 
-      uint256 collateral = market.asCTokenExtensionInterface().balanceOf(someBorrower);
+      uint256 collateral = market.balanceOf(someBorrower);
       if (collateral > 0) {
         emit log("has collateral");
         emit log_uint(collateral);
@@ -156,9 +153,9 @@ contract MaxBorrowTest is WithPool {
       }
     }
 
-    CTokenInterface marketToBorrow = markets[0];
-    CTokenInterface cappedCollateralMarket = markets[6];
-    uint256 borrowAmount = marketToBorrow.asCTokenExtensionInterface().borrowBalanceHypo(someBorrower);
+    ICErc20 marketToBorrow = markets[0];
+    ICErc20 cappedCollateralMarket = markets[6];
+    uint256 borrowAmount = marketToBorrow.borrowBalanceHypo(someBorrower);
 
     {
       (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(

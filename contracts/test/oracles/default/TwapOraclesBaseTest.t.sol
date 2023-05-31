@@ -7,7 +7,7 @@ import { UniswapTwapPriceOracleV2Root } from "../../../oracles/default/UniswapTw
 import { UniswapTwapPriceOracleV2 } from "../../../oracles/default/UniswapTwapPriceOracleV2.sol";
 import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../../../external/uniswap/IUniswapV2Factory.sol";
 
@@ -47,8 +47,8 @@ contract TwapOraclesBaseTest is BaseTest {
       // add the new twap oracle to the master oracle
       address[] memory underlyings = new address[](1);
       underlyings[0] = tokenAddress;
-      IPriceOracle[] memory oracles = new IPriceOracle[](1);
-      oracles[0] = IPriceOracle(oracle);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
+      oracles[0] = oracle;
       // impersonate the admin to add the oracle
       vm.prank(mpo.admin());
       mpo.add(underlyings, oracles);

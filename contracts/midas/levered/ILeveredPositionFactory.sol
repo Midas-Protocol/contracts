@@ -2,8 +2,8 @@
 pragma solidity >=0.8.0;
 
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import "./LeveredPosition.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { LeveredPosition } from "./LeveredPosition.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 

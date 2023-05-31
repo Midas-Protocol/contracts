@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenInterface, CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
-import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { UniswapV3LiquidatorFunder } from "../../liquidators/UniswapV3LiquidatorFunder.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
@@ -17,8 +16,6 @@ import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.so
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -64,7 +61,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    CTokenInterface[] allMarkets;
+    ICErc20[] allMarkets;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
@@ -75,8 +72,8 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
 
     vars.liquidator = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
 
-    CErc20Delegate usdcCToken = CErc20Delegate(usdcMarketAddress);
-    CErc20Delegate parCToken = CErc20Delegate(parMarketAddress);
+    ICErc20 usdcCToken = ICErc20(usdcMarketAddress);
+    ICErc20 parCToken = ICErc20(parMarketAddress);
     IComptroller comptroller = IComptroller(address(usdcCToken.comptroller()));
 
     vars.cTokens = new address[](2);
@@ -118,14 +115,14 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      CTokenExtensionInterface(address(usdcCToken)).accrueInterest();
-      CTokenExtensionInterface(address(parCToken)).accrueInterest();
+      usdcCToken.accrueInterest();
+      parCToken.accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-      uint256 priceusdc = mpo.getUnderlyingPrice(ICToken(usdcMarketAddress));
+      uint256 priceusdc = mpo.getUnderlyingPrice(usdcCToken);
       vm.mockCall(
         address(mpo),
-        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(usdcMarketAddress)),
+        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, usdcCToken),
         abi.encode(priceusdc / 100)
       );
     }

@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import "./ILeveredPositionFactory.sol";
-import "./LeveredPosition.sol";
-import "../SafeOwnableUpgradeable.sol";
-import "../../compound/IFuseFeeDistributor.sol";
-import "../../liquidators/registry/ILiquidatorsRegistry.sol";
+import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
+import { LeveredPosition } from "./LeveredPosition.sol";
+import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
+import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
+import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -104,7 +108,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     view
     returns (
       address[] memory markets,
-      address[] memory poolOfMarket,
+      IComptroller[] memory poolOfMarket,
       address[] memory underlyings,
       string[] memory names,
       string[] memory symbols,
@@ -115,7 +119,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     )
   {
     markets = collateralMarkets.values();
-    poolOfMarket = new address[](markets.length);
+    poolOfMarket = new IComptroller[](markets.length);
     underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
@@ -175,7 +179,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     uint256 _targetLeverageRatio
   ) public view returns (uint256) {
     IComptroller pool = IComptroller(_stableMarket.comptroller());
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 

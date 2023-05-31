@@ -2,8 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./config/MarketsTest.t.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract PoolCapsAndBlacklistsTest is MarketsTest {
   address payable ankrBnbPool = payable(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
@@ -11,8 +10,8 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
   ComptrollerFirstExtension asExtension;
   address borrower = 0x28C0208b7144B511C73586Bb07dE2100495e92f3; // ANKR account
   address otherSupplier = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc; // Supplier of ankrBNBAnkrMkt
-  CTokenExtensionInterface ankrBNBAnkrMkt = CTokenExtensionInterface(0x71693C84486B37096192c9942852f542543639Bf);
-  CTokenExtensionInterface ankrBNBMkt = CTokenExtensionInterface(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa);
+  ICErc20 ankrBNBAnkrMkt = ICErc20(0x71693C84486B37096192c9942852f542543639Bf);
+  ICErc20 ankrBNBMkt = ICErc20(0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa);
 
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
@@ -130,9 +129,9 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     assertEq(shortFallBefore, 0, "should have no shortfall before");
     assertGt(liquidityBefore, 0, "should have positive liquidity before");
 
-    CTokenInterface[] memory markets = new CTokenInterface[](2);
-    markets[0] = CTokenInterface(address(ankrBNBMkt));
-    markets[1] = CTokenInterface(address(ankrBNBAnkrMkt));
+    ICErc20[] memory markets = new ICErc20[](2);
+    markets[0] = ICErc20(address(ankrBNBMkt));
+    markets[1] = ICErc20(address(ankrBNBAnkrMkt));
 
     vm.prank(pool.admin());
     asExtension._setMarketSupplyCaps(markets, asArray(1, 1));
@@ -155,9 +154,9 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     assertEq(shortFallBefore, 0, "should have no shortfall before");
     assertGt(liquidityBefore, 0, "should have positive liquidity before");
 
-    CTokenInterface[] memory markets = new CTokenInterface[](2);
-    markets[0] = CTokenInterface(address(ankrBNBMkt));
-    markets[1] = CTokenInterface(address(ankrBNBAnkrMkt));
+    ICErc20[] memory markets = new ICErc20[](2);
+    markets[0] = ICErc20(address(ankrBNBMkt));
+    markets[1] = ICErc20(address(ankrBNBAnkrMkt));
 
     vm.prank(pool.admin());
     asExtension._setMarketBorrowCaps(markets, asArray(1, 1));

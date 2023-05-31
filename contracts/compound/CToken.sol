@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ComptrollerInterface } from "./ComptrollerInterface.sol";
-import { CTokenInterface } from "./CTokenInterfaces.sol";
+import { IComptroller } from "./ComptrollerInterface.sol";
+import { CTokenBase, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
@@ -16,7 +16,7 @@ import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
  * @notice Abstract base for CTokens
  * @author Compound
  */
-abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, DiamondBase {
+abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, DiamondBase {
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */
@@ -38,7 +38,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @param decimals_ EIP-20 decimal precision of this token
    */
   function initialize(
-    ComptrollerInterface comptroller_,
+    IComptroller comptroller_,
     address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     uint256 initialExchangeRateMantissa_,
@@ -112,7 +112,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
    */
   function mintInternal(uint256 mintAmount) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
@@ -152,7 +152,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
     MintLocalVars memory vars;
 
-    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateHypothetical();
+    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
 
     // Check max supply
     // unused function
@@ -218,7 +218,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function redeemInternal(uint256 redeemTokens) internal nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
@@ -234,7 +234,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function redeemUnderlyingInternal(uint256 redeemAmount) internal nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
       return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
@@ -270,13 +270,13 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
 
     RedeemLocalVars memory vars;
 
-    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateHypothetical();
+    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
 
     if (redeemAmountIn == type(uint256).max) {
-      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, address(this), false);
+      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, ICErc20(address(this)), false);
     }
 
-    uint256 totalUnderlyingSupplied = asCTokenExtensionInterface().getTotalUnderlyingSupplied();
+    uint256 totalUnderlyingSupplied = asCTokenExtension().getTotalUnderlyingSupplied();
     // don't allow dust tokens/assets to be left after
     if (totalUnderlyingSupplied - redeemAmountIn < 1000) redeemAmountIn = totalUnderlyingSupplied;
 
@@ -384,7 +384,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function borrowInternal(uint256 borrowAmount) internal nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return fail(Error(error), FailureInfo.BORROW_ACCRUE_INTEREST_FAILED);
@@ -431,7 +431,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
      *  accountBorrowsNew = accountBorrows + borrowAmount
      *  totalBorrowsNew = totalBorrows + borrowAmount
      */
-    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceHypo(borrower);
+    vars.accountBorrows = asCTokenExtension().borrowBalanceHypo(borrower);
 
     (vars.mathErr, vars.accountBorrowsNew) = addUInt(vars.accountBorrows, borrowAmount);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -488,7 +488,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
    */
   function repayBorrowInternal(uint256 repayAmount) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return (fail(Error(error), FailureInfo.REPAY_BORROW_ACCRUE_INTEREST_FAILED), 0);
@@ -508,7 +508,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     nonReentrant(false)
     returns (uint256, uint256)
   {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
       return (fail(Error(error), FailureInfo.REPAY_BEHALF_ACCRUE_INTEREST_FAILED), 0);
@@ -557,7 +557,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     vars.borrowerIndex = accountBorrows[borrower].interestIndex;
 
     /* We fetch the amount the borrower owes, with accumulated interest */
-    vars.accountBorrows = asCTokenExtensionInterface().borrowBalanceHypo(borrower);
+    vars.accountBorrows = asCTokenExtension().borrowBalanceHypo(borrower);
 
     /* If repayAmount == -1, repayAmount = accountBorrows */
     if (repayAmount == type(uint256).max) {
@@ -616,15 +616,15 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
   function liquidateBorrowInternal(
     address borrower,
     uint256 repayAmount,
-    CTokenInterface cTokenCollateral
+    address cTokenCollateral
   ) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
       return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED), 0);
     }
 
-    error = cTokenCollateral.asCTokenExtensionInterface().accrueInterest();
+    error = ICErc20(cTokenCollateral).accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
       return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED), 0);
@@ -647,12 +647,12 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     address liquidator,
     address borrower,
     uint256 repayAmount,
-    CTokenInterface cTokenCollateral
+    address cTokenCollateral
   ) internal returns (uint256, uint256) {
     /* Fail if liquidate not allowed */
     uint256 allowed = comptroller.liquidateBorrowAllowed(
       address(this),
-      address(cTokenCollateral),
+      cTokenCollateral,
       liquidator,
       borrower,
       repayAmount
@@ -667,7 +667,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     }
 
     /* Verify cTokenCollateral market's block number equals current block number */
-    if (cTokenCollateral.accrualBlockNumber() != block.number) {
+    if (CToken(cTokenCollateral).accrualBlockNumber() != block.number) {
       return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_COLLATERAL_FRESHNESS_CHECK), 0);
     }
 
@@ -699,34 +699,31 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     /* We calculate the number of collateral tokens that will be seized */
     (uint256 amountSeizeError, uint256 seizeTokens) = comptroller.liquidateCalculateSeizeTokens(
       address(this),
-      address(cTokenCollateral),
+      cTokenCollateral,
       actualRepayAmount
     );
     require(amountSeizeError == uint256(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
 
     /* Revert if borrower collateral token balance < seizeTokens */
-    require(
-      cTokenCollateral.asCTokenExtensionInterface().balanceOf(borrower) >= seizeTokens,
-      "LIQUIDATE_SEIZE_TOO_MUCH"
-    );
+    require(ICErc20(cTokenCollateral).balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
 
     // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
     uint256 seizeError;
-    if (address(cTokenCollateral) == address(this)) {
+    if (cTokenCollateral == address(this)) {
       seizeError = seizeInternal(address(this), liquidator, borrower, seizeTokens);
     } else {
-      seizeError = cTokenCollateral.seize(liquidator, borrower, seizeTokens);
+      seizeError = CToken(cTokenCollateral).seize(liquidator, borrower, seizeTokens);
     }
 
     /* Revert if seize tokens fails (since we cannot be sure of side effects) */
     require(seizeError == uint256(Error.NO_ERROR), "!seize");
 
     /* We emit a LiquidateBorrow event */
-    emit LiquidateBorrow(liquidator, borrower, actualRepayAmount, address(cTokenCollateral), seizeTokens);
+    emit LiquidateBorrow(liquidator, borrower, actualRepayAmount, cTokenCollateral, seizeTokens);
 
     /* We call the defense hook */
     // unused function
-    // comptroller.liquidateBorrowVerify(address(this), address(cTokenCollateral), liquidator, borrower, actualRepayAmount, seizeTokens);
+    // comptroller.liquidateBorrowVerify(address(this), cTokenCollateral, liquidator, borrower, actualRepayAmount, seizeTokens);
 
     return (uint256(Error.NO_ERROR), actualRepayAmount);
   }
@@ -806,7 +803,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
     vars.liquidatorSeizeTokens = seizeTokens - vars.protocolSeizeTokens - vars.feeSeizeTokens;
 
-    vars.exchangeRateMantissa = asCTokenExtensionInterface().exchangeRateHypothetical();
+    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
 
     vars.protocolSeizeAmount = mul_ScalarTruncate(
       Exp({ mantissa: vars.exchangeRateMantissa }),
@@ -847,6 +844,17 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
     return uint256(Error.NO_ERROR);
   }
 
+  function asCTokenExtension() internal view returns (ICErc20) {
+    return ICErc20(address(this));
+  }
+
+  /**
+   * @notice Indicator that this is a CToken contract (for inspection)
+   */
+  function isCToken() external view returns (bool) {
+    return true;
+  }
+
   /*** Safe Token ***/
 
   /**
@@ -885,7 +893,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
       return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
@@ -922,7 +930,7 @@ abstract contract CToken is CTokenInterface, TokenErrorReporter, Exponential, Di
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtensionInterface().accrueInterest();
+    uint256 error = asCTokenExtension().accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
     }

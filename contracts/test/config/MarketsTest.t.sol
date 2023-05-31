@@ -100,7 +100,7 @@ contract MarketsTest is BaseTest {
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
     asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-    Comptroller(latestComptrollerImplementation)._become(asUnitroller);
+    Comptroller(latestComptrollerImplementation)._become(poolAddress);
     vm.stopPrank();
   }
 }

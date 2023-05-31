@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
-import { CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
+import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
@@ -15,14 +15,14 @@ import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 
 contract CTokenFirstExtension is
   CDelegationStorage,
-  CTokenExtensionInterface,
+  CTokenExtensionBase,
   TokenErrorReporter,
   Exponential,
   DiamondExtension,
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 24;
+    uint8 fnsCount = 29;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -48,6 +48,11 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.borrowRatePerBlockAfterBorrow.selector;
     functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
     functionSelectors[--fnsCount] = this.flash.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceHypo.selector;
+    functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceStored.selector;
+    functionSelectors[--fnsCount] = this.totalBorrowsHypo.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -623,7 +628,7 @@ contract CTokenFirstExtension is
    * @param account The address whose balance should be calculated after updating borrowIndex
    * @return The calculated balance
    */
-  function borrowBalanceCurrent(address account) external override nonReentrant(false) returns (uint256) {
+  function borrowBalanceCurrent(address account) external override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     return borrowBalanceHypo(account);
   }
@@ -709,6 +714,10 @@ contract CTokenFirstExtension is
     totalBorrows -= amount;
 
     emit Flash(msg.sender, amount);
+  }
+
+  function asCTokenInterface() external view returns (CTokenInterface) {
+    return CTokenInterface(address(this));
   }
 
   /**

@@ -4,15 +4,12 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "./external/compound/IComptroller.sol";
-import "./external/compound/IPriceOracle.sol";
-import "./oracles/BasePriceOracle.sol";
-import "./external/compound/ICToken.sol";
-import "./external/compound/ICErc20.sol";
-import "./external/compound/IRewardsDistributor.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
-import "./FusePoolDirectory.sol";
-import "./oracles/MasterPriceOracle.sol";
+import { FusePoolDirectory } from "./FusePoolDirectory.sol";
+import { MasterPriceOracle } from "./oracles/MasterPriceOracle.sol";
 
 /**
  * @title FusePoolLens
@@ -225,13 +222,13 @@ contract FusePoolLens is Initializable {
   {
     uint256 totalBorrow = 0;
     uint256 totalSupply = 0;
-    ICToken[] memory cTokens = comptroller.getAllMarkets();
+    ICErc20[] memory cTokens = comptroller.getAllMarkets();
     address[] memory underlyingTokens = new address[](cTokens.length);
     string[] memory underlyingSymbols = new string[](cTokens.length);
-    IPriceOracle oracle = comptroller.oracle();
+    BasePriceOracle oracle = comptroller.oracle();
 
     for (uint256 i = 0; i < cTokens.length; i++) {
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
       cToken.accrueInterest();
@@ -243,13 +240,8 @@ contract FusePoolLens is Initializable {
       totalBorrow = totalBorrow + (assetTotalBorrow * underlyingPrice) / 1e18;
       totalSupply = totalSupply + (assetTotalSupply * underlyingPrice) / 1e18;
 
-      if (cToken.isCEther()) {
-        underlyingTokens[i] = address(0);
-        underlyingSymbols[i] = symbol;
-      } else {
-        underlyingTokens[i] = ICErc20(address(cToken)).underlying();
-        (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
-      }
+      underlyingTokens[i] = ICErc20(address(cToken)).underlying();
+      (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
     }
 
     bool whitelistedAdmin = directory.adminWhitelist(comptroller.admin());
@@ -296,7 +288,7 @@ contract FusePoolLens is Initializable {
    */
   function getPoolAssetsWithData(
     IComptroller comptroller,
-    ICToken[] memory cTokens,
+    ICErc20[] memory cTokens,
     address user
   ) internal returns (FusePoolAsset[] memory) {
     uint256 arrayLength = 0;
@@ -317,24 +309,17 @@ contract FusePoolLens is Initializable {
 
       // Start adding data to FusePoolAsset
       FusePoolAsset memory asset;
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       asset.cToken = address(cToken);
 
       cToken.accrueInterest();
 
       // Get underlying asset data
-      if (cToken.isCEther()) {
-        asset.underlyingName = name;
-        asset.underlyingSymbol = symbol;
-        asset.underlyingDecimals = 18;
-        asset.underlyingBalance = user.balance;
-      } else {
-        asset.underlyingToken = ICErc20(address(cToken)).underlying();
-        ERC20Upgradeable underlying = ERC20Upgradeable(asset.underlyingToken);
-        (asset.underlyingName, asset.underlyingSymbol) = getTokenNameAndSymbol(asset.underlyingToken);
-        asset.underlyingDecimals = underlying.decimals();
-        asset.underlyingBalance = underlying.balanceOf(user);
-      }
+      asset.underlyingToken = ICErc20(address(cToken)).underlying();
+      ERC20Upgradeable underlying = ERC20Upgradeable(asset.underlyingToken);
+      (asset.underlyingName, asset.underlyingSymbol) = getTokenNameAndSymbol(asset.underlyingToken);
+      asset.underlyingDecimals = underlying.decimals();
+      asset.underlyingBalance = underlying.balanceOf(user);
 
       // Get cToken data
       asset.supplyRatePerBlock = cToken.supplyRatePerBlock();
@@ -354,7 +339,7 @@ contract FusePoolLens is Initializable {
       // Get oracle for this cToken
       asset.oracle = address(oracle);
 
-      try MasterPriceOracle(asset.oracle).oracles(asset.underlyingToken) returns (IPriceOracle _oracle) {
+      try MasterPriceOracle(asset.oracle).oracles(asset.underlyingToken) returns (BasePriceOracle _oracle) {
         asset.oracle = address(_oracle);
       } catch {}
 
@@ -374,7 +359,7 @@ contract FusePoolLens is Initializable {
     return (detailedAssets);
   }
 
-  function getBorrowCapsPerCollateral(ICToken borrowedAsset, IComptroller comptroller)
+  function getBorrowCapsPerCollateral(ICErc20 borrowedAsset, IComptroller comptroller)
     internal
     view
     returns (
@@ -383,7 +368,7 @@ contract FusePoolLens is Initializable {
       bool[] memory borrowingBlacklistedAgainstCollateral
     )
   {
-    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     collateral = new address[](poolMarkets.length);
     borrowCapsAgainstCollateral = new uint256[](poolMarkets.length);
@@ -457,7 +442,7 @@ contract FusePoolLens is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
-    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     address[] memory assets = new address[](poolMarkets.length);
     uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
@@ -482,7 +467,7 @@ contract FusePoolLens is Initializable {
       uint256[] memory
     )
   {
-    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     address[] memory assets = new address[](poolMarkets.length);
     uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
@@ -503,7 +488,7 @@ contract FusePoolLens is Initializable {
    * @notice returns the total borrow cap and the per collateral borrowing cap/blacklist for the asset
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getBorrowCapsForAsset(ICToken asset)
+  function getBorrowCapsForAsset(ICErc20 asset)
     public
     view
     returns (
@@ -522,7 +507,7 @@ contract FusePoolLens is Initializable {
    * @notice returns the total borrow cap, the per collateral borrowing cap/blacklist for the asset and the total non-whitelist borrows
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getBorrowCapsDataForAsset(ICToken asset)
+  function getBorrowCapsDataForAsset(ICErc20 asset)
     public
     view
     returns (

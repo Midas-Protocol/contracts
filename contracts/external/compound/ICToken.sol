@@ -47,8 +47,6 @@ interface ICToken {
 
   function totalBorrowsCurrent() external returns (uint256);
 
-  function totalBorrowsHypo() external view returns (uint256);
-
   function totalSupply() external view returns (uint256);
 
   function getTotalUnderlyingSupplied() external view returns (uint256);
