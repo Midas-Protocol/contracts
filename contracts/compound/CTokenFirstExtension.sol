@@ -22,7 +22,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 28;
+    uint8 fnsCount = 29;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -52,6 +52,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceStored.selector;
+    functionSelectors[--fnsCount] = this.totalBorrowsHypo.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
