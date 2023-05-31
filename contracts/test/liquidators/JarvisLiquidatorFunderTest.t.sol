@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
+import { CTokenExtensionInterface, ICToken, ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { CToken } from "../../compound/CToken.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
@@ -15,8 +15,6 @@ import { ISynthereumLiquidityPool } from "../../external/jarvis/ISynthereumLiqui
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 

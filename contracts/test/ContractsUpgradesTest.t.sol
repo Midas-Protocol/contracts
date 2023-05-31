@@ -6,12 +6,11 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CToken } from "../compound/CToken.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, ICToken } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 

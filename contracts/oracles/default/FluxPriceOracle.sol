@@ -4,11 +4,8 @@ pragma solidity >=0.8.0;
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { CLV2V3Interface } from "../../external/flux/CLV2V3Interface.sol";
-import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
 import { NativeUSDPriceOracle } from "../evmos/NativeUSDPriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
@@ -18,7 +15,7 @@ import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
  * @dev Implements `PriceOracle`.
  * @author Rahul Sethuram & Carlo Mazzaferro <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
  */
-contract FluxPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracle {
+contract FluxPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @notice Maps ERC20 token addresses to ETH-based Flux price feed contracts.
    */

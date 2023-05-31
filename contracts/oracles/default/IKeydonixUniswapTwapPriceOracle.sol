@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../external/compound/ICToken.sol";
+import "../../compound/CTokenInterfaces.sol";
 import "../keydonix/UniswapOracle.sol";
 
 interface IKeydonixUniswapTwapPriceOracle {

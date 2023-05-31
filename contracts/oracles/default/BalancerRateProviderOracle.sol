@@ -3,12 +3,10 @@ pragma solidity >=0.8.0;
 
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
 import { IRateProvider } from "../../external/balancer/IRateProvider.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
 
 /**
  * @title BalancerRateProviderOracle

@@ -5,8 +5,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
 import { LiquidityAmounts } from "../../external/uniswap/LiquidityAmounts.sol";
 import { TickMath } from "../../external/uniswap/TickMath.sol";
 import { IAlgebraPool } from "../../external/algebra/IAlgebraPool.sol";

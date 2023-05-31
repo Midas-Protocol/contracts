@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../BasePriceOracle.sol";
 
 /**
@@ -15,7 +11,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract FixedNativePriceOracle is IPriceOracle, BasePriceOracle {
+contract FixedNativePriceOracle is BasePriceOracle {
   /**
    * @dev Returns the price in native token of `underlying` (implements `BasePriceOracle`).
    */

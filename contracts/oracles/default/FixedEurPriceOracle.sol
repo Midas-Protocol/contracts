@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/chainlink/AggregatorV3Interface.sol";
 
 import "../BasePriceOracle.sol";
@@ -17,7 +13,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract FixedEurPriceOracle is IPriceOracle, BasePriceOracle {
+contract FixedEurPriceOracle is BasePriceOracle {
   /**
    * @notice The maximum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
    */

@@ -8,18 +8,15 @@ import "forge-std/Test.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, ICToken, ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -30,7 +27,7 @@ contract MockAsset is MockERC20 {
 contract MaxWithdrawTest is WithPool {
   struct LiquidationData {
     address[] cTokens;
-    CTokenInterface[] allMarkets;
+    ICToken[] allMarkets;
     MockAsset bnb;
     MockAsset mimo;
     MockAsset usdc;
@@ -61,7 +58,7 @@ contract MaxWithdrawTest is WithPool {
     // TODO no need to upgrade after the next deploy
     upgradePool(address(comptroller));
 
-    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    vars.allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cBnbToken = CErc20Delegate(address(vars.allMarkets[0]));
 
     CErc20Delegate cUSDC = CErc20Delegate(address(vars.allMarkets[1]));
@@ -152,7 +149,7 @@ contract MaxWithdrawTest is WithPool {
     deployCErc20Delegate(address(vars.mimo), "MIMO", "mimo", 0.9e18);
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
 
-    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    vars.allMarkets = comptroller.getAllMarkets();
     CErc20Delegate cMimoToken = CErc20Delegate(address(vars.allMarkets[0]));
 
     CErc20Delegate cUSDC = CErc20Delegate(address(vars.allMarkets[1]));

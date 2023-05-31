@@ -5,7 +5,7 @@ import { PriceOracle } from "../../compound/PriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
-import { CTokenInterface } from "../../compound/CErc20.sol";
+import { CTokenInterface } from "../../compound/CTokenInterfaces.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../midas/SafeOwnableUpgradeable.sol";

@@ -4,15 +4,14 @@ pragma solidity >=0.8.0;
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplacingFlywheel.sol";
 import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, ICToken } from "../compound/CTokenInterfaces.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -123,7 +122,7 @@ contract FlywheelUpgradesTest is BaseTest {
     ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(poolAddress);
     address[] memory fws = poolExt.getRewardsDistributors();
 
-    CTokenInterface[] memory markets = poolExt.getAllMarkets();
+    ICToken[] memory markets = poolExt.getAllMarkets();
 
     for (uint8 j = 0; j < markets.length; j++) {
       string memory contractType = CErc20PluginRewardsDelegate(address(markets[j])).contractType();

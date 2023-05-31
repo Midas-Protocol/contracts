@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { ICurveV2Pool } from "../../../external/curve/ICurveV2Pool.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICToken } from "../../../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 

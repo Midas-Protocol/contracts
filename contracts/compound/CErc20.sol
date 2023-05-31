@@ -2,7 +2,8 @@
 pragma solidity >=0.8.0;
 
 import "./CToken.sol";
-import { CErc20Interface } from "./CTokenInterfaces.sol";
+import { CErc20Base } from "./CTokenInterfaces.sol";
+import { IComptroller } from "./ComptrollerInterface.sol";
 
 /**
  * @title Compound's CErc20 Contract
@@ -10,7 +11,7 @@ import { CErc20Interface } from "./CTokenInterfaces.sol";
  * @dev This contract should not to be deployed on its own; instead, deploy `CErc20Delegator` (proxy contract) and `CErc20Delegate` (logic/implementation contract).
  * @author Compound
  */
-contract CErc20 is CToken, CErc20Interface {
+contract CErc20 is CToken, CErc20Base {
   /**
    * @notice Initialize the new money market
    * @param underlying_ The address of the underlying asset
@@ -22,7 +23,7 @@ contract CErc20 is CToken, CErc20Interface {
    */
   function initialize(
     address underlying_,
-    ComptrollerInterface comptroller_,
+    IComptroller comptroller_,
     address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
@@ -46,11 +47,15 @@ contract CErc20 is CToken, CErc20Interface {
     );
 
     // Set underlying and sanity check it
-    underlying = underlying_;
-    EIP20Interface(underlying).totalSupply();
+    _underlying = underlying_;
+    EIP20Interface(_underlying).totalSupply();
   }
 
   /*** User Interface ***/
+
+  function underlying() external view returns (address) {
+    return _underlying;
+  }
 
   /**
    * @notice Sender supplies assets into the market and receives cTokens in exchange
@@ -124,7 +129,7 @@ contract CErc20 is CToken, CErc20Interface {
   function liquidateBorrow(
     address borrower,
     uint256 repayAmount,
-    CTokenInterface cTokenCollateral
+    address cTokenCollateral
   ) external override returns (uint256) {
     (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
     return err;
@@ -138,7 +143,7 @@ contract CErc20 is CToken, CErc20Interface {
    * @return The quantity of underlying tokens owned by this contract
    */
   function getCashPrior() internal view virtual override returns (uint256) {
-    EIP20Interface token = EIP20Interface(underlying);
+    EIP20Interface token = EIP20Interface(_underlying);
     return token.balanceOf(address(this));
   }
 
@@ -152,14 +157,14 @@ contract CErc20 is CToken, CErc20Interface {
    *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
    */
   function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
-    uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
+    uint256 balanceBefore = EIP20Interface(_underlying).balanceOf(address(this));
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20Interface(underlying).transferFrom.selector, from, address(this), amount),
+      abi.encodeWithSelector(EIP20Interface(_underlying).transferFrom.selector, from, address(this), amount),
       "TOKEN_TRANSFER_IN_FAILED"
     );
 
     // Calculate the amount that was *actually* transferred
-    uint256 balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
+    uint256 balanceAfter = EIP20Interface(_underlying).balanceOf(address(this));
     require(balanceAfter >= balanceBefore, "TOKEN_TRANSFER_IN_OVERFLOW");
     return balanceAfter - balanceBefore; // underflow already checked above, just subtract
   }
@@ -175,7 +180,7 @@ contract CErc20 is CToken, CErc20Interface {
    */
   function doTransferOut(address to, uint256 amount) internal virtual override {
     _callOptionalReturn(
-      abi.encodeWithSelector(EIP20Interface(underlying).transfer.selector, to, amount),
+      abi.encodeWithSelector(EIP20Interface(_underlying).transfer.selector, to, amount),
       "TOKEN_TRANSFER_OUT_FAILED"
     );
   }
@@ -187,7 +192,7 @@ contract CErc20 is CToken, CErc20Interface {
    * @param errorMessage The revert string to return on failure.
    */
   function _callOptionalReturn(bytes memory data, string memory errorMessage) internal {
-    bytes memory returndata = _functionCall(underlying, data, errorMessage);
+    bytes memory returndata = _functionCall(_underlying, data, errorMessage);
     if (returndata.length > 0) require(abi.decode(returndata, (bool)), errorMessage);
   }
 }

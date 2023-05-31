@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/alpha/ISafeBox.sol";
 
 import "../BasePriceOracle.sol";
@@ -17,7 +13,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract AlphaHomoraV2PriceOracle is IPriceOracle, BasePriceOracle {
+contract AlphaHomoraV2PriceOracle is BasePriceOracle {
   /**
    * @dev Fetches the fair ibTokenV2/ETH price, with 18 decimals of precision.
    * @param underlying The underlying token address for which to get the price (set to zero address for ETH).

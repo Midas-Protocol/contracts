@@ -5,10 +5,10 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { IBeefyVault, BeefyERC4626, MidasERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
-import { ComptrollerFirstExtension } from "../../compound/Comptroller.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
-import { CTokenInterface } from "../../compound/CTokenInterfaces.sol";
+import { ICToken } from "../../compound/CTokenInterfaces.sol";
 import { IERC4626 } from "../../compound/IERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -169,8 +169,8 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      ICToken[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
 

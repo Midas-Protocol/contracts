@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
-import { CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
+import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
@@ -15,7 +15,7 @@ import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/Saf
 
 contract CTokenFirstExtension is
   CDelegationStorage,
-  CTokenExtensionInterface,
+  CTokenExtensionBase,
   TokenErrorReporter,
   Exponential,
   DiamondExtension,
@@ -703,12 +703,16 @@ contract CTokenFirstExtension is
     totalBorrows += amount;
     asCToken().selfTransferOut(msg.sender, amount);
 
-    IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
+    IFlashLoanReceiver(msg.sender).receiveFlashLoan(_underlying, amount, data);
 
     asCToken().selfTransferIn(msg.sender, amount);
     totalBorrows -= amount;
 
     emit Flash(msg.sender, amount);
+  }
+
+  function asCTokenInterface() external view returns (CTokenInterface) {
+    return CTokenInterface(address(this));
   }
 
   /**

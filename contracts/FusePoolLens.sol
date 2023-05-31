@@ -4,15 +4,12 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "./external/compound/IComptroller.sol";
-import "./external/compound/IPriceOracle.sol";
-import "./oracles/BasePriceOracle.sol";
-import "./external/compound/ICToken.sol";
-import "./external/compound/ICErc20.sol";
-import "./external/compound/IRewardsDistributor.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
+import { ICToken, ICErc20 } from "./compound/CTokenInterfaces.sol";
 
-import "./FusePoolDirectory.sol";
-import "./oracles/MasterPriceOracle.sol";
+import { FusePoolDirectory } from "./FusePoolDirectory.sol";
+import { MasterPriceOracle } from "./oracles/MasterPriceOracle.sol";
 
 /**
  * @title FusePoolLens
@@ -228,7 +225,7 @@ contract FusePoolLens is Initializable {
     ICToken[] memory cTokens = comptroller.getAllMarkets();
     address[] memory underlyingTokens = new address[](cTokens.length);
     string[] memory underlyingSymbols = new string[](cTokens.length);
-    IPriceOracle oracle = comptroller.oracle();
+    BasePriceOracle oracle = comptroller.oracle();
 
     for (uint256 i = 0; i < cTokens.length; i++) {
       ICToken cToken = cTokens[i];
@@ -354,7 +351,7 @@ contract FusePoolLens is Initializable {
       // Get oracle for this cToken
       asset.oracle = address(oracle);
 
-      try MasterPriceOracle(asset.oracle).oracles(asset.underlyingToken) returns (IPriceOracle _oracle) {
+      try MasterPriceOracle(asset.oracle).oracles(asset.underlyingToken) returns (BasePriceOracle _oracle) {
         asset.oracle = address(_oracle);
       } catch {}
 

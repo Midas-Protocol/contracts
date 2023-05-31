@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/keep3r/Keep3rV2OracleFactory.sol";
 import "../../external/keep3r/Keep3rV2Oracle.sol";
 
@@ -21,7 +17,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract Keep3rV2PriceOracle is IPriceOracle, BasePriceOracle {
+contract Keep3rV2PriceOracle is BasePriceOracle {
   /**
    * @dev Constructor that sets the Keep3rV1Oracle or SushiswapV1Oracle.
    */

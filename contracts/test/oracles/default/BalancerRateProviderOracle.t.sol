@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { BalancerRateProviderOracle } from "../../../oracles/default/BalancerRateProviderOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 import { IBalancerStablePool } from "../../../external/balancer/IBalancerStablePool.sol";
@@ -42,8 +42,8 @@ contract BalancerRateProviderOracleTest is BaseTest {
   }
 
   function getTokenPrice(address token) internal returns (uint256) {
-    IPriceOracle[] memory oracles = new IPriceOracle[](1);
-    oracles[0] = IPriceOracle(oracle);
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
+    oracles[0] = BasePriceOracle(oracle);
 
     vm.prank(mpo.admin());
     mpo.add(asArray(token), oracles);

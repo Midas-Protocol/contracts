@@ -3,11 +3,9 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 
-import "../external/compound/IPriceOracle.sol";
-import "../external/compound/ICToken.sol";
-import "../external/compound/ICErc20.sol";
+import { ICToken, ICErc20 } from "../compound/CTokenInterfaces.sol";
 
-import "./BasePriceOracle.sol";
+import { BasePriceOracle } from "./BasePriceOracle.sol";
 
 /**
  * @title MasterPriceOracle
@@ -15,16 +13,16 @@ import "./BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
+contract MasterPriceOracle is Initializable, BasePriceOracle {
   /**
    * @dev Maps underlying token addresses to `PriceOracle` contracts (can be `BasePriceOracle` contracts too).
    */
-  mapping(address => IPriceOracle) public oracles;
+  mapping(address => BasePriceOracle) public oracles;
 
   /**
    * @dev Default/fallback `PriceOracle`.
    */
-  IPriceOracle public defaultOracle;
+  BasePriceOracle public defaultOracle;
 
   /**
    * @dev The administrator of this `MasterPriceOracle`.
@@ -74,8 +72,8 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
    */
   function initialize(
     address[] memory underlyings,
-    IPriceOracle[] memory _oracles,
-    IPriceOracle _defaultOracle,
+    BasePriceOracle[] memory _oracles,
+    BasePriceOracle _defaultOracle,
     address _admin,
     bool _canAdminOverwrite,
     address _wtoken
@@ -86,7 +84,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     // Initialize state variables
     for (uint256 i = 0; i < underlyings.length; i++) {
       address underlying = underlyings[i];
-      IPriceOracle newOracle = _oracles[i];
+      BasePriceOracle newOracle = _oracles[i];
       oracles[underlying] = newOracle;
       emit NewOracle(underlying, address(0), address(newOracle));
     }
@@ -100,7 +98,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
   /**
    * @dev Sets `_oracles` for `underlyings`.
    */
-  function add(address[] calldata underlyings, IPriceOracle[] calldata _oracles) external onlyAdmin {
+  function add(address[] calldata underlyings, BasePriceOracle[] calldata _oracles) external onlyAdmin {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == _oracles.length,
@@ -116,7 +114,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
           oldOracle == address(0),
           "Admin cannot overwrite existing assignments of oracles to underlying tokens."
         );
-      IPriceOracle newOracle = _oracles[i];
+      BasePriceOracle newOracle = _oracles[i];
       oracles[underlying] = newOracle;
       emit NewOracle(underlying, oldOracle, address(newOracle));
     }
@@ -125,8 +123,8 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
   /**
    * @dev Changes the default price oracle
    */
-  function setDefaultOracle(IPriceOracle newOracle) external onlyAdmin {
-    IPriceOracle oldOracle = defaultOracle;
+  function setDefaultOracle(BasePriceOracle newOracle) external onlyAdmin {
+    BasePriceOracle oldOracle = defaultOracle;
     defaultOracle = newOracle;
     emit NewDefaultOracle(address(oldOracle), address(newOracle));
   }
@@ -161,7 +159,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     if (underlying == wtoken) return 1e18;
 
     // Get underlying price from assigned oracle
-    IPriceOracle oracle = oracles[underlying];
+    BasePriceOracle oracle = oracles[underlying];
     if (address(oracle) != address(0)) return oracle.getUnderlyingPrice(cToken);
     if (address(defaultOracle) != address(0)) return defaultOracle.getUnderlyingPrice(cToken);
     revert("Price oracle not found for this underlying token address.");
@@ -175,7 +173,7 @@ contract MasterPriceOracle is Initializable, IPriceOracle, BasePriceOracle {
     if (underlying == wtoken) return 1e18;
 
     // Get underlying price from assigned oracle
-    IPriceOracle oracle = oracles[underlying];
+    BasePriceOracle oracle = oracles[underlying];
     if (address(oracle) != address(0)) return BasePriceOracle(address(oracle)).price(underlying);
     if (address(defaultOracle) != address(0)) return BasePriceOracle(address(defaultOracle)).price(underlying);
     revert("Price oracle not found for this underlying token address.");

@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/mstable/IMasset.sol";
 import "../../external/mstable/ISavingsContractV2.sol";
 
@@ -18,7 +14,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital>
  */
-contract MStablePriceOracle is IPriceOracle, BasePriceOracle {
+contract MStablePriceOracle is BasePriceOracle {
   /**
    * @dev mStable mUSD ERC20 token contract object.
    */

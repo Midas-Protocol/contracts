@@ -3,11 +3,8 @@ pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { ICToken } from "../../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
-import "../../external/compound/IPriceOracle.sol";
 import "../BasePriceOracle.sol";
 
 interface IWombatLpAsset {
@@ -24,7 +21,7 @@ interface IWombatLpAsset {
   function liability() external view returns (uint256);
 }
 
-contract WombatLpTokenPriceOracle is IPriceOracle, BasePriceOracle {
+contract WombatLpTokenPriceOracle is BasePriceOracle {
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     if (cToken.isCEther()) return 1e18;
 

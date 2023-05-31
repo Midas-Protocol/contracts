@@ -5,7 +5,7 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
 import { PriceOracle } from "../../compound/PriceOracle.sol";
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { CTokenInterface } from "../../compound/CErc20.sol";
+import { CTokenInterface } from "../../compound/CTokenInterfaces.sol";
 
 import "../../external/uniswap/FullMath.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";

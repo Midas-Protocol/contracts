@@ -22,7 +22,7 @@ contract CEtherDelegator is CDelegationStorage {
    * @param becomeImplementationData The encoded args for becomeImplementation
    */
   constructor(
-    ComptrollerInterface comptroller_,
+    IComptroller comptroller_,
     address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,

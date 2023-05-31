@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./IFuseFeeDistributor.sol";
-import "./PriceOracle.sol";
+import "../oracles/BasePriceOracle.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -54,7 +54,7 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
   /**
    * @notice Oracle which gives the price of any given asset
    */
-  PriceOracle public oracle;
+  BasePriceOracle public oracle;
 
   /**
    * @notice Multiplier used to calculate the maximum repayAmount when liquidating a borrow
@@ -74,7 +74,7 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
   /**
    * @notice Per-account mapping of "assets you are in", capped by maxAssets
    */
-  mapping(address => CTokenInterface[]) public accountAssets;
+  mapping(address => ICToken[]) public accountAssets;
 }
 
 contract ComptrollerV2Storage is ComptrollerV1Storage {
@@ -96,7 +96,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
   mapping(address => Market) public markets;
 
   /// @notice A list of all markets
-  CTokenInterface[] public allMarkets;
+  ICToken[] public allMarkets;
 
   /**
    * @dev Maps borrowers to booleans indicating if they have entered any markets
@@ -115,7 +115,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
   mapping(address => bool) public suppliers;
 
   /// @notice All cTokens addresses mapped by their underlying token addresses
-  mapping(address => CTokenInterface) public cTokensByUnderlying;
+  mapping(address => ICToken) public cTokensByUnderlying;
 
   /// @notice Whether or not the supplier whitelist is enforced
   bool public enforceWhitelist;

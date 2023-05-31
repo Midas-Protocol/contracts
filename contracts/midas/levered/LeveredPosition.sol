@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
 import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
-import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
+import { ICToken, ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -44,10 +44,10 @@ contract LeveredPosition is IFlashLoanReceiver {
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket
   ) {
-    address collateralPool = _collateralMarket.comptroller();
-    address stablePool = _stableMarket.comptroller();
+    IComptroller collateralPool = _collateralMarket.comptroller();
+    IComptroller stablePool = _stableMarket.comptroller();
     require(collateralPool == stablePool, "markets pools differ");
-    pool = IComptroller(collateralPool);
+    pool = collateralPool;
 
     positionOwner = _positionOwner;
     collateralMarket = _collateralMarket;
@@ -165,7 +165,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   function getMinLeverageRatioDiff() public view returns (uint256) {
     if (baseCollateral == 0) return 0;
 
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
     // not accounting for slippage
@@ -177,7 +177,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
     (, uint256 collatCollateralFactor) = pool.markets(address(collateralMarket));
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
     uint256 maxBorrow = pool.getMaxRedeemOrBorrow(address(this), stableMarket, true);
@@ -222,7 +222,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
   // @dev flash loan the needed amount, then borrow stables and swap them for the amount needed to repay the FL
   function _leverUp(uint256 ratioDiff) internal {
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
@@ -234,7 +234,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 assumedSlippage = factory.getSlippage(stableAsset, collateralAsset);
     stableToBorrow = (stableToBorrow * (10000 + assumedSlippage)) / 10000;
 
-    CTokenExtensionInterface(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
+    ICToken(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
     // the execution will first receive a callback to receiveFlashLoan()
     // then it continues from here
   }
@@ -258,7 +258,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 borrowsToRepay;
 
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
@@ -277,7 +277,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     }
 
     if (borrowsToRepay > 0) {
-      CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
+      ICToken(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
       // the execution will first receive a callback to receiveFlashLoan()
       // then it continues from here
     }

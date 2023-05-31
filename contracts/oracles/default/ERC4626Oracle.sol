@@ -4,10 +4,7 @@ pragma solidity >=0.8.0;
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { IERC4626 } from "../../compound/IERC4626.sol";
-import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 contract ERC4626Oracle is SafeOwnableUpgradeable, BasePriceOracle {

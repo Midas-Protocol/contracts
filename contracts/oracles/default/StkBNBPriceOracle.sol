@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ICToken } from "../../external/compound/ICToken.sol";
 import { IStakePool, ExchangeRateData } from "../../external/pstake/IStakePool.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceOracleV2.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICToken } from "../../../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 

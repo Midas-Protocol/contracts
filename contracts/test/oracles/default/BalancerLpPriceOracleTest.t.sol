@@ -5,7 +5,7 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 import { BalancerLpTokenPriceOracle } from "../../../oracles/default/BalancerLpTokenPriceOracle.sol";
 import { BalancerLpTokenPriceOracleNTokens } from "../../../oracles/default/BalancerLpTokenPriceOracleNTokens.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICToken } from "../../../compound/CTokenInterfaces.sol";
 
 import "../../../external/balancer/IBalancerPool.sol";
 import "../../../external/balancer/IBalancerVault.sol";

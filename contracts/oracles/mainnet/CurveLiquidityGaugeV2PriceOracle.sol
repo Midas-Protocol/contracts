@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/curve/ICurveLiquidityGaugeV2.sol";
 
 import "../BasePriceOracle.sol";
@@ -19,7 +15,7 @@ import "../BasePriceOracle.sol";
  * This contract is expected to be called by a `MasterPriceOracle` with the necessary `CurveLpTokenPriceOracle` configured.
  * The price of a Curve LiquidityGaugeV2 token is the same as the price of its underlying Curve LP token.
  */
-contract CurveLiquidityGaugeV2PriceOracle is IPriceOracle, BasePriceOracle {
+contract CurveLiquidityGaugeV2PriceOracle is BasePriceOracle {
   /**
    * @notice Get the LiquidityGaugeV2 price price for an underlying token address.
    * @param underlying The underlying token address for which to get the price (set to zero address for ETH).

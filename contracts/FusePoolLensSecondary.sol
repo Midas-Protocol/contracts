@@ -4,13 +4,27 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "./external/compound/IComptroller.sol";
-import "./external/compound/IPriceOracle.sol";
-import "./external/compound/ICToken.sol";
-import "./external/compound/IRewardsDistributor.sol";
-import "./external/uniswap/IUniswapV2Pair.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { ICToken } from "./compound/CTokenInterfaces.sol";
+import { IUniswapV2Pair } from "./external/uniswap/IUniswapV2Pair.sol";
 
-import "./FusePoolDirectory.sol";
+import { FusePoolDirectory } from "./FusePoolDirectory.sol";
+
+interface IRewardsDistributor {
+  function rewardToken() external view returns (address);
+
+  function compSupplySpeeds(address) external view returns (uint256);
+
+  function compBorrowSpeeds(address) external view returns (uint256);
+
+  function compAccrued(address) external view returns (uint256);
+
+  function flywheelPreSupplierAction(address cToken, address supplier) external;
+
+  function flywheelPreBorrowerAction(address cToken, address borrower) external;
+
+  function getAllMarkets() external view returns (ICToken[] memory);
+}
 
 /**
  * @title FusePoolLensSecondary

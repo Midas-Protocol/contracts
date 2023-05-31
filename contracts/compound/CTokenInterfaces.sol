@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ComptrollerInterface } from "./ComptrollerInterface.sol";
+import { IComptroller } from "./ComptrollerInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 
 contract CTokenAdminStorage {
@@ -65,7 +65,7 @@ contract CTokenStorage is CTokenAdminStorage {
   /**
    * @notice Contract which oversees inter-cToken operations
    */
-  ComptrollerInterface public comptroller;
+  IComptroller public comptroller;
 
   /**
    * @notice Model which tells what the current interest rate should be
@@ -167,10 +167,10 @@ contract CErc20Storage is CTokenStorage {
   /**
    * @notice Underlying asset for this CToken
    */
-  address public underlying;
+  address internal _underlying;
 }
 
-abstract contract CTokenBaseInterface is CErc20Storage {
+abstract contract CTokenBaseEvents {
   /* ERC20 */
 
   /**
@@ -211,96 +211,11 @@ abstract contract CTokenBaseInterface is CErc20Storage {
   event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 }
 
-abstract contract CTokenExtensionInterface is CTokenBaseInterface {
+abstract contract CTokenExtensionEvents is CTokenBaseEvents {
   event Flash(address receiver, uint256 amount);
-
-  /*** User Interface ***/
-
-  function transfer(address dst, uint256 amount) external virtual returns (bool);
-
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 amount
-  ) external virtual returns (bool);
-
-  function approve(address spender, uint256 amount) external virtual returns (bool);
-
-  function allowance(address owner, address spender) external view virtual returns (uint256);
-
-  function balanceOf(address owner) external view virtual returns (uint256);
-
-  /*** Admin Functions ***/
-
-  function _setReserveFactor(uint256 newReserveFactorMantissa) external virtual returns (uint256);
-
-  function _setAdminFee(uint256 newAdminFeeMantissa) external virtual returns (uint256);
-
-  function _setInterestRateModel(InterestRateModel newInterestRateModel) external virtual returns (uint256);
-
-  function getAccountSnapshot(address account)
-    external
-    view
-    virtual
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    );
-
-  function borrowRatePerBlock() external view virtual returns (uint256);
-
-  function supplyRatePerBlock() external view virtual returns (uint256);
-
-  function exchangeRateCurrent() public virtual returns (uint256);
-
-  function exchangeRateStored() public view virtual returns (uint256);
-
-  function accrueInterest() public virtual returns (uint256);
-
-  function totalBorrowsCurrent() external virtual returns (uint256);
-
-  function totalBorrowsHypo() external view virtual returns (uint256);
-
-  function borrowBalanceCurrent(address account) external virtual returns (uint256);
-
-  function borrowBalanceStored(address account) public view virtual returns (uint256);
-
-  function borrowBalanceHypo(address account) public view virtual returns (uint256);
-
-  function getTotalUnderlyingSupplied() public view virtual returns (uint256);
-
-  function balanceOfUnderlying(address owner) external virtual returns (uint256);
-
-  function balanceOfUnderlyingHypo(address owner) external view virtual returns (uint256);
-
-  function exchangeRateHypothetical() external view virtual returns (uint256);
-
-  function multicall(bytes[] calldata data) external payable virtual returns (bytes[] memory results);
-
-  function flash(uint256 amount, bytes calldata data) external virtual;
 }
 
-abstract contract CTokenInterface is CTokenBaseInterface {
-  function asCTokenExtensionInterface() public view returns (CTokenExtensionInterface) {
-    return CTokenExtensionInterface(address(this));
-  }
-
-  /**
-   * @notice Indicator that this is a CToken contract (for inspection)
-   */
-  function isCToken() external virtual returns (bool) {
-    return true;
-  }
-
-  /**
-   * @notice Indicator that this is or is not a CEther contract (for inspection)
-   */
-  function isCEther() external virtual returns (bool) {
-    return false;
-  }
-
+abstract contract CTokenEvents is CTokenBaseEvents {
   /*** Market Events ***/
 
   /**
@@ -343,44 +258,200 @@ abstract contract CTokenInterface is CTokenBaseInterface {
    * @notice Event emitted when the reserves are reduced
    */
   event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
+}
 
-  function getCash() external view virtual returns (uint256);
+interface CTokenExtensionInterface {
+  /*** User Interface ***/
+
+  function transfer(address dst, uint256 amount) external returns (bool);
+
+  function transferFrom(
+    address src,
+    address dst,
+    uint256 amount
+  ) external returns (bool);
+
+  function approve(address spender, uint256 amount) external returns (bool);
+
+  function allowance(address owner, address spender) external view returns (uint256);
+
+  function balanceOf(address owner) external view returns (uint256);
+
+  /*** Admin Functions ***/
+
+  function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256);
+
+  function _setAdminFee(uint256 newAdminFeeMantissa) external returns (uint256);
+
+  function _setInterestRateModel(InterestRateModel newInterestRateModel) external returns (uint256);
+
+  function getAccountSnapshot(address account)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
+
+  function borrowRatePerBlock() external view returns (uint256);
+
+  function supplyRatePerBlock() external view returns (uint256);
+
+  function exchangeRateCurrent() external returns (uint256);
+
+  function exchangeRateStored() external view returns (uint256);
+
+  function accrueInterest() external returns (uint256);
+
+  function totalBorrowsCurrent() external returns (uint256);
+
+  function totalBorrowsHypo() external view returns (uint256);
+
+  function borrowBalanceCurrent(address account) external returns (uint256);
+
+  function borrowBalanceStored(address account) external view returns (uint256);
+
+  function borrowBalanceHypo(address account) external view returns (uint256);
+
+  function getTotalUnderlyingSupplied() external view returns (uint256);
+
+  function balanceOfUnderlying(address owner) external returns (uint256);
+
+  function balanceOfUnderlyingHypo(address owner) external view returns (uint256);
+
+  function exchangeRateHypothetical() external view returns (uint256);
+
+  function multicall(bytes[] calldata data) external payable returns (bytes[] memory results);
+
+  function flash(uint256 amount, bytes calldata data) external;
+
+  function supplyRatePerBlockAfterDeposit(uint256 mintAmount) external view returns (uint256);
+
+  function supplyRatePerBlockAfterWithdraw(uint256 withdrawAmount) external view returns (uint256);
+
+  function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) external view returns (uint256);
+}
+
+interface CTokenInterface {
+  /**
+   * @notice Indicator that this is a CToken contract (for inspection)
+   */
+  function isCToken() external view returns (bool);
+
+  /**
+   * @notice Indicator that this is or is not a CEther contract (for inspection)
+   */
+  function isCEther() external view returns (bool);
+
+  function getCash() external view returns (uint256);
 
   function seize(
     address liquidator,
     address borrower,
     uint256 seizeTokens
-  ) external virtual returns (uint256);
+  ) external returns (uint256);
 
   /*** Admin Functions ***/
 
-  function _withdrawAdminFees(uint256 withdrawAmount) external virtual returns (uint256);
+  function _withdrawAdminFees(uint256 withdrawAmount) external returns (uint256);
 
-  function _withdrawFuseFees(uint256 withdrawAmount) external virtual returns (uint256);
+  function _withdrawFuseFees(uint256 withdrawAmount) external returns (uint256);
 
-  function selfTransferOut(address to, uint256 amount) external virtual;
+  function selfTransferOut(address to, uint256 amount) external;
 
-  function selfTransferIn(address from, uint256 amount) external virtual returns (uint256);
+  function selfTransferIn(address from, uint256 amount) external returns (uint256);
 }
 
-abstract contract CErc20Interface is CTokenInterface {
+interface CErc20Interface is CTokenInterface {
   /*** User Interface ***/
 
-  function mint(uint256 mintAmount) external virtual returns (uint256);
+  function mint(uint256 mintAmount) external returns (uint256);
 
-  function redeem(uint256 redeemTokens) external virtual returns (uint256);
+  function redeem(uint256 redeemTokens) external returns (uint256);
 
-  function redeemUnderlying(uint256 redeemAmount) external virtual returns (uint256);
+  function redeemUnderlying(uint256 redeemAmount) external returns (uint256);
 
-  function borrow(uint256 borrowAmount) external virtual returns (uint256);
+  function borrow(uint256 borrowAmount) external returns (uint256);
 
-  function repayBorrow(uint256 repayAmount) external virtual returns (uint256);
+  function repayBorrow(uint256 repayAmount) external returns (uint256);
 
-  function repayBorrowBehalf(address borrower, uint256 repayAmount) external virtual returns (uint256);
+  function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256);
 
   function liquidateBorrow(
     address borrower,
     uint256 repayAmount,
-    CTokenInterface cTokenCollateral
-  ) external virtual returns (uint256);
+    address cTokenCollateral
+  ) external returns (uint256);
+}
+
+abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {
+
+}
+
+abstract contract CTokenBase is CTokenStorage, CTokenEvents, CTokenInterface {
+
+}
+
+abstract contract CErc20Base is CErc20Storage, CTokenEvents, CErc20Interface {
+
+}
+
+interface CTokenStorageInterface {
+  function admin() external view returns (address);
+
+  function adminHasRights() external view returns (bool);
+
+  function fuseAdminHasRights() external view returns (bool);
+
+  function comptroller() external view returns (IComptroller);
+
+  function name() external view returns (string memory);
+
+  function symbol() external view returns (string memory);
+
+  function decimals() external view returns (uint8);
+
+  function totalSupply() external view returns (uint256);
+
+  function adminFeeMantissa() external view returns (uint256);
+
+  function fuseFeeMantissa() external view returns (uint256);
+
+  function reserveFactorMantissa() external view returns (uint256);
+
+  function protocolSeizeShareMantissa() external view returns (uint256);
+
+  function feeSeizeShareMantissa() external view returns (uint256);
+
+  function totalReserves() external view returns (uint256);
+
+  function totalAdminFees() external view returns (uint256);
+
+  function totalFuseFees() external view returns (uint256);
+
+  function totalBorrows() external view returns (uint256);
+
+  function accrualBlockNumber() external view returns (uint256);
+}
+
+interface CErc20StorageInterface is CTokenStorageInterface {
+  function underlying() external view returns (address);
+}
+
+interface ICTokenBase is CTokenInterface, CTokenStorageInterface {
+  function asCTokenExtension() external view returns (ICTokenExtension);
+}
+
+interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {
+  function asCTokenInterface() external view returns (CTokenInterface);
+}
+
+interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {
+  function asCTokenExtension() external view returns (ICToken);
+  function asCTokenInterface() external view returns (ICToken);
+}
+
+interface ICErc20 is CErc20StorageInterface, ICToken {
 }

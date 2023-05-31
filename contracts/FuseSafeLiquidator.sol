@@ -9,11 +9,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "./liquidators/IRedemptionStrategy.sol";
 import "./liquidators/IFundsConversionStrategy.sol";
 
-import "./external/compound/ICToken.sol";
-
-import "./external/compound/ICErc20.sol";
-import "./external/compound/ICEther.sol";
-
 import "./utils/IW_NATIVE.sol";
 
 import "./external/uniswap/IUniswapV2Router02.sol";
@@ -21,6 +16,8 @@ import "./external/uniswap/IUniswapV2Callee.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
+
+import { ICToken, ICErc20 } from "./compound/CTokenInterfaces.sol";
 
 /**
  * @title FuseSafeLiquidator
@@ -260,7 +257,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     IERC20Upgradeable underlying = IERC20Upgradeable(cErc20.underlying());
     underlying.safeTransferFrom(msg.sender, address(this), repayAmount);
     justApprove(underlying, address(cErc20), repayAmount);
-    require(cErc20.liquidateBorrow(borrower, repayAmount, cTokenCollateral) == 0, "Liquidation failed.");
+    require(cErc20.liquidateBorrow(borrower, repayAmount, address(cTokenCollateral)) == 0, "Liquidation failed.");
 
     // Redeem seized cToken collateral if necessary
     if (exchangeSeizedTo != address(cTokenCollateral)) {
@@ -304,7 +301,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
   function safeLiquidate(
     address,
-    ICEther,
+    address,
     ICErc20,
     uint256,
     address,
@@ -534,7 +531,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
       // Liquidate borrow
       require(
-        vars.cErc20.liquidateBorrow(vars.borrower, vars.repayAmount, vars.cTokenCollateral) == 0,
+        vars.cErc20.liquidateBorrow(vars.borrower, vars.repayAmount, address(vars.cTokenCollateral)) == 0,
         "Liquidation failed."
       );
 

@@ -8,9 +8,9 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 import { ERC4626Oracle } from "../../../oracles/default/ERC4626Oracle.sol";
 import { SimplePriceOracle } from "../../../oracles/default/SimplePriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { IERC4626 } from "../../../compound/IERC4626.sol";
 import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceOracleV2.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 
 import { IUniswapV3Factory } from "../../../external/uniswap/IUniswapV3Factory.sol";
 import { Quoter } from "../../../external/uniswap/Quoter/Quoter.sol";
@@ -50,18 +50,18 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
   address holder;
 
   function setUpErc4626Oracle() public {
-    IPriceOracle[] memory oracles = new IPriceOracle[](1);
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
     erc4626Oracle = new ERC4626Oracle();
     vm.prank(erc4626Oracle.owner());
     erc4626Oracle.initialize();
-    oracles[0] = IPriceOracle(address(erc4626Oracle));
+    oracles[0] = erc4626Oracle;
     vm.prank(mpo.admin());
     mpo.add(asArray(address(erc4626Vault)), oracles);
   }
 
   function setUpBaseOracles() public {
     setUpMpoAndAddresses();
-    IPriceOracle[] memory oracles = new IPriceOracle[](2);
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](2);
     chainlinkOracle = new ChainlinkPriceOracleV2(mpo.admin(), true, address(wethToken), nativeUsdPriceFeed);
     vm.prank(chainlinkOracle.admin());
     chainlinkOracle.setPriceFeeds(
@@ -69,8 +69,8 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
       asArray(usdcEthPriceFeed, wbtcEthPriceFeed),
       ChainlinkPriceOracleV2.FeedBaseCurrency.ETH
     );
-    oracles[0] = IPriceOracle(address(chainlinkOracle));
-    oracles[1] = IPriceOracle(address(chainlinkOracle));
+    oracles[0] = BasePriceOracle(address(chainlinkOracle));
+    oracles[1] = BasePriceOracle(address(chainlinkOracle));
 
     vm.prank(mpo.admin());
     mpo.add(asArray(address(usdcToken), address(wbtcToken)), oracles);
@@ -89,9 +89,9 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
       wbtcEthPriceFeed = 0xdeb288F737066589598e9214E782fa5A8eD689e8;
 
       address[] memory assets = new address[](0);
-      IPriceOracle[] memory oracles = new IPriceOracle[](0);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](0);
       mpo = new MasterPriceOracle();
-      mpo.initialize(assets, oracles, IPriceOracle(address(0)), address(this), true, address(wethToken));
+      mpo.initialize(assets, oracles, BasePriceOracle(address(0)), address(this), true, address(wethToken));
     }
   }
 

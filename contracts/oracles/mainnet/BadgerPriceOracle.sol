@@ -3,9 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/chainlink/AggregatorV3Interface.sol";
 
 import "../../external/badger/IXToken.sol";
@@ -20,7 +17,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract BadgerPriceOracle is IPriceOracle, BasePriceOracle {
+contract BadgerPriceOracle is BasePriceOracle {
   /**
    * @dev BADGER/ETH Chainlink price feed.
    */

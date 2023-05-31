@@ -3,11 +3,8 @@ pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
 import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";

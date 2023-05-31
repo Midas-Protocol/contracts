@@ -4,10 +4,8 @@ pragma solidity >=0.8.0;
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
 
 interface DIAOracleV2 {
   function getValue(string memory key) external view returns (uint128, uint128);
@@ -19,7 +17,7 @@ interface DIAOracleV2 {
  * @dev Implements `PriceOracle`.
  * @author Rahul Sethuram <rahul@midascapital.xyz> (https://github.com/rhlsthrm)
  */
-contract DiaPriceOracle is IPriceOracle, BasePriceOracle {
+contract DiaPriceOracle is BasePriceOracle {
   struct DiaOracle {
     DIAOracleV2 feed;
     string key;

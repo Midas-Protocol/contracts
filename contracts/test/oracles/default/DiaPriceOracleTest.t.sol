@@ -5,7 +5,7 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 import { DiaPriceOracle, DIAOracleV2 } from "../../../oracles/default/DiaPriceOracle.sol";
 import { SimplePriceOracle } from "../../../oracles/default/SimplePriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 
 contract MockDiaPriceFeed is DIAOracleV2 {
   struct DiaOracle {
@@ -48,9 +48,9 @@ contract DiaPriceOracleTest is BaseTest {
     MasterPriceOracle mpo = new MasterPriceOracle();
     address[] memory underlyings = new address[](1);
     underlyings[0] = address(2);
-    IPriceOracle[] memory oracles = new IPriceOracle[](1);
-    oracles[0] = IPriceOracle(address(spo));
-    mpo.initialize(underlyings, oracles, IPriceOracle(address(spo)), address(this), true, address(0));
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
+    oracles[0] = spo;
+    mpo.initialize(underlyings, oracles, spo, address(this), true, address(0));
     oracle = new DiaPriceOracle(address(this), true, address(0), MockDiaPriceFeed(address(0)), "", mpo, address(2));
   }
 

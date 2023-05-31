@@ -6,14 +6,13 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import "./compound/ErrorReporter.sol";
-import "./external/compound/IComptroller.sol";
-import "./compound/CErc20Delegator.sol";
-import "./compound/CErc20PluginDelegate.sol";
-import "./midas/SafeOwnableUpgradeable.sol";
-import "./utils/PatchedStorage.sol";
-import "./oracles/BasePriceOracle.sol";
-import { CTokenExtensionInterface } from "./compound/CTokenInterfaces.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { ICErc20, ICToken } from "./compound/CTokenInterfaces.sol";
+import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
+import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";
+import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
+import { PatchedStorage } from "./utils/PatchedStorage.sol";
+import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
 
 /**
@@ -102,12 +101,12 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     maxUtilizationRate = _maxUtilizationRate;
   }
 
-  function getMinBorrowEth(CTokenExtensionInterface _ctoken) public view returns (uint256) {
+  function getMinBorrowEth(ICToken _ctoken) public view returns (uint256) {
     (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
     if (borrowBalance == 0) return minBorrowEth;
     IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
-    BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));
-    uint256 underlyingPriceEth = oracle.price(CErc20Interface(address(_ctoken)).underlying());
+    BasePriceOracle oracle = comptroller.oracle();
+    uint256 underlyingPriceEth = oracle.price(ICErc20(address(_ctoken)).underlying());
     uint256 underlyingDecimals = _ctoken.decimals();
     uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10**underlyingDecimals;
     if (borrowBalanceEth > minBorrowEth) {
@@ -446,9 +445,8 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     pool.enterMarkets(new address[](0));
 
     for (uint8 i = 0; i < markets.length; i++) {
-      address marketAddress = address(markets[i]);
       // auto upgrade the market
-      CTokenExtensionInterface(marketAddress).accrueInterest();
+      markets[i].accrueInterest();
     }
 
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);

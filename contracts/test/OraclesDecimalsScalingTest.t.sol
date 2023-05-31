@@ -5,9 +5,8 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
+import { CTokenInterface, ICToken } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 

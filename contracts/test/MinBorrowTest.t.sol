@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ComptrollerInterface, CErc20Interface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
@@ -19,9 +20,9 @@ contract MinBorrowTest is BaseTest {
     IERC20Upgradeable usdc = IERC20Upgradeable(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
     IERC20Upgradeable busd = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
 
-    CErc20Interface usdcMarket = CErc20Interface(0x16B8da195CdC7F380B333bf6cF2f0f33c1061755);
-    CErc20Interface busdMarket = CErc20Interface(0x3BCb7dbBe729B24bE6c660B3e8ADD1Cb352e371D);
-    ComptrollerInterface comptroller = usdcMarket.comptroller();
+    ICErc20 usdcMarket = ICErc20(0x16B8da195CdC7F380B333bf6cF2f0f33c1061755);
+    ICErc20 busdMarket = ICErc20(0x3BCb7dbBe729B24bE6c660B3e8ADD1Cb352e371D);
+    IComptroller comptroller = usdcMarket.comptroller();
     deal(address(usdc), address(this), 10000e18);
     deal(address(busd), address(1), 10000e18);
 
@@ -41,12 +42,12 @@ contract MinBorrowTest is BaseTest {
     cTokens[1] = address(busdMarket);
     comptroller.enterMarkets(cTokens);
 
-    uint256 minBorrowEth = ffd.getMinBorrowEth(busdMarket.asCTokenExtensionInterface());
+    uint256 minBorrowEth = ffd.getMinBorrowEth(busdMarket);
     assertEq(minBorrowEth, baseMinBorrowEth, "!minBorrowEth for default min borrow eth");
 
     busdMarket.borrow(300e18);
 
-    minBorrowEth = ffd.getMinBorrowEth(busdMarket.asCTokenExtensionInterface());
+    minBorrowEth = ffd.getMinBorrowEth(busdMarket);
     assertEq(minBorrowEth, 0, "!minBorrowEth after borrowing less amount than min amount");
   }
 }

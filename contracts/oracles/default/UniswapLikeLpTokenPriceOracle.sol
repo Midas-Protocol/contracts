@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/uniswap/IUniswapV2Pair.sol";
 
 import "../BasePriceOracle.sol";
@@ -17,7 +13,7 @@ import "../BasePriceOracle.sol";
  * @notice UniswapLpTokenPriceOracle is a price oracle for Uniswap (and SushiSwap) LP tokens.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-abstract contract UniswapLikeLpTokenPriceOracle is IPriceOracle {
+abstract contract UniswapLikeLpTokenPriceOracle is BasePriceOracle {
   /**
    * @dev wtoken contract address.
    */
@@ -32,7 +28,7 @@ abstract contract UniswapLikeLpTokenPriceOracle is IPriceOracle {
 
   function _price(address token) internal view virtual returns (uint256);
 
-  function price(address underlying) external view returns (uint256) {
+  function price(address underlying) external view override returns (uint256) {
     return _price(underlying);
   }
 

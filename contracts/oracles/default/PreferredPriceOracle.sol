@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../BasePriceOracle.sol";
 import "../MasterPriceOracle.sol";
 import "../default/ChainlinkPriceOracleV2.sol";
@@ -15,7 +11,7 @@ import "../default/ChainlinkPriceOracleV2.sol";
  * @dev Implements `PriceOracle` and `BasePriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
+contract PreferredPriceOracle is BasePriceOracle {
   /**
    * @dev The primary `MasterPriceOracle`.
    */
@@ -29,7 +25,7 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
   /**
    * @dev The tertiary `PriceOracle`.
    */
-  IPriceOracle public tertiaryOracle;
+  BasePriceOracle public tertiaryOracle;
 
   /**
    * @dev The Wrapped native asset address.
@@ -42,7 +38,7 @@ contract PreferredPriceOracle is IPriceOracle, BasePriceOracle {
   constructor(
     MasterPriceOracle _masterOracle,
     ChainlinkPriceOracleV2 _chainlinkOracleV2,
-    IPriceOracle _tertiaryOracle,
+    BasePriceOracle _tertiaryOracle,
     address _wtoken
   ) {
     require(address(_masterOracle) != address(0), "MasterPriceOracle not set.");

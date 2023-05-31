@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { ISwap } from "../../../external/saddle/ISwap.sol";
 import { SaddleLpPriceOracle } from "../../../oracles/default/SaddleLpPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICToken } from "../../../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 

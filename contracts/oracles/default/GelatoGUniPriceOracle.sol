@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/gelato/GUniPool.sol";
 
 import "../BasePriceOracle.sol";
@@ -17,7 +13,7 @@ import "../BasePriceOracle.sol";
  * @notice GelatoGUniPriceOracle is a price oracle for Gelato G-UNI wrapped Uniswap V3 LP tokens.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract GelatoGUniPriceOracle is IPriceOracle {
+contract GelatoGUniPriceOracle is BasePriceOracle {
   /**
    * @dev The Wrapped native asset address.
    */

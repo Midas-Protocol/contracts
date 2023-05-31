@@ -11,20 +11,16 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
-import { IPriceOracle } from "../external/compound/IPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { FusePoolLens } from "../FusePoolLens.sol";
 import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20 } from "../compound/CErc20.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
+import { CTokenInterface, CTokenExtensionInterface, ICErc20, ICToken } from "../compound/CTokenInterfaces.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
@@ -50,7 +46,7 @@ contract NeondevnetE2ETest is WithPool {
     address[] swapToken0Path;
     address[] swapToken1Path;
     bytes[] abis;
-    CTokenInterface[] allMarkets;
+    ICToken[] allMarkets;
     FuseSafeLiquidator liquidator;
     MockERC20 erc20;
     MockWNeon asset;
@@ -75,9 +71,9 @@ contract NeondevnetE2ETest is WithPool {
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
     deployCErc20Delegate(wtoken, "cWToken", "wtoken", 0.9e18);
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[0]));
-    CErc20Delegate cWToken = CErc20Delegate(address(allMarkets[1]));
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken cToken = allMarkets[0];
+    ICToken cWToken = allMarkets[1];
 
     assertEq(cToken.name(), "cUnderlyingToken");
     assertEq(cWToken.name(), "cWToken");
@@ -108,8 +104,8 @@ contract NeondevnetE2ETest is WithPool {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    ICToken cToken = allMarkets[allMarkets.length - 1];
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
     address[] memory cTokens = new address[](1);
@@ -132,10 +128,10 @@ contract NeondevnetE2ETest is WithPool {
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
 
-    vars.allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    vars.allMarkets = comptroller.getAllMarkets();
 
-    CErc20Delegate cToken = CErc20Delegate(address(vars.allMarkets[0]));
-    CErc20Delegate cWNeonToken = CErc20Delegate(address(vars.allMarkets[1]));
+    ICToken cToken = vars.allMarkets[0];
+    ICToken cWNeonToken = vars.allMarkets[1];
 
     vars.cTokens = new address[](1);
 
@@ -200,7 +196,7 @@ contract NeondevnetE2ETest is WithPool {
 
     vm.startPrank(accountOne);
     FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
-    uint256 neonBalance = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
+    uint256 neonBalance = cWNeonToken.balanceOf(accountOne);
 
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(moraRouter);
     address pairAddress = IUniswapV2Factory(uniswapRouter.factory()).getPair(address(underlyingToken), wtoken);
@@ -229,7 +225,7 @@ contract NeondevnetE2ETest is WithPool {
       IComptroller(address(comptroller))
     );
 
-    uint256 neonBalanceAfter = cWNeonToken.asCTokenExtensionInterface().balanceOf(accountOne);
+    uint256 neonBalanceAfter = cWNeonToken.balanceOf(accountOne);
 
     assertGt(neonBalance, neonBalanceAfter, "!balance after > before");
     assertGt(assetsData[1].supplyBalance, assetsDataAfter[1].supplyBalance, "!supply balance after > before");

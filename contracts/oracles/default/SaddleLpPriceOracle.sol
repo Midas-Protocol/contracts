@@ -3,8 +3,6 @@ pragma solidity >=0.8.0;
 
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
 import "../../external/saddle/ISwap.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../../utils/PatchedStorage.sol";
