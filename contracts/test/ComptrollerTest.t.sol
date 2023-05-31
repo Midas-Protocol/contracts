@@ -5,7 +5,7 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
-import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
@@ -19,7 +19,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 
 contract ComptrollerTest is BaseTest {
-  Comptroller internal comptroller;
+  IComptroller internal comptroller;
   MidasFlywheel internal flywheel;
   address internal nonOwner = address(0x2222);
 
@@ -27,7 +27,7 @@ contract ComptrollerTest is BaseTest {
 
   function setUp() public {
     ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-    comptroller = new Comptroller(payable(address(this)));
+    comptroller = IComptroller(address(new Comptroller(payable(address(this)))));
     MidasFlywheel impl = new MidasFlywheel();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
     flywheel = MidasFlywheel(address(proxy));
@@ -36,7 +36,6 @@ contract ComptrollerTest is BaseTest {
 
   function test__setFlywheel() external {
     comptroller._addRewardsDistributor(address(flywheel));
-
     assertEq(comptroller.rewardsDistributors(0), address(flywheel));
   }
 
@@ -71,9 +70,8 @@ contract ComptrollerTest is BaseTest {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
     for (uint256 i = 0; i < pools.length; i++) {
-      Comptroller pool = Comptroller(pools[i].comptroller);
-      ComptrollerFirstExtension cfe = pool.asComptrollerExtension();
-      ICToken[] memory markets = cfe.getAllMarkets();
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      ICToken[] memory markets = pool.getAllMarkets();
       for (uint256 j = 0; j < markets.length; j++) {
         ICToken market = markets[j];
         uint256 totalSupply = market.totalSupply();

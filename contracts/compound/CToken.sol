@@ -847,7 +847,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     return uint256(Error.NO_ERROR);
   }
 
-  function asCTokenExtension() public view returns (ICToken) {
+  function asCTokenExtension() internal view returns (ICToken) {
     return ICToken(address(this));
   }
 

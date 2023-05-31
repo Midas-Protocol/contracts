@@ -1346,7 +1346,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
   }
 
-  function asComptrollerExtension() public view returns (ComptrollerFirstExtension) {
+  function asComptrollerExtension() internal view returns (ComptrollerFirstExtension) {
     return ComptrollerFirstExtension(address(this));
   }
 

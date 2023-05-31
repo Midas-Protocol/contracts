@@ -441,16 +441,12 @@ interface CErc20StorageInterface is CTokenStorageInterface {
 }
 
 interface ICTokenBase is CTokenInterface, CTokenStorageInterface {
-  function asCTokenExtension() external view returns (ICTokenExtension);
 }
 
 interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {
-  function asCTokenInterface() external view returns (CTokenInterface);
 }
 
 interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {
-  function asCTokenExtension() external view returns (ICToken);
-  function asCTokenInterface() external view returns (ICToken);
 }
 
 interface ICErc20 is CErc20StorageInterface, ICToken {

@@ -187,6 +187,8 @@ interface ComptrollerStorageInterface {
   function borrowGuardianPaused(address cToken) external view returns (bool);
 
   function mintGuardianPaused(address cToken) external view returns (bool);
+
+  function rewardsDistributors(uint256) external view returns (address);
 }
 
 interface ComptrollerExtensionInterface {
@@ -282,15 +284,12 @@ interface ComptrollerExtensionInterface {
 }
 
 interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {
-
 }
 
 interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {
-  function asComptrollerExtension() external view returns (IComptrollerExtension);
 }
 
-interface IComptroller is ComptrollerInterface, ComptrollerExtensionInterface, ComptrollerStorageInterface {
-  function asComptrollerExtension() external view returns (IComptroller);
+interface IComptroller is IComptrollerBase, ComptrollerExtensionInterface {
 }
 
 abstract contract ComptrollerBase is ComptrollerInterface {
