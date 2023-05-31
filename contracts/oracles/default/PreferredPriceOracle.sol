@@ -75,9 +75,6 @@ contract PreferredPriceOracle is BasePriceOracle {
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
-    // Return 1e18 for ETH
-    if (cToken.isCEther()) return 1e18;
-
     // Get underlying ERC20 token address
     address underlying = cToken.underlying();
 

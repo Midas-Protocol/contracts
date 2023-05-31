@@ -23,8 +23,6 @@ interface IWombatLpAsset {
 
 contract WombatLpTokenPriceOracle is BasePriceOracle {
   function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
-    if (cToken.isCEther()) return 1e18;
-
     address asset = cToken.underlying();
 
     uint256 oraclePrice = _price(asset);

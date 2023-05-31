@@ -340,11 +340,6 @@ interface CTokenInterface {
    */
   function isCToken() external view returns (bool);
 
-  /**
-   * @notice Indicator that this is or is not a CEther contract (for inspection)
-   */
-  function isCEther() external view returns (bool);
-
   function getCash() external view returns (uint256);
 
   function seize(

@@ -267,31 +267,26 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         uint256 redeemResult = cTokenCollateral.redeem(seizedCTokenAmount);
         require(redeemResult == 0, "Error calling redeeming seized cToken: error code not equal to 0");
 
-        // If cTokenCollateral is CEther
-        if (cTokenCollateral.isCEther()) {
-          revert("not used anymore");
-        } else {
-          // Redeem custom collateral if liquidation strategy is set
-          IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
+        // Redeem custom collateral if liquidation strategy is set
+        IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
 
-          if (redemptionStrategies.length > 0) {
-            require(
-              redemptionStrategies.length == strategyData.length,
-              "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
+        if (redemptionStrategies.length > 0) {
+          require(
+            redemptionStrategies.length == strategyData.length,
+            "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
+          );
+          uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
+          for (uint256 i = 0; i < redemptionStrategies.length; i++)
+            (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
+              underlyingCollateral,
+              underlyingCollateralSeized,
+              redemptionStrategies[i],
+              strategyData[i]
             );
-            uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
-            for (uint256 i = 0; i < redemptionStrategies.length; i++)
-              (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
-                underlyingCollateral,
-                underlyingCollateralSeized,
-                redemptionStrategies[i],
-                strategyData[i]
-              );
-          }
-
-          // Exchange redeemed token collateral if necessary
-          exchangeAllWethOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
         }
+
+        // Exchange redeemed token collateral if necessary
+        exchangeAllWethOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
       }
     }
 
@@ -566,10 +561,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     if ((_flashSwapAmount * 10000) % (10000 - flashSwapFee) > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
 
     // Swap cTokenCollateral for cErc20 via Uniswap
-    if (cTokenCollateral.isCEther()) {
-      revert("not used anymore");
-    }
-
     // Check underlying collateral seized
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
     uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));

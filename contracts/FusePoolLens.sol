@@ -240,13 +240,8 @@ contract FusePoolLens is Initializable {
       totalBorrow = totalBorrow + (assetTotalBorrow * underlyingPrice) / 1e18;
       totalSupply = totalSupply + (assetTotalSupply * underlyingPrice) / 1e18;
 
-      if (cToken.isCEther()) {
-        underlyingTokens[i] = address(0);
-        underlyingSymbols[i] = symbol;
-      } else {
-        underlyingTokens[i] = ICErc20(address(cToken)).underlying();
-        (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
-      }
+      underlyingTokens[i] = ICErc20(address(cToken)).underlying();
+      (, underlyingSymbols[i]) = getTokenNameAndSymbol(underlyingTokens[i]);
     }
 
     bool whitelistedAdmin = directory.adminWhitelist(comptroller.admin());
@@ -320,18 +315,11 @@ contract FusePoolLens is Initializable {
       cToken.accrueInterest();
 
       // Get underlying asset data
-      if (cToken.isCEther()) {
-        asset.underlyingName = name;
-        asset.underlyingSymbol = symbol;
-        asset.underlyingDecimals = 18;
-        asset.underlyingBalance = user.balance;
-      } else {
-        asset.underlyingToken = ICErc20(address(cToken)).underlying();
-        ERC20Upgradeable underlying = ERC20Upgradeable(asset.underlyingToken);
-        (asset.underlyingName, asset.underlyingSymbol) = getTokenNameAndSymbol(asset.underlyingToken);
-        asset.underlyingDecimals = underlying.decimals();
-        asset.underlyingBalance = underlying.balanceOf(user);
-      }
+      asset.underlyingToken = ICErc20(address(cToken)).underlying();
+      ERC20Upgradeable underlying = ERC20Upgradeable(asset.underlyingToken);
+      (asset.underlyingName, asset.underlyingSymbol) = getTokenNameAndSymbol(asset.underlyingToken);
+      asset.underlyingDecimals = underlying.decimals();
+      asset.underlyingBalance = underlying.balanceOf(user);
 
       // Get cToken data
       asset.supplyRatePerBlock = cToken.supplyRatePerBlock();

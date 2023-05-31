@@ -400,10 +400,6 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     if ((_flashSwapAmount * 10000) % (10000 - flashSwapFee) > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
 
     // Swap cTokenCollateral for cErc20 via Uniswap
-    if (cTokenCollateral.isCEther()) {
-      revert("not used anymore");
-    }
-
     // Check underlying collateral seized
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
     uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));

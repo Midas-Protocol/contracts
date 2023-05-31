@@ -10,7 +10,7 @@ interface ComptrollerInterface {
   function _become(address _unitroller) external;
 
   function _deployMarket(
-    bool isCEther,
+    bool,
     bytes memory constructorData,
     uint256 collateralFactorMantissa
   ) external returns (uint256);

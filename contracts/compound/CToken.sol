@@ -855,13 +855,6 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     return true;
   }
 
-  /**
-   * @notice Indicator that this is or is not a CEther contract (for inspection)
-   */
-  function isCEther() external view returns (bool) {
-    return false;
-  }
-
   /*** Safe Token ***/
 
   /**
