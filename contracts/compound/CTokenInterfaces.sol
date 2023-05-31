@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { IComptroller } from "./ComptrollerInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 
-contract CTokenAdminStorage {
+abstract contract CTokenAdminStorage {
   /*
    * Administrator for Fuse
    */
@@ -26,7 +26,7 @@ contract CTokenAdminStorage {
   bool internal __adminHasRights;
 }
 
-contract CTokenStorage is CTokenAdminStorage {
+abstract contract CTokenStorage is CTokenAdminStorage {
   /**
    * @dev Guard variable for re-entrancy checks
    */
@@ -161,9 +161,12 @@ contract CTokenStorage is CTokenAdminStorage {
    * Share of seized collateral taken as fees
    */
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
+
+  // TODO remove after the next deploy
+  bool public constant isCEther = false;
 }
 
-contract CErc20Storage is CTokenStorage {
+abstract contract CErc20Storage is CTokenStorage {
   /**
    * @notice Underlying asset for this CToken
    */
