@@ -36,11 +36,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   event NewCloseFactor(uint256 oldCloseFactorMantissa, uint256 newCloseFactorMantissa);
 
   /// @notice Emitted when a collateral factor is changed by admin
-  event NewCollateralFactor(
-    ICToken cToken,
-    uint256 oldCollateralFactorMantissa,
-    uint256 newCollateralFactorMantissa
-  );
+  event NewCollateralFactor(ICToken cToken, uint256 oldCollateralFactorMantissa, uint256 newCollateralFactorMantissa);
 
   /// @notice Emitted when liquidation incentive is changed by admin
   event NewLiquidationIncentive(uint256 oldLiquidationIncentiveMantissa, uint256 newLiquidationIncentiveMantissa);
@@ -588,12 +584,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       require(borrowBalance >= repayAmount, "!borrow>repay");
     } else {
       /* The borrower must have shortfall in order to be liquidateable */
-      (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
-        borrower,
-        ICToken(address(0)),
-        0,
-        0
-      );
+      (Error err, , uint256 shortfall) = getHypotheticalAccountLiquidityInternal(borrower, ICToken(address(0)), 0, 0);
       if (err != Error.NO_ERROR) {
         return uint256(err);
       }

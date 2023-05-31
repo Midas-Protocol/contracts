@@ -41,13 +41,13 @@ interface ComptrollerInterface {
     uint256 redeemTokens,
     uint256 borrowAmount
   )
-  external
-  view
-  returns (
-    uint256,
-    uint256,
-    uint256
-  );
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
   function getMaxRedeemOrBorrow(
     address account,
@@ -125,7 +125,6 @@ interface ComptrollerInterface {
   function getAccountLiquidity(address account)
     external
     view
-   
     returns (
       uint256,
       uint256,
@@ -283,14 +282,11 @@ interface ComptrollerExtensionInterface {
   function _unsupportMarket(ICToken cToken) external returns (uint256);
 }
 
-interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {
-}
+interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {}
 
-interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {
-}
+interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
 
-interface IComptroller is IComptrollerBase, ComptrollerExtensionInterface {
-}
+interface IComptroller is IComptrollerBase, ComptrollerExtensionInterface {}
 
 abstract contract ComptrollerBase is ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)

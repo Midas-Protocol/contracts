@@ -386,17 +386,11 @@ interface CErc20Interface is CTokenInterface {
   ) external returns (uint256);
 }
 
-abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {
+abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {}
 
-}
+abstract contract CTokenBase is CTokenStorage, CTokenEvents, CTokenInterface {}
 
-abstract contract CTokenBase is CTokenStorage, CTokenEvents, CTokenInterface {
-
-}
-
-abstract contract CErc20Base is CErc20Storage, CTokenEvents, CErc20Interface {
-
-}
+abstract contract CErc20Base is CErc20Storage, CTokenEvents, CErc20Interface {}
 
 interface CTokenStorageInterface {
   function admin() external view returns (address);
@@ -440,14 +434,10 @@ interface CErc20StorageInterface is CTokenStorageInterface {
   function underlying() external view returns (address);
 }
 
-interface ICTokenBase is CTokenInterface, CTokenStorageInterface {
-}
+interface ICTokenBase is CTokenInterface, CTokenStorageInterface {}
 
-interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {
-}
+interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {}
 
-interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {
-}
+interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {}
 
-interface ICErc20 is CErc20StorageInterface, ICToken {
-}
+interface ICErc20 is CErc20StorageInterface, ICToken {}

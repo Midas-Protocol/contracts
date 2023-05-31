@@ -9,7 +9,12 @@ import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerExtensionInterface, ComptrollerErrorReporter {
+contract ComptrollerFirstExtension is
+  DiamondExtension,
+  ComptrollerV3Storage,
+  ComptrollerExtensionInterface,
+  ComptrollerErrorReporter
+{
   using EnumerableSet for EnumerableSet.AddressSet;
 
   /// @notice Emitted when supply cap for a cToken is changed
