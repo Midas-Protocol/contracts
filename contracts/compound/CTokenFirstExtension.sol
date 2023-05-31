@@ -22,7 +22,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 24;
+    uint8 fnsCount = 28;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -48,6 +48,10 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.borrowRatePerBlockAfterBorrow.selector;
     functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
     functionSelectors[--fnsCount] = this.flash.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceHypo.selector;
+    functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceStored.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -623,7 +627,7 @@ contract CTokenFirstExtension is
    * @param account The address whose balance should be calculated after updating borrowIndex
    * @return The calculated balance
    */
-  function borrowBalanceCurrent(address account) external override nonReentrant(false) returns (uint256) {
+  function borrowBalanceCurrent(address account) external override returns (uint256) {
     require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
     return borrowBalanceHypo(account);
   }
