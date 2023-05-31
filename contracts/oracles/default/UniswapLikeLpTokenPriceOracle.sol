@@ -32,8 +32,8 @@ abstract contract UniswapLikeLpTokenPriceOracle is BasePriceOracle {
     return _price(underlying);
   }
 
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));

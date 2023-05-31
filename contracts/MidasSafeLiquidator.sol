@@ -17,7 +17,7 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
 
-import { ICToken, ICErc20 } from "./compound/CTokenInterfaces.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
 
 contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
@@ -388,7 +388,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
    * @dev Repays token flashloans.
    */
   function repayTokenFlashLoan(
-    ICToken cTokenCollateral,
+    ICErc20 cTokenCollateral,
     address exchangeProfitTo,
     IUniswapV2Router02 uniswapV2RouterForBorrow,
     IUniswapV2Router02 uniswapV2RouterForCollateral,

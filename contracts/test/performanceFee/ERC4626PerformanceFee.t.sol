@@ -8,7 +8,7 @@ import { IBeefyVault, BeefyERC4626, MidasERC4626 } from "../../midas/strategies/
 import { IComptroller } from "../../compound/ComptrollerInterface.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
-import { ICToken } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { IERC4626 } from "../../compound/IERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -170,7 +170,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
-      ICToken[] memory markets = comptroller.getAllMarkets();
+      ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
 

@@ -7,7 +7,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
-import { ICErc20, ICToken } from "./compound/CTokenInterfaces.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
 import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";
 import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
@@ -101,7 +101,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     maxUtilizationRate = _maxUtilizationRate;
   }
 
-  function getMinBorrowEth(ICToken _ctoken) public view returns (uint256) {
+  function getMinBorrowEth(ICErc20 _ctoken) public view returns (uint256) {
     (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
     if (borrowBalance == 0) return minBorrowEth;
     IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
@@ -437,7 +437,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   function autoUpgradePool(IComptroller pool) external onlyOwner {
-    ICToken[] memory markets = pool.getAllMarkets();
+    ICErc20[] memory markets = pool.getAllMarkets();
     bool autoImplOnBefore = pool.autoImplementation();
     pool._toggleAutoImplementations(true);
 

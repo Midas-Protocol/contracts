@@ -3,7 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import { ICToken } from "./compound/CTokenInterfaces.sol";
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { IUnitroller } from "./external/compound/IUnitroller.sol"; // TODO
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";

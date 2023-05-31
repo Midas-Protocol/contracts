@@ -6,7 +6,7 @@ import { LeveredPosition } from "./LeveredPosition.sol";
 import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
 import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
-import { ICToken, ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../../compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";

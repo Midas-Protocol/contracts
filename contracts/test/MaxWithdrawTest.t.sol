@@ -16,7 +16,7 @@ import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
-import { CTokenInterface, ICToken, ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -27,7 +27,7 @@ contract MockAsset is MockERC20 {
 contract MaxWithdrawTest is WithPool {
   struct LiquidationData {
     address[] cTokens;
-    ICToken[] allMarkets;
+    ICErc20[] allMarkets;
     MockAsset bnb;
     MockAsset mimo;
     MockAsset usdc;
@@ -126,7 +126,7 @@ contract MaxWithdrawTest is WithPool {
       assertEq(cUSDC.borrow(110e18), 0, "!cusdc borrow acc 1");
       assertEq(cUSDC.totalBorrows(), 110e18, "!total borrows");
 
-      uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICToken(address(cBnbToken)));
+      uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICErc20(address(cBnbToken)));
 
       uint256 beforeBnbBalance = vars.bnb.balanceOf(accountOne);
       cBnbToken.redeemUnderlying(type(uint256).max);
@@ -206,7 +206,7 @@ contract MaxWithdrawTest is WithPool {
     {
       emit log("Account Two Borrow");
       vm.startPrank(accountTwo);
-      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountTwo, ICToken(address(cMimoToken)));
+      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountTwo, ICErc20(address(cMimoToken)));
       emit log_uint(maxBorrow);
       assertEq(cMimoToken.borrow(maxBorrow), 0, "!cmimo borrow acc 2");
       assertEq(cMimoToken.totalBorrows(), maxBorrow, "!cMimo total borrows");
@@ -222,7 +222,7 @@ contract MaxWithdrawTest is WithPool {
       assertEq(cUSDC.borrow(150e6), 0, "!cusdc borrow acc 1");
       assertEq(cUSDC.totalBorrows(), 150e6, "!cUSDC total borrows");
 
-      uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICToken(address(cMimoToken)));
+      uint256 maxWithdraw = poolLensSecondary.getMaxRedeem(accountOne, ICErc20(address(cMimoToken)));
 
       uint256 beforeMimoBalance = vars.mimo.balanceOf(accountOne);
       cMimoToken.redeemUnderlying(type(uint256).max);

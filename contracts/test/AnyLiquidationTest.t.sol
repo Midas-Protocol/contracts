@@ -15,7 +15,7 @@ import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2L
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-import { ICErc20, ICToken } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
@@ -126,7 +126,7 @@ contract AnyLiquidationTest is BaseTest {
   struct LiquidationData {
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
-    ICToken[] markets;
+    ICErc20[] markets;
     address[] borrowers;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
@@ -179,7 +179,7 @@ contract AnyLiquidationTest is BaseTest {
     // find a debt market in which the borrower has borrowed
     for (uint256 m = 0; m < vars.markets.length; m++) {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
-      ICToken randomMarket = vars.markets[marketIndexWithOffset];
+      ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
       borrowAmount = randomMarket.borrowBalanceHypo(vars.borrower);
       if (borrowAmount > 0) {
         debtMarket = ICErc20(address(randomMarket));
@@ -196,7 +196,7 @@ contract AnyLiquidationTest is BaseTest {
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-        ICToken randomMarket = vars.markets[marketIndexWithOffset];
+        ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
         uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
         if (borrowerCollateral > 0) {
           if (address(randomMarket) == address(debtMarket)) continue;

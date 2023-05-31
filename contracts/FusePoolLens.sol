@@ -6,7 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
-import { ICToken, ICErc20 } from "./compound/CTokenInterfaces.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
 import { FusePoolDirectory } from "./FusePoolDirectory.sol";
 import { MasterPriceOracle } from "./oracles/MasterPriceOracle.sol";
@@ -222,13 +222,13 @@ contract FusePoolLens is Initializable {
   {
     uint256 totalBorrow = 0;
     uint256 totalSupply = 0;
-    ICToken[] memory cTokens = comptroller.getAllMarkets();
+    ICErc20[] memory cTokens = comptroller.getAllMarkets();
     address[] memory underlyingTokens = new address[](cTokens.length);
     string[] memory underlyingSymbols = new string[](cTokens.length);
     BasePriceOracle oracle = comptroller.oracle();
 
     for (uint256 i = 0; i < cTokens.length; i++) {
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
       cToken.accrueInterest();
@@ -293,7 +293,7 @@ contract FusePoolLens is Initializable {
    */
   function getPoolAssetsWithData(
     IComptroller comptroller,
-    ICToken[] memory cTokens,
+    ICErc20[] memory cTokens,
     address user
   ) internal returns (FusePoolAsset[] memory) {
     uint256 arrayLength = 0;
@@ -314,7 +314,7 @@ contract FusePoolLens is Initializable {
 
       // Start adding data to FusePoolAsset
       FusePoolAsset memory asset;
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       asset.cToken = address(cToken);
 
       cToken.accrueInterest();
@@ -371,7 +371,7 @@ contract FusePoolLens is Initializable {
     return (detailedAssets);
   }
 
-  function getBorrowCapsPerCollateral(ICToken borrowedAsset, IComptroller comptroller)
+  function getBorrowCapsPerCollateral(ICErc20 borrowedAsset, IComptroller comptroller)
     internal
     view
     returns (
@@ -380,7 +380,7 @@ contract FusePoolLens is Initializable {
       bool[] memory borrowingBlacklistedAgainstCollateral
     )
   {
-    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     collateral = new address[](poolMarkets.length);
     borrowCapsAgainstCollateral = new uint256[](poolMarkets.length);
@@ -454,7 +454,7 @@ contract FusePoolLens is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
-    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     address[] memory assets = new address[](poolMarkets.length);
     uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
@@ -479,7 +479,7 @@ contract FusePoolLens is Initializable {
       uint256[] memory
     )
   {
-    ICToken[] memory poolMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     address[] memory assets = new address[](poolMarkets.length);
     uint256[] memory supplyCapsPerAsset = new uint256[](poolMarkets.length);
@@ -500,7 +500,7 @@ contract FusePoolLens is Initializable {
    * @notice returns the total borrow cap and the per collateral borrowing cap/blacklist for the asset
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getBorrowCapsForAsset(ICToken asset)
+  function getBorrowCapsForAsset(ICErc20 asset)
     public
     view
     returns (
@@ -519,7 +519,7 @@ contract FusePoolLens is Initializable {
    * @notice returns the total borrow cap, the per collateral borrowing cap/blacklist for the asset and the total non-whitelist borrows
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getBorrowCapsDataForAsset(ICToken asset)
+  function getBorrowCapsDataForAsset(ICErc20 asset)
     public
     view
     returns (

@@ -172,12 +172,12 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Return 1e18 for ETH
     if (cToken.isCEther()) return 1e18;
 
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
 
     uint256 oraclePrice = _price(underlying);
 

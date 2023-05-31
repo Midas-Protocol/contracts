@@ -18,7 +18,7 @@ contract SimplePriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     __SafeOwnable_init(msg.sender);
   }
 
-  function getUnderlyingPrice(ICToken cToken) public view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) public view override returns (uint256) {
     if (compareStrings(cToken.symbol(), "cETH")) {
       return 1e18;
     } else {
@@ -33,7 +33,7 @@ contract SimplePriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     }
   }
 
-  function setUnderlyingPrice(ICToken cToken, uint256 underlyingPriceMantissa) public onlyOwner {
+  function setUnderlyingPrice(ICErc20 cToken, uint256 underlyingPriceMantissa) public onlyOwner {
     address asset = ICErc20(address(cToken)).underlying();
     emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
     prices[asset] = underlyingPriceMantissa;

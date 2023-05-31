@@ -11,7 +11,7 @@ import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/re
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
-import { CTokenInterface, ICToken } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -51,7 +51,7 @@ contract FlywheelUpgradesTest is BaseTest {
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
 
-      ICToken[] memory markets = pool.getAllMarkets();
+      ICErc20[] memory markets = pool.getAllMarkets();
 
       address[] memory flywheels = pool.getRewardsDistributors();
       if (flywheels.length > 0) {
@@ -122,7 +122,7 @@ contract FlywheelUpgradesTest is BaseTest {
     ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(poolAddress);
     address[] memory fws = poolExt.getRewardsDistributors();
 
-    ICToken[] memory markets = poolExt.getAllMarkets();
+    ICErc20[] memory markets = poolExt.getAllMarkets();
 
     for (uint8 j = 0; j < markets.length; j++) {
       string memory contractType = CErc20PluginRewardsDelegate(address(markets[j])).contractType();

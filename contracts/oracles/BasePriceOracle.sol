@@ -24,5 +24,5 @@ interface BasePriceOracle {
    * @return The underlying asset price mantissa (scaled by 1e18).
    *  Zero means the price is unavailable.
    */
-  function getUnderlyingPrice(ICToken cToken) external view returns (uint256);
+  function getUnderlyingPrice(ICErc20 cToken) external view returns (uint256);
 }

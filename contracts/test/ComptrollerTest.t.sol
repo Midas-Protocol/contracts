@@ -9,7 +9,7 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
-import { ICToken } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";
@@ -71,9 +71,9 @@ contract ComptrollerTest is BaseTest {
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
-      ICToken[] memory markets = pool.getAllMarkets();
+      ICErc20[] memory markets = pool.getAllMarkets();
       for (uint256 j = 0; j < markets.length; j++) {
-        ICToken market = markets[j];
+        ICErc20 market = markets[j];
         uint256 totalSupply = market.totalSupply();
         if (totalSupply > 0) {
           if (totalSupply < 1000) {

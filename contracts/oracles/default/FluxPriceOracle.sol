@@ -5,7 +5,7 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 
 import { CLV2V3Interface } from "../../external/flux/CLV2V3Interface.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 import { NativeUSDPriceOracle } from "../evmos/NativeUSDPriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
@@ -86,9 +86,9 @@ contract FluxPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
 
     // Get price
     uint256 oraclePrice = _price(underlying);

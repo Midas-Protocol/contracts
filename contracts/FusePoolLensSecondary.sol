@@ -5,7 +5,7 @@ import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.s
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
-import { ICToken } from "./compound/CTokenInterfaces.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { IUniswapV2Pair } from "./external/uniswap/IUniswapV2Pair.sol";
 
 import { FusePoolDirectory } from "./FusePoolDirectory.sol";
@@ -23,7 +23,7 @@ interface IRewardsDistributor {
 
   function flywheelPreBorrowerAction(address cToken, address borrower) external;
 
-  function getAllMarkets() external view returns (ICToken[] memory);
+  function getAllMarkets() external view returns (ICErc20[] memory);
 }
 
 /**
@@ -76,11 +76,11 @@ contract FusePoolLensSecondary is Initializable {
     bool comptrollerFuseAdminHasRights = comptroller.fuseAdminHasRights();
 
     // Get cToken ownership
-    ICToken[] memory cTokens = comptroller.getAllMarkets();
+    ICErc20[] memory cTokens = comptroller.getAllMarkets();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < cTokens.length; i++) {
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
 
@@ -105,7 +105,7 @@ contract FusePoolLensSecondary is Initializable {
     uint256 arrayIndex = 0;
 
     for (uint256 i = 0; i < cTokens.length; i++) {
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
 
@@ -143,7 +143,7 @@ contract FusePoolLensSecondary is Initializable {
    * @param account The account to determine liquidity for.
    * @return Maximum redeem amount.
    */
-  function getMaxRedeem(address account, ICToken cTokenModify) external returns (uint256) {
+  function getMaxRedeem(address account, ICErc20 cTokenModify) external returns (uint256) {
     return getMaxRedeemOrBorrow(account, cTokenModify, false);
   }
 
@@ -153,7 +153,7 @@ contract FusePoolLensSecondary is Initializable {
    * @param account The account to determine liquidity for.
    * @return Maximum borrow amount.
    */
-  function getMaxBorrow(address account, ICToken cTokenModify) external returns (uint256) {
+  function getMaxBorrow(address account, ICErc20 cTokenModify) external returns (uint256) {
     return getMaxRedeemOrBorrow(account, cTokenModify, true);
   }
 
@@ -165,7 +165,7 @@ contract FusePoolLensSecondary is Initializable {
    */
   function getMaxRedeemOrBorrow(
     address account,
-    ICToken cTokenModify,
+    ICErc20 cTokenModify,
     bool isBorrow
   ) internal returns (uint256) {
     IComptroller comptroller = IComptroller(cTokenModify.comptroller());
@@ -180,14 +180,14 @@ contract FusePoolLensSecondary is Initializable {
     public
     view
     returns (
-      ICToken[] memory,
+      ICErc20[] memory,
       address[] memory,
       address[] memory,
       uint256[][] memory,
       uint256[][] memory
     )
   {
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     address[] memory distributors;
 
     try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
@@ -229,14 +229,14 @@ contract FusePoolLensSecondary is Initializable {
     external
     view
     returns (
-      ICToken[][] memory,
+      ICErc20[][] memory,
       address[][] memory,
       address[][] memory,
       uint256[][][] memory,
       uint256[][][] memory
     )
   {
-    ICToken[][] memory allMarkets = new ICToken[][](comptrollers.length);
+    ICErc20[][] memory allMarkets = new ICErc20[][](comptrollers.length);
     address[][] memory distributors = new address[][](comptrollers.length);
     address[][] memory rewardTokens = new address[][](comptrollers.length);
     uint256[][][] memory supplySpeeds = new uint256[][][](comptrollers.length);
@@ -258,7 +258,7 @@ contract FusePoolLensSecondary is Initializable {
   function getUnaccruedRewards(
     address holder,
     IRewardsDistributor distributor,
-    ICToken cToken
+    ICErc20 cToken
   ) internal returns (uint256, uint256) {
     // Get unaccrued supply rewards
     uint256 compAccruedPrior = distributor.compAccrued(holder);
@@ -285,14 +285,14 @@ contract FusePoolLensSecondary is Initializable {
     returns (
       address[] memory,
       uint256[] memory,
-      ICToken[][] memory,
+      ICErc20[][] memory,
       uint256[2][][] memory,
       uint256[] memory
     )
   {
     address[] memory rewardTokens = new address[](distributors.length);
     uint256[] memory compUnclaimedTotal = new uint256[](distributors.length);
-    ICToken[][] memory allMarkets = new ICToken[][](distributors.length);
+    ICErc20[][] memory allMarkets = new ICErc20[][](distributors.length);
     uint256[2][][] memory rewardsUnaccrued = new uint256[2][][](distributors.length);
     uint256[] memory distributorFunds = new uint256[](distributors.length);
 

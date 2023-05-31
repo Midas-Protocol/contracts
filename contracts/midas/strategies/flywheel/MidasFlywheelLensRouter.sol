@@ -5,7 +5,7 @@ import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 import { IComptroller } from "../../../compound/ComptrollerInterface.sol";
-import { ICErc20, ICToken } from "../../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 
 interface IPriceOracle {
@@ -34,11 +34,11 @@ contract MidasFlywheelLensRouter {
   }
 
   function getPoolMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
-    ICToken[] memory markets = comptroller.getAllMarkets();
+    ICErc20[] memory markets = comptroller.getAllMarkets();
     return _getMarketRewardsInfo(markets, comptroller);
   }
 
-  function getMarketRewardsInfo(ICToken[] memory markets) external returns (MarketRewardsInfo[] memory) {
+  function getMarketRewardsInfo(ICErc20[] memory markets) external returns (MarketRewardsInfo[] memory) {
     IComptroller pool;
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 asMarket = ICErc20(address(markets[i]));
@@ -48,7 +48,7 @@ contract MidasFlywheelLensRouter {
     return _getMarketRewardsInfo(markets, pool);
   }
 
-  function _getMarketRewardsInfo(ICToken[] memory markets, IComptroller comptroller)
+  function _getMarketRewardsInfo(ICErc20[] memory markets, IComptroller comptroller)
     internal
     returns (MarketRewardsInfo[] memory)
   {
@@ -110,7 +110,7 @@ contract MidasFlywheelLensRouter {
 
   function getRewardSpeedPerSecondPerToken(
     MidasFlywheelCore flywheel,
-    ICToken market,
+    ICErc20 market,
     uint256 decimals
   ) internal returns (uint256 rewardSpeedPerSecondPerToken) {
     ERC20 strategy = ERC20(address(market));

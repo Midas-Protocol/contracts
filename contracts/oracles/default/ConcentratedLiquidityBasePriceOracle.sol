@@ -3,9 +3,8 @@ pragma solidity >=0.8.0;
 
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
-import { PriceOracle } from "../../compound/PriceOracle.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { CTokenInterface } from "../../compound/CTokenInterfaces.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import "../../external/uniswap/FullMath.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
@@ -16,7 +15,7 @@ import "../../midas/SafeOwnableUpgradeable.sol";
  * @notice ConcentratedLiquidityBasePriceOracle is an abstract price oracle for concentrated liquidty (UniV3-like) pairs.
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
-abstract contract ConcentratedLiquidityBasePriceOracle is PriceOracle, SafeOwnableUpgradeable {
+abstract contract ConcentratedLiquidityBasePriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Maps ERC20 token addresses to asset configs.
    */
@@ -77,11 +76,11 @@ abstract contract ConcentratedLiquidityBasePriceOracle is PriceOracle, SafeOwnab
 
   /**
    * @notice Returns the price in NATIVE of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `BasePriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in NATIVE of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) public view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));

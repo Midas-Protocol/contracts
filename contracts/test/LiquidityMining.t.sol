@@ -12,7 +12,7 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import { ICToken, ICTokenExtension, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
@@ -40,7 +40,7 @@ contract LiquidityMiningTest is BaseTest {
   WhitePaperInterestRateModel interestModel;
   IComptroller comptroller;
   CErc20Delegate cErc20Delegate;
-  ICToken cErc20;
+  ICErc20 cErc20;
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
@@ -121,7 +121,7 @@ contract LiquidityMiningTest is BaseTest {
       0.9e18
     );
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     cErc20 = allMarkets[allMarkets.length - 1];
   }
 

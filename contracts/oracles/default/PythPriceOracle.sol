@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";
@@ -132,12 +132,12 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Return 1e18 for ETH
     if (cToken.isCEther()) return 1e18;
 
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
 
     // Get price
     uint256 oraclePrice = _price(underlying);

@@ -7,7 +7,7 @@ import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
-import { ICToken } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
@@ -147,11 +147,11 @@ contract ExtensionsTest is MarketsTest {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
-    ICToken[] memory markets = somePool.getAllMarkets();
+    ICErc20[] memory markets = somePool.getAllMarkets();
 
     if (markets.length == 0) return;
 
-    ICToken someMarket = markets[random % markets.length];
+    ICErc20 someMarket = markets[random % markets.length];
 
     emit log("pool");
     emit log_address(address(somePool));
@@ -195,12 +195,12 @@ contract ExtensionsTest is MarketsTest {
   function _testPoolAllMarketsExtensionUpgrade(address poolAddress) internal {
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(poolAddress);
 
-    ICToken[] memory markets = somePool.getAllMarkets();
+    ICErc20[] memory markets = somePool.getAllMarkets();
 
     if (markets.length == 0) return;
 
     for (uint256 j = 0; j < markets.length; j++) {
-      ICToken someMarket = markets[j];
+      ICErc20 someMarket = markets[j];
       CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
       emit log("pool");
@@ -323,7 +323,7 @@ contract ExtensionsTest is MarketsTest {
       //      if (pools[i].comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
       ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
 
-      ICToken[] memory markets = poolExt.getAllMarkets();
+      ICErc20[] memory markets = poolExt.getAllMarkets();
       for (uint8 k = 0; k < markets.length; k++) {
         CErc20Delegate market = CErc20Delegate(address(markets[k]));
         //        emit log(market.contractType());

@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { IComptroller } from "./ComptrollerInterface.sol";
-import { CTokenBase, CTokenInterface, ICToken } from "./CTokenInterfaces.sol";
+import { CTokenBase, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
@@ -273,7 +273,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
 
     if (redeemAmountIn == type(uint256).max) {
-      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, ICToken(address(this)), false);
+      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, ICErc20(address(this)), false);
     }
 
     uint256 totalUnderlyingSupplied = asCTokenExtension().getTotalUnderlyingSupplied();
@@ -624,7 +624,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
       return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED), 0);
     }
 
-    error = ICToken(cTokenCollateral).accrueInterest();
+    error = ICErc20(cTokenCollateral).accrueInterest();
     if (error != uint256(Error.NO_ERROR)) {
       // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
       return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED), 0);
@@ -705,7 +705,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     require(amountSeizeError == uint256(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
 
     /* Revert if borrower collateral token balance < seizeTokens */
-    require(ICToken(cTokenCollateral).balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
+    require(ICErc20(cTokenCollateral).balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
 
     // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
     uint256 seizeError;
@@ -844,8 +844,8 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     return uint256(Error.NO_ERROR);
   }
 
-  function asCTokenExtension() internal view returns (ICToken) {
-    return ICToken(address(this));
+  function asCTokenExtension() internal view returns (ICErc20) {
+    return ICErc20(address(this));
   }
 
   /**

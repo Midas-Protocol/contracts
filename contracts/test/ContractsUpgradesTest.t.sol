@@ -10,7 +10,7 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CToken } from "../compound/CToken.sol";
-import { CTokenInterface, ICToken } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 
@@ -125,7 +125,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
-      ICToken[] memory markets = pool.getAllMarkets();
+      ICErc20[] memory markets = pool.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate market = CErc20Delegate(address(markets[j]));
 

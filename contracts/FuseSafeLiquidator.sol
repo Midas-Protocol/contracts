@@ -17,7 +17,7 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
 
-import { ICToken, ICErc20 } from "./compound/CTokenInterfaces.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
 /**
  * @title FuseSafeLiquidator
@@ -245,7 +245,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     address borrower,
     uint256 repayAmount,
     ICErc20 cErc20,
-    ICToken cTokenCollateral,
+    ICErc20 cTokenCollateral,
     uint256 minOutputAmount,
     address exchangeSeizedTo,
     IUniswapV2Router02 uniswapV2Router,
@@ -342,7 +342,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     address borrower;
     uint256 repayAmount;
     ICErc20 cErc20;
-    ICToken cTokenCollateral;
+    ICErc20 cTokenCollateral;
     IUniswapV2Pair flashSwapPair;
     uint256 minProfitAmount;
     address exchangeProfitTo;
@@ -448,16 +448,12 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     address cToken = abi.decode(data[100:132], (address));
 
     // Liquidate unhealthy borrow, exchange seized collateral, return flashloaned funds, and exchange profit
-    if (ICToken(cToken).isCEther()) {
-      revert("not used anymore");
-    } else {
-      // Decode params
-      LiquidateToTokensWithFlashSwapVars memory vars = abi.decode(data[4:], (LiquidateToTokensWithFlashSwapVars));
+    // Decode params
+    LiquidateToTokensWithFlashSwapVars memory vars = abi.decode(data[4:], (LiquidateToTokensWithFlashSwapVars));
 
-      // Post token flashloan
-      // Cache liquidation profit token (or the zero address for NATIVE) for use as source for exchange later
-      _liquidatorProfitExchangeSource = postFlashLoanTokens(vars);
-    }
+    // Post token flashloan
+    // Cache liquidation profit token (or the zero address for NATIVE) for use as source for exchange later
+    _liquidatorProfitExchangeSource = postFlashLoanTokens(vars);
   }
 
   /**
@@ -558,7 +554,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev Repays token flashloans.
    */
   function repayTokenFlashLoan(
-    ICToken cTokenCollateral,
+    ICErc20 cTokenCollateral,
     address exchangeProfitTo,
     IUniswapV2Router02 uniswapV2RouterForBorrow,
     IUniswapV2Router02 uniswapV2RouterForCollateral,

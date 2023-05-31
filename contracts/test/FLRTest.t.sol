@@ -13,12 +13,9 @@ import { IERC20MetadataUpgradeable, IERC20Upgradeable } from "openzeppelin-contr
 
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
-//import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
-
 import { MidasFlywheelLensRouter, IComptroller, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";

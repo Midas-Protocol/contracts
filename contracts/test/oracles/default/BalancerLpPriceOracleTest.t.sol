@@ -5,7 +5,7 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 import { BalancerLpTokenPriceOracle } from "../../../oracles/default/BalancerLpTokenPriceOracle.sol";
 import { BalancerLpTokenPriceOracleNTokens } from "../../../oracles/default/BalancerLpTokenPriceOracleNTokens.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 
 import "../../../external/balancer/IBalancerPool.sol";
 import "../../../external/balancer/IBalancerVault.sol";
@@ -46,7 +46,7 @@ contract BalancerLpTokenPriceOracleTest is BaseTest, BNum {
 
     uint256 priceMimoPar = oracle.price(mimoPar8020);
     uint256 priceNTokensMimoPar = oracleNTokens.price(mimoPar8020);
-    uint256 underlyingPriceMimoPar = mpo.getUnderlyingPrice(ICToken(mimoPar8020_c));
+    uint256 underlyingPriceMimoPar = mpo.getUnderlyingPrice(ICErc20(mimoPar8020_c));
 
     // Based on this tx: https://polygonscan.com/tx/0x206f359e35b49265c7b3cb28691e1ca547ae79475af8e479331dc936fcbf0dd0
     // 1220 USD$ worth of liquidity was removed for 0,197227836914 wbtcWeth5050 tokens

@@ -7,7 +7,7 @@ import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStra
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
 import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
-import { ICToken, ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -234,7 +234,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 assumedSlippage = factory.getSlippage(stableAsset, collateralAsset);
     stableToBorrow = (stableToBorrow * (10000 + assumedSlippage)) / 10000;
 
-    ICToken(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
+    ICErc20(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
     // the execution will first receive a callback to receiveFlashLoan()
     // then it continues from here
   }
@@ -277,7 +277,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     }
 
     if (borrowsToRepay > 0) {
-      ICToken(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
+      ICErc20(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
       // the execution will first receive a callback to receiveFlashLoan()
       // then it continues from here
     }

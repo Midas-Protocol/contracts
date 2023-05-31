@@ -20,7 +20,7 @@ import { FusePoolLens } from "../FusePoolLens.sol";
 import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { CTokenInterface, CTokenExtensionInterface, ICErc20, ICToken } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
@@ -46,7 +46,7 @@ contract NeondevnetE2ETest is WithPool {
     address[] swapToken0Path;
     address[] swapToken1Path;
     bytes[] abis;
-    ICToken[] allMarkets;
+    ICErc20[] allMarkets;
     FuseSafeLiquidator liquidator;
     MockERC20 erc20;
     MockWNeon asset;
@@ -71,9 +71,9 @@ contract NeondevnetE2ETest is WithPool {
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
     deployCErc20Delegate(wtoken, "cWToken", "wtoken", 0.9e18);
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
-    ICToken cToken = allMarkets[0];
-    ICToken cWToken = allMarkets[1];
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20 cToken = allMarkets[0];
+    ICErc20 cWToken = allMarkets[1];
 
     assertEq(cToken.name(), "cUnderlyingToken");
     assertEq(cWToken.name(), "cWToken");
@@ -104,8 +104,8 @@ contract NeondevnetE2ETest is WithPool {
     vm.roll(1);
     deployCErc20Delegate(address(underlyingToken), "cUnderlyingToken", "CUT", 0.9e18);
 
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
-    ICToken cToken = allMarkets[allMarkets.length - 1];
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20 cToken = allMarkets[allMarkets.length - 1];
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
     address[] memory cTokens = new address[](1);
@@ -130,8 +130,8 @@ contract NeondevnetE2ETest is WithPool {
 
     vars.allMarkets = comptroller.getAllMarkets();
 
-    ICToken cToken = vars.allMarkets[0];
-    ICToken cWNeonToken = vars.allMarkets[1];
+    ICErc20 cToken = vars.allMarkets[0];
+    ICErc20 cWNeonToken = vars.allMarkets[1];
 
     vars.cTokens = new address[](1);
 
@@ -182,10 +182,10 @@ contract NeondevnetE2ETest is WithPool {
     vm.stopPrank();
     assertEq(cToken.totalBorrows(), 1e16, "!ctoken total borrows");
 
-    vars.price2 = priceOracle.getUnderlyingPrice(ICToken(address(cWNeonToken)));
+    vars.price2 = priceOracle.getUnderlyingPrice(ICErc20(address(cWNeonToken)));
     vm.mockCall(
       mpo,
-      abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICToken(address(cWNeonToken))),
+      abi.encodeWithSelector(priceOracle.getUnderlyingPrice.selector, ICErc20(address(cWNeonToken))),
       abi.encode(vars.price2 / 10000)
     );
 

@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0;
 
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
-import { ICToken } from "./CTokenInterfaces.sol";
+import { ICErc20 } from "./CTokenInterfaces.sol";
 
 interface ComptrollerInterface {
-  function isDeprecated(ICToken cToken) external view returns (bool);
+  function isDeprecated(ICErc20 cToken) external view returns (bool);
 
   function _become(address _unitroller) external;
 
@@ -15,15 +15,15 @@ interface ComptrollerInterface {
     uint256 collateralFactorMantissa
   ) external returns (uint256);
 
-  function getAssetsIn(address account) external view returns (ICToken[] memory);
+  function getAssetsIn(address account) external view returns (ICErc20[] memory);
 
-  function checkMembership(address account, ICToken cToken) external view returns (bool);
+  function checkMembership(address account, ICErc20 cToken) external view returns (bool);
 
   function _setPriceOracle(BasePriceOracle newOracle) external returns (uint256);
 
   function _setCloseFactor(uint256 newCloseFactorMantissa) external returns (uint256);
 
-  function _setCollateralFactor(ICToken market, uint256 newCollateralFactorMantissa) external returns (uint256);
+  function _setCollateralFactor(ICErc20 market, uint256 newCollateralFactorMantissa) external returns (uint256);
 
   function _setLiquidationIncentive(uint256 newLiquidationIncentiveMantissa) external returns (uint256);
 
@@ -51,7 +51,7 @@ interface ComptrollerInterface {
 
   function getMaxRedeemOrBorrow(
     address account,
-    ICToken cToken,
+    ICErc20 cToken,
     bool isBorrow
   ) external view returns (uint256);
 
@@ -195,7 +195,7 @@ interface ComptrollerExtensionInterface {
 
   function getWhitelistedBorrowersBorrows(address cToken) external view returns (uint256 borrowed);
 
-  function getAllMarkets() external view returns (ICToken[] memory);
+  function getAllMarkets() external view returns (ICErc20[] memory);
 
   function getAllBorrowers() external view returns (address[] memory);
 
@@ -263,23 +263,23 @@ interface ComptrollerExtensionInterface {
 
   function addNonAccruingFlywheel(address flywheelAddress) external returns (bool);
 
-  function _setMarketSupplyCaps(ICToken[] calldata cTokens, uint256[] calldata newSupplyCaps) external;
+  function _setMarketSupplyCaps(ICErc20[] calldata cTokens, uint256[] calldata newSupplyCaps) external;
 
-  function _setMarketBorrowCaps(ICToken[] calldata cTokens, uint256[] calldata newBorrowCaps) external;
+  function _setMarketBorrowCaps(ICErc20[] calldata cTokens, uint256[] calldata newBorrowCaps) external;
 
   function _setBorrowCapGuardian(address newBorrowCapGuardian) external;
 
   function _setPauseGuardian(address newPauseGuardian) external returns (uint256);
 
-  function _setMintPaused(ICToken cToken, bool state) external returns (bool);
+  function _setMintPaused(ICErc20 cToken, bool state) external returns (bool);
 
-  function _setBorrowPaused(ICToken cToken, bool state) external returns (bool);
+  function _setBorrowPaused(ICErc20 cToken, bool state) external returns (bool);
 
   function _setTransferPaused(bool state) external returns (bool);
 
   function _setSeizePaused(bool state) external returns (bool);
 
-  function _unsupportMarket(ICToken cToken) external returns (uint256);
+  function _unsupportMarket(ICErc20 cToken) external returns (uint256);
 }
 
 interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {}

@@ -8,7 +8,7 @@ import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStra
 import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../../external/uniswap/IUniswapV2Factory.sol";
-import { ICToken, ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../../external/compound/IComptroller.sol";
 import { UniswapV2Liquidator } from "../../liquidators/UniswapV2Liquidator.sol";
 
@@ -119,8 +119,8 @@ contract MidasSafeLiquidatorTest is BaseTest {
     uint256 debtAmount,
     ICErc20 stableCollateralMarket
   ) internal view returns (uint256, uint256) {
-    uint256 debtAssetPrice = mpo.getUnderlyingPrice(ICToken(address(debtMarket)));
-    uint256 stableCollateralAssetPrice = mpo.getUnderlyingPrice(ICToken(address(stableCollateralMarket)));
+    uint256 debtAssetPrice = mpo.getUnderlyingPrice(debtMarket);
+    uint256 stableCollateralAssetPrice = mpo.getUnderlyingPrice(stableCollateralMarket);
 
     uint256 overcollateralizaionFactor = 2500; // 25%
     uint256 percent100 = 10000; // 100.00%

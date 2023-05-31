@@ -40,9 +40,9 @@ contract DiaStDotPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     wstDot = 0x191cf2602Ca2e534c5Ccae7BCBF4C46a704bb949;
   }
 
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
 
     require(underlying == stDot || underlying == wstDot, "Invalid underlying");
 

@@ -25,9 +25,9 @@ contract BNBxPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     BNBx = _bnbX;
   }
 
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
     require(underlying == BNBx, "Invalid underlying");
     // no need to scale as BNBx has 18 decimals
     return _price();

@@ -432,6 +432,10 @@ interface CErc20StorageInterface is CTokenStorageInterface {
   function underlying() external view returns (address);
 }
 
+interface CErc20PluginStorageInterface is CErc20StorageInterface {
+  function plugin() external view returns (address);
+}
+
 interface ICTokenBase is CTokenInterface, CTokenStorageInterface {}
 
 interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {}
@@ -439,3 +443,5 @@ interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {
 interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {}
 
 interface ICErc20 is CErc20StorageInterface, ICToken {}
+
+interface ICErc20Plugin is CErc20PluginStorageInterface, ICToken {}

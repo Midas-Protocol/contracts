@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ICToken, ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { UniswapV3LiquidatorFunder } from "../../liquidators/UniswapV3LiquidatorFunder.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
@@ -61,7 +61,7 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    ICToken[] allMarkets;
+    ICErc20[] allMarkets;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
@@ -119,10 +119,10 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
       parCToken.accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-      uint256 priceusdc = mpo.getUnderlyingPrice(ICToken(usdcMarketAddress));
+      uint256 priceusdc = mpo.getUnderlyingPrice(usdcCToken);
       vm.mockCall(
         address(mpo),
-        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(usdcMarketAddress)),
+        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, usdcCToken),
         abi.encode(priceusdc / 100)
       );
     }
