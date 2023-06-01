@@ -181,6 +181,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
     uint256 maxBorrow = pool.getMaxRedeemOrBorrow(address(this), stableMarket, true);
+    uint256 cash = stableMarket.getCash();
+    if (maxBorrow > cash) maxBorrow = cash;
     uint256 maxBorrowValueScaled = maxBorrow * stableAssetPrice;
 
     // accounting for swaps slippage
