@@ -175,7 +175,11 @@ contract AddressesProvider is OwnableUpgradeable {
     return jarvisPoolsConfig;
   }
 
-  function setBalancerPoolForTokens(address inputToken, address outputToken, address pool) external onlyOwner {
+  function setBalancerPoolForTokens(
+    address inputToken,
+    address outputToken,
+    address pool
+  ) external onlyOwner {
     balancerPoolForTokens[inputToken][outputToken] = pool;
   }
 
