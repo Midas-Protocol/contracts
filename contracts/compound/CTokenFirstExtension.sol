@@ -399,9 +399,11 @@ contract CTokenFirstExtension is
   }
 
   function supplyRatePerBlockAfterWithdraw(uint256 withdrawAmount) external view returns (uint256) {
+    uint256 cash = asCToken().getCash();
+    require(cash >= withdrawAmount, "market cash not enough");
     return
       interestRateModel.getSupplyRate(
-        asCToken().getCash() - withdrawAmount,
+        cash - withdrawAmount,
         totalBorrows,
         totalReserves + totalAdminFees + totalFuseFees,
         reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa

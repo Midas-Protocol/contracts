@@ -37,6 +37,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
 
+  EnumerableSet.AddressSet private accountsWithOpenPositions;
+
   /*----------------------------------------------------------------
                         Initializer Functions
   ----------------------------------------------------------------*/
@@ -64,7 +66,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     if (!borrowableMarketsByCollateral[_collateralMarket].contains(address(_stableMarket))) revert PairNotWhitelisted();
 
     LeveredPosition position = new LeveredPosition(msg.sender, _collateralMarket, _stableMarket);
+
+    accountsWithOpenPositions.add(msg.sender);
     positionsByAccount[msg.sender].add(address(position));
+
     return position;
   }
 
@@ -82,12 +87,13 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
   }
 
   // @return true if removed, otherwise false
-  function removeClosedPosition(address closedPosition) public returns (bool) {
+  function removeClosedPosition(address closedPosition) public returns (bool removed) {
     EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
     if (!userPositions.contains(closedPosition)) revert NoSuchPosition();
     if (!LeveredPosition(closedPosition).isPositionClosed()) revert PositionNotClosed();
 
-    return userPositions.remove(closedPosition);
+    removed = userPositions.remove(closedPosition);
+    if (userPositions.length() == 0) accountsWithOpenPositions.remove(msg.sender);
   }
 
   /*----------------------------------------------------------------
@@ -96,6 +102,10 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   function getPositionsByAccount(address account) public view returns (address[] memory) {
     return positionsByAccount[account].values();
+  }
+
+  function getAccountsWithOpenPositions() public view returns (address[] memory) {
+    return accountsWithOpenPositions.values();
   }
 
   function getWhitelistedCollateralMarkets() public view returns (address[] memory) {
@@ -113,7 +123,6 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       string[] memory names,
       string[] memory symbols,
       uint8[] memory decimals,
-      uint256[] memory rates,
       uint256[] memory totalUnderlyingSupplied,
       uint256[] memory ratesPerBlock
     )
@@ -123,7 +132,6 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
-    rates = new uint256[](markets.length);
     totalUnderlyingSupplied = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
     ratesPerBlock = new uint256[](markets.length);
@@ -137,7 +145,6 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       symbols[i] = underlying.symbol();
       decimals[i] = underlying.decimals();
       totalUnderlyingSupplied[i] = market.getTotalUnderlyingSupplied();
-      rates[i] = market.supplyRatePerBlock() * blocksPerYear;
       ratesPerBlock[i] = market.supplyRatePerBlock();
     }
   }
@@ -188,13 +195,6 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount);
   }
 
-  function getBorrowRates(address[] memory _markets) public view returns (uint256[] memory rates) {
-    rates = new uint256[](_markets.length);
-    for (uint256 i = 0; i < _markets.length; i++) {
-      rates[i] = ICErc20(_markets[i]).borrowRatePerBlock();
-    }
-  }
-
   // @dev returns lists of the market addresses, names, symbols and the current Rate for each Borrowable asset
   function getBorrowableMarketsAndRates(ICErc20 _collateralMarket)
     public
@@ -212,16 +212,18 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     underlyings = new address[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
+    rates = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
-      address underlyingAddress = ICErc20(markets[i]).underlying();
+      ICErc20 market = ICErc20(markets[i]);
+      address underlyingAddress = market.underlying();
+      underlyings[i] = underlyingAddress;
       ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
-      underlyings[i] = underlyingAddress;
+      rates[i] = market.borrowRatePerBlock();
       decimals[i] = underlying.decimals();
     }
-    rates = getBorrowRates(markets);
   }
 
   /*----------------------------------------------------------------

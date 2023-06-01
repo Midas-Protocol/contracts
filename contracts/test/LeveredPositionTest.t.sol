@@ -64,11 +64,11 @@ abstract contract LeveredPositionTest is MarketsTest {
     if (block.chainid == BSC_MAINNET) {
       blocksPerYear = 20 * 24 * 365 * 60;
       vm.prank(ap.owner());
-      ap.setAddress("chainConfig.chainAddresses.ALGEBRA_SWAP_ROUTER", 0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0);
+      ap.setAddress("ALGEBRA_SWAP_ROUTER", 0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0);
     } else if (block.chainid == POLYGON_MAINNET) {
       blocksPerYear = 26 * 24 * 365 * 60;
       vm.prank(ap.owner());
-      ap.setAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER", 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
+      ap.setAddress("SOLIDLY_SWAP_ROUTER", 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109);
     }
 
     if (block.chainid == BSC_CHAPEL) {
@@ -222,6 +222,10 @@ abstract contract LeveredPositionTest is MarketsTest {
   function testMaxLeverageRatio() public whenForking {
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
+
+    uint256 rate = factory.getBorrowRateAtRatio(collateralMarket, stableMarket, 1e18, maxRatio);
+    emit log_named_uint("borrow rate at max ratio", rate);
+
     uint256 minRatio = position.getMinLeverageRatio();
     emit log_named_uint("min ratio diff", minRatio);
     position.adjustLeverageRatio(maxRatio);

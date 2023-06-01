@@ -189,4 +189,11 @@ contract MidasFlywheelLensRouter {
       flywheels[i].claimRewards(user);
     }
   }
+
+  // @dev this function is NOT a lens fn - it is meant to be called by the user on-chain
+  function claimRewardsFromFlywheels(MidasFlywheelCore[] calldata flywheels) external {
+    for (uint256 i = 0; i < flywheels.length; i++) {
+      flywheels[i].claimRewards(msg.sender);
+    }
+  }
 }

@@ -220,7 +220,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     returns (bytes memory strategyData)
   {
     // assuming bsc for the chain
-    IRouter solidlyRouter = IRouter(ap.getAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER"));
+    IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_ROUTER"));
     address tokenTo = address(outputToken);
 
     // Check if stable pair exists
@@ -262,7 +262,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       "Output token does not match either of the pair tokens!"
     );
 
-    strategyData = abi.encode(ap.getAddress("chainConfig.chainAddresses.SOLIDLY_SWAP_ROUTER"), outputToken);
+    strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_ROUTER"), outputToken);
   }
 
   function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -289,7 +289,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (bytes memory strategyData)
   {
-    strategyData = abi.encode(outputToken, ap.getAddress("chainConfig.chainAddresses.ALGEBRA_SWAP_ROUTER"));
+    strategyData = abi.encode(outputToken, ap.getAddress("ALGEBRA_SWAP_ROUTER"));
   }
 
   function uniswapLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -391,38 +391,40 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (bytes memory strategyData)
   {
-    // TODO figure out how to query these pools on-chain
-    address poolAddress;
-    address wnative = ap.getAddress("wtoken");
-    address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
-    address maticx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
-    address twoeur = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E;
-    address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
-    address maticxBbaWmatic = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
+    address poolAddress = ap.getBalancerPoolForTokens(address(inputToken), address(outputToken));
+    // TODO remove after the pools are configure on-chain
+    if (poolAddress == address(0)) {
+      address wnative = ap.getAddress("wtoken");
+      address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
+      address maticx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
+      address twoeur = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E;
+      address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
+      address maticxBbaWmatic = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
 
-    if (
-      (address(inputToken) == wnative && address(outputToken) == stmatic) ||
-      (address(inputToken) == stmatic && address(outputToken) == wnative)
-    ) {
-      poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
-    }
-    if (
-      (address(inputToken) == wnative && address(outputToken) == maticx) ||
-      (address(inputToken) == maticx && address(outputToken) == wnative)
-    ) {
-      poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
-    }
-    if (
-      (address(inputToken) == par && address(outputToken) == twoeur) ||
-      (address(inputToken) == twoeur && address(outputToken) == par)
-    ) {
-      poolAddress = twoeur; // Balancer 2EUR Stable Pool
-    }
-    if (
-      (address(inputToken) == maticxBbaWmatic && address(outputToken) == maticx) ||
-      (address(inputToken) == maticx && address(outputToken) == maticxBbaWmatic)
-    ) {
-      poolAddress = maticxBbaWmatic;
+      if (
+        (address(inputToken) == wnative && address(outputToken) == stmatic) ||
+        (address(inputToken) == stmatic && address(outputToken) == wnative)
+      ) {
+        poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
+      }
+      if (
+        (address(inputToken) == wnative && address(outputToken) == maticx) ||
+        (address(inputToken) == maticx && address(outputToken) == wnative)
+      ) {
+        poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
+      }
+      if (
+        (address(inputToken) == par && address(outputToken) == twoeur) ||
+        (address(inputToken) == twoeur && address(outputToken) == par)
+      ) {
+        poolAddress = twoeur; // Balancer 2EUR Stable Pool
+      }
+      if (
+        (address(inputToken) == maticxBbaWmatic && address(outputToken) == maticx) ||
+        (address(inputToken) == maticx && address(outputToken) == maticxBbaWmatic)
+      ) {
+        poolAddress = maticxBbaWmatic;
+      }
     }
 
     strategyData = abi.encode(poolAddress, outputToken);
@@ -441,7 +443,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
       if (inputToken == chapelBomb) {
         strategyData = abi.encode(xbombSwap, xbombSwap, chapelTUsd);
-      } else if (inputToken == chapelTUsd) {
+      }
+      /*if (inputToken == chapelTUsd)*/
+      else {
         strategyData = abi.encode(chapelTUsd, xbombSwap, chapelTUsd);
       }
     } else {
@@ -449,5 +453,50 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
       strategyData = abi.encode(inputToken, xbomb, bomb);
     }
+  }
+
+  // @notice addresses hardcoded, use only for ETHEREUM
+  function erc4626LiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    view
+    returns (bytes memory strategyData)
+  {
+    uint256 fee;
+    address[] memory underlyingTokens;
+    address inputTokenAddr = address(inputToken);
+    address usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+    address usdt = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address wbtc = 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599;
+    address realYieldUSD = 0x97e6E0a40a3D02F12d1cEC30ebfbAE04e37C119E;
+    address ethBtcTrend = 0x6b7f87279982d919Bbf85182DDeAB179B366D8f2;
+    address ethBtcMomentum = address(255); // TODO
+
+    if (inputTokenAddr == realYieldUSD) {
+      fee = 10;
+      underlyingTokens = new address[](3);
+      underlyingTokens[0] = usdc;
+      underlyingTokens[1] = dai;
+      underlyingTokens[2] = usdt;
+    } else if (inputTokenAddr == ethBtcMomentum || inputTokenAddr == ethBtcTrend) {
+      fee = 500;
+      underlyingTokens = new address[](3);
+      underlyingTokens[0] = usdc;
+      underlyingTokens[1] = weth;
+      underlyingTokens[2] = wbtc;
+    } else {
+      fee = 300;
+      underlyingTokens = new address[](1);
+      underlyingTokens[0] = address(outputToken);
+    }
+
+    strategyData = abi.encode(
+      outputToken,
+      fee,
+      ap.getAddress("UNISWAP_V3_ROUTER"),
+      underlyingTokens,
+      ap.getAddress("Quoter")
+    );
   }
 }
