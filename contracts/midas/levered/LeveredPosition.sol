@@ -102,7 +102,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   }
 
   function adjustLeverageRatio(uint256 targetRatioMantissa) public returns (uint256) {
-    if (msg.sender != positionOwner) revert NotPositionOwner();
+    if (msg.sender != positionOwner && msg.sender != address(factory)) revert NotPositionOwner();
 
     // anything under 1:1 means removing the leverage
     if (targetRatioMantissa < 1e18) _leverDown(type(uint256).max);
