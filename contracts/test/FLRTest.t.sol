@@ -105,7 +105,7 @@ contract FLRTest is BaseTest {
     emit log_named_uint("rewardsEndTimestamp", rewardsEndTimestamp);
     emit log_named_uint("mkt ts", ERC20(mkt).totalSupply());
 
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getMarketRewardsInfo(
+    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
       IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
     );
     for (uint256 i = 0; i < marketRewardsInfos.length; i++) {
@@ -150,7 +150,7 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
+    MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getPoolMarketRewardsInfo(comptroller);
     for (uint8 i = 0; i < info.length; i++) {
       for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
         if (info[i].rewardsInfo[j].formattedAPR != 0) {
@@ -171,7 +171,7 @@ contract FLRTest is BaseTest {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
+      router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));
     }
   }
 
@@ -197,7 +197,7 @@ contract FLRTest is BaseTest {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
+      router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));
     }
   }
 }

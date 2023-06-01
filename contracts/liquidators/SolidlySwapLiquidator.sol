@@ -9,10 +9,10 @@ import { IRouter } from "../external/solidly/IRouter.sol";
 import "./IRedemptionStrategy.sol";
 
 /**
- * @title SolidlyLiquidator
+ * @title SolidlySwapLiquidator
  * @notice Exchanges seized token collateral for underlying tokens via a Solidly router for use as a step in a liquidation.
  */
-contract SolidlyLiquidator is IRedemptionStrategy {
+contract SolidlySwapLiquidator is IRedemptionStrategy {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /**
@@ -37,33 +37,7 @@ contract SolidlyLiquidator is IRedemptionStrategy {
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     // Get Solidly router and path
-    (IRouter solidlyRouter, address tokenTo) = abi.decode(strategyData, (IRouter, address));
-
-    bool stable;
-
-    // Check if stable pair exists
-    address volatilePair = solidlyRouter.pairFor(address(inputToken), tokenTo, false);
-    address stablePair = solidlyRouter.pairFor(address(inputToken), tokenTo, true);
-
-    require(
-      solidlyRouter.isPair(stablePair) || solidlyRouter.isPair(volatilePair),
-      "Invalid SolidlyLiquidator swap path."
-    );
-
-    if (!solidlyRouter.isPair(stablePair)) {
-      stable = false;
-    } else if (!solidlyRouter.isPair(volatilePair)) {
-      stable = true;
-    } else {
-      (uint256 stableR0, uint256 stableR1) = solidlyRouter.getReserves(address(inputToken), tokenTo, true);
-      (uint256 volatileR0, uint256 volatileR1) = solidlyRouter.getReserves(address(inputToken), tokenTo, false);
-      // Determine which swap has higher liquidity
-      if (stableR0 > volatileR0 && stableR1 > volatileR1) {
-        stable = true;
-      } else {
-        stable = false;
-      }
-    }
+    (IRouter solidlyRouter, address tokenTo, bool stable) = abi.decode(strategyData, (IRouter, address, bool));
 
     // Swap underlying tokens
     inputToken.approve(address(solidlyRouter), inputAmount);
@@ -80,5 +54,9 @@ contract SolidlyLiquidator is IRedemptionStrategy {
     // Get new collateral
     outputToken = IERC20Upgradeable(tokenTo);
     outputAmount = outputToken.balanceOf(address(this));
+  }
+
+  function name() public pure returns (string memory) {
+    return "SolidlySwapLiquidator";
   }
 }

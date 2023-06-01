@@ -24,6 +24,7 @@ contract AddressesProvider is OwnableUpgradeable {
   CurveSwapPool[] public curveSwapPoolsConfig;
   mapping(address => RedemptionStrategy) public redemptionStrategiesConfig;
   mapping(address => FundingStrategy) public fundingStrategiesConfig;
+  mapping(address => mapping(address => address)) public balancerPoolForTokens;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
@@ -172,5 +173,17 @@ contract AddressesProvider is OwnableUpgradeable {
 
   function getJarvisPools() public view returns (JarvisPool[] memory) {
     return jarvisPoolsConfig;
+  }
+
+  function setBalancerPoolForTokens(
+    address inputToken,
+    address outputToken,
+    address pool
+  ) external onlyOwner {
+    balancerPoolForTokens[inputToken][outputToken] = pool;
+  }
+
+  function getBalancerPoolForTokens(address inputToken, address outputToken) external view returns (address) {
+    return balancerPoolForTokens[inputToken][outputToken];
   }
 }

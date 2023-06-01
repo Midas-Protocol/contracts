@@ -4,6 +4,8 @@ pragma solidity >=0.8.0;
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { BalancerLpTokenLiquidator } from "../../liquidators/BalancerLpTokenLiquidator.sol";
 import { BalancerSwapLiquidator } from "../../liquidators/BalancerSwapLiquidator.sol";
+import { BalancerLinearPoolTokenLiquidator } from "../../liquidators/BalancerLinearPoolTokenLiquidator.sol";
+
 import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import "../../external/balancer/IBalancerPool.sol";
 import "../../external/balancer/IBalancerVault.sol";
@@ -15,10 +17,12 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 contract BalancerLpTokenLiquidatorTest is BaseTest {
   BalancerLpTokenLiquidator private lpTokenLiquidator;
   BalancerSwapLiquidator private swapLiquidator;
+  BalancerLinearPoolTokenLiquidator private linearPoolLiquidator;
 
   function afterForkSetUp() internal override {
     lpTokenLiquidator = new BalancerLpTokenLiquidator();
     swapLiquidator = new BalancerSwapLiquidator();
+    linearPoolLiquidator = new BalancerLinearPoolTokenLiquidator();
   }
 
   function testRedeem(
@@ -52,6 +56,29 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     assertGt(balanceAfter - balanceBefore, 0, "!redeem lp token");
   }
 
+  function testRedeemLinearPool(
+    uint256 amount,
+    address whaleAddress,
+    address inputTokenAddress,
+    address poolAddress,
+    address outputTokenAddress
+  ) internal {
+    IERC20Upgradeable inputToken = IERC20Upgradeable(inputTokenAddress);
+    IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddress);
+
+    vm.prank(whaleAddress);
+    inputToken.transfer(address(linearPoolLiquidator), amount);
+
+    uint256 balanceBefore = outputToken.balanceOf(address(linearPoolLiquidator));
+
+    bytes memory data = abi.encode(poolAddress, outputTokenAddress);
+    linearPoolLiquidator.redeem(inputToken, amount, data);
+
+    uint256 balanceAfter = outputToken.balanceOf(address(linearPoolLiquidator));
+
+    assertGt(balanceAfter - balanceBefore, 0, "!redeem lp token");
+  }
+
   function testMimoParBalancerLpLiquidatorRedeem() public fork(POLYGON_MAINNET) {
     address lpToken = 0x82d7f08026e21c7713CfAd1071df7C8271B17Eae; //MIMO-PAR 8020
     address lpTokenWhale = 0xbB60ADbe38B4e6ab7fb0f9546C2C1b665B86af11;
@@ -60,9 +87,17 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
-  function testWmaticStmaticLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+  function testWmaticStmaticLPLiquidatorRedeem() public fork(POLYGON_MAINNET) {
     address lpToken = 0x8159462d255C1D24915CB51ec361F700174cD994; // stMATIC-WMATIC stable
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
+    address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
+
+    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testWmaticMaticXLPLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+    address lpToken = 0xC17636e36398602dd37Bb5d1B3a9008c7629005f; // WMATIC-MaticX stable
+    address lpTokenWhale = 0x48534d027f8962692122dB440714fFE88Ab1fA85;
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
     testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
@@ -83,6 +118,35 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address outputTokenAddress = 0xF93579002DBE8046c43FEfE86ec78b1112247BB8; // linear aaver usdc
 
     testRedeem(swapLiquidator, amount, lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testBoostedAaaveWmaticMaticXRedeem() public fork(POLYGON_MAINNET) {
+    uint256 amount = 1e18;
+    address maticX = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
+    address erc4626TokenAddress = 0xE4885Ed2818Cc9E840A25f94F9b2A28169D1AEA7; // bb-a-WMATIC
+    address poolAddress = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917; // Balancer MaticX Boosted Aave WMATIC StablePool
+    address maticXWhale = 0x4bE0eB1Ed4dcd216c303Cf964F3730Eda6EC3051;
+    address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
+
+    testRedeemLinearPool(amount, maticXWhale, maticX, poolAddress, erc4626TokenAddress);
+
+    IERC20Upgradeable erc4626Token = IERC20Upgradeable(erc4626TokenAddress);
+    uint256 balance = erc4626Token.balanceOf(address(linearPoolLiquidator));
+    vm.prank(address(linearPoolLiquidator));
+    erc4626Token.transfer(address(swapLiquidator), balance);
+
+    bytes memory data = abi.encode(outputTokenAddress);
+    swapLiquidator.redeem(erc4626Token, balance, data);
+  }
+
+  function testWmaticStmaticLiquidatorRedeem() public fork(POLYGON_MAINNET) {
+    address wmatic = ap.getAddress("wtoken");
+    address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+    address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
+    uint256 amount = 100e18;
+    address poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
+
+    testRedeemLinearPool(amount, wmaticWhale, wmatic, poolAddress, stmatic);
   }
 
   function testLinearAaveRedeem() public fork(POLYGON_MAINNET) {

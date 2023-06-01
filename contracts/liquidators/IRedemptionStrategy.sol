@@ -22,4 +22,6 @@ interface IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount);
+
+  function name() external view returns (string memory);
 }

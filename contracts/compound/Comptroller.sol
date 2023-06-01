@@ -360,10 +360,10 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
     address account,
     address cToken,
     bool isBorrow
-  ) external override returns (uint256) {
+  ) external view override returns (uint256) {
     CTokenInterface cTokenModify = CTokenInterface(cToken);
     // Accrue interest
-    uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlying(account);
+    uint256 balanceOfUnderlying = cTokenModify.asCTokenExtensionInterface().balanceOfUnderlyingHypo(account);
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
@@ -1236,7 +1236,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
    */
   function _deployMarket(
-    bool isCEther,
+    bool,
     bytes calldata constructorData,
     uint256 collateralFactorMantissa
   ) external returns (uint256) {

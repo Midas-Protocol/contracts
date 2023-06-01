@@ -32,4 +32,8 @@ contract StakedSdtLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(sanctuary.sdt());
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "StakedSdtLiquidator";
+  }
 }

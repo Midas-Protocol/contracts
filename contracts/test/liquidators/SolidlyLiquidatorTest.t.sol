@@ -3,10 +3,10 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
-import "../../liquidators/SolidlyLiquidator.sol";
+import "../../liquidators/SolidlySwapLiquidator.sol";
 
 contract SolidlyLiquidatorTest is BaseTest {
-  SolidlyLiquidator public liquidator;
+  SolidlySwapLiquidator public liquidator;
   MasterPriceOracle public mpo;
   address stableToken;
   address solidlySwapRouter = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
@@ -16,7 +16,7 @@ contract SolidlyLiquidatorTest is BaseTest {
   uint256 inputAmount = 1e18;
 
   function afterForkSetUp() internal override {
-    liquidator = new SolidlyLiquidator();
+    liquidator = new SolidlySwapLiquidator();
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     stableToken = ap.getAddress("stableToken");
   }
@@ -31,7 +31,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       hay,
       inputAmount,
-      abi.encode(solidlySwapRouter, stableToken)
+      abi.encode(solidlySwapRouter, stableToken, true)
     );
 
     assertEq(address(outputToken), stableToken, "!busd output");
@@ -48,7 +48,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       ankr,
       inputAmount,
-      abi.encode(solidlySwapRouter, hayAddress)
+      abi.encode(solidlySwapRouter, hayAddress, false)
     );
 
     uint256 outputValue = mpo.price(hayAddress) * outputAmount;
@@ -68,7 +68,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       ankr,
       inputAmount,
-      abi.encode(solidlySwapRouter, ankrBnbAddress)
+      abi.encode(solidlySwapRouter, ankrBnbAddress, false)
     );
 
     uint256 outputValue = mpo.price(ankrBnbAddress) * outputAmount;
@@ -88,7 +88,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       hay,
       inputAmount,
-      abi.encode(solidlySwapRouter, ankrBnbAddress)
+      abi.encode(solidlySwapRouter, ankrBnbAddress, false)
     );
 
     uint256 outputValue = mpo.price(ankrBnbAddress) * outputAmount;

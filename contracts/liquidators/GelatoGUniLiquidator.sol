@@ -79,4 +79,8 @@ contract GelatoGUniLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(swapToken0Path.length > 0 ? swapToken0Path[swapToken0Path.length - 1] : token0);
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "GelatoGUniLiquidator";
+  }
 }

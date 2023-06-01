@@ -11,7 +11,7 @@ import { WETH } from "solmate/tokens/WETH.sol";
 import "./IRedemptionStrategy.sol";
 
 /**
- * @title CurveLpTokenLiquidator
+ * @title CurveLpTokenLiquidatorNoRegistry
  * @notice Redeems seized Curve LP token collateral for underlying tokens for use as a step in a liquidation.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
@@ -63,5 +63,9 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     outputAmount = outputToken.balanceOf(address(this));
 
     return (outputToken, outputAmount);
+  }
+
+  function name() public pure returns (string memory) {
+    return "CurveLpTokenLiquidatorNoRegistry";
   }
 }

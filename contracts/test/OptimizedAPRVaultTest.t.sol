@@ -66,8 +66,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
       lenderSharesHint[0] = 4e17;
       lenderSharesHint[1] = 6e17;
 
-      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+      _upgradeMarket(CErc20Delegate(ankrWbnbMarketAddress));
+      _upgradeMarket(CErc20Delegate(ahWbnbMarketAddress));
 
       twoBrl = TwoBRL(twoBrlAddress);
       vm.prank(twoBrl.minter());
@@ -458,7 +458,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     // set up the registry, the vault and the adapter
     {
       // upgrade to enable the aprAfterDeposit fn for the vault
-      _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
+      _upgradeMarket(CErc20Delegate(twoBrlMarketAddress));
 
       vm.startPrank(someDeployer);
       deployVaultRegistry();

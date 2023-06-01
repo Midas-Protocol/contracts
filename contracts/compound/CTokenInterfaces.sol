@@ -163,7 +163,14 @@ contract CTokenStorage is CTokenAdminStorage {
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
 }
 
-abstract contract CTokenBaseInterface is CTokenStorage {
+contract CErc20Storage is CTokenStorage {
+  /**
+   * @notice Underlying asset for this CToken
+   */
+  address public underlying;
+}
+
+abstract contract CTokenBaseInterface is CErc20Storage {
   /* ERC20 */
 
   /**
@@ -205,6 +212,8 @@ abstract contract CTokenBaseInterface is CTokenStorage {
 }
 
 abstract contract CTokenExtensionInterface is CTokenBaseInterface {
+  event Flash(address receiver, uint256 amount);
+
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external virtual returns (bool);
@@ -247,7 +256,11 @@ abstract contract CTokenExtensionInterface is CTokenBaseInterface {
 
   function balanceOfUnderlyingHypo(address owner) external view virtual returns (uint256);
 
+  function exchangeRateHypothetical() external view virtual returns (uint256);
+
   function multicall(bytes[] calldata data) external payable virtual returns (bytes[] memory results);
+
+  function flash(uint256 amount, bytes calldata data) external virtual;
 }
 
 abstract contract CTokenInterface is CTokenBaseInterface {
@@ -340,16 +353,13 @@ abstract contract CTokenInterface is CTokenBaseInterface {
   function _withdrawAdminFees(uint256 withdrawAmount) external virtual returns (uint256);
 
   function _withdrawFuseFees(uint256 withdrawAmount) external virtual returns (uint256);
+
+  function selfTransferOut(address to, uint256 amount) external virtual;
+
+  function selfTransferIn(address from, uint256 amount) external virtual returns (uint256);
 }
 
-contract CErc20Storage is CTokenStorage {
-  /**
-   * @notice Underlying asset for this CToken
-   */
-  address public underlying;
-}
-
-abstract contract CErc20Interface is CTokenInterface, CErc20Storage {
+abstract contract CErc20Interface is CTokenInterface {
   /*** User Interface ***/
 
   function mint(uint256 mintAmount) external virtual returns (uint256);

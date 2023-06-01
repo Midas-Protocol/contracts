@@ -60,7 +60,7 @@ contract MarketsTest is BaseTest {
     return address(newImpl);
   }
 
-  function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
+  function _upgradeMarket(CErc20Delegate asDelegate) internal {
     address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
     bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
