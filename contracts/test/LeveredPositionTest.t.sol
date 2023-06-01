@@ -221,12 +221,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
 
-    uint256 rate = factory.getBorrowRateAtRatio(
-      collateralMarket,
-      stableMarket,
-      1e18,
-      maxRatio
-    );
+    uint256 rate = factory.getBorrowRateAtRatio(collateralMarket, stableMarket, 1e18, maxRatio);
     emit log_named_uint("borrow rate at max ratio", rate);
 
     uint256 minRatio = position.getMinLeverageRatio();
