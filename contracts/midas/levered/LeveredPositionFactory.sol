@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import "./ILeveredPositionFactory.sol";
-import "./LeveredPosition.sol";
-import "../SafeOwnableUpgradeable.sol";
-import "../../compound/IFuseFeeDistributor.sol";
-import "../../liquidators/registry/ILiquidatorsRegistry.sol";
+import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
+import { LeveredPosition } from "./LeveredPosition.sol";
+import { SafeOwnableUpgradeable } from "../SafeOwnableUpgradeable.sol";
+import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
+import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
+import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
