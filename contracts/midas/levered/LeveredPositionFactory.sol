@@ -248,7 +248,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket,
     uint256 _targetLeverageRatio
-  ) external view returns (int256 netAPY) {
+  ) external view returns (int256) {
     IComptroller pool = IComptroller(_stableMarket.comptroller());
     IPriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
@@ -263,8 +263,8 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
     int256 netValueDiffScaled = yieldValueScaled - borrowInterestValueScaled;
 
-    netAPY = ((netValueDiffScaled / collateralAssetPrice) * 1e18) / _supplyAmount;
-    netAPY = netAPY / blocksPerYear;
+    int256 netAPY = ((netValueDiffScaled / collateralAssetPrice) * 1e18) / _supplyAmount;
+    return netAPY / blocksPerYear;
   }
 
   /*----------------------------------------------------------------
