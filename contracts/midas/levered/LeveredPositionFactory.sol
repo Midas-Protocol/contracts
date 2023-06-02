@@ -242,6 +242,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     }
   }
 
+  /// @notice this is a lens fn, it is not intended to be used on-chain
   function getNetAPY(
     uint256 _supplyAPY,
     uint256 _supplyAmount,
@@ -249,21 +250,23 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     ICErc20 _stableMarket,
     uint256 _targetLeverageRatio
   ) external view returns (int256 netAPY) {
-    IComptroller pool = IComptroller(_stableMarket.comptroller());
+    IComptroller pool = IComptroller(_collateralMarket.comptroller());
     IPriceOracle oracle = pool.oracle();
-    uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
+    // TODO the calcs can be implemented without using collateralAssetPrice
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 
-    uint256 supplyValueScaled = _supplyAmount * stableAssetPrice;
-    uint256 yieldFromSupplyScaled = _supplyAPY * _supplyAmount;
-    int256 yieldValueScaled = int256((yieldFromSupplyScaled * collateralAssetPrice) / 1e18);
-    uint256 borrowedValueScaled = ((_targetLeverageRatio - 1e18) * supplyValueScaled) / 1e18;
+    // total collateral = base collateral + levered collateral
+    uint256 totalCollateral = (_supplyAmount * _targetLeverageRatio) / 1e18;
+    uint256 yieldFromTotalSupplyScaled = _supplyAPY * totalCollateral;
+    int256 yieldValueScaled = int256((yieldFromTotalSupplyScaled * collateralAssetPrice) / 1e18);
+
+    uint256 borrowedValueScaled = (totalCollateral - _supplyAmount) * collateralAssetPrice;
     uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * blocksPerYear;
     int256 borrowInterestValueScaled = int256((_borrowRate * borrowedValueScaled) / 1e18);
 
     int256 netValueDiffScaled = yieldValueScaled - borrowInterestValueScaled;
 
-    netAPY = ((netValueDiffScaled / collateralAssetPrice) * 1e18) / _supplyAmount;
+    netAPY = ((netValueDiffScaled / int256(collateralAssetPrice)) * 1e18) / int256(_supplyAmount);
   }
 
   /*----------------------------------------------------------------

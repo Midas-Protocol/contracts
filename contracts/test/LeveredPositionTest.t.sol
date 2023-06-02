@@ -41,10 +41,40 @@ contract LeveredPositionFactoryTest is BaseTest {
     );
   }
 
-  function testChapelAssetPrice() public debuggingOnly fork(BSC_CHAPEL) {
-    uint256 p = mpo.price(0xf97e8F094c4428e6436b3bf86264D176A2606bC4);
-    emit log_named_uint("rewards tok price", p);
-    assertGt(p, 0, "zero price");
+  function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
+    ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); //DAI
+
+    uint256 borrowRate = 5.2e16; // 5.2%
+    vm.mockCall(
+      address(_stableMarket),
+      abi.encodeWithSelector(_stableMarket.borrowRatePerBlock.selector),
+      abi.encode(borrowRate / factory.blocksPerYear())
+    );
+
+    LeveredPositionFactory newImpl = new LeveredPositionFactory();
+    TransparentUpgradeableProxy asProxy = TransparentUpgradeableProxy(payable(address(factory)));
+    bytes32 bytesAtSlot = vm.load(address(asProxy), _ADMIN_SLOT);
+    address admin = address(uint160(uint256(bytesAtSlot)));
+    vm.prank(admin);
+    asProxy.upgradeTo(address(newImpl));
+
+    uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * factory.blocksPerYear();
+    emit log_named_uint("_borrowRate", _borrowRate);
+
+    int256 netApy = factory.getNetAPY(
+      2.7e16, // 2.7%
+      1e18, // supply amount
+      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD), // BOMB
+      _stableMarket,
+      2e18 // ratio
+    );
+
+    emit log_named_int("net apy", netApy);
+
+    // boosted APY = 2x 2.7% = 5.4 % of the base collateral
+    // bororw APR = 5.2%
+    // diff = 5.4 - 5.2 = 0.2%
+    assertApproxEqRel(netApy, 0.2e16, 1e12, "!net apy");
   }
 }
 
