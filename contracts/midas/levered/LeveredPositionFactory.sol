@@ -213,7 +213,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
 
   // @dev returns lists of the market addresses, names, symbols and the current Rate for each Borrowable asset
   function getBorrowableMarketsAndRates(ICErc20 _collateralMarket)
-    public
+    external
     view
     returns (
       address[] memory markets,
@@ -240,6 +240,30 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
       rates[i] = market.borrowRatePerBlock();
       decimals[i] = underlying.decimals();
     }
+  }
+
+  function getNetAPYPerBlock(
+    uint256 _supplyAPY,
+    uint256 _supplyAmount,
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    uint256 _targetLeverageRatio
+  ) external view returns (int256 netAPY) {
+    IComptroller pool = IComptroller(_stableMarket.comptroller());
+    IPriceOracle oracle = pool.oracle();
+    uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
+    uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
+
+    uint256 supplyValueScaled = _supplyAmount * stableAssetPrice;
+    uint256 yieldFromSupplyScaled = _supplyAPY * _supplyAmount;
+    int256 yieldValueScaled = int256((yieldFromSupplyScaled * collateralAssetPrice) / 1e18);
+    uint256 borrowedValueScaled = ((_targetLeverageRatio - 1e18) * supplyValueScaled) / 1e18;
+    uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * blocksPerYear;
+    int256 borrowInterestValueScaled = int256((_borrowRate * borrowedValueScaled) / 1e18);
+
+    int256 netValueDiffScaled = yieldValueScaled - borrowInterestValueScaled;
+
+    netAPY = ((netValueDiffScaled / collateralAssetPrice) * 1e18) / _supplyAmount;
   }
 
   /*----------------------------------------------------------------

@@ -366,7 +366,16 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
     _fundMarketAndSelf(ICErc20(stkBnbMarket), stkBnbWhale);
     _fundMarketAndSelf(ICErc20(wbnbMarket), wbnbWhale);
 
-    position = _openLeveredPosition(address(this), depositAmount);
+    IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
+    collateralToken.transfer(address(this), depositAmount);
+    collateralToken.approve(address(factory), depositAmount);
+    position = factory.createAndFundPositionAtRatio(
+      collateralMarket,
+      stableMarket,
+      collateralToken,
+      depositAmount,
+      1.2e18
+    );
   }
 }
 
