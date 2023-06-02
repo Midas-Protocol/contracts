@@ -85,6 +85,23 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     return position;
   }
 
+  function createAndFundPositionAtRatio(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    IERC20Upgradeable _fundingAsset,
+    uint256 _fundingAmount,
+    uint256 _leverageRatio
+  ) public returns (LeveredPosition) {
+    LeveredPosition position = createPosition(_collateralMarket, _stableMarket);
+    _fundingAsset.safeTransferFrom(msg.sender, address(this), _fundingAmount);
+    _fundingAsset.approve(address(position), _fundingAmount);
+    position.fundPosition(_fundingAsset, _fundingAmount);
+
+    position.adjustLeverageRatio(_leverageRatio);
+
+    return position;
+  }
+
   // @return true if removed, otherwise false
   function removeClosedPosition(address closedPosition) public returns (bool removed) {
     EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];

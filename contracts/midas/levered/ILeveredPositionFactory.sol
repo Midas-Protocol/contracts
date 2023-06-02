@@ -24,6 +24,14 @@ interface ILeveredPositionFactory {
     uint256 _fundingAmount
   ) external returns (LeveredPosition);
 
+  function createAndFundPositionAtRatio(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    IERC20Upgradeable _fundingAsset,
+    uint256 _fundingAmount,
+    uint256 _leverageRatio
+  ) external returns (LeveredPosition);
+
   function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (bool);
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256);
