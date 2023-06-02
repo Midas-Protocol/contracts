@@ -264,6 +264,7 @@ contract LeveredPositionFactory is ILeveredPositionFactory, SafeOwnableUpgradeab
     int256 netValueDiffScaled = yieldValueScaled - borrowInterestValueScaled;
 
     netAPY = ((netValueDiffScaled / collateralAssetPrice) * 1e18) / _supplyAmount;
+    netAPY = netAPY / blocksPerYear;
   }
 
   /*----------------------------------------------------------------
