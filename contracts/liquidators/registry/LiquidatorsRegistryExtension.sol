@@ -18,7 +18,7 @@ import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.s
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { XBombSwap } from "../XBombLiquidatorFunder.sol";
 
-contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExtension, ILiquidatorsRegistry {
+contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExtension, ILiquidatorsRegistryExtension {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
@@ -84,16 +84,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
 
     for (uint256 i = 0; i < strategies.length; i++) {
-      string memory name = strategies[i].name();
-      IRedemptionStrategy oldStrategy = redemptionStrategiesByName[name];
-
-      redemptionStrategiesByTokens[inputTokens[i]][outputTokens[i]] = strategies[i];
-      redemptionStrategiesByName[name] = strategies[i];
-
-      redemptionStrategies.remove(address(oldStrategy));
-      redemptionStrategies.add(address(strategies[i]));
-
-      outputTokensByInputToken[inputTokens[i]] = outputTokens[i];
+      _setRedemptionStrategy(strategies[i], inputTokens[i], outputTokens[i]);
     }
   }
 
