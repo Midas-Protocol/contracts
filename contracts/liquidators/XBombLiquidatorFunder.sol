@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "../external/bomb/IXBomb.sol";
 import "./IRedemptionStrategy.sol";
 import "./IFundsConversionStrategy.sol";
+import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 /**
  * @title XBombLiquidatorFunder
@@ -95,20 +96,22 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
 contract XBombSwap {
   IERC20Upgradeable public testingBomb;
   IERC20Upgradeable public testingStable;
+  MasterPriceOracle public oracle;
 
-  constructor(IERC20Upgradeable _testingBomb, IERC20Upgradeable _testingStable) {
+  constructor(IERC20Upgradeable _testingBomb, IERC20Upgradeable _testingStable, MasterPriceOracle _oracle) {
     testingBomb = _testingBomb;
     testingStable = _testingStable;
+    oracle = _oracle;
   }
 
   function leave(uint256 _share) external {
     testingBomb.transferFrom(msg.sender, address(this), _share);
-    testingStable.transfer(msg.sender, _share);
+    testingStable.transfer(msg.sender, toREWARD(_share));
   }
 
   function enter(uint256 _amount) external {
     testingStable.transferFrom(msg.sender, address(this), _amount);
-    testingBomb.transfer(msg.sender, _amount);
+    testingBomb.transfer(msg.sender, toSTAKED(_amount));
   }
 
   function getExchangeRate() external view returns (uint256) {
@@ -116,10 +119,14 @@ contract XBombSwap {
   }
 
   function toREWARD(uint256 stakedAmount) external view returns (uint256) {
-    return stakedAmount;
+    uint256 bombPrice = oracle.price(testingBomb);
+    uint256 stablePrice = oracle.price(testingStable);
+    return stakedAmount * bombPrice / stablePrice;
   }
 
   function toSTAKED(uint256 rewardAmount) external view returns (uint256) {
-    return rewardAmount;
+    uint256 bombPrice = oracle.price(testingBomb);
+    uint256 stablePrice = oracle.price(testingStable);
+    return rewardAmount * stablePrice / bombPrice;
   }
 }
