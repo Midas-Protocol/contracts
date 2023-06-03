@@ -9,6 +9,7 @@ import "../midas/levered/ILeveredPositionFactory.sol";
 import "../midas/levered/LeveredPositionFactoryExtension.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
+import "../liquidators/XBombLiquidatorFunder.sol";
 import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
 import "../liquidators/AlgebraSwapLiquidator.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
@@ -143,6 +144,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     collateralMarket = ICErc20(_collat);
     stableMarket = ICErc20(_stable);
     upgradePoolAndMarkets();
+    vm.prank(factory.owner());
     factory._setPairWhitelisted(collateralMarket, stableMarket, true);
   }
 
@@ -153,8 +155,10 @@ abstract contract LeveredPositionTest is MarketsTest {
   ) internal {
     IERC20Upgradeable inputToken = underlying(inputMarket);
     IERC20Upgradeable outputToken = underlying(outputMarket);
+    vm.startPrank(registry.owner());
     registry.asExtension()._setRedemptionStrategy(strategy, inputToken, outputToken);
     registry.asExtension()._setRedemptionStrategy(strategy, outputToken, inputToken);
+    vm.stopPrank();
   }
 
   function underlying(address market) internal view returns (IERC20Upgradeable) {
@@ -176,7 +180,9 @@ abstract contract LeveredPositionTest is MarketsTest {
       inputTokens[i] = liquidators[i].inputToken;
       outputTokens[i] = liquidators[i].outputToken;
     }
+    vm.startPrank(registry.owner());
     registry.asExtension()._setRedemptionStrategies(strategies, inputTokens, outputTokens);
+    vm.stopPrank();
   }
 
   function _fundMarketAndSelf(ICErc20 market, address whale) internal {
@@ -520,6 +526,37 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
   }
 }
 
+contract BombTDaiLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(BSC_CHAPEL) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    uint256 depositAmount = 1e18;
+
+    address xMarket = 0xfa60851E76728eb31EFeA660937cD535C887fDbD; // BOMB
+    address yMarket = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15; // tdai
+    address xWhale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
+    address yWhale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
+
+    XBombLiquidatorFunder liquidator = new XBombLiquidatorFunder();
+    _configurePairAndLiquidator(xMarket, yMarket, liquidator);
+    _fundMarketAndSelf(ICErc20(xMarket), xWhale);
+    _fundMarketAndSelf(ICErc20(yMarket), yWhale);
+
+    IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
+    collateralToken.transfer(address(this), depositAmount);
+    collateralToken.approve(address(factory), depositAmount);
+    position = factory.createAndFundPositionAtRatio(
+      collateralMarket,
+      stableMarket,
+      collateralToken,
+      depositAmount,
+      1.2e18
+    );
+  }
+}
+
 /*
 contract XYLeveredPositionTest is LeveredPositionTest {
   function setUp() public fork(X_CHAIN_ID) {}
@@ -535,7 +572,7 @@ contract XYLeveredPositionTest is LeveredPositionTest {
     address yWhale = 0x...4;
 
     IRedemptionStrategy liquidator = new IRedemptionStrategy();
-    _configurePair(xMarket, yMarket, liquidator);
+    _configurePairAndLiquidator(xMarket, yMarket, liquidator);
     _fundMarketAndSelf(ICErc20(xMarket), xWhale);
     _fundMarketAndSelf(ICErc20(yMarket), yWhale);
 

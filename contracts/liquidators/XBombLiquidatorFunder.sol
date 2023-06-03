@@ -40,22 +40,22 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb) = abi.decode(
+    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb, IERC20Upgradeable _outputToken) = abi.decode(
       strategyData,
-      (address, address, IERC20Upgradeable)
+      (address, address, IERC20Upgradeable, IERC20Upgradeable)
     );
     if (inputTokenAddress == xbomb) {
       // burns the xBOMB and returns the underlying BOMB to the liquidator
       IXBomb(xbomb).leave(inputAmount);
 
-      outputToken = bomb;
+      outputToken = _outputToken;
       outputAmount = outputToken.balanceOf(address(this));
     } else if (inputTokenAddress == address(bomb)) {
       // mints xBOMB
       bomb.approve(address(xbomb), inputAmount);
       IXBomb(xbomb).enter(inputAmount);
 
-      outputToken = IERC20Upgradeable(xbomb);
+      outputToken = _outputToken;
       outputAmount = outputToken.balanceOf(address(this));
     } else {
       revert("unknown input token");
@@ -72,9 +72,9 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     view
     returns (IERC20Upgradeable, uint256)
   {
-    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb) = abi.decode(
+    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb, ) = abi.decode(
       strategyData,
-      (address, address, IERC20Upgradeable)
+      (address, address, IERC20Upgradeable, IERC20Upgradeable)
     );
     if (inputTokenAddress == xbomb) {
       // what amount of staked/xbomb equals the desired output amount of bomb?

@@ -443,14 +443,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       XBombSwap xbombSwapTUsd = XBombSwap(0x47Bf57bB81c82Af4116cA2FF76D063C698cFCd76);
       XBombSwap xbombSwapTDai = XBombSwap(0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482);
 
-      if (inputToken == chapelBomb && outputToken == chapelTUsd) {
-        strategyData = abi.encode(xbombSwapTUsd, xbombSwapTUsd, chapelTUsd);
-      } else if (inputToken == chapelBomb && outputToken == chapelTDai) {
-        strategyData = abi.encode(xbombSwapTDai, xbombSwapTDai, chapelTDai);
-      } else if (inputToken == chapelTUsd) {
-        strategyData = abi.encode(chapelTUsd, xbombSwapTUsd, chapelTUsd);
-      } else if (inputToken == chapelTDai) {
-        strategyData = abi.encode(chapelTDai, xbombSwapTDai, chapelTDai);
+      if (inputToken == chapelBomb) {
+        strategyData = abi.encode(xbombSwapTUsd, xbombSwapTUsd, outputToken, outputToken);
+      } else {
+        /*if (inputToken == chapelTUsd)*/
+        strategyData = abi.encode(inputToken, xbombSwapTUsd, inputToken, chapelBomb);
       }
     } else {
       address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
