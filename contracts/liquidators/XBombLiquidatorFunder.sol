@@ -118,15 +118,15 @@ contract XBombSwap {
     return 1e18;
   }
 
-  function toREWARD(uint256 stakedAmount) external view returns (uint256) {
-    uint256 bombPrice = oracle.price(testingBomb);
-    uint256 stablePrice = oracle.price(testingStable);
+  function toREWARD(uint256 stakedAmount) public view returns (uint256) {
+    uint256 bombPrice = oracle.price(address(testingBomb));
+    uint256 stablePrice = oracle.price(address(testingStable));
     return stakedAmount * bombPrice / stablePrice;
   }
 
-  function toSTAKED(uint256 rewardAmount) external view returns (uint256) {
-    uint256 bombPrice = oracle.price(testingBomb);
-    uint256 stablePrice = oracle.price(testingStable);
+  function toSTAKED(uint256 rewardAmount) public view returns (uint256) {
+    uint256 bombPrice = oracle.price(address(testingBomb));
+    uint256 stablePrice = oracle.price(address(testingStable));
     return rewardAmount * stablePrice / bombPrice;
   }
 }
