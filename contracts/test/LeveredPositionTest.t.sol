@@ -5,6 +5,8 @@ import "./config/MarketsTest.t.sol";
 
 import "../midas/levered/LeveredPosition.sol";
 import "../midas/levered/LeveredPositionFactory.sol";
+import "../midas/levered/ILeveredPositionFactory.sol";
+import "../midas/levered/LeveredPositionFactoryExtension.sol";
 import "../liquidators/JarvisLiquidatorFunder.sol";
 import "../liquidators/SolidlySwapLiquidator.sol";
 import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
@@ -24,12 +26,12 @@ import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywhe
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
-  LeveredPositionFactory factory;
+  ILeveredPositionFactory factory;
   MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
@@ -51,12 +53,11 @@ contract LeveredPositionFactoryTest is BaseTest {
       abi.encode(borrowRate / factory.blocksPerYear())
     );
 
-    LeveredPositionFactory newImpl = new LeveredPositionFactory();
-    TransparentUpgradeableProxy asProxy = TransparentUpgradeableProxy(payable(address(factory)));
-    bytes32 bytesAtSlot = vm.load(address(asProxy), _ADMIN_SLOT);
-    address admin = address(uint160(uint256(bytesAtSlot)));
-    vm.prank(admin);
-    asProxy.upgradeTo(address(newImpl));
+    LeveredPositionFactoryExtension newExt = new LeveredPositionFactoryExtension();
+    DiamondBase asBase = DiamondBase(address(factory));
+    address[] memory oldExt = asBase._listExtensions();
+    vm.prank(factory.owner());
+    asBase._registerExtension(DiamondExtension(oldExt[0]), newExt);
 
     uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * factory.blocksPerYear();
     emit log_named_uint("_borrowRate", _borrowRate);
@@ -72,7 +73,7 @@ contract LeveredPositionFactoryTest is BaseTest {
     emit log_named_int("net apy", netApy);
 
     // boosted APY = 2x 2.7% = 5.4 % of the base collateral
-    // bororw APR = 5.2%
+    // borrow APR = 5.2%
     // diff = 5.4 - 5.2 = 0.2%
     assertApproxEqRel(netApy, 0.2e16, 1e12, "!net apy");
   }
@@ -81,7 +82,7 @@ contract LeveredPositionFactoryTest is BaseTest {
 abstract contract LeveredPositionTest is MarketsTest {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
-  LeveredPositionFactory factory;
+  ILeveredPositionFactory factory;
   LiquidatorsRegistry registry;
   LeveredPosition position;
 
@@ -101,7 +102,7 @@ abstract contract LeveredPositionTest is MarketsTest {
 
     if (block.chainid == BSC_CHAPEL) {
       registry = LiquidatorsRegistry(ap.getAddress("LiquidatorsRegistry"));
-      factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+      factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
     } else {
       // create and configure the liquidators registry
       registry = new LiquidatorsRegistry(ap);
@@ -109,18 +110,14 @@ abstract contract LeveredPositionTest is MarketsTest {
       registry._registerExtension(ext, DiamondExtension(address(0)));
 
       // create and initialize the levered positions factory
-      LeveredPositionFactory impl = new LeveredPositionFactory();
-      TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
-        address(impl),
-        ap.getAddress("DefaultProxyAdmin"),
-        ""
-      );
-      factory = LeveredPositionFactory(address(factoryProxy));
-      factory.initialize(
+      LeveredPositionFactoryExtension factoryExt = new LeveredPositionFactoryExtension();
+      LeveredPositionFactory factoryBase = new LeveredPositionFactory(
         IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
         ILiquidatorsRegistry(address(registry)),
         blocksPerYear
       );
+      factoryBase._registerExtension(LeveredPositionFactoryExtension(address(0)), factoryExt);
+      factory = ILeveredPositionFactory(address(factoryBase));
     }
   }
 
