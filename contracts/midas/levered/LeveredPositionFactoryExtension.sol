@@ -14,7 +14,11 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract LeveredPositionFactoryExtension is LeveredPositionFactoryStorage, DiamondExtension, ILeveredPositionFactoryExtension {
+contract LeveredPositionFactoryExtension is
+  LeveredPositionFactoryStorage,
+  DiamondExtension,
+  ILeveredPositionFactoryExtension
+{
   using SafeERC20Upgradeable for IERC20Upgradeable;
   using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -111,17 +115,17 @@ contract LeveredPositionFactoryExtension is LeveredPositionFactoryStorage, Diamo
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
+    external
+    view
+    returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
   {
     return liquidatorsRegistry.getRedemptionStrategies(inputToken, outputToken);
   }
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (uint256 slippage)
+    external
+    view
+    returns (uint256 slippage)
   {
     slippage = conversionSlippage[inputToken][outputToken];
     if (slippage == 0) return MAX_SLIPPAGE;
@@ -141,18 +145,18 @@ contract LeveredPositionFactoryExtension is LeveredPositionFactoryStorage, Diamo
 
   // @dev returns lists of the market addresses, names and symbols of the underlying assets of those collateral markets that are whitelisted
   function getCollateralMarkets()
-  external
-  view
-  returns (
-    address[] memory markets,
-    address[] memory poolOfMarket,
-    address[] memory underlyings,
-    string[] memory names,
-    string[] memory symbols,
-    uint8[] memory decimals,
-    uint256[] memory totalUnderlyingSupplied,
-    uint256[] memory ratesPerBlock
-  )
+    external
+    view
+    returns (
+      address[] memory markets,
+      address[] memory poolOfMarket,
+      address[] memory underlyings,
+      string[] memory names,
+      string[] memory symbols,
+      uint8[] memory decimals,
+      uint256[] memory totalUnderlyingSupplied,
+      uint256[] memory ratesPerBlock
+    )
   {
     markets = collateralMarkets.values();
     poolOfMarket = new address[](markets.length);
@@ -193,22 +197,22 @@ contract LeveredPositionFactoryExtension is LeveredPositionFactoryStorage, Diamo
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 
     uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _baseCollateral * collateralAssetPrice) /
-    (stableAssetPrice * 1e18);
+      (stableAssetPrice * 1e18);
     return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount);
   }
 
   // @dev returns lists of the market addresses, names, symbols and the current Rate for each Borrowable asset
   function getBorrowableMarketsAndRates(ICErc20 _collateralMarket)
-  external
-  view
-  returns (
-    address[] memory markets,
-    address[] memory underlyings,
-    string[] memory names,
-    string[] memory symbols,
-    uint256[] memory rates,
-    uint8[] memory decimals
-  )
+    external
+    view
+    returns (
+      address[] memory markets,
+      address[] memory underlyings,
+      string[] memory names,
+      string[] memory symbols,
+      uint256[] memory rates,
+      uint8[] memory decimals
+    )
   {
     markets = borrowableMarketsByCollateral[_collateralMarket].values();
     underlyings = new address[](markets.length);

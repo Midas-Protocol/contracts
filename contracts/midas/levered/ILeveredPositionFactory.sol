@@ -71,18 +71,18 @@ interface ILeveredPositionFactoryExtension {
   function getWhitelistedCollateralMarkets() external view returns (address[] memory);
 
   function getCollateralMarkets()
-  external
-  view
-  returns (
-    address[] memory markets,
-    address[] memory poolOfMarket,
-    address[] memory underlyings,
-    string[] memory names,
-    string[] memory symbols,
-    uint8[] memory decimals,
-    uint256[] memory totalUnderlyingSupplied,
-    uint256[] memory ratesPerBlock
-  );
+    external
+    view
+    returns (
+      address[] memory markets,
+      address[] memory poolOfMarket,
+      address[] memory underlyings,
+      string[] memory names,
+      string[] memory symbols,
+      uint8[] memory decimals,
+      uint256[] memory totalUnderlyingSupplied,
+      uint256[] memory ratesPerBlock
+    );
 
   function getBorrowableMarketsByCollateral(ICErc20 _collateralMarket) external view returns (address[] memory);
 
@@ -94,16 +94,16 @@ interface ILeveredPositionFactoryExtension {
   ) external view returns (uint256);
 
   function getBorrowableMarketsAndRates(ICErc20 _collateralMarket)
-  external
-  view
-  returns (
-    address[] memory markets,
-    address[] memory underlyings,
-    string[] memory names,
-    string[] memory symbols,
-    uint256[] memory rates,
-    uint8[] memory decimals
-  );
+    external
+    view
+    returns (
+      address[] memory markets,
+      address[] memory underlyings,
+      string[] memory names,
+      string[] memory symbols,
+      uint256[] memory rates,
+      uint8[] memory decimals
+    );
 
   function getNetAPY(
     uint256 _supplyAPY,
@@ -114,5 +114,8 @@ interface ILeveredPositionFactoryExtension {
   ) external view returns (int256 netAPY);
 }
 
-interface ILeveredPositionFactory is ILeveredPositionFactoryStorage, ILeveredPositionFactoryBase, ILeveredPositionFactoryExtension {
-}
+interface ILeveredPositionFactory is
+  ILeveredPositionFactoryStorage,
+  ILeveredPositionFactoryBase,
+  ILeveredPositionFactoryExtension
+{}

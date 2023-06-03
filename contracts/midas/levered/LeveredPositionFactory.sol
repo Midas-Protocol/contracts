@@ -64,7 +64,6 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
     }
   }
 
-
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace)
     public
     override
