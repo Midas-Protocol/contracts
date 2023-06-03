@@ -55,15 +55,6 @@ contract LeveredPositionFactoryTest is BaseTest {
 
     LeveredPositionFactoryExtension newExt = new LeveredPositionFactoryExtension();
 
-    // TODO remove after redeploy
-    if (address(factory) == 0x7b6F27bF7cE60DA6e398ec348a915D8A81bC2b3A) {
-      LeveredPositionFactory base = new LeveredPositionFactory(
-        factory.fuseFeeDistributor(),
-        factory.liquidatorsRegistry(),
-        factory.blocksPerYear()
-      );
-      factory = ILeveredPositionFactory(address(base));
-    }
     DiamondBase asBase = DiamondBase(address(factory));
     address[] memory oldExts = asBase._listExtensions();
     DiamondExtension oldExt = DiamondExtension(address(0));

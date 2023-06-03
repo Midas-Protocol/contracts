@@ -12,16 +12,13 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract LeveredPositionFactoryStorage is SafeOwnable {
-  uint8 private __deprecated_initialized;
-  bool private __deprecated_initializing;
-
-  IFuseFeeDistributor public fuseFeeDistributor;
-  ILiquidatorsRegistry public liquidatorsRegistry;
-  uint256 public blocksPerYear;
-
+  EnumerableSet.AddressSet internal accountsWithOpenPositions;
   mapping(address => EnumerableSet.AddressSet) internal positionsByAccount;
   EnumerableSet.AddressSet internal collateralMarkets;
   mapping(ICErc20 => EnumerableSet.AddressSet) internal borrowableMarketsByCollateral;
   mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
-  EnumerableSet.AddressSet internal accountsWithOpenPositions;
+
+  IFuseFeeDistributor public fuseFeeDistributor;
+  ILiquidatorsRegistry public liquidatorsRegistry;
+  uint256 public blocksPerYear;
 }

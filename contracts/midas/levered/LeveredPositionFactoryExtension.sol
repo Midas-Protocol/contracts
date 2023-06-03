@@ -32,13 +32,13 @@ contract LeveredPositionFactoryExtension is
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
     uint8 fnsCount = 16;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
-    functionSelectors[--fnsCount] = this.getMinBorrowNative.selector;
     functionSelectors[--fnsCount] = this.createPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPositionAtRatio.selector;
     functionSelectors[--fnsCount] = this.removeClosedPosition.selector;
     functionSelectors[--fnsCount] = this.isFundingAllowed.selector;
+    functionSelectors[--fnsCount] = this.getMinBorrowNative.selector;
+    functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getSlippage.selector;
     functionSelectors[--fnsCount] = this.getNetAPY.selector;
     functionSelectors[--fnsCount] = this.getBorrowableMarketsAndRates.selector;
