@@ -440,8 +440,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       IERC20Upgradeable chapelBomb = IERC20Upgradeable(0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768);
       IERC20Upgradeable chapelTUsd = IERC20Upgradeable(0x4f1885D25eF219D3D4Fa064809D6D4985FAb9A0b);
       IERC20Upgradeable chapelTDai = IERC20Upgradeable(0x8870f7102F1DcB1c35b01af10f1baF1B00aD6805);
-      XBombSwap xbombSwapTUsd = XBombSwap(0x47Bf57bB81c82Af4116cA2FF76D063C698cFCd76);
-      XBombSwap xbombSwapTDai = XBombSwap(0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482);
+      XBombSwap xbombSwapTUsd = XBombSwap(0x161FbE0943Af4A39a50262026A81a243B635982d);
+      XBombSwap xbombSwapTDai = XBombSwap(0xd816eb4660615BBF080ddf425F28ea4AF30d04D5);
 
       if (inputToken == chapelBomb) {
         strategyData = abi.encode(xbombSwapTUsd, xbombSwapTUsd, outputToken, outputToken);
