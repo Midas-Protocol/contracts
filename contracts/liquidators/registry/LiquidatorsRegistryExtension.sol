@@ -445,9 +445,10 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
       if (inputToken == chapelBomb) {
         strategyData = abi.encode(xbombSwapTUsd, xbombSwapTUsd, outputToken, outputToken);
-      } else {
-        /*if (inputToken == chapelTUsd)*/
+      } else if (inputToken == chapelTUsd) {
         strategyData = abi.encode(inputToken, xbombSwapTUsd, inputToken, chapelBomb);
+      } else if (inputToken == chapelTDai) {
+        strategyData = abi.encode(inputToken, xbombSwapTDai, inputToken, chapelBomb);
       }
     } else {
       address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
