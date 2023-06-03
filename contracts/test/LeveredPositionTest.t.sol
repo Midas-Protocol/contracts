@@ -54,10 +54,22 @@ contract LeveredPositionFactoryTest is BaseTest {
     );
 
     LeveredPositionFactoryExtension newExt = new LeveredPositionFactoryExtension();
+
+    // TODO remove after redeploy
+    if (address(factory) == 0x7b6F27bF7cE60DA6e398ec348a915D8A81bC2b3A) {
+      LeveredPositionFactory base = new LeveredPositionFactory(
+        factory.fuseFeeDistributor(),
+        factory.liquidatorsRegistry(),
+        factory.blocksPerYear()
+      );
+      factory = ILeveredPositionFactory(address(base));
+    }
     DiamondBase asBase = DiamondBase(address(factory));
-    address[] memory oldExt = asBase._listExtensions();
+    address[] memory oldExts = asBase._listExtensions();
+    DiamondExtension oldExt = DiamondExtension(address(0));
+    if (oldExts.length > 0) oldExt = DiamondExtension(oldExts[0]);
     vm.prank(factory.owner());
-    asBase._registerExtension(DiamondExtension(oldExt[0]), newExt);
+    asBase._registerExtension(newExt, oldExt);
 
     uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * factory.blocksPerYear();
     emit log_named_uint("_borrowRate", _borrowRate);
@@ -116,7 +128,7 @@ abstract contract LeveredPositionTest is MarketsTest {
         ILiquidatorsRegistry(address(registry)),
         blocksPerYear
       );
-      factoryBase._registerExtension(LeveredPositionFactoryExtension(address(0)), factoryExt);
+      factoryBase._registerExtension(factoryExt, LeveredPositionFactoryExtension(address(0)));
       factory = ILeveredPositionFactory(address(factoryBase));
     }
   }
