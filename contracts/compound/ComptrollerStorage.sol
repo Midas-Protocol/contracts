@@ -189,3 +189,16 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
   /// @dev set of whitelisted accounts that are allowed to bypass the borrow cap
   mapping(address => EnumerableSet.AddressSet) internal borrowCapWhitelist;
 }
+
+contract ComptrollerV4Storage is ComptrollerV3Storage {
+  struct PrudentiaConfig {
+    address controller; // Adrastia Prudentia controller address
+    uint8 offset; // Offset for delayed rate activation
+  }
+
+  /// @dev Adrastia Prudentia config for controlling borrow caps.
+  PrudentiaConfig public borrowCapConfig;
+
+  /// @dev Adrastia Prudentia config for controlling supply caps.
+  PrudentiaConfig public supplyCapConfig;
+}

@@ -6,7 +6,7 @@ import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { PriceOracle } from "./PriceOracle.sol";
 import { ComptrollerInterface } from "./ComptrollerInterface.sol";
-import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
+import { ComptrollerV4Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
@@ -15,12 +15,14 @@ import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
+import "adrastia-periphery/rates/IHistoricalRates.sol";
+
 /**
  * @title Compound's Comptroller Contract
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondBase {
+contract Comptroller is ComptrollerV4Storage, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondBase {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   /// @notice Emitted when an admin supports a market
@@ -251,8 +253,41 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.SUPPLIER_NOT_WHITELISTED);
     }
 
-    // Check supply cap
-    uint256 supplyCap = supplyCaps[cToken];
+    PrudentiaConfig memory capConfig = supplyCapConfig;
+
+    uint256 supplyCap;
+
+    // Check if we're using Adrastia Prudentia for the supply cap
+    if (capConfig.controller != address(0)) {
+      // We have a controller, so we're using Adrastia Prudentia
+
+      // Get the supply cap from Adrastia Prudentia
+      supplyCap = IHistoricalRates(capConfig.controller).getRateAt(cToken, capConfig.offset).current;
+
+      // Prudentia stores the supply cap as a whole token amount while our code requires the mantissa amount, so we
+      // must scale the supply cap by the underlying token decimals
+
+      uint256 underlyingDecimals = 18;
+
+      // Try to get the underlying asset address (we use a staticcall b/c CEther doesn't have an underlying)
+      (bool success, bytes memory data) = cToken.staticcall(abi.encodeWithSignature("underlying()"));
+      if (success && data.length == 32) {
+        address underlyingToken = abi.decode(data, (address));
+        (success, data) = underlyingToken.staticcall(abi.encodeWithSignature("decimals()"));
+        if (success && data.length == 32) {
+          underlyingDecimals = abi.decode(data, (uint8));
+        }
+      }
+
+      // Scale the supply cap by the decimals
+      supplyCap *= 10**underlyingDecimals;
+    } else {
+      // We don't have a controller, so we're using the local supply cap
+
+      // Get the supply cap from the local supply cap
+      supplyCap = supplyCaps[cToken];
+    }
+
     // Supply cap of 0 corresponds to unlimited supplying
     if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
       CTokenExtensionInterface asExt = CTokenInterface(cToken).asCTokenExtensionInterface();
@@ -464,8 +499,39 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerInterface, ComptrollerE
       return uint256(Error.SUPPLIER_NOT_WHITELISTED);
     }
 
-    // Check borrow cap
-    uint256 borrowCap = borrowCaps[cToken];
+    PrudentiaConfig memory capConfig = borrowCapConfig;
+
+    uint256 borrowCap;
+
+    // Check if we're using Adrastia Prudentia for the borrow cap
+    if (capConfig.controller != address(0)) {
+      // We have a controller, so we're using Adrastia Prudentia
+
+      // Get the borrow cap from Adrastia Prudentia
+      borrowCap = IHistoricalRates(capConfig.controller).getRateAt(cToken, capConfig.offset).current;
+
+      // Prudentia stores the borrow cap as a whole token amount while our code requires the mantissa amount, so we
+      // must scale the borrow cap by the underlying token decimals
+
+      uint256 underlyingDecimals = 18;
+
+      // Try to get the underlying asset address (we use a staticcall b/c CEther doesn't have an underlying)
+      (bool success, bytes memory data) = cToken.staticcall(abi.encodeWithSignature("underlying()"));
+      if (success && data.length == 32) {
+        address underlyingToken = abi.decode(data, (address));
+        (success, data) = underlyingToken.staticcall(abi.encodeWithSignature("decimals()"));
+        if (success && data.length == 32) {
+          underlyingDecimals = abi.decode(data, (uint8));
+        }
+      }
+
+      // Scale the borrow cap by the decimals
+      borrowCap *= 10**underlyingDecimals;
+    } else {
+      // We don't have a controller, so we're using the local borrow cap
+      borrowCap = borrowCaps[cToken];
+    }
+
     // Borrow cap of 0 corresponds to unlimited borrowing
     if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
       uint256 totalBorrows = CTokenInterface(cToken).totalBorrows();
