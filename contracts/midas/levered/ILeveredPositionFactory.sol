@@ -79,6 +79,7 @@ interface ILeveredPositionFactoryExtension {
       address[] memory markets,
       address[] memory poolOfMarket,
       address[] memory underlyings,
+      uint256[] memory underlyingPrices,
       string[] memory names,
       string[] memory symbols,
       uint8[] memory decimals,

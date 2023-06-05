@@ -151,6 +151,7 @@ contract LeveredPositionFactoryExtension is
       address[] memory markets,
       address[] memory poolOfMarket,
       address[] memory underlyings,
+      uint256[] memory underlyingPrices,
       string[] memory names,
       string[] memory symbols,
       uint8[] memory decimals,
@@ -161,6 +162,7 @@ contract LeveredPositionFactoryExtension is
     markets = collateralMarkets.values();
     poolOfMarket = new address[](markets.length);
     underlyings = new address[](markets.length);
+    underlyingPrices = new uint256[](markets.length);
     names = new string[](markets.length);
     symbols = new string[](markets.length);
     totalUnderlyingSupplied = new uint256[](markets.length);
@@ -169,9 +171,10 @@ contract LeveredPositionFactoryExtension is
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       poolOfMarket[i] = market.comptroller();
-      address underlyingAddress = market.underlying();
-      underlyings[i] = underlyingAddress;
-      ERC20Upgradeable underlying = ERC20Upgradeable(underlyingAddress);
+      IComptroller pool = IComptroller(poolOfMarket[i]);
+      underlyingPrices[i] = IPriceOracle(pool.oracle()).getUnderlyingPrice(market);
+      underlyings[i] = market.underlying();
+      ERC20Upgradeable underlying = ERC20Upgradeable(underlyings[i]);
       names[i] = underlying.name();
       symbols[i] = underlying.symbol();
       decimals[i] = underlying.decimals();
