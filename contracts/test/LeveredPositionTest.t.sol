@@ -540,7 +540,7 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
     stableMarket = ICErc20(yMarket);
   }
 
-  function testOpenLeveredPositionAtRatio() public {
+  function testOpenLeveredPositionAtRatio() public whenForking {
     uint256 depositAmount = 1e18;
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
