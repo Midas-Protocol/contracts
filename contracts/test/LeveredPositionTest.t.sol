@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { MarketsTest, BaseTest, CErc20Delegate } from "./config/MarketsTest.t.sol";
+import { DiamondBase, DiamondExtension } from "../midas/DiamondExtension.sol";
 
 import { LeveredPosition } from "../midas/levered/LeveredPosition.sol";
 import { LeveredPositionFactory, IFuseFeeDistributor } from "../midas/levered/LeveredPositionFactory.sol";
@@ -10,32 +11,34 @@ import { SolidlySwapLiquidator } from "../liquidators/SolidlySwapLiquidator.sol"
 import { BalancerLinearPoolTokenLiquidator } from "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
 import { AlgebraSwapLiquidator } from "../liquidators/AlgebraSwapLiquidator.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-
+import { LeveredPositionFactoryExtension } from "../midas/levered/LeveredPositionFactoryExtension.sol";
+import { ILeveredPositionFactory } from "../midas/levered/ILeveredPositionFactory.sol";
+import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { LeveredPositionsLens } from "../midas/levered/LeveredPositionsLens.sol";
 import { LiquidatorsRegistry } from "../liquidators/registry/LiquidatorsRegistry.sol";
-import { LiquidatorsRegistryExtension, DiamondExtension } from "../liquidators/registry/LiquidatorsRegistryExtension.sol";
+import { LiquidatorsRegistryExtension } from "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-
 contract LeveredPositionFactoryTest is BaseTest {
-  LeveredPositionFactory factory;
+  ILeveredPositionFactory factory;
+  LeveredPositionsLens lens;
   MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    lens = new LeveredPositionsLens();
+    lens.initialize(factory);
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    vm.prank(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
-    factory.getBorrowRateAtRatio(
+    lens.getBorrowRateAtRatio(
       ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD),
       ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
       990950010006960400000000000000,
@@ -43,19 +46,52 @@ contract LeveredPositionFactoryTest is BaseTest {
     );
   }
 
-  function testChapelAssetPrice() public debuggingOnly fork(BSC_CHAPEL) {
-    uint256 p = mpo.price(0xf97e8F094c4428e6436b3bf86264D176A2606bC4);
-    emit log_named_uint("rewards tok price", p);
-    assertGt(p, 0, "zero price");
+  function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
+    ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // DAI
+
+    uint256 borrowRate = 5.2e16; // 5.2%
+    vm.mockCall(
+      address(_stableMarket),
+      abi.encodeWithSelector(_stableMarket.borrowRatePerBlock.selector),
+      abi.encode(borrowRate / factory.blocksPerYear())
+    );
+
+    LeveredPositionFactoryExtension newExt = new LeveredPositionFactoryExtension();
+
+    DiamondBase asBase = DiamondBase(address(factory));
+    address[] memory oldExts = asBase._listExtensions();
+    DiamondExtension oldExt = DiamondExtension(address(0));
+    if (oldExts.length > 0) oldExt = DiamondExtension(oldExts[0]);
+    vm.prank(factory.owner());
+    asBase._registerExtension(newExt, oldExt);
+
+    uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * factory.blocksPerYear();
+    emit log_named_uint("_borrowRate", _borrowRate);
+
+    int256 netApy = lens.getNetAPY(
+      2.7e16, // 2.7%
+      1e18, // supply amount
+      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD), // BOMB
+      _stableMarket,
+      2e18 // ratio
+    );
+
+    emit log_named_int("net apy", netApy);
+
+    // boosted APY = 2x 2.7% = 5.4 % of the base collateral
+    // borrow APR = 5.2%
+    // diff = 5.4 - 5.2 = 0.2%
+    assertApproxEqRel(netApy, 0.2e16, 1e12, "!net apy");
   }
 }
 
 abstract contract LeveredPositionTest is MarketsTest {
   ICErc20 collateralMarket;
   ICErc20 stableMarket;
-  LeveredPositionFactory factory;
+  ILeveredPositionFactory factory;
   LiquidatorsRegistry registry;
   LeveredPosition position;
+  LeveredPositionsLens lens;
 
   function afterForkSetUp() internal virtual override {
     super.afterForkSetUp();
@@ -73,7 +109,7 @@ abstract contract LeveredPositionTest is MarketsTest {
 
     if (block.chainid == BSC_CHAPEL) {
       registry = LiquidatorsRegistry(ap.getAddress("LiquidatorsRegistry"));
-      factory = LeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+      factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
     } else {
       // create and configure the liquidators registry
       registry = new LiquidatorsRegistry(ap);
@@ -81,19 +117,17 @@ abstract contract LeveredPositionTest is MarketsTest {
       registry._registerExtension(ext, DiamondExtension(address(0)));
 
       // create and initialize the levered positions factory
-      LeveredPositionFactory impl = new LeveredPositionFactory();
-      TransparentUpgradeableProxy factoryProxy = new TransparentUpgradeableProxy(
-        address(impl),
-        ap.getAddress("DefaultProxyAdmin"),
-        ""
-      );
-      factory = LeveredPositionFactory(address(factoryProxy));
-      factory.initialize(
+      LeveredPositionFactoryExtension factoryExt = new LeveredPositionFactoryExtension();
+      LeveredPositionFactory factoryBase = new LeveredPositionFactory(
         IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
         ILiquidatorsRegistry(address(registry)),
         blocksPerYear
       );
+      factoryBase._registerExtension(factoryExt, LeveredPositionFactoryExtension(address(0)));
+      factory = ILeveredPositionFactory(address(factoryBase));
     }
+    lens = new LeveredPositionsLens();
+    lens.initialize(factory);
   }
 
   function upgradePoolAndMarkets() internal {
@@ -115,6 +149,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     collateralMarket = ICErc20(_collat);
     stableMarket = ICErc20(_stable);
     upgradePoolAndMarkets();
+    vm.prank(factory.owner());
     factory._setPairWhitelisted(collateralMarket, stableMarket, true);
   }
 
@@ -125,8 +160,10 @@ abstract contract LeveredPositionTest is MarketsTest {
   ) internal {
     IERC20Upgradeable inputToken = underlying(inputMarket);
     IERC20Upgradeable outputToken = underlying(outputMarket);
+    vm.startPrank(registry.owner());
     registry.asExtension()._setRedemptionStrategy(strategy, inputToken, outputToken);
     registry.asExtension()._setRedemptionStrategy(strategy, outputToken, inputToken);
+    vm.stopPrank();
   }
 
   function underlying(address market) internal view returns (IERC20Upgradeable) {
@@ -148,7 +185,9 @@ abstract contract LeveredPositionTest is MarketsTest {
       inputTokens[i] = liquidators[i].inputToken;
       outputTokens[i] = liquidators[i].outputToken;
     }
+    vm.startPrank(registry.owner());
     registry.asExtension()._setRedemptionStrategies(strategies, inputTokens, outputTokens);
+    vm.stopPrank();
   }
 
   function _fundMarketAndSelf(ICErc20 market, address whale) internal {
@@ -223,7 +262,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
 
-    uint256 rate = factory.getBorrowRateAtRatio(collateralMarket, stableMarket, 1e18, maxRatio);
+    uint256 rate = lens.getBorrowRateAtRatio(collateralMarket, stableMarket, 1e18, maxRatio);
     emit log_named_uint("borrow rate at max ratio", rate);
 
     uint256 minRatio = position.getMinLeverageRatio();
@@ -368,7 +407,10 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
     _fundMarketAndSelf(ICErc20(stkBnbMarket), stkBnbWhale);
     _fundMarketAndSelf(ICErc20(wbnbMarket), wbnbWhale);
 
-    position = _openLeveredPosition(address(this), depositAmount);
+    IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
+    collateralToken.transfer(address(this), depositAmount);
+    collateralToken.approve(address(factory), depositAmount);
+    position = factory.createAndFundPosition(collateralMarket, stableMarket, collateralToken, depositAmount);
   }
 }
 
@@ -483,6 +525,38 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
   }
 }
 
+contract BombTDaiLeveredPositionTest is LeveredPositionTest {
+  function setUp() public fork(BSC_CHAPEL) {}
+
+  function afterForkSetUp() internal override {
+    super.afterForkSetUp();
+
+    address xMarket = 0xfa60851E76728eb31EFeA660937cD535C887fDbD; // BOMB
+    address yMarket = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15; // tdai
+
+    collateralMarket = ICErc20(xMarket);
+    stableMarket = ICErc20(yMarket);
+  }
+
+  function testOpenLeveredPositionAtRatio() public whenForking {
+    uint256 depositAmount = 1e18;
+    IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
+    address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
+    vm.startPrank(whale);
+    collateralToken.transfer(address(this), depositAmount);
+    collateralToken.approve(address(factory), depositAmount);
+    position = factory.createAndFundPositionAtRatio(
+      collateralMarket,
+      stableMarket,
+      collateralToken,
+      depositAmount,
+      1.2e18
+    );
+    vm.stopPrank();
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1.2e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
+  }
+}
+
 /*
 contract XYLeveredPositionTest is LeveredPositionTest {
   function setUp() public fork(X_CHAIN_ID) {}
@@ -498,7 +572,7 @@ contract XYLeveredPositionTest is LeveredPositionTest {
     address yWhale = 0x...4;
 
     IRedemptionStrategy liquidator = new IRedemptionStrategy();
-    _configurePair(xMarket, yMarket, liquidator);
+    _configurePairAndLiquidator(xMarket, yMarket, liquidator);
     _fundMarketAndSelf(ICErc20(xMarket), xWhale);
     _fundMarketAndSelf(ICErc20(yMarket), yWhale);
 
