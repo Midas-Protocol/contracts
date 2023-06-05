@@ -98,7 +98,11 @@ contract XBombSwap {
   IERC20Upgradeable public testingStable;
   MasterPriceOracle public oracle;
 
-  constructor(IERC20Upgradeable _testingBomb, IERC20Upgradeable _testingStable, MasterPriceOracle _oracle) {
+  constructor(
+    IERC20Upgradeable _testingBomb,
+    IERC20Upgradeable _testingStable,
+    MasterPriceOracle _oracle
+  ) {
     testingBomb = _testingBomb;
     testingStable = _testingStable;
     oracle = _oracle;
@@ -121,12 +125,12 @@ contract XBombSwap {
   function toREWARD(uint256 stakedAmount) public view returns (uint256) {
     uint256 bombPrice = oracle.price(address(testingBomb));
     uint256 stablePrice = oracle.price(address(testingStable));
-    return stakedAmount * bombPrice / stablePrice;
+    return (stakedAmount * bombPrice) / stablePrice;
   }
 
   function toSTAKED(uint256 rewardAmount) public view returns (uint256) {
     uint256 bombPrice = oracle.price(address(testingBomb));
     uint256 stablePrice = oracle.price(address(testingStable));
-    return rewardAmount * stablePrice / bombPrice;
+    return (rewardAmount * stablePrice) / bombPrice;
   }
 }

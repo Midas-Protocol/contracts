@@ -8,7 +8,10 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 interface ILiquidatorsRegistryStorage {
   function redemptionStrategiesByName(string memory name) external view returns (IRedemptionStrategy);
 
-  function redemptionStrategiesByTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (IRedemptionStrategy);
+  function redemptionStrategiesByTokens(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    view
+    returns (IRedemptionStrategy);
 
   function outputTokensByInputToken(IERC20Upgradeable inputToken) external view returns (IERC20Upgradeable);
 }
@@ -48,5 +51,4 @@ interface ILiquidatorsRegistryExtension {
   ) external;
 }
 
-interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {
-}
+interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {}
