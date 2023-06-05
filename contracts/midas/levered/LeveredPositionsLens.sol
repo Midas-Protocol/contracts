@@ -15,7 +15,7 @@ contract LeveredPositionsLens is Initializable {
   }
 
   /// @notice this is a lens fn, it is not intended to be used on-chain
-  // @dev returns lists of the market addresses, names and symbols of the underlying assets of those collateral markets that are whitelisted
+  /// @dev returns lists of the market addresses, names and symbols of the underlying assets of those collateral markets that are whitelisted
   function getCollateralMarkets()
     external
     view
