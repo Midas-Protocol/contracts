@@ -16,7 +16,8 @@ contract LeveredPositionFactoryStorage is SafeOwnable {
   mapping(address => EnumerableSet.AddressSet) internal positionsByAccount;
   EnumerableSet.AddressSet internal collateralMarkets;
   mapping(ICErc20 => EnumerableSet.AddressSet) internal borrowableMarketsByCollateral;
-  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
+
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) public conversionSlippage;
 
   IFuseFeeDistributor public fuseFeeDistributor;
   ILiquidatorsRegistry public liquidatorsRegistry;

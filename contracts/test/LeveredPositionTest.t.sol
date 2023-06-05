@@ -25,27 +25,31 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 
 import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { LeveredPositionsLens } from "../midas/levered/LeveredPositionsLens.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
+  LeveredPositionsLens lens;
   MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    lens = new LeveredPositionsLens();
+    lens.initialize(factory);
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    factory.getBorrowRateAtRatio(
-      ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
-      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD),
-      990950010006960400000000000000,
-      1000000000000000000
+    lens.getBorrowRateAtRatio(
+        ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
+        ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD),
+        990950010006960400000000000000,
+        1000000000000000000
     );
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
-    ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); //DAI
+    ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // DAI
 
     uint256 borrowRate = 5.2e16; // 5.2%
     vm.mockCall(
@@ -66,7 +70,7 @@ contract LeveredPositionFactoryTest is BaseTest {
     uint256 _borrowRate = _stableMarket.borrowRatePerBlock() * factory.blocksPerYear();
     emit log_named_uint("_borrowRate", _borrowRate);
 
-    int256 netApy = factory.getNetAPY(
+    int256 netApy = lens.getNetAPY(
       2.7e16, // 2.7%
       1e18, // supply amount
       ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD), // BOMB
@@ -89,6 +93,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   ILeveredPositionFactory factory;
   LiquidatorsRegistry registry;
   LeveredPosition position;
+  LeveredPositionsLens lens;
 
   function afterForkSetUp() internal virtual override {
     super.afterForkSetUp();
@@ -123,6 +128,8 @@ abstract contract LeveredPositionTest is MarketsTest {
       factoryBase._registerExtension(factoryExt, LeveredPositionFactoryExtension(address(0)));
       factory = ILeveredPositionFactory(address(factoryBase));
     }
+    lens = new LeveredPositionsLens();
+    lens.initialize(factory);
   }
 
   function upgradePoolAndMarkets() internal {
@@ -257,7 +264,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max ratio", maxRatio);
 
-    uint256 rate = factory.getBorrowRateAtRatio(collateralMarket, stableMarket, 1e18, maxRatio);
+    uint256 rate = lens.getBorrowRateAtRatio(collateralMarket, stableMarket, 1e18, maxRatio);
     emit log_named_uint("borrow rate at max ratio", rate);
 
     uint256 minRatio = position.getMinLeverageRatio();
@@ -405,13 +412,7 @@ contract StkBnbWBnbLeveredPositionTest is LeveredPositionTest {
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     collateralToken.transfer(address(this), depositAmount);
     collateralToken.approve(address(factory), depositAmount);
-    position = factory.createAndFundPositionAtRatio(
-      collateralMarket,
-      stableMarket,
-      collateralToken,
-      depositAmount,
-      1.2e18
-    );
+    position = factory.createAndFundPosition(collateralMarket, stableMarket, collateralToken, depositAmount);
   }
 }
 
@@ -532,19 +533,18 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount = 1e18;
-
     address xMarket = 0xfa60851E76728eb31EFeA660937cD535C887fDbD; // BOMB
     address yMarket = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15; // tdai
-    address xWhale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
-    address yWhale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
 
-    XBombLiquidatorFunder liquidator = new XBombLiquidatorFunder();
-    _configurePairAndLiquidator(xMarket, yMarket, liquidator);
-    _fundMarketAndSelf(ICErc20(xMarket), xWhale);
-    _fundMarketAndSelf(ICErc20(yMarket), yWhale);
+    collateralMarket = ICErc20(xMarket);
+    stableMarket = ICErc20(yMarket);
+  }
 
+  function testOpenLeveredPositionAtRatio() public {
+    uint256 depositAmount = 1e18;
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
+    address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
+    vm.startPrank(whale);
     collateralToken.transfer(address(this), depositAmount);
     collateralToken.approve(address(factory), depositAmount);
     position = factory.createAndFundPositionAtRatio(
@@ -554,6 +554,8 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
       depositAmount,
       1.2e18
     );
+    vm.stopPrank();
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1.2e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
   }
 }
 
