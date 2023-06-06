@@ -197,8 +197,8 @@ contract ComptrollerV4Storage is ComptrollerV3Storage {
   }
 
   /// @dev Adrastia Prudentia config for controlling borrow caps.
-  PrudentiaConfig public borrowCapConfig;
+  PrudentiaConfig internal borrowCapConfig;
 
   /// @dev Adrastia Prudentia config for controlling supply caps.
-  PrudentiaConfig public supplyCapConfig;
+  PrudentiaConfig internal supplyCapConfig;
 }
