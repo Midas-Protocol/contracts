@@ -14,18 +14,19 @@ import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
 import "../liquidators/AlgebraSwapLiquidator.sol";
 import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 
-import "../liquidators/registry/LiquidatorsRegistry.sol";
-import "../liquidators/registry/LiquidatorsRegistryExtension.sol";
-import "../liquidators/registry/ILiquidatorsRegistry.sol";
-
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-
-import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { LeveredPositionsLens } from "../midas/levered/LeveredPositionsLens.sol";
+import { LiquidatorsRegistry } from "../liquidators/registry/LiquidatorsRegistry.sol";
+import { LiquidatorsRegistryExtension } from "../liquidators/registry/LiquidatorsRegistryExtension.sol";
+import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
+import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
@@ -40,12 +41,9 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    lens.getBorrowRateAtRatio(
-      ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e),
-      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD),
-      990950010006960400000000000000,
-      1000000000000000000
-    );
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x73B6f1B5B344A9981E312e7DBF64A5C4C587ac38);
+    CErc20Token[] memory markets = new CErc20Token[](0);
+    router.getMarketRewardsInfo(markets);
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
@@ -528,6 +526,9 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
 }
 
 contract BombTDaiLeveredPositionTest is LeveredPositionTest {
+  uint256 depositAmount = 1e18;
+  address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
+
   function setUp() public fork(BSC_CHAPEL) {}
 
   function afterForkSetUp() internal override {
@@ -538,14 +539,15 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
 
     collateralMarket = ICErc20(xMarket);
     stableMarket = ICErc20(yMarket);
+
+    IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
+    vm.prank(whale);
+    collateralToken.transfer(address(this), depositAmount);
   }
 
   function testOpenLeveredPositionAtRatio() public whenForking {
-    uint256 depositAmount = 1e18;
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
-    address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
     vm.startPrank(whale);
-    collateralToken.transfer(address(this), depositAmount);
     collateralToken.approve(address(factory), depositAmount);
     position = factory.createAndFundPositionAtRatio(
       collateralMarket,
