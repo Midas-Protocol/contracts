@@ -9,9 +9,13 @@ import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
 import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
 import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
 
+import { MidasFlywheel } from "../../midas/strategies/flywheel/MidasFlywheel.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
+// TODO upgrade (proxy-impl) pattern with a centralized implementation reference (in the factory?)
 contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -151,9 +155,47 @@ contract LeveredPosition is IFlashLoanReceiver {
     return stableLeftovers;
   }
 
+  function claimRewards() public {
+    claimRewards(msg.sender);
+  }
+
+  function claimRewards(address withdrawTo) public {
+    if (msg.sender != positionOwner && msg.sender != address(factory)) revert NotPositionOwner();
+
+    address[] memory flywheels = pool.getRewardsDistributors();
+
+    for (uint256 i = 0; i < flywheels.length; i++) {
+      MidasFlywheel fw = MidasFlywheel(flywheels[i]);
+      fw.accrue(ERC20(address(collateralMarket)), address(this));
+      fw.accrue(ERC20(address(stableMarket)), address(this));
+      fw.claimRewards(address(this));
+      ERC20 rewardToken = fw.rewardToken();
+      uint256 rewardsAccrued = rewardToken.balanceOf(address(this));
+      if (rewardsAccrued > 0) {
+        rewardToken.transfer(withdrawTo, rewardsAccrued);
+      }
+    }
+  }
+
   /*----------------------------------------------------------------
                           View Functions
   ----------------------------------------------------------------*/
+
+  /// @notice this is a lens fn, it is not intended to be used on-chain
+  function getAccruedRewards() external /*view*/ returns (ERC20[] memory rewardTokens, uint256[] memory amounts) {
+    address[] memory flywheels = pool.getRewardsDistributors();
+
+    rewardTokens = new ERC20[](flywheels.length);
+    amounts = new uint256[](flywheels.length);
+
+    for (uint256 i = 0; i < flywheels.length; i++) {
+      MidasFlywheel fw = MidasFlywheel(flywheels[i]);
+      fw.accrue(ERC20(address(collateralMarket)), address(this));
+      fw.accrue(ERC20(address(stableMarket)), address(this));
+      rewardTokens[i] = fw.rewardToken();
+      amounts[i] = fw.rewardsAccrued(address(this));
+    }
+  }
 
   function getCurrentLeverageRatio() public view returns (uint256) {
     if (baseCollateral == 0) return 0;

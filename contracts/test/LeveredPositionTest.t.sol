@@ -40,11 +40,7 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    address[] memory collatMarkets = factory.getWhitelistedCollateralMarkets();
-    emit log_named_address("collat", collatMarkets[0]);
-
-    address[] memory borrowable = factory.getBorrowableMarketsByCollateral(ICErc20(collatMarkets[0]));
-    emit log_named_address("borr", borrowable[0]);
+    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
