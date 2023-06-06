@@ -22,8 +22,8 @@ import { LiquidatorsRegistry } from "../liquidators/registry/LiquidatorsRegistry
 import { LiquidatorsRegistryExtension } from "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { ICErc20 } from "../external/compound/ICErc20.sol";
+import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -42,7 +42,7 @@ contract LeveredPositionFactoryTest is BaseTest {
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
     MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x73B6f1B5B344A9981E312e7DBF64A5C4C587ac38);
-    ICErc20[] memory markets = new ICErc20[](0);
+    CErc20Token[] memory markets = new CErc20Token[](0);
     router.getMarketRewardsInfo(markets);
   }
 
