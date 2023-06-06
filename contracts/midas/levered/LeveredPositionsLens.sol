@@ -117,6 +117,8 @@ contract LeveredPositionsLens is Initializable {
     ICErc20 _stableMarket,
     uint256 _targetLeverageRatio
   ) external view returns (int256 netAPY) {
+    if (_supplyAPY == 0 || _supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
+
     IComptroller pool = IComptroller(_collateralMarket.comptroller());
     IPriceOracle oracle = pool.oracle();
     // TODO the calcs can be implemented without using collateralAssetPrice

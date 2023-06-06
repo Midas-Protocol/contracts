@@ -26,7 +26,6 @@ import { ICErc20 } from "../external/compound/ICErc20.sol";
 import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
@@ -41,9 +40,11 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x73B6f1B5B344A9981E312e7DBF64A5C4C587ac38);
-    CErc20Token[] memory markets = new CErc20Token[](0);
-    router.getMarketRewardsInfo(markets);
+    address[] memory collatMarkets = factory.getWhitelistedCollateralMarkets();
+    emit log_named_address("collat", collatMarkets[0]);
+
+    address[] memory borrowable = factory.getBorrowableMarketsByCollateral(ICErc20(collatMarkets[0]));
+    emit log_named_address("borr", borrowable[0]);
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
