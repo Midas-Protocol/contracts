@@ -40,7 +40,9 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
+    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
+      0x27521eae4eE4153214CaDc3eCD703b9B0326C908
+    );
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {

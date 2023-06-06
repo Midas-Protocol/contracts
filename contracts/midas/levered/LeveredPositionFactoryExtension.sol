@@ -127,7 +127,11 @@ contract LeveredPositionFactoryExtension is
     if (slippage == 0) return MAX_SLIPPAGE;
   }
 
-  function getPositionsByAccount(address account) external view returns (address[] memory positions, bool[] memory closed) {
+  function getPositionsByAccount(address account)
+    external
+    view
+    returns (address[] memory positions, bool[] memory closed)
+  {
     positions = positionsByAccount[account].values();
     closed = new bool[](positions.length);
     for (uint256 i = 0; i < positions.length; i++) {

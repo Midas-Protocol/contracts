@@ -182,7 +182,14 @@ contract LeveredPosition is IFlashLoanReceiver {
   ----------------------------------------------------------------*/
 
   /// @notice this is a lens fn, it is not intended to be used on-chain
-  function getAccruedRewards() external /*view*/ returns (ERC20[] memory rewardTokens, uint256[] memory amounts) {
+  function getAccruedRewards()
+    external
+    returns (
+      /*view*/
+      ERC20[] memory rewardTokens,
+      uint256[] memory amounts
+    )
+  {
     address[] memory flywheels = pool.getRewardsDistributors();
 
     rewardTokens = new ERC20[](flywheels.length);
