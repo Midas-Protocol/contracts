@@ -14,10 +14,6 @@ contract LeveredPositionsLens is Initializable {
     factory = _factory;
   }
 
-  function reinitialize(ILeveredPositionFactory _factory) external reinitializer(2) {
-    factory = _factory;
-  }
-
   /// @notice this is a lens fn, it is not intended to be used on-chain
   /// @dev returns lists of the market addresses, names and symbols of the underlying assets of those collateral markets that are whitelisted
   function getCollateralMarkets()
