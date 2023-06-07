@@ -52,6 +52,8 @@ contract MidasFlywheelLensRouter {
     internal
     returns (MarketRewardsInfo[] memory)
   {
+    if (address(comptroller) == address(0) || markets.length == 0) return new MarketRewardsInfo[](0);
+
     address[] memory flywheels = comptroller.getAccruingFlywheels();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
