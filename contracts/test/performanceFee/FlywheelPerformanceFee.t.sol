@@ -7,7 +7,7 @@ import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { ComptrollerFirstExtension } from "../../compound/Comptroller.sol";
+import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";

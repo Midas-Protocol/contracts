@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceOracleV2.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -20,8 +20,8 @@ contract ChainlinkOraclesTest is BaseTest {
   address usdtBsc = 0x55d398326f99059fF775485246999027B3197955;
   address usdtFeedBsc = 0xB97Ad0E74fa7d920791E90258A6E2085088b4320;
   address usdcFeedBsc = 0x51597f405303C4377E36123cBc172b13269EA163;
-  ICToken usdcMarketBsc = ICToken(0x8D5bE2768c335e88b71E4e913189AEE7104f01B4);
-  ICToken usdtMarketBsc = ICToken(0x1F73754c135d5B9fDE674806f43AeDfA2c7eaDb5);
+  ICErc20 usdcMarketBsc = ICErc20(0x8D5bE2768c335e88b71E4e913189AEE7104f01B4);
+  ICErc20 usdtMarketBsc = ICErc20(0x1F73754c135d5B9fDE674806f43AeDfA2c7eaDb5);
 
   function afterForkSetUp() internal override {
     oracle = ChainlinkPriceOracleV2(ap.getAddress("ChainlinkPriceOracleV2"));

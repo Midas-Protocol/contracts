@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { ICurveV2Pool } from "../../../external/curve/ICurveV2Pool.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -13,11 +13,11 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   address busd;
   address epsJCHFBUSD_lp = 0x5887cEa5e2bb7dD36F0C06Da47A8Df918c289A29;
   address epsJCHFBUSD_pool = 0xBcA6E25937B0F7E0FD8130076b6B218F595E32e2;
-  ICToken epsJCHFBUSD_c = ICToken(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
+  ICErc20 epsJCHFBUSD_c = ICErc20(0x1F0452D6a8bb9EAbC53Fa6809Fa0a060Dd531267);
 
   address epsBnbxBnb_lp = 0xFD4afeAc39DA03a05f61844095A75c4fB7D766DA;
   address epsBnbxBnb_pool = 0xFD4afeAc39DA03a05f61844095A75c4fB7D766DA;
-  ICToken epsBnbxBnb_c = ICToken(0xD96643Ba2Bf96e73509C4bb73c0cb259dAf34de1);
+  ICErc20 epsBnbxBnb_c = ICErc20(0xD96643Ba2Bf96e73509C4bb73c0cb259dAf34de1);
   MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {

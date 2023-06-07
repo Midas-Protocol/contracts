@@ -12,7 +12,7 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import "../compound/CTokenInterfaces.sol";
+import { ICErc20, ICErc20Plugin } from "../compound/CTokenInterfaces.sol";
 
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
@@ -22,7 +22,7 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import { ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
@@ -37,7 +37,7 @@ contract DeployMarketsTest is Test {
   MockERC20 rewardToken;
 
   WhitePaperInterestRateModel interestModel;
-  Comptroller comptroller;
+  IComptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
@@ -132,7 +132,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = Comptroller(payable(comptrollerAddress));
+    comptroller = IComptroller(comptrollerAddress);
   }
 
   function setUp() public {
@@ -148,7 +148,7 @@ contract DeployMarketsTest is Test {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -161,8 +161,8 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
-    CErc20Delegate cToken = CErc20Delegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20 cToken = allMarkets[allMarkets.length - 1];
     assertEq(cToken.name(), "cUnderlyingToken");
     underlyingToken.approve(address(cToken), 1e36);
     address[] memory cTokens = new address[](1);
@@ -184,7 +184,7 @@ contract DeployMarketsTest is Test {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -197,8 +197,8 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
 
@@ -245,7 +245,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
 
     flywheel.addStrategyForRewards(ERC20(address(cToken)));
@@ -279,7 +279,7 @@ contract DeployMarketsTest is Test {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -292,7 +292,7 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
@@ -309,7 +309,7 @@ contract DeployMarketsTest is Test {
 
     // trigger the auto implementations
     vm.prank(address(7));
-    CTokenExtensionInterface(address(cToken)).accrueInterest();
+    ICErc20(address(cToken)).accrueInterest();
 
     address implAfter = cToken.implementation();
 
@@ -328,7 +328,7 @@ contract DeployMarketsTest is Test {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -341,8 +341,8 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
 
@@ -367,7 +367,7 @@ contract DeployMarketsTest is Test {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -380,13 +380,13 @@ contract DeployMarketsTest is Test {
       0.9e18
     );
 
-    CTokenInterface[] memory allMarkets = comptroller.asComptrollerFirstExtension().getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
 
     address pluginImplBefore = address(cToken.plugin());
-    address implBefore = cToken.implementation();
+    address implBefore = CErc20PluginDelegate(address(cToken)).implementation();
 
     // just testing to replace the plugin delegate with the plugin rewards delegate
     whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
@@ -401,10 +401,10 @@ contract DeployMarketsTest is Test {
 
     // trigger the auto implementations from a non-admin address
     vm.prank(address(7));
-    CTokenExtensionInterface(address(cToken)).accrueInterest();
+    cToken.accrueInterest();
 
     address pluginImplAfter = address(cToken.plugin());
-    address implAfter = cToken.implementation();
+    address implAfter = CErc20PluginDelegate(address(cToken)).implementation();
 
     assertEq(pluginImplBefore, address(pluginA), "the old impl should be the A plugin");
     assertEq(pluginImplAfter, address(pluginB), "the new impl should be the B plugin");

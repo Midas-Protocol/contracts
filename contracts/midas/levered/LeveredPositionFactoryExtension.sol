@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import "../../midas/DiamondExtension.sol";
 import { LeveredPositionFactoryStorage } from "./LeveredPositionFactoryStorage.sol";
 import { ILeveredPositionFactoryExtension } from "./ILeveredPositionFactory.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { LeveredPosition } from "./LeveredPosition.sol";
 import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";

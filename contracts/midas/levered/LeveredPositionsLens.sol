@@ -2,8 +2,9 @@
 pragma solidity ^0.8.10;
 
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -21,7 +22,7 @@ contract LeveredPositionsLens is Initializable {
     view
     returns (
       address[] memory markets,
-      address[] memory poolOfMarket,
+      IComptroller[] memory poolOfMarket,
       address[] memory underlyings,
       uint256[] memory underlyingPrices,
       string[] memory names,
@@ -32,7 +33,7 @@ contract LeveredPositionsLens is Initializable {
     )
   {
     markets = factory.getWhitelistedCollateralMarkets();
-    poolOfMarket = new address[](markets.length);
+    poolOfMarket = new IComptroller[](markets.length);
     underlyings = new address[](markets.length);
     underlyingPrices = new uint256[](markets.length);
     names = new string[](markets.length);
@@ -43,8 +44,7 @@ contract LeveredPositionsLens is Initializable {
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       poolOfMarket[i] = market.comptroller();
-      IComptroller pool = IComptroller(poolOfMarket[i]);
-      underlyingPrices[i] = IPriceOracle(pool.oracle()).getUnderlyingPrice(market);
+      underlyingPrices[i] = BasePriceOracle(poolOfMarket[i].oracle()).getUnderlyingPrice(market);
       underlyings[i] = market.underlying();
       ERC20Upgradeable underlying = ERC20Upgradeable(underlyings[i]);
       names[i] = underlying.name();
@@ -64,7 +64,7 @@ contract LeveredPositionsLens is Initializable {
     uint256 _targetLeverageRatio
   ) external view returns (uint256) {
     IComptroller pool = IComptroller(_stableMarket.comptroller());
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 
@@ -116,7 +116,7 @@ contract LeveredPositionsLens is Initializable {
     if (_supplyAPY == 0 || _supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
 
     IComptroller pool = IComptroller(_collateralMarket.comptroller());
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     // TODO the calcs can be implemented without using collateralAssetPrice
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 

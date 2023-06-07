@@ -2,43 +2,23 @@
 pragma solidity 0.8.10;
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
+
 import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
-
-abstract contract CErc20Token is ERC20 {
-  function exchangeRateCurrent() external virtual returns (uint256);
-
-  function underlying() external view virtual returns (address);
-
-  function comptroller() external view virtual returns (IComptroller);
-}
+import { IComptroller } from "../../../compound/ComptrollerInterface.sol";
+import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 
 interface IPriceOracle {
-  function getUnderlyingPrice(CErc20Token cToken) external view returns (uint256);
+  function getUnderlyingPrice(ERC20 cToken) external view returns (uint256);
 
   function price(address underlying) external view returns (uint256);
-}
-
-interface IComptroller {
-  function getRewardsDistributors() external view returns (MidasFlywheelCore[] memory);
-
-  function rewardsDistributors(uint256 index) external view returns (MidasFlywheelCore);
-
-  function getAllMarkets() external view returns (CErc20Token[] memory);
-
-  function oracle() external view returns (IPriceOracle);
-
-  function admin() external returns (address);
-
-  function _addRewardsDistributor(address distributor) external returns (uint256);
-
-  function getAccruingFlywheels() external view returns (MidasFlywheelCore[] memory);
 }
 
 contract MidasFlywheelLensRouter {
   struct MarketRewardsInfo {
     /// @dev comptroller oracle price of market underlying
     uint256 underlyingPrice;
-    CErc20Token market;
+    ICErc20 market;
     RewardsInfo[] rewardsInfo;
   }
 
@@ -47,48 +27,49 @@ contract MidasFlywheelLensRouter {
     uint256 rewardSpeedPerSecondPerToken;
     /// @dev comptroller oracle price of reward token
     uint256 rewardTokenPrice;
-    /// @dev APR scaled by 1e18. Calculated as rewardSpeedPerSecondPerToken * rewardTokenPrice * 365.25 days / underlyingPrice * 1e18 / market.exchangeRateCurrent()
+    /// @dev APR scaled by 1e18. Calculated as rewardSpeedPerSecondPerToken * rewardTokenPrice * 365.25 days / underlyingPrice * 1e18 / market.exchangeRate
     uint256 formattedAPR;
     address flywheel;
     address rewardToken;
   }
 
   function getPoolMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
-    CErc20Token[] memory markets = comptroller.getAllMarkets();
+    ICErc20[] memory markets = comptroller.getAllMarkets();
     return _getMarketRewardsInfo(markets, comptroller);
   }
 
-  function getMarketRewardsInfo(CErc20Token[] memory markets) external returns (MarketRewardsInfo[] memory) {
+  function getMarketRewardsInfo(ICErc20[] memory markets) external returns (MarketRewardsInfo[] memory) {
     IComptroller pool;
     for (uint256 i = 0; i < markets.length; i++) {
-      if (address(pool) == address(0)) pool = markets[i].comptroller();
-      else require(markets[i].comptroller() == pool);
+      ICErc20 asMarket = ICErc20(address(markets[i]));
+      if (address(pool) == address(0)) pool = asMarket.comptroller();
+      else require(asMarket.comptroller() == pool);
     }
     return _getMarketRewardsInfo(markets, pool);
   }
 
-  function _getMarketRewardsInfo(CErc20Token[] memory markets, IComptroller comptroller)
+  function _getMarketRewardsInfo(ICErc20[] memory markets, IComptroller comptroller)
     internal
     returns (MarketRewardsInfo[] memory)
   {
     if (address(comptroller) == address(0) || markets.length == 0) return new MarketRewardsInfo[](0);
 
-    MidasFlywheelCore[] memory flywheels = comptroller.getAccruingFlywheels();
+    address[] memory flywheels = comptroller.getAccruingFlywheels();
     address[] memory rewardTokens = new address[](flywheels.length);
     uint256[] memory rewardTokenPrices = new uint256[](flywheels.length);
     uint256[] memory rewardTokenDecimals = new uint256[](flywheels.length);
-    IPriceOracle oracle = comptroller.oracle();
+    BasePriceOracle oracle = comptroller.oracle();
 
     MarketRewardsInfo[] memory infoList = new MarketRewardsInfo[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       RewardsInfo[] memory rewardsInfo = new RewardsInfo[](flywheels.length);
 
-      CErc20Token market = markets[i];
+      ICErc20 market = ICErc20(address(markets[i]));
       uint256 price = oracle.price(market.underlying()); // scaled to 1e18
 
       if (i == 0) {
         for (uint256 j = 0; j < flywheels.length; j++) {
-          ERC20 rewardToken = flywheels[j].rewardToken();
+          ERC20 rewardToken = MidasFlywheelCore(flywheels[j]).rewardToken();
           rewardTokens[j] = address(rewardToken);
           rewardTokenPrices[j] = oracle.price(address(rewardToken)); // scaled to 1e18
           rewardTokenDecimals[j] = uint256(rewardToken.decimals());
@@ -96,7 +77,7 @@ contract MidasFlywheelLensRouter {
       }
 
       for (uint256 j = 0; j < flywheels.length; j++) {
-        MidasFlywheelCore flywheel = flywheels[j];
+        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
 
         uint256 rewardSpeedPerSecondPerToken = getRewardSpeedPerSecondPerToken(
           flywheel,
@@ -126,12 +107,13 @@ contract MidasFlywheelLensRouter {
 
   function getRewardSpeedPerSecondPerToken(
     MidasFlywheelCore flywheel,
-    CErc20Token market,
+    ICErc20 market,
     uint256 decimals
   ) internal returns (uint256 rewardSpeedPerSecondPerToken) {
-    (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(market);
-    flywheel.accrue(market, address(0));
-    (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(market);
+    ERC20 strategy = ERC20(address(market));
+    (uint224 indexBefore, uint32 lastUpdatedTimestampBefore) = flywheel.strategyState(strategy);
+    flywheel.accrue(strategy, address(0));
+    (uint224 indexAfter, uint32 lastUpdatedTimestampAfter) = flywheel.strategyState(strategy);
     if (lastUpdatedTimestampAfter > lastUpdatedTimestampBefore) {
       rewardSpeedPerSecondPerToken =
         scaleIndexDiff((indexAfter - indexBefore), decimals) /
@@ -180,7 +162,7 @@ contract MidasFlywheelLensRouter {
 
   function getUnclaimedRewardsByMarkets(
     address user,
-    CErc20Token[] calldata markets,
+    ERC20[] calldata markets,
     MidasFlywheelCore[] calldata flywheels,
     bool[] calldata accrue
   ) external returns (uint256[] memory rewards) {
@@ -188,7 +170,7 @@ contract MidasFlywheelLensRouter {
 
     for (uint256 i = 0; i < flywheels.length; i++) {
       for (uint256 j = 0; j < markets.length; j++) {
-        CErc20Token market = markets[j];
+        ERC20 market = markets[j];
 
         uint256 newRewards;
         if (accrue[i]) {

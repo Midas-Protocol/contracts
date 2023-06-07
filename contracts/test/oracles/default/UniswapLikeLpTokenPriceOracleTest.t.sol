@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { IPair, Observation } from "../../../external/solidly/IPair.sol";
 import { IRouter } from "../../../external/solidly/IRouter.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
@@ -33,10 +33,10 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   function getLpPrice(address lpToken, UniswapLikeLpTokenPriceOracle oracle) internal returns (uint256) {
     if (address(mpo.oracles(lpToken)) == address(0)) {
       address[] memory underlyings = new address[](1);
-      IPriceOracle[] memory oracles = new IPriceOracle[](1);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
 
       underlyings[0] = lpToken;
-      oracles[0] = IPriceOracle(oracle);
+      oracles[0] = oracle;
 
       vm.prank(mpo.admin());
       mpo.add(underlyings, oracles);
