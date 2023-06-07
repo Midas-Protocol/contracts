@@ -267,15 +267,11 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerBase, ComptrollerErrorR
       // must scale the supply cap by the underlying token decimals
 
       uint256 underlyingDecimals = 18;
-
-      // Try to get the underlying asset address (we use a staticcall b/c CEther doesn't have an underlying)
-      (bool success, bytes memory data) = cTokenAddress.staticcall(abi.encodeWithSignature("underlying()"));
+      address underlyingToken = ICErc20(cTokenAddress).underlying();
+      // Not all ERC20s implement decimals(), so we use a staticcall and check the return data
+      (bool success, bytes memory data) = underlyingToken.staticcall(abi.encodeWithSignature("decimals()"));
       if (success && data.length == 32) {
-        address underlyingToken = abi.decode(data, (address));
-        (success, data) = underlyingToken.staticcall(abi.encodeWithSignature("decimals()"));
-        if (success && data.length == 32) {
-          underlyingDecimals = abi.decode(data, (uint8));
-        }
+        underlyingDecimals = abi.decode(data, (uint8));
       }
 
       // Scale the supply cap by the decimals
@@ -512,15 +508,11 @@ contract Comptroller is ComptrollerV4Storage, ComptrollerBase, ComptrollerErrorR
       // must scale the borrow cap by the underlying token decimals
 
       uint256 underlyingDecimals = 18;
-
-      // Try to get the underlying asset address (we use a staticcall b/c CEther doesn't have an underlying)
-      (bool success, bytes memory data) = cToken.staticcall(abi.encodeWithSignature("underlying()"));
+      address underlyingToken = ICErc20(cToken).underlying();
+      // Not all ERC20s implement decimals(), so we use a staticcall and check the return data
+      (bool success, bytes memory data) = underlyingToken.staticcall(abi.encodeWithSignature("decimals()"));
       if (success && data.length == 32) {
-        address underlyingToken = abi.decode(data, (address));
-        (success, data) = underlyingToken.staticcall(abi.encodeWithSignature("decimals()"));
-        if (success && data.length == 32) {
-          underlyingDecimals = abi.decode(data, (uint8));
-        }
+        underlyingDecimals = abi.decode(data, (uint8));
       }
 
       // Scale the borrow cap by the decimals
