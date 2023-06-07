@@ -9,12 +9,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "./liquidators/IRedemptionStrategy.sol";
 import "./liquidators/IFundsConversionStrategy.sol";
 
-import "./external/compound/ICToken.sol";
-import "./external/compound/IComptroller.sol";
-
-import "./external/compound/ICErc20.sol";
-import "./external/compound/ICEther.sol";
-
 import "./utils/IW_NATIVE.sol";
 
 import "./external/uniswap/IUniswapV2Router02.sol";
@@ -22,6 +16,9 @@ import "./external/uniswap/IUniswapV2Callee.sol";
 import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
+
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
 
 contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
   using AddressUpgradeable for address payable;
@@ -365,7 +362,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
 
     // Liquidate borrow
     require(
-      vars.debtMarket.liquidateBorrow(vars.borrower, vars.repayAmount, vars.collateralMarket) == 0,
+      vars.debtMarket.liquidateBorrow(vars.borrower, vars.repayAmount, address(vars.collateralMarket)) == 0,
       "Liquidation failed."
     );
 
@@ -391,7 +388,7 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
    * @dev Repays token flashloans.
    */
   function repayTokenFlashLoan(
-    ICToken cTokenCollateral,
+    ICErc20 cTokenCollateral,
     address exchangeProfitTo,
     IUniswapV2Router02 uniswapV2RouterForBorrow,
     IUniswapV2Router02 uniswapV2RouterForCollateral,
@@ -403,10 +400,6 @@ contract MidasSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
     if ((_flashSwapAmount * 10000) % (10000 - flashSwapFee) > 0) flashSwapReturnAmount++; // Round up if division resulted in a remainder
 
     // Swap cTokenCollateral for cErc20 via Uniswap
-    if (cTokenCollateral.isCEther()) {
-      revert("not used anymore");
-    }
-
     // Check underlying collateral seized
     IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
     uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));

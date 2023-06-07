@@ -23,7 +23,7 @@ contract CErc20Delegator is CDelegationStorage {
    */
   constructor(
     address underlying_,
-    ComptrollerInterface comptroller_,
+    IComptroller comptroller_,
     address payable fuseAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,

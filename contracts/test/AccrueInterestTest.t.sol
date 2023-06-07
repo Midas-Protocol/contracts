@@ -88,10 +88,6 @@ contract AccrueInterestTest is UpgradesBaseTest {
     afterForkSetUp();
     _upgradeMarketWithExtension(market);
 
-    // make sure the extension logic is upgraded
-    uint256 hypoRate = marketAsExt.exchangeRateHypothetical();
-    assertGt(hypoRate, 0, "!hypo rate");
-
     AccrualDiff memory diffAfter;
     // accrue at the latest block in order to have an equal/comparable accrual period
     marketAsExt.accrueInterest();

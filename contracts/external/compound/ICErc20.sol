@@ -18,6 +18,4 @@ interface ICErc20 is ICToken {
   ) external returns (uint256);
 
   function getTotalUnderlyingSupplied() external view returns (uint256);
-
-  function balanceOfUnderlyingHypo(address owner) external view returns (uint256);
 }

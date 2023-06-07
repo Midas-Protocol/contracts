@@ -7,7 +7,6 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
 import { BalancerLpStablePoolPriceOracle } from "../../../oracles/default/BalancerLpStablePoolPriceOracle.sol";
 import { BalancerLpLinearPoolPriceOracle } from "../../../oracles/default/BalancerLpLinearPoolPriceOracle.sol";
 import { BalancerRateProviderOracle } from "../../../oracles/default/BalancerRateProviderOracle.sol";
@@ -81,19 +80,19 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     rateProviderOracle.initialize(asArray(csMATICRateProvider), asArray(wtoken), asArray(csMATIC));
 
     // Add the oracles to the MPO
-    IPriceOracle[] memory aaveLinerlpOracles = new IPriceOracle[](linearAaveLps.length);
+    BasePriceOracle[] memory aaveLinerlpOracles = new BasePriceOracle[](linearAaveLps.length);
     for (uint256 i = 0; i < linearAaveLps.length; i++) {
       aaveLinerlpOracles[i] = linearLpOracle;
     }
-    IPriceOracle[] memory tetuLinearlpOracles = new IPriceOracle[](linearTetuLps.length);
+    BasePriceOracle[] memory tetuLinearlpOracles = new BasePriceOracle[](linearTetuLps.length);
     for (uint256 i = 0; i < linearTetuLps.length; i++) {
       tetuLinearlpOracles[i] = linearLpOracle;
     }
 
-    IPriceOracle[] memory linearAaveWmaticOracle = new IPriceOracle[](1);
+    BasePriceOracle[] memory linearAaveWmaticOracle = new BasePriceOracle[](1);
     linearAaveWmaticOracle[0] = linearLpOracle;
 
-    IPriceOracle[] memory csMATICOracle = new IPriceOracle[](1);
+    BasePriceOracle[] memory csMATICOracle = new BasePriceOracle[](1);
     csMATICOracle[0] = rateProviderOracle;
 
     vm.startPrank(mpo.admin());
@@ -113,8 +112,8 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     );
 
     // add the oracle to the mpo for that LP token
-    IPriceOracle[] memory oracles = new IPriceOracle[](1);
-    oracles[0] = IPriceOracle(stableLpOracle);
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
+    oracles[0] = BasePriceOracle(stableLpOracle);
     vm.prank(mpo.admin());
     mpo.add(asArray(stMATIC_WMATIC_pool), oracles);
 
@@ -132,8 +131,8 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   function testReentrancyErrorMessageWmaticStmaticLpTokenOraclePrice() public fork(POLYGON_MAINNET) {
     // add the oracle to the mpo for that LP token
     {
-      IPriceOracle[] memory oracles = new IPriceOracle[](1);
-      oracles[0] = IPriceOracle(stableLpOracle);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
+      oracles[0] = BasePriceOracle(stableLpOracle);
       vm.prank(mpo.admin());
       mpo.add(asArray(stMATIC_WMATIC_pool), oracles);
     }
@@ -327,8 +326,8 @@ contract BalancerLpStablePoolPriceOracleTest is BaseTest {
     assertEq(price, 1009290665332190911); // 1,0093 WMATIC * 1,18 USD/WMATIC =~ 1,1909 USD
   }
 
-  function _getLpTokenPrice(address lpToken, IPriceOracle oracle) internal returns (uint256) {
-    IPriceOracle[] memory oracles = new IPriceOracle[](1);
+  function _getLpTokenPrice(address lpToken, BasePriceOracle oracle) internal returns (uint256) {
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
     oracles[0] = oracle;
 
     vm.prank(mpo.admin());

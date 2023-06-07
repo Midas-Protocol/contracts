@@ -5,8 +5,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
 import { LiquidityAmounts } from "../../external/uniswap/LiquidityAmounts.sol";
 import { TickMath } from "../../external/uniswap/TickMath.sol";
 import { IAlgebraPool } from "../../external/algebra/IAlgebraPool.sol";
@@ -49,8 +47,8 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) public view returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) public view returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
