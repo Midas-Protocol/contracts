@@ -193,7 +193,7 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x30a6630101baBE0da765e3Ed8323824d40eD9a42);
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
