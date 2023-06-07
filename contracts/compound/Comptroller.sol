@@ -362,7 +362,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   ) external view override returns (uint256) {
     address cToken = address(cTokenModify);
     // Accrue interest
-    uint256 balanceOfUnderlying = cTokenModify.balanceOfUnderlyingHypo(account);
+    uint256 balanceOfUnderlying = cTokenModify.balanceOfUnderlying(account);
 
     // Get account liquidity
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
@@ -467,7 +467,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
     if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
-      uint256 totalBorrows = CTokenExtensionInterface(cToken).totalBorrowsHypo();
+      uint256 totalBorrows = CTokenExtensionInterface(cToken).totalBorrowsCurrent();
       uint256 whitelistedBorrowersBorrows = asComptrollerExtension().getWhitelistedBorrowersBorrows(cToken);
       uint256 nonWhitelistedTotalBorrows;
       if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
@@ -577,7 +577,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     }
 
     // Get borrowers' underlying borrow balance
-    uint256 borrowBalance = CTokenExtensionInterface(cTokenBorrowed).borrowBalanceHypo(borrower);
+    uint256 borrowBalance = CTokenExtensionInterface(cTokenBorrowed).borrowBalanceCurrent(borrower);
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(ICErc20(cTokenBorrowed))) {
@@ -789,8 +789,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
      * @param account The account to determine liquidity for
      * @param redeemTokens The number of tokens to hypothetically redeem
      * @param borrowAmount The amount of underlying to hypothetically borrow
-     * @dev Note that we calculate the exchangeRateStored for each collateral cToken using stored data,
-     *  without calculating accumulated interest.
      * @return (possible error code,
                 hypothetical account liquidity in excess of collateral requirements,
      *          hypothetical account shortfall below collateral requirements)
@@ -935,7 +933,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
      *   = actualRepayAmount * (liquidationIncentive * priceBorrowed) / (priceCollateral * exchangeRate)
      */
     ICErc20 collateralCToken = ICErc20(cTokenCollateral);
-    uint256 exchangeRateMantissa = collateralCToken.exchangeRateHypothetical(); // Note: reverts on error
+    uint256 exchangeRateMantissa = collateralCToken.exchangeRateCurrent();
     uint256 seizeTokens;
     Exp memory numerator;
     Exp memory denominator;

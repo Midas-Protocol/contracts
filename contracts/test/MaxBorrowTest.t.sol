@@ -132,7 +132,7 @@ contract MaxBorrowTest is WithPool {
     ICErc20[] memory markets = asExtension.getAllMarkets();
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = markets[i];
-      uint256 borrowed = market.borrowBalanceHypo(someBorrower);
+      uint256 borrowed = market.borrowBalanceCurrent(someBorrower);
       if (borrowed > 0) {
         emit log("borrower has borrowed");
         emit log_uint(borrowed);
@@ -155,7 +155,7 @@ contract MaxBorrowTest is WithPool {
 
     ICErc20 marketToBorrow = markets[0];
     ICErc20 cappedCollateralMarket = markets[6];
-    uint256 borrowAmount = marketToBorrow.borrowBalanceHypo(someBorrower);
+    uint256 borrowAmount = marketToBorrow.borrowBalanceCurrent(someBorrower);
 
     {
       (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(

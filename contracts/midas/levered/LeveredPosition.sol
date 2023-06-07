@@ -94,7 +94,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     if (errorCode != 0) revert RedeemFailed(errorCode);
 
     // baseCollateral should become 0 here
-    baseCollateral = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    baseCollateral = collateralMarket.balanceOfUnderlying(address(this));
 
     // withdraw the redeemed collateral
     withdrawAmount = collateralAsset.balanceOf(address(this));
@@ -158,7 +158,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   function getCurrentLeverageRatio() public view returns (uint256) {
     if (baseCollateral == 0) return 0;
 
-    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlying(address(this));
     return (suppliedCollateralCurrent * 1e18) / baseCollateral;
   }
 
@@ -192,7 +192,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 maxTopUpRepay = maxTopUpCollateralSwapValueScaled / collateralAssetPrice;
     uint256 maxCollateralToRepay = (maxTopUpRepay * stableCollateralFactor) / (1e18 - stableCollateralFactor);
     uint256 maxFlashLoaned = (maxCollateralToRepay * collatCollateralFactor) / 1e18;
-    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlying(address(this));
     return ((suppliedCollateralCurrent + maxFlashLoaned) * 1e18) / baseCollateral;
   }
 
@@ -266,7 +266,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
     if (ratioDiff == type(uint256).max) {
       // if max levering down, then derive the amount to redeem from the debt to be repaid
-      borrowsToRepay = stableMarket.borrowBalanceHypo(address(this));
+      borrowsToRepay = stableMarket.borrowBalanceCurrent(address(this));
       uint256 borrowsToRepayValueScaled = borrowsToRepay * stableAssetPrice;
       // not accounting for swaps slippage
       amountToRedeem = ((borrowsToRepayValueScaled / collateralAssetPrice) * 1e18) / stableCollateralFactor;
@@ -287,7 +287,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
   function _leverDownPostFL(uint256 _flashLoanedCollateral, uint256 _amountToRedeem) internal {
     // repay the borrows
-    uint256 borrowBalance = stableMarket.borrowBalanceHypo(address(this));
+    uint256 borrowBalance = stableMarket.borrowBalanceCurrent(address(this));
     uint256 repayAmount = _flashLoanedCollateral < borrowBalance ? _flashLoanedCollateral : borrowBalance;
     stableAsset.approve(address(stableMarket), repayAmount);
     uint256 errorCode = stableMarket.repayBorrow(repayAmount);

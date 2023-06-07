@@ -53,8 +53,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function totalAssets() public view override returns (uint256) {
-    // TODO consider making the ctoken balanceOfUnderlying fn a view fn
-    return (market.balanceOf(address(this)) * market.exchangeRateHypothetical()) / 1e18;
+    return market.balanceOfUnderlying(address(this));
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {

@@ -180,7 +180,7 @@ contract AnyLiquidationTest is BaseTest {
     for (uint256 m = 0; m < vars.markets.length; m++) {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
       ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
-      borrowAmount = randomMarket.borrowBalanceHypo(vars.borrower);
+      borrowAmount = randomMarket.borrowBalanceCurrent(vars.borrower);
       if (borrowAmount > 0) {
         debtMarket = ICErc20(address(randomMarket));
         break;

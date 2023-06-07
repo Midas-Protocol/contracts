@@ -302,29 +302,17 @@ interface CTokenExtensionInterface {
 
   function supplyRatePerBlock() external view returns (uint256);
 
-  function exchangeRateCurrent() external returns (uint256);
-
-  function exchangeRateStored() external view returns (uint256);
+  function exchangeRateCurrent() external view returns (uint256);
 
   function accrueInterest() external returns (uint256);
 
-  function totalBorrowsCurrent() external returns (uint256);
+  function totalBorrowsCurrent() external view returns (uint256);
 
-  function totalBorrowsHypo() external view returns (uint256);
-
-  function borrowBalanceCurrent(address account) external returns (uint256);
-
-  function borrowBalanceStored(address account) external view returns (uint256);
-
-  function borrowBalanceHypo(address account) external view returns (uint256);
+  function borrowBalanceCurrent(address account) external view returns (uint256);
 
   function getTotalUnderlyingSupplied() external view returns (uint256);
 
-  function balanceOfUnderlying(address owner) external returns (uint256);
-
-  function balanceOfUnderlyingHypo(address owner) external view returns (uint256);
-
-  function exchangeRateHypothetical() external view returns (uint256);
+  function balanceOfUnderlying(address owner) external view returns (uint256);
 
   function multicall(bytes[] calldata data) external payable returns (bytes[] memory results);
 

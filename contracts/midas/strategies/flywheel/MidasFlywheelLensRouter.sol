@@ -88,7 +88,7 @@ contract MidasFlywheelLensRouter {
           rewardSpeedPerSecondPerToken,
           rewardTokenPrices[j],
           price,
-          market.exchangeRateHypothetical()
+          market.exchangeRateCurrent()
         );
 
         rewardsInfo[j] = RewardsInfo({

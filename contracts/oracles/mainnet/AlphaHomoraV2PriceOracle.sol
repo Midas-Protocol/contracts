@@ -47,6 +47,6 @@ contract AlphaHomoraV2PriceOracle is BasePriceOracle {
     address baseToken = underlyingCErc20.underlying();
 
     // ibTokenV2/ETH price = underlying cToken/ETH price = underlying cToken/token price * base token/ETH price
-    return (underlyingCErc20.exchangeRateStored() * BasePriceOracle(msg.sender).price(baseToken)) / 1e18;
+    return (underlyingCErc20.exchangeRateCurrent() * BasePriceOracle(msg.sender).price(baseToken)) / 1e18;
   }
 }

@@ -152,7 +152,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
 
     MintLocalVars memory vars;
 
-    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
+    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateCurrent();
 
     // Check max supply
     // unused function
@@ -270,7 +270,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
 
     RedeemLocalVars memory vars;
 
-    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
+    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateCurrent();
 
     if (redeemAmountIn == type(uint256).max) {
       redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, ICErc20(address(this)), false);
@@ -431,7 +431,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
      *  accountBorrowsNew = accountBorrows + borrowAmount
      *  totalBorrowsNew = totalBorrows + borrowAmount
      */
-    vars.accountBorrows = asCTokenExtension().borrowBalanceHypo(borrower);
+    vars.accountBorrows = asCTokenExtension().borrowBalanceCurrent(borrower);
 
     (vars.mathErr, vars.accountBorrowsNew) = addUInt(vars.accountBorrows, borrowAmount);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -557,7 +557,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     vars.borrowerIndex = accountBorrows[borrower].interestIndex;
 
     /* We fetch the amount the borrower owes, with accumulated interest */
-    vars.accountBorrows = asCTokenExtension().borrowBalanceHypo(borrower);
+    vars.accountBorrows = asCTokenExtension().borrowBalanceCurrent(borrower);
 
     /* If repayAmount == -1, repayAmount = accountBorrows */
     if (repayAmount == type(uint256).max) {
@@ -803,7 +803,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     vars.feeSeizeTokens = mul_(seizeTokens, Exp({ mantissa: feeSeizeShareMantissa }));
     vars.liquidatorSeizeTokens = seizeTokens - vars.protocolSeizeTokens - vars.feeSeizeTokens;
 
-    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateHypothetical();
+    vars.exchangeRateMantissa = asCTokenExtension().exchangeRateCurrent();
 
     vars.protocolSeizeAmount = mul_ScalarTruncate(
       Exp({ mantissa: vars.exchangeRateMantissa }),

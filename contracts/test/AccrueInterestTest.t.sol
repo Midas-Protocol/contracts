@@ -41,7 +41,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
 
       accrualDataBefore.accrualBlockNumber = marketAsExt.accrualBlockNumber();
       accrualDataBefore.borrowIndex = marketAsExt.borrowIndex();
-      accrualDataBefore.totalBorrows = marketAsExt.totalBorrowsHypo();
+      accrualDataBefore.totalBorrows = marketAsExt.totalBorrows();
       accrualDataBefore.totalReserves = marketAsExt.totalReserves();
       accrualDataBefore.totalFuseFees = marketAsExt.totalFuseFees();
       accrualDataBefore.totalAdminFees = marketAsExt.totalAdminFees();
@@ -52,7 +52,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
 
       accrualDataAfter.accrualBlockNumber = marketAsExt.accrualBlockNumber();
       accrualDataAfter.borrowIndex = marketAsExt.borrowIndex();
-      accrualDataAfter.totalBorrows = marketAsExt.totalBorrowsHypo();
+      accrualDataAfter.totalBorrows = marketAsExt.totalBorrows();
       accrualDataAfter.totalReserves = marketAsExt.totalReserves();
       accrualDataAfter.totalFuseFees = marketAsExt.totalFuseFees();
       accrualDataAfter.totalAdminFees = marketAsExt.totalAdminFees();
@@ -97,7 +97,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
 
       accrualDataBefore.accrualBlockNumber = marketAsExt.accrualBlockNumber();
       accrualDataBefore.borrowIndex = marketAsExt.borrowIndex();
-      accrualDataBefore.totalBorrows = marketAsExt.totalBorrowsHypo();
+      accrualDataBefore.totalBorrows = marketAsExt.totalBorrows();
       accrualDataBefore.totalReserves = marketAsExt.totalReserves();
       accrualDataBefore.totalFuseFees = marketAsExt.totalFuseFees();
       accrualDataBefore.totalAdminFees = marketAsExt.totalAdminFees();
@@ -108,7 +108,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
 
       accrualDataAfter.accrualBlockNumber = marketAsExt.accrualBlockNumber();
       accrualDataAfter.borrowIndex = marketAsExt.borrowIndex();
-      accrualDataAfter.totalBorrows = marketAsExt.totalBorrowsHypo();
+      accrualDataAfter.totalBorrows = marketAsExt.totalBorrows();
       accrualDataAfter.totalReserves = marketAsExt.totalReserves();
       accrualDataAfter.totalFuseFees = marketAsExt.totalFuseFees();
       accrualDataAfter.totalAdminFees = marketAsExt.totalAdminFees();

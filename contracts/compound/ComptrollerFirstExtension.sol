@@ -304,7 +304,7 @@ contract ComptrollerFirstExtension is
   function getWhitelistedSuppliersSupply(address cToken) public view returns (uint256 supplied) {
     address[] memory whitelistedSuppliers = supplyCapWhitelist[cToken].values();
     for (uint256 i = 0; i < whitelistedSuppliers.length; i++) {
-      supplied += ICErc20(cToken).balanceOfUnderlyingHypo(whitelistedSuppliers[i]);
+      supplied += ICErc20(cToken).balanceOfUnderlying(whitelistedSuppliers[i]);
     }
   }
 
@@ -326,7 +326,7 @@ contract ComptrollerFirstExtension is
   function getWhitelistedBorrowersBorrows(address cToken) public view returns (uint256 borrowed) {
     address[] memory whitelistedBorrowers = borrowCapWhitelist[cToken].values();
     for (uint256 i = 0; i < whitelistedBorrowers.length; i++) {
-      borrowed += ICErc20(cToken).borrowBalanceHypo(whitelistedBorrowers[i]);
+      borrowed += ICErc20(cToken).borrowBalanceCurrent(whitelistedBorrowers[i]);
     }
   }
 

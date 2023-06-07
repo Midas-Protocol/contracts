@@ -232,7 +232,7 @@ contract FusePoolLens is Initializable {
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
       cToken.accrueInterest();
-      uint256 assetTotalBorrow = cToken.totalBorrowsHypo();
+      uint256 assetTotalBorrow = cToken.totalBorrowsCurrent();
       uint256 assetTotalSupply = cToken.getCash() +
         assetTotalBorrow -
         (cToken.totalReserves() + cToken.totalAdminFees() + cToken.totalFuseFees());
@@ -325,15 +325,15 @@ contract FusePoolLens is Initializable {
       asset.supplyRatePerBlock = cToken.supplyRatePerBlock();
       asset.borrowRatePerBlock = cToken.borrowRatePerBlock();
       asset.liquidity = cToken.getCash();
-      asset.totalBorrow = cToken.totalBorrowsHypo();
+      asset.totalBorrow = cToken.totalBorrowsCurrent();
       asset.totalSupply =
         asset.liquidity +
         asset.totalBorrow -
         (cToken.totalReserves() + cToken.totalAdminFees() + cToken.totalFuseFees());
-      asset.supplyBalance = cToken.balanceOfUnderlyingHypo(user);
-      asset.borrowBalance = cToken.borrowBalanceHypo(user); // We would use borrowBalanceCurrent but we already accrue interest above
+      asset.supplyBalance = cToken.balanceOfUnderlying(user);
+      asset.borrowBalance = cToken.borrowBalanceCurrent(user);
       asset.membership = comptroller.checkMembership(user, cToken);
-      asset.exchangeRate = cToken.exchangeRateHypothetical(); // We would use exchangeRateCurrent but we already accrue interest above
+      asset.exchangeRate = cToken.exchangeRateCurrent(); // We would use exchangeRateCurrent but we already accrue interest above
       asset.underlyingPrice = oracle.price(asset.underlyingToken);
 
       // Get oracle for this cToken
@@ -521,7 +521,7 @@ contract FusePoolLens is Initializable {
     IComptroller comptroller = IComptroller(asset.comptroller());
     (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
-    uint256 totalBorrows = asset.totalBorrowsHypo();
+    uint256 totalBorrows = asset.totalBorrowsCurrent();
     uint256 whitelistedBorrowersBorrows = comptroller.getWhitelistedBorrowersBorrows(address(asset));
     if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
     else nonWhitelistedTotalBorrows = totalBorrows - whitelistedBorrowersBorrows;
