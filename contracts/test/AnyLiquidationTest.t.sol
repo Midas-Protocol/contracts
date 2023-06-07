@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { Comptroller } from "../compound/Comptroller.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -17,12 +15,11 @@ import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2L
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
@@ -129,7 +126,7 @@ contract AnyLiquidationTest is BaseTest {
   struct LiquidationData {
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
-    ICToken[] markets;
+    ICErc20[] markets;
     address[] borrowers;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
@@ -182,8 +179,8 @@ contract AnyLiquidationTest is BaseTest {
     // find a debt market in which the borrower has borrowed
     for (uint256 m = 0; m < vars.markets.length; m++) {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
-      ICToken randomMarket = vars.markets[marketIndexWithOffset];
-      borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
+      ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
+      borrowAmount = randomMarket.borrowBalanceCurrent(vars.borrower);
       if (borrowAmount > 0) {
         debtMarket = ICErc20(address(randomMarket));
         break;
@@ -199,13 +196,13 @@ contract AnyLiquidationTest is BaseTest {
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-        ICToken randomMarket = vars.markets[marketIndexWithOffset];
+        ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
         uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
         if (borrowerCollateral > 0) {
           if (address(randomMarket) == address(debtMarket)) continue;
 
           // the collateral prices change
-          MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
+          BasePriceOracle mpo = vars.comptroller.oracle();
           uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
           vm.mockCall(
             address(mpo),

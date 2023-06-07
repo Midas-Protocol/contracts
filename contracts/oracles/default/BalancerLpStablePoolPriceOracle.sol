@@ -4,14 +4,10 @@ pragma solidity >=0.8.0;
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import { IBalancerStablePool } from "../../external/balancer/IBalancerStablePool.sol";
 import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
-import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 /**
@@ -43,8 +39,8 @@ contract BalancerLpStablePoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));

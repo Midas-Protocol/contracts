@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/keep3r/Keep3rV1Oracle.sol";
 
 import "../../external/uniswap/IUniswapV2Pair.sol";
@@ -20,7 +16,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
+contract Keep3rPriceOracle is BasePriceOracle {
   /**
    * @dev Constructor that sets the Keep3rV1Oracle or SushiswapV1Oracle.
    */
@@ -138,12 +134,9 @@ contract Keep3rPriceOracle is IPriceOracle, BasePriceOracle {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    // Return 1e18 for ETH
-    if (cToken.isCEther()) return 1e18;
-
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Get underlying ERC20 token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
 
     // Get price, format, and return
     uint256 baseUnit = 10**uint256(ERC20Upgradeable(underlying).decimals());

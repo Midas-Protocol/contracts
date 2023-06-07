@@ -6,7 +6,7 @@ import { CurveTestConfigStorage } from "./CurveTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
-import { MockPriceOracle, IPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
+import { MockPriceOracle, BasePriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./CurveERC4626Test.sol";
 
@@ -14,7 +14,7 @@ import "./CurveERC4626Test.sol";
 contract CurveAssetTest is AbstractAssetTest {
   MasterPriceOracle masterPriceOracle;
   address[] underlyingsForOracle;
-  IPriceOracle[] oracles;
+  BasePriceOracle[] oracles;
 
   function setUp() public forkAtBlock(POLYGON_MAINNET, 33063212) {}
 
@@ -31,7 +31,7 @@ contract CurveAssetTest is AbstractAssetTest {
     MockPriceOracle curveOracle = new MockPriceOracle(60);
 
     underlyingsForOracle.push(asset);
-    oracles.push(IPriceOracle(address(curveOracle)));
+    oracles.push(BasePriceOracle(address(curveOracle)));
 
     vm.prank(masterPriceOracle.admin());
     masterPriceOracle.add(underlyingsForOracle, oracles);
