@@ -19,6 +19,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   error NotPositionOwner();
   error RepayFlashLoanFailed(address asset, uint256 currentBalance, uint256 repayAmount);
 
+  error ConvertFundsFailed();
   error ExitFailed(uint256 errorCode);
   error RedeemFailed(uint256 errorCode);
   error SupplyCollateralFailed(uint256 errorCode);
@@ -84,7 +85,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
     // calling accrue and exit allows to redeem the full underlying balance
     collateralMarket.accrueInterest();
-    errorCode = pool.exitMarket(address(collateralMarket));
+    uint256 errorCode = pool.exitMarket(address(collateralMarket));
     if (errorCode != 0) revert ExitFailed(errorCode);
 
     // redeem all cTokens should leave no dust
@@ -306,6 +307,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 inputAmount = inputToken.balanceOf(address(this));
     (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = factory
       .getRedemptionStrategies(inputToken, outputToken);
+
+    if (redemptionStrategies.length == 0) revert ConvertFundsFailed();
 
     for (uint256 i = 0; i < redemptionStrategies.length; i++) {
       IRedemptionStrategy redemptionStrategy = redemptionStrategies[i];

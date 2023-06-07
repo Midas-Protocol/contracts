@@ -326,11 +326,6 @@ interface CTokenExtensionInterface {
 }
 
 interface CTokenInterface {
-  /**
-   * @notice Indicator that this is a CToken contract (for inspection)
-   */
-  function isCToken() external view returns (bool);
-
   function getCash() external view returns (uint256);
 
   function seize(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ICErc20, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { ICErc20, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
@@ -11,7 +11,7 @@ import { Unitroller } from "./Unitroller.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 import { IMidasFlywheel } from "../midas/strategies/flywheel/IMidasFlywheel.sol";
 import { DiamondExtension, DiamondBase, LibDiamond } from "../midas/DiamondExtension.sol";
-import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -163,9 +163,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     // TODO
     require(markets[cTokenAddress].isListed, "!Comptroller:exitMarket");
 
-    CTokenExtensionInterface cTokenExt = CTokenExtensionInterface(cTokenAddress);
+    ICErc20 cToken = ICErc20(cTokenAddress);
     /* Get sender tokensHeld and amountOwed underlying from the cToken */
-    (uint256 oErr, uint256 tokensHeld, uint256 amountOwed, ) = cTokenExt.getAccountSnapshot(msg.sender);
+    (uint256 oErr, uint256 tokensHeld, uint256 amountOwed, ) = cToken.getAccountSnapshot(msg.sender);
     require(oErr == 0, "!exitMarket"); // semi-opaque error code
 
     /* Fail if the sender has a borrow balance */
@@ -227,21 +227,21 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
 
   /**
    * @notice Checks if the account should be allowed to mint tokens in the given market
-   * @param cToken The market to verify the mint against
+   * @param cTokenAddress The market to verify the mint against
    * @param minter The account which would get the minted tokens
    * @param mintAmount The amount of underlying being supplied to the market in exchange for tokens
    * @return 0 if the mint is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
    */
   function mintAllowed(
-    address cToken,
+    address cTokenAddress,
     address minter,
     uint256 mintAmount
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
-    require(!mintGuardianPaused[cToken], "!mint:paused");
+    require(!mintGuardianPaused[cTokenAddress], "!mint:paused");
 
     // Make sure market is listed
-    if (!markets[cToken].isListed) {
+    if (!markets[cTokenAddress].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
     }
 
@@ -251,12 +251,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     }
 
     // Check supply cap
-    uint256 supplyCap = supplyCaps[cToken];
+    uint256 supplyCap = supplyCaps[cTokenAddress];
     // Supply cap of 0 corresponds to unlimited supplying
-    if (supplyCap != 0 && !supplyCapWhitelist[cToken].contains(minter)) {
-      CTokenExtensionInterface asExt = CTokenExtensionInterface(cToken);
-      uint256 totalUnderlyingSupply = asExt.getTotalUnderlyingSupplied();
-      uint256 whitelistedSuppliersSupply = asComptrollerExtension().getWhitelistedSuppliersSupply(cToken);
+    if (supplyCap != 0 && !supplyCapWhitelist[cTokenAddress].contains(minter)) {
+      uint256 totalUnderlyingSupply = ICErc20(cTokenAddress).getTotalUnderlyingSupplied();
+      uint256 whitelistedSuppliersSupply = asComptrollerExtension().getWhitelistedSuppliersSupply(cTokenAddress);
       uint256 nonWhitelistedTotalSupply;
       if (whitelistedSuppliersSupply >= totalUnderlyingSupply) nonWhitelistedTotalSupply = 0;
       else nonWhitelistedTotalSupply = totalUnderlyingSupply - whitelistedSuppliersSupply;
@@ -265,7 +264,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     }
 
     // Keep the flywheel moving
-    flywheelPreSupplierAction(cToken, minter);
+    flywheelPreSupplierAction(cTokenAddress, minter);
 
     return uint256(Error.NO_ERROR);
   }
@@ -467,7 +466,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     uint256 borrowCap = borrowCaps[cToken];
     // Borrow cap of 0 corresponds to unlimited borrowing
     if (borrowCap != 0 && !borrowCapWhitelist[cToken].contains(borrower)) {
-      uint256 totalBorrows = CTokenExtensionInterface(cToken).totalBorrowsCurrent();
+      uint256 totalBorrows = ICErc20(cToken).totalBorrowsCurrent();
       uint256 whitelistedBorrowersBorrows = asComptrollerExtension().getWhitelistedBorrowersBorrows(cToken);
       uint256 nonWhitelistedTotalBorrows;
       if (whitelistedBorrowersBorrows >= totalBorrows) nonWhitelistedTotalBorrows = 0;
@@ -577,7 +576,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     }
 
     // Get borrowers' underlying borrow balance
-    uint256 borrowBalance = CTokenExtensionInterface(cTokenBorrowed).borrowBalanceCurrent(borrower);
+    uint256 borrowBalance = ICErc20(cTokenBorrowed).borrowBalanceCurrent(borrower);
 
     /* allow accounts to be liquidated if the market is deprecated */
     if (isDeprecated(ICErc20(cTokenBorrowed))) {
@@ -820,9 +819,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       ICErc20 asset = assets[i];
 
       // Read the balances and exchange rate from the cToken
-      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = CTokenExtensionInterface(
-        address(asset)
-      ).getAccountSnapshot(account);
+      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = asset.getAccountSnapshot(account);
       if (oErr != 0) {
         // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
         return (Error.SNAPSHOT_ERROR, 0, 0);
@@ -1200,8 +1197,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     if (markets[address(cToken)].isListed) {
       return fail(Error.MARKET_ALREADY_LISTED, FailureInfo.SUPPORT_MARKET_EXISTS);
     }
-    // Sanity check to make sure its really a CToken
-    require(cToken.isCToken(), "!market:isctoken");
 
     // Check cToken.comptroller == this
     require(address(cToken.comptroller()) == address(this), "!comptroller");
@@ -1335,8 +1330,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
   }
 
-  function asComptrollerExtension() internal view returns (ComptrollerFirstExtension) {
-    return ComptrollerFirstExtension(address(this));
+  function asComptrollerExtension() internal view returns (ComptrollerExtensionInterface) {
+    return ComptrollerExtensionInterface(address(this));
   }
 
   /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/

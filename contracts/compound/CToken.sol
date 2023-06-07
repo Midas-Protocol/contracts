@@ -814,13 +814,6 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     return ICErc20(address(this));
   }
 
-  /**
-   * @notice Indicator that this is a CToken contract (for inspection)
-   */
-  function isCToken() external view returns (bool) {
-    return true;
-  }
-
   /*** Safe Token ***/
 
   /**

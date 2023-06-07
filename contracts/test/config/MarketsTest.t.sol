@@ -7,8 +7,9 @@ import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { DiamondExtension } from "../../midas/DiamondExtension.sol";
 import { CTokenFirstExtension } from "../../compound/CTokenFirstExtension.sol";
-import { ComptrollerFirstExtension, Comptroller } from "../../compound/Comptroller.sol";
+import { Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
+import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 
 contract MarketsTest is BaseTest {
   FuseFeeDistributor internal ffd;

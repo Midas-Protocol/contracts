@@ -660,10 +660,6 @@ contract CTokenFirstExtension is
     emit Flash(msg.sender, amount);
   }
 
-  function asCTokenInterface() external view returns (CTokenInterface) {
-    return CTokenInterface(address(this));
-  }
-
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */
