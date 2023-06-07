@@ -30,7 +30,7 @@ contract LeveredPositionFactoryExtension is
   uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
+    uint8 fnsCount = 13;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.createPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPosition.selector;
@@ -44,6 +44,7 @@ contract LeveredPositionFactoryExtension is
     functionSelectors[--fnsCount] = this.getWhitelistedCollateralMarkets.selector;
     functionSelectors[--fnsCount] = this.getAccountsWithOpenPositions.selector;
     functionSelectors[--fnsCount] = this.getPositionsByAccount.selector;
+    functionSelectors[--fnsCount] = this.getPositionsExtension.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -149,5 +150,10 @@ contract LeveredPositionFactoryExtension is
 
   function getBorrowableMarketsByCollateral(ICErc20 _collateralMarket) external view returns (address[] memory) {
     return borrowableMarketsByCollateral[_collateralMarket].values();
+  }
+
+  function getPositionsExtension(bytes4 msgSig) external view returns (address) {
+    // TODO
+    return address(0);
   }
 }

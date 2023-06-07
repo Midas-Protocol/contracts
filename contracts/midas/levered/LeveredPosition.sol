@@ -8,6 +8,7 @@ import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
 import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
 import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
+import { LeveredPositionStorage } from "./LeveredPositionStorage.sol";
 
 import { MidasFlywheel } from "../../midas/strategies/flywheel/MidasFlywheel.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -16,7 +17,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 // TODO upgrade (proxy-impl) pattern with a centralized implementation reference (in the factory?)
-contract LeveredPosition is IFlashLoanReceiver {
+contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   error OnlyWhenClosed();
@@ -30,30 +31,18 @@ contract LeveredPosition is IFlashLoanReceiver {
   error BorrowStableFailed(uint256 errorCode);
   error RepayBorrowFailed(uint256 errorCode);
   error RedeemCollateralFailed(uint256 errorCode);
-
-  // @notice the base collateral is the amount of collateral that is not funded by borrowing stables
-  uint256 public baseCollateral;
-  address public immutable positionOwner;
-  ILeveredPositionFactory public factory;
-
-  ICErc20 public collateralMarket;
-  ICErc20 public stableMarket;
-  IComptroller public pool;
-
-  IERC20Upgradeable public collateralAsset;
-  IERC20Upgradeable public stableAsset;
+  error ExtNotFound(bytes4 _functionSelector);
 
   constructor(
     address _positionOwner,
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket
-  ) {
+  ) LeveredPositionStorage(_positionOwner) {
     address collateralPool = _collateralMarket.comptroller();
     address stablePool = _stableMarket.comptroller();
     require(collateralPool == stablePool, "markets pools differ");
     pool = IComptroller(collateralPool);
 
-    positionOwner = _positionOwner;
     collateralMarket = _collateralMarket;
     collateralAsset = IERC20Upgradeable(_collateralMarket.underlying());
     stableMarket = _stableMarket;
@@ -173,6 +162,28 @@ contract LeveredPosition is IFlashLoanReceiver {
       uint256 rewardsAccrued = rewardToken.balanceOf(address(this));
       if (rewardsAccrued > 0) {
         rewardToken.transfer(withdrawTo, rewardsAccrued);
+      }
+    }
+  }
+
+  fallback() external {
+    address extension = factory.getPositionsExtension(msg.sig);
+    if (extension == address(0)) revert ExtNotFound(msg.sig);
+    // Execute external function from extension using delegatecall and return any value.
+    assembly {
+    // copy function selector and any arguments
+      calldatacopy(0, 0, calldatasize())
+    // execute function call using the extension
+      let result := delegatecall(gas(), extension, 0, calldatasize(), 0, 0)
+    // get any return value
+      returndatacopy(0, 0, returndatasize())
+    // return any return value or error back to the caller
+      switch result
+      case 0 {
+        revert(0, returndatasize())
+      }
+      default {
+        return(0, returndatasize())
       }
     }
   }

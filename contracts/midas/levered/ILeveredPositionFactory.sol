@@ -73,6 +73,8 @@ interface ILeveredPositionFactoryExtension {
   function getWhitelistedCollateralMarkets() external view returns (address[] memory);
 
   function getBorrowableMarketsByCollateral(ICErc20 _collateralMarket) external view returns (address[] memory);
+
+  function getPositionsExtension(bytes4 msgSig) external view returns (address);
 }
 
 interface ILeveredPositionFactory is
