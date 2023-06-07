@@ -112,11 +112,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
    */
   function mintInternal(uint256 mintAmount) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-      return (fail(Error(error), FailureInfo.MINT_ACCRUE_INTEREST_FAILED), 0);
-    }
+    asCTokenExtension().accrueInterest();
     // mintFresh emits the actual Mint event if successful and logs on errors, so we don't need to
     return mintFresh(msg.sender, mintAmount);
   }
@@ -218,11 +214,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function redeemInternal(uint256 redeemTokens) internal nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
-      return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
-    }
+    asCTokenExtension().accrueInterest();
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(msg.sender, redeemTokens, 0);
   }
@@ -234,11 +226,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function redeemUnderlyingInternal(uint256 redeemAmount) internal nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
-      return fail(Error(error), FailureInfo.REDEEM_ACCRUE_INTEREST_FAILED);
-    }
+    asCTokenExtension().accrueInterest();
     // redeemFresh emits redeem-specific logs on errors, so we don't need to
     return redeemFresh(msg.sender, 0, redeemAmount);
   }
@@ -384,11 +372,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function borrowInternal(uint256 borrowAmount) internal nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-      return fail(Error(error), FailureInfo.BORROW_ACCRUE_INTEREST_FAILED);
-    }
+    asCTokenExtension().accrueInterest();
     // borrowFresh emits borrow-specific logs on errors, so we don't need to
     return borrowFresh(msg.sender, borrowAmount);
   }
@@ -488,11 +472,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
    */
   function repayBorrowInternal(uint256 repayAmount) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-      return (fail(Error(error), FailureInfo.REPAY_BORROW_ACCRUE_INTEREST_FAILED), 0);
-    }
+    asCTokenExtension().accrueInterest();
     // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
     return repayBorrowFresh(msg.sender, msg.sender, repayAmount);
   }
@@ -508,11 +488,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     nonReentrant(false)
     returns (uint256, uint256)
   {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-      return (fail(Error(error), FailureInfo.REPAY_BEHALF_ACCRUE_INTEREST_FAILED), 0);
-    }
+    asCTokenExtension().accrueInterest();
     // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
     return repayBorrowFresh(msg.sender, borrower, repayAmount);
   }
@@ -618,18 +594,8 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     uint256 repayAmount,
     address cTokenCollateral
   ) internal nonReentrant(false) returns (uint256, uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
-      return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED), 0);
-    }
-
-    error = ICErc20(cTokenCollateral).accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
-      return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED), 0);
-    }
-
+    asCTokenExtension().accrueInterest();
+    ICErc20(cTokenCollateral).accrueInterest();
     // liquidateBorrowFresh emits borrow-specific logs on errors, so we don't need to
     return liquidateBorrowFresh(msg.sender, borrower, repayAmount, cTokenCollateral);
   }
@@ -893,11 +859,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted Fuse fee withdrawal failed.
-      return fail(Error(error), FailureInfo.WITHDRAW_FUSE_FEES_ACCRUE_INTEREST_FAILED);
-    }
+    asCTokenExtension().accrueInterest();
 
     if (accrualBlockNumber != block.number) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_FUSE_FEES_FRESH_CHECK);
@@ -930,10 +892,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    uint256 error = asCTokenExtension().accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      return fail(Error(error), FailureInfo.WITHDRAW_ADMIN_FEES_ACCRUE_INTEREST_FAILED);
-    }
+    asCTokenExtension().accrueInterest();
 
     if (accrualBlockNumber != block.number) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_ADMIN_FEES_FRESH_CHECK);

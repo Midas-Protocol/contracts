@@ -223,12 +223,7 @@ contract CTokenFirstExtension is
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _setReserveFactor(uint256 newReserveFactorMantissa) public override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
-      return fail(Error(error), FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED);
-    }
-
+    accrueInterest();
     // Check caller is admin
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
@@ -258,12 +253,7 @@ contract CTokenFirstExtension is
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _setAdminFee(uint256 newAdminFeeMantissa) public override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee change failed.
-      return fail(Error(error), FailureInfo.SET_ADMIN_FEE_ACCRUE_INTEREST_FAILED);
-    }
-
+    accrueInterest();
     // Verify market's block number equals current block number
     if (accrualBlockNumber != block.number) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_ADMIN_FEE_FRESH_CHECK);
@@ -320,11 +310,7 @@ contract CTokenFirstExtension is
     nonReentrant(false)
     returns (uint256)
   {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      return fail(Error(error), FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED);
-    }
-
+    accrueInterest();
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK);
     }
