@@ -84,12 +84,7 @@ contract MidasFlywheelLensRouter {
           market,
           rewardTokenDecimals[j]
         );
-        uint256 apr = getApr(
-          rewardSpeedPerSecondPerToken,
-          rewardTokenPrices[j],
-          price,
-          market.exchangeRateCurrent()
-        );
+        uint256 apr = getApr(rewardSpeedPerSecondPerToken, rewardTokenPrices[j], price, market.exchangeRateCurrent());
 
         rewardsInfo[j] = RewardsInfo({
           rewardSpeedPerSecondPerToken: rewardSpeedPerSecondPerToken, // scaled in 1e18
