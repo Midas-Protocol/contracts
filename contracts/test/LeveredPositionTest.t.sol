@@ -294,9 +294,9 @@ abstract contract LeveredPositionTest is MarketsTest {
 
     position.claimRewards();
 
-//    uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
-//
-//    assertGt(rewardsBalanceAfter - rewardsBalanceBefore, 0, "should have claimed some rewards");
+    //    uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
+    //
+    //    assertGt(rewardsBalanceAfter - rewardsBalanceBefore, 0, "should have claimed some rewards");
   }
 
   function testLeverMaxDown() public whenForking {
