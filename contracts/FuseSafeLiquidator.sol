@@ -440,8 +440,6 @@ contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     uint256,
     bytes calldata data
   ) public override {
-    address cToken = abi.decode(data[100:132], (address));
-
     // Liquidate unhealthy borrow, exchange seized collateral, return flashloaned funds, and exchange profit
     // Decode params
     LiquidateToTokensWithFlashSwapVars memory vars = abi.decode(data[4:], (LiquidateToTokensWithFlashSwapVars));
