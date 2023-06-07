@@ -7,8 +7,7 @@ import { SolidlyLpTokenPriceOracle } from "../../oracles/default/SolidlyLpTokenP
 import { UniswapLikeLpTokenPriceOracle } from "../../oracles/default/UniswapLikeLpTokenPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../../liquidators/UniswapLpTokenLiquidator.sol";
 import { SolidlyLpTokenLiquidator } from "../../liquidators/SolidlyLpTokenLiquidator.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
@@ -44,10 +43,10 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   function setUpOracles(address lpToken, UniswapLikeLpTokenPriceOracle oracle) internal {
     if (address(mpo.oracles(lpToken)) == address(0)) {
       address[] memory underlyings = new address[](1);
-      IPriceOracle[] memory oracles = new IPriceOracle[](1);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
 
       underlyings[0] = lpToken;
-      oracles[0] = IPriceOracle(oracle);
+      oracles[0] = BasePriceOracle(oracle);
 
       vm.prank(mpo.admin());
       mpo.add(underlyings, oracles);

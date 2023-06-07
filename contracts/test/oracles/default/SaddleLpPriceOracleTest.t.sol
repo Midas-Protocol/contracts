@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { ISwap } from "../../../external/saddle/ISwap.sol";
 import { SaddleLpPriceOracle } from "../../../oracles/default/SaddleLpPriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { ICToken } from "../../../external/compound/ICToken.sol";
+import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -15,7 +15,7 @@ contract SaddleLpPriceOracleTest is BaseTest {
   address fraxUsdc_lp = 0x896935B02D3cBEb152192774e4F1991bb1D2ED3f;
   address fraxUsdc_pool = 0x401AFbc31ad2A3Bc0eD8960d63eFcDEA749b4849;
   // TODO: add test once this is deployed
-  // ICToken fraxUsdc_c = ICToken(0x);
+  // ICErc20 fraxUsdc_c = ICErc20(0x);
   MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {

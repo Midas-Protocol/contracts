@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { CToken } from "../../compound/CToken.sol";
-import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { JarvisLiquidatorFunder } from "../../liquidators/JarvisLiquidatorFunder.sol";
 import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
@@ -15,8 +14,6 @@ import { ISynthereumLiquidityPool } from "../../external/jarvis/ISynthereumLiqui
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -106,8 +103,8 @@ contract JarvisLiquidatorFunderTest is BaseTest {
 
     IComptroller comptroller = IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
-    CErc20Delegate cTokenJBRL = CErc20Delegate(0x82A3103bc306293227B756f7554AfAeE82F8ab7a);
-    CErc20Delegate cTokenBUSD = CErc20Delegate(0xa7213deB44f570646Ea955771Cc7f39B58841363);
+    ICErc20 cTokenJBRL = ICErc20(0x82A3103bc306293227B756f7554AfAeE82F8ab7a);
+    ICErc20 cTokenBUSD = ICErc20(0xa7213deB44f570646Ea955771Cc7f39B58841363);
 
     uint256 borrowAmount = 1e21;
     address accountOne = address(10001);
@@ -137,14 +134,14 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     // some time passes, interest accrues and prices change
     {
       vm.roll(block.number + 100);
-      CTokenExtensionInterface(address(cTokenBUSD)).accrueInterest();
-      CTokenExtensionInterface(address(cTokenJBRL)).accrueInterest();
+      cTokenBUSD.accrueInterest();
+      cTokenJBRL.accrueInterest();
 
       MasterPriceOracle mpo = MasterPriceOracle(address(comptroller.oracle()));
-      uint256 priceBUSD = mpo.getUnderlyingPrice(ICToken(address(cTokenBUSD)));
+      uint256 priceBUSD = mpo.getUnderlyingPrice(cTokenBUSD);
       vm.mockCall(
         address(mpo),
-        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, ICToken(address(cTokenBUSD))),
+        abi.encodeWithSelector(mpo.getUnderlyingPrice.selector, cTokenBUSD),
         abi.encode(priceBUSD / 100)
       );
     }

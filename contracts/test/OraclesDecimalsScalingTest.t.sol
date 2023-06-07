@@ -5,9 +5,8 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
@@ -46,11 +45,9 @@ contract OraclesDecimalsScalingTest is BaseTest {
 
       for (uint8 i = 0; i < pools.length; i++) {
         IComptroller comptroller = IComptroller(pools[i].comptroller);
-        ICToken[] memory markets = comptroller.getAllMarkets();
+        ICErc20[] memory markets = comptroller.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
-          address marketAddress = address(markets[j]);
-          CErc20Delegate market = CErc20Delegate(marketAddress);
-          address underlying = market.underlying();
+          address underlying = markets[j].underlying();
 
           if (isSkipped(underlying)) {
             emit log("the oracle for this underlying cannot be tested");

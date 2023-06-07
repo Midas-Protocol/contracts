@@ -2,8 +2,8 @@
 pragma solidity ^0.8.10;
 
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IComptroller } from "../../external/compound/IComptroller.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 

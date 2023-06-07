@@ -3,11 +3,9 @@ pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { IPriceOracle } from "../../external/compound/IPriceOracle.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { NativeUSDPriceOracle } from "../evmos/NativeUSDPriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
@@ -19,7 +17,7 @@ import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPrice
  * @dev Implements `PriceOracle`.
  * @author Carlo Mazzaferro <rahul@midascapital.xyz> (https://github.com/carlomazzaferro)
  */
-contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceOracle {
+contract AdrastiaPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @notice Maps ERC20 token addresses to NATIVE-based Adrastia price feed contracts.
    */
@@ -89,9 +87,9 @@ contract AdrastiaPriceOracle is SafeOwnableUpgradeable, IPriceOracle, BasePriceO
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
 
     // Get price
     uint256 oraclePrice = _price(underlying);

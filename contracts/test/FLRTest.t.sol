@@ -13,13 +13,10 @@ import { IERC20MetadataUpgradeable, IERC20Upgradeable } from "openzeppelin-contr
 
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
-import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
-
-import { MidasFlywheelLensRouter, IComptroller, CErc20Token, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, IComptroller, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 
@@ -91,7 +88,6 @@ contract FLRTest is BaseTest {
         address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
       )
     );
-    emit log_named_uint("exchangeRateCurrent", CErc20Token(mkt).exchangeRateCurrent());
 
     vm.warp(block.timestamp + 10);
 
@@ -129,7 +125,7 @@ contract FLRTest is BaseTest {
   }
 
   function testMoonbeamFlywheelLensRouter() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
+    ERC20 market = ERC20(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
     rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
     IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
     // setUpFlywheel(rewardToken, address(market), comptroller, ap.owner());
@@ -173,6 +169,11 @@ contract FLRTest is BaseTest {
     for (uint8 i = 0; i < pools.length; i++) {
       router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));
     }
+  }
+
+  function testChapelRouter() public fork(BSC_CHAPEL) {
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
+    router.getPoolMarketRewardsInfo(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
   }
 
   function testMoonbeamLensRouter() public fork(MOONBEAM_MAINNET) {
