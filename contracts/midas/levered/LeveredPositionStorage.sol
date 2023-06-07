@@ -20,7 +20,7 @@ contract LeveredPositionStorage {
   IERC20Upgradeable public collateralAsset;
   IERC20Upgradeable public stableAsset;
 
-  constructor (address _positionOwner) {
+  constructor(address _positionOwner) {
     positionOwner = _positionOwner;
   }
 }
