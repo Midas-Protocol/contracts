@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerV4Storage } from "./ComptrollerStorage.sol";
 
@@ -11,7 +10,7 @@ import { ComptrollerV4Storage } from "./ComptrollerStorage.sol";
  * @author Tyler Loewen (TRILEZ SOFTWARE INC. dba. Adrastia)
  * @notice A diamond extension that allows the Comptroller to use Adrastia Prudentia to control supply and borrow caps.
  */
-contract ComptrollerPrudentiaCapsExt is DiamondExtension, ComptrollerV4Storage, ComptrollerErrorReporter {
+contract ComptrollerPrudentiaCapsExt is DiamondExtension, ComptrollerV4Storage {
   /**
    * @notice Emitted when the Adrastia Prudentia supply cap config is changed.
    * @param oldConfig The old config.
