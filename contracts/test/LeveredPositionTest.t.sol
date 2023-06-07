@@ -24,6 +24,7 @@ import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywh
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
@@ -268,6 +269,36 @@ abstract contract LeveredPositionTest is MarketsTest {
     assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
   }
 
+  function testRewardsAccruedClaimed() public whenForking {
+    //position.adjustLeverageRatio(position.getMaxLeverageRatio());
+
+    vm.warp(block.timestamp + 60 * 60 * 24);
+    vm.roll(block.number + 10000);
+
+    (ERC20[] memory rewardTokens, uint256[] memory amounts) = position.getAccruedRewards();
+
+    ERC20 rewardToken;
+    bool atLeastOneAccrued = false;
+    for (uint256 i = 0; i < amounts.length; i++) {
+      atLeastOneAccrued = amounts[i] > 0;
+      if (atLeastOneAccrued) {
+        rewardToken = rewardTokens[i];
+        emit log_named_address("accrued from reward token", address(rewardTokens[i]));
+        break;
+      }
+    }
+
+    assertEq(atLeastOneAccrued, true, "!should have accrued at least one reward token");
+
+    //uint256 rewardsBalanceBefore = rewardToken.balanceOf(address(this));
+
+    position.claimRewards();
+
+//    uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
+//
+//    assertGt(rewardsBalanceAfter - rewardsBalanceBefore, 0, "should have claimed some rewards");
+  }
+
   function testLeverMaxDown() public whenForking {
     uint256 maxRatio = position.getMaxLeverageRatio();
     uint256 leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
@@ -485,24 +516,6 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
     address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
     IComptroller pool = IComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
-    //    Liquidator[] memory ls = new Liquidator[](2);
-    //    {
-    //      Liquidator memory bbaToMaticX;
-    //      bbaToMaticX.inputToken = underlying(maticXBbaWMaticMarket);
-    //      bbaToMaticX.outputToken = underlying(maticXMarket);
-    //      bbaToMaticX.strategy = new BalancerLinearPoolTokenLiquidator();
-    //      ls[0] = bbaToMaticX;
-    //
-    //      Liquidator memory maticXBbaTo;
-    //      maticXBbaTo.inputToken = underlying(maticXMarket);
-    //      maticXBbaTo.outputToken = underlying(maticXBbaWMaticMarket);
-    //      maticXBbaTo.strategy = new BalancerLinearPoolTokenLiquidator();
-    //      ls[1] = maticXBbaTo;
-    //    }
-    //
-    //    _configurePair(maticXBbaWMaticMarket, maticXMarket);
-    //    _configureMultipleLiquidators(ls);
-
     _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerLinearPoolTokenLiquidator());
 
     {
