@@ -48,6 +48,7 @@ contract AlgebraSwapLiquidator is IRedemptionStrategy {
 
 contract ReverseAlgebraSwapLiquidator is IRedemptionStrategy {
   IERC20Upgradeable public lpHayBusdToken = IERC20Upgradeable(0x93B32a8dfE10e9196403dd111974E325219aec24);
+
   function redeem(
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
@@ -55,7 +56,7 @@ contract ReverseAlgebraSwapLiquidator is IRedemptionStrategy {
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     (address _outputToken, ISwapRouter swapRouter) = abi.decode(strategyData, (address, ISwapRouter));
 
-/*
+    /*
     function beefIn (address beefyVault, uint256 tokenAmountOutMin, address tokenIn, uint256 tokenInAmount) external {
         require(tokenInAmount >= minimumAmount, 'Beefy: Insignificant input amount');
         require(IERC20(tokenIn).allowance(msg.sender, address(this)) >= tokenInAmount, 'Beefy: Input token is not approved');
