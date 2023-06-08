@@ -19,6 +19,7 @@ import { CErc20 } from "../compound/CErc20.sol";
 import { MidasFlywheelLensRouter, IComptroller, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 contract FLRTest is BaseTest {
   address rewardToken;
@@ -163,12 +164,13 @@ contract FLRTest is BaseTest {
   }
 
   function testBscLensRouter() public fork(BSC_MAINNET) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xb4c8353412633B779893Bb728435930b7d3610C8);
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));
-    }
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xf16f0E6C3F4ee9B380369Db229C7D826039af3d6);
+    MidasFlywheelCore[] memory fws = new MidasFlywheelCore[](1);
+    fws[0] = MidasFlywheelCore(0xa00775B261B6ACf24b3F692990907abA7E55591a);
+
+    fws[0].rewardsAccrued(user);
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
