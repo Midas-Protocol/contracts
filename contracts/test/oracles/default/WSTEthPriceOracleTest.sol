@@ -2,15 +2,15 @@
 pragma solidity >=0.8.0;
 
 import { BaseTest } from "../../config/BaseTest.t.sol";
-import { WstEthPriceOracle } from "../../../oracles/default/WstEthPriceOracle.sol";
+import { WSTEthPriceOracle } from "../../../oracles/default/WSTEthPriceOracle.sol";
 
-contract WstEthPriceOracleTest is BaseTest {
+contract WSTEthPriceOracleTest is BaseTest {
   // TODO: fix this after deploy of MPO
-  WstEthPriceOracle private oracle;
+  WSTEthPriceOracle private oracle;
   address wstETH = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
 
   function afterForkSetUp() internal override {
-    oracle = new WstEthPriceOracle();
+    oracle = new WSTEthPriceOracle();
     oracle.initialize();
   }
 

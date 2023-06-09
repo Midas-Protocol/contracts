@@ -14,7 +14,7 @@ import "../BasePriceOracle.sol";
  * @notice WSTEthPriceOracle is a price oracle for wstETH.
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
-contract WstEthPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
+contract WSTEthPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
   function initialize() public initializer {
     __SafeOwnable_init(msg.sender);
   }
