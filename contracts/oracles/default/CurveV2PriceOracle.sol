@@ -2,13 +2,10 @@
 pragma solidity >=0.8.0;
 
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
-import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
 import "../../external/curve/ICurveV2Pool.sol";
-import "../../midas/SafeOwnableUpgradeable.sol";
 
+import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 
 /**
@@ -18,7 +15,6 @@ import "../BasePriceOracle.sol";
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
  */
 contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
-  MasterPriceOracle public masterPriceOracle;
   /**
    * @dev Maps Curve LP token addresses to pool addresses.
    */
@@ -90,8 +86,8 @@ contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
