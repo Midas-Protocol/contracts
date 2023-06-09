@@ -2,9 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import { ICToken } from "../../external/compound/ICToken.sol";
 import { IStakeManager } from "../../external/stader/IStakeManager.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
@@ -27,9 +25,9 @@ contract BNBxPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     BNBx = _bnbX;
   }
 
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     // Get underlying token address
-    address underlying = ICErc20(address(cToken)).underlying();
+    address underlying = cToken.underlying();
     require(underlying == BNBx, "Invalid underlying");
     // no need to scale as BNBx has 18 decimals
     return _price();

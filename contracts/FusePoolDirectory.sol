@@ -3,10 +3,9 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import "./external/compound/IComptroller.sol";
-import "./external/compound/IUnitroller.sol";
-import "./external/compound/IPriceOracle.sol";
-import "./compound/Unitroller.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
+import { Unitroller } from "./compound/Unitroller.sol";
 import "./midas/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 
@@ -172,13 +171,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     );
 
     // Setup Unitroller
-    IUnitroller unitroller = IUnitroller(proxy);
+    Unitroller unitroller = Unitroller(payable(proxy));
     require(
       unitroller._setPendingImplementation(implementation) == 0,
       "Failed to set pending implementation on Unitroller."
     ); // Checks Comptroller implementation whitelist
     IComptroller comptrollerImplementation = IComptroller(implementation);
-    comptrollerImplementation._become(unitroller);
+    comptrollerImplementation._become(proxy);
     IComptroller comptrollerProxy = IComptroller(proxy);
 
     // Set pool parameters
@@ -187,7 +186,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
       comptrollerProxy._setLiquidationIncentive(liquidationIncentive) == 0,
       "Failed to set pool liquidation incentive."
     );
-    require(comptrollerProxy._setPriceOracle(IPriceOracle(priceOracle)) == 0, "Failed to set pool price oracle.");
+    require(comptrollerProxy._setPriceOracle(BasePriceOracle(priceOracle)) == 0, "Failed to set pool price oracle.");
 
     // Whitelist
     if (enforceWhitelist)

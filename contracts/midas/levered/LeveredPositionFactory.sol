@@ -3,7 +3,10 @@ pragma solidity ^0.8.10;
 
 import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
+import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { LeveredPositionFactoryStorage } from "./LeveredPositionFactoryStorage.sol";
 import { DiamondBase, DiamondExtension, LibDiamond } from "../../midas/DiamondExtension.sol";
 

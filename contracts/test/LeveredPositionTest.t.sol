@@ -1,32 +1,30 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./config/MarketsTest.t.sol";
+import { MarketsTest, BaseTest, CErc20Delegate } from "./config/MarketsTest.t.sol";
+import { DiamondBase, DiamondExtension } from "../midas/DiamondExtension.sol";
 
-import "../midas/levered/LeveredPosition.sol";
-import "../midas/levered/LeveredPositionFactory.sol";
-import "../midas/levered/ILeveredPositionFactory.sol";
-import "../midas/levered/LeveredPositionFactoryExtension.sol";
-import "../liquidators/JarvisLiquidatorFunder.sol";
-import "../liquidators/SolidlySwapLiquidator.sol";
-import "../liquidators/XBombLiquidatorFunder.sol";
-import "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
-import "../liquidators/AlgebraSwapLiquidator.sol";
-import "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-
-import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
-
+import { LeveredPosition } from "../midas/levered/LeveredPosition.sol";
+import { LeveredPositionFactory, IFuseFeeDistributor } from "../midas/levered/LeveredPositionFactory.sol";
+import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
+import { SolidlySwapLiquidator } from "../liquidators/SolidlySwapLiquidator.sol";
+import { BalancerLinearPoolTokenLiquidator } from "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
+import { AlgebraSwapLiquidator } from "../liquidators/AlgebraSwapLiquidator.sol";
+import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
+import { LeveredPositionFactoryExtension } from "../midas/levered/LeveredPositionFactoryExtension.sol";
+import { ILeveredPositionFactory } from "../midas/levered/ILeveredPositionFactory.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { LeveredPositionsLens } from "../midas/levered/LeveredPositionsLens.sol";
 import { LiquidatorsRegistry } from "../liquidators/registry/LiquidatorsRegistry.sol";
 import { LiquidatorsRegistryExtension } from "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
-import { MidasFlywheelLensRouter, CErc20Token } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
@@ -41,9 +39,9 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x73B6f1B5B344A9981E312e7DBF64A5C4C587ac38);
-    CErc20Token[] memory markets = new CErc20Token[](0);
-    router.getMarketRewardsInfo(markets);
+    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
+      0x27521eae4eE4153214CaDc3eCD703b9B0326C908
+    );
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
@@ -131,7 +129,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function upgradePoolAndMarkets() internal {
-    _upgradeExistingPool(collateralMarket.comptroller());
+    _upgradeExistingPool(address(collateralMarket.comptroller()));
     _upgradeMarket(CErc20Delegate(address(collateralMarket)));
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
   }
@@ -269,6 +267,36 @@ abstract contract LeveredPositionTest is MarketsTest {
     emit log_named_uint("min ratio diff", minRatio);
     position.adjustLeverageRatio(maxRatio);
     assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
+  }
+
+  function testRewardsAccruedClaimed() public whenForking {
+    //position.adjustLeverageRatio(position.getMaxLeverageRatio());
+
+    vm.warp(block.timestamp + 60 * 60 * 24);
+    vm.roll(block.number + 10000);
+
+    (ERC20[] memory rewardTokens, uint256[] memory amounts) = position.getAccruedRewards();
+
+    ERC20 rewardToken;
+    bool atLeastOneAccrued = false;
+    for (uint256 i = 0; i < amounts.length; i++) {
+      atLeastOneAccrued = amounts[i] > 0;
+      if (atLeastOneAccrued) {
+        rewardToken = rewardTokens[i];
+        emit log_named_address("accrued from reward token", address(rewardTokens[i]));
+        break;
+      }
+    }
+
+    assertEq(atLeastOneAccrued, true, "!should have accrued at least one reward token");
+
+    uint256 rewardsBalanceBefore = rewardToken.balanceOf(address(this));
+
+    position.claimRewards();
+
+    uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
+
+    assertGt(rewardsBalanceAfter - rewardsBalanceBefore, 0, "should have claimed some rewards");
   }
 
   function testLeverMaxDown() public whenForking {
@@ -487,25 +515,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
     address maticXBbaWMaticWhale = 0xB0B28d7A74e62DF5F6F9E0d9Ae0f4e7982De9585;
     address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    ComptrollerFirstExtension pool = ComptrollerFirstExtension(ICErc20(maticXBbaWMaticMarket).comptroller());
-    //    Liquidator[] memory ls = new Liquidator[](2);
-    //    {
-    //      Liquidator memory bbaToMaticX;
-    //      bbaToMaticX.inputToken = underlying(maticXBbaWMaticMarket);
-    //      bbaToMaticX.outputToken = underlying(maticXMarket);
-    //      bbaToMaticX.strategy = new BalancerLinearPoolTokenLiquidator();
-    //      ls[0] = bbaToMaticX;
-    //
-    //      Liquidator memory maticXBbaTo;
-    //      maticXBbaTo.inputToken = underlying(maticXMarket);
-    //      maticXBbaTo.outputToken = underlying(maticXBbaWMaticMarket);
-    //      maticXBbaTo.strategy = new BalancerLinearPoolTokenLiquidator();
-    //      ls[1] = maticXBbaTo;
-    //    }
-    //
-    //    _configurePair(maticXBbaWMaticMarket, maticXMarket);
-    //    _configureMultipleLiquidators(ls);
-
+    IComptroller pool = IComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
     _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerLinearPoolTokenLiquidator());
 
     {

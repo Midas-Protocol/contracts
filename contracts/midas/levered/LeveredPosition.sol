@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ILeveredPositionFactory } from "./ILeveredPositionFactory.sol";
 import { IFlashLoanReceiver } from "../IFlashLoanReceiver.sol";
-import { CTokenExtensionInterface } from "../../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
+
+import { MidasFlywheel } from "../../midas/strategies/flywheel/MidasFlywheel.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
+// TODO upgrade (proxy-impl) pattern with a centralized implementation reference (in the factory?)
 contract LeveredPosition is IFlashLoanReceiver {
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -19,7 +23,7 @@ contract LeveredPosition is IFlashLoanReceiver {
   error NotPositionOwner();
   error RepayFlashLoanFailed(address asset, uint256 currentBalance, uint256 repayAmount);
 
-  error AccrueFailed(uint256 errorCode);
+  error ConvertFundsFailed();
   error ExitFailed(uint256 errorCode);
   error RedeemFailed(uint256 errorCode);
   error SupplyCollateralFailed(uint256 errorCode);
@@ -44,10 +48,10 @@ contract LeveredPosition is IFlashLoanReceiver {
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket
   ) {
-    address collateralPool = _collateralMarket.comptroller();
-    address stablePool = _stableMarket.comptroller();
+    IComptroller collateralPool = _collateralMarket.comptroller();
+    IComptroller stablePool = _stableMarket.comptroller();
     require(collateralPool == stablePool, "markets pools differ");
-    pool = IComptroller(collateralPool);
+    pool = collateralPool;
 
     positionOwner = _positionOwner;
     collateralMarket = _collateralMarket;
@@ -84,9 +88,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     _leverDown(type(uint256).max);
 
     // calling accrue and exit allows to redeem the full underlying balance
-    uint256 errorCode = collateralMarket.accrueInterest();
-    if (errorCode != 0) revert AccrueFailed(errorCode);
-    errorCode = pool.exitMarket(address(collateralMarket));
+    collateralMarket.accrueInterest();
+    uint256 errorCode = pool.exitMarket(address(collateralMarket));
     if (errorCode != 0) revert ExitFailed(errorCode);
 
     // redeem all cTokens should leave no dust
@@ -94,7 +97,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     if (errorCode != 0) revert RedeemFailed(errorCode);
 
     // baseCollateral should become 0 here
-    baseCollateral = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    baseCollateral = collateralMarket.balanceOfUnderlying(address(this));
 
     // withdraw the redeemed collateral
     withdrawAmount = collateralAsset.balanceOf(address(this));
@@ -151,21 +154,66 @@ contract LeveredPosition is IFlashLoanReceiver {
     return stableLeftovers;
   }
 
+  function claimRewards() public {
+    claimRewards(msg.sender);
+  }
+
+  function claimRewards(address withdrawTo) public {
+    if (msg.sender != positionOwner && msg.sender != address(factory)) revert NotPositionOwner();
+
+    address[] memory flywheels = pool.getRewardsDistributors();
+
+    for (uint256 i = 0; i < flywheels.length; i++) {
+      MidasFlywheel fw = MidasFlywheel(flywheels[i]);
+      fw.accrue(ERC20(address(collateralMarket)), address(this));
+      fw.accrue(ERC20(address(stableMarket)), address(this));
+      fw.claimRewards(address(this));
+      ERC20 rewardToken = fw.rewardToken();
+      uint256 rewardsAccrued = rewardToken.balanceOf(address(this));
+      if (rewardsAccrued > 0) {
+        rewardToken.transfer(withdrawTo, rewardsAccrued);
+      }
+    }
+  }
+
   /*----------------------------------------------------------------
                           View Functions
   ----------------------------------------------------------------*/
 
+  /// @notice this is a lens fn, it is not intended to be used on-chain
+  function getAccruedRewards()
+    external
+    returns (
+      /*view*/
+      ERC20[] memory rewardTokens,
+      uint256[] memory amounts
+    )
+  {
+    address[] memory flywheels = pool.getRewardsDistributors();
+
+    rewardTokens = new ERC20[](flywheels.length);
+    amounts = new uint256[](flywheels.length);
+
+    for (uint256 i = 0; i < flywheels.length; i++) {
+      MidasFlywheel fw = MidasFlywheel(flywheels[i]);
+      fw.accrue(ERC20(address(collateralMarket)), address(this));
+      fw.accrue(ERC20(address(stableMarket)), address(this));
+      rewardTokens[i] = fw.rewardToken();
+      amounts[i] = fw.rewardsAccrued(address(this));
+    }
+  }
+
   function getCurrentLeverageRatio() public view returns (uint256) {
     if (baseCollateral == 0) return 0;
 
-    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlying(address(this));
     return (suppliedCollateralCurrent * 1e18) / baseCollateral;
   }
 
   function getMinLeverageRatio() public view returns (uint256) {
     if (baseCollateral == 0) return 0;
 
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
     // not accounting for slippage
@@ -177,7 +225,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
     (, uint256 collatCollateralFactor) = pool.markets(address(collateralMarket));
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
     uint256 maxBorrow = pool.getMaxRedeemOrBorrow(address(this), stableMarket, true);
@@ -192,7 +240,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 maxTopUpRepay = maxTopUpCollateralSwapValueScaled / collateralAssetPrice;
     uint256 maxCollateralToRepay = (maxTopUpRepay * stableCollateralFactor) / (1e18 - stableCollateralFactor);
     uint256 maxFlashLoaned = (maxCollateralToRepay * collatCollateralFactor) / 1e18;
-    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlyingHypo(address(this));
+    uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlying(address(this));
     return ((suppliedCollateralCurrent + maxFlashLoaned) * 1e18) / baseCollateral;
   }
 
@@ -224,7 +272,7 @@ contract LeveredPosition is IFlashLoanReceiver {
 
   // @dev flash loan the needed amount, then borrow stables and swap them for the amount needed to repay the FL
   function _leverUp(uint256 ratioDiff) internal {
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
@@ -236,7 +284,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 assumedSlippage = factory.getSlippage(stableAsset, collateralAsset);
     stableToBorrow = (stableToBorrow * (10000 + assumedSlippage)) / 10000;
 
-    CTokenExtensionInterface(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
+    ICErc20(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
     // the execution will first receive a callback to receiveFlashLoan()
     // then it continues from here
   }
@@ -260,7 +308,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 borrowsToRepay;
 
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
-    IPriceOracle oracle = pool.oracle();
+    BasePriceOracle oracle = pool.oracle();
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
@@ -279,7 +327,7 @@ contract LeveredPosition is IFlashLoanReceiver {
     }
 
     if (borrowsToRepay > 0) {
-      CTokenExtensionInterface(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
+      ICErc20(address(stableMarket)).flash(borrowsToRepay, abi.encode(amountToRedeem));
       // the execution will first receive a callback to receiveFlashLoan()
       // then it continues from here
     }
@@ -308,6 +356,8 @@ contract LeveredPosition is IFlashLoanReceiver {
     uint256 inputAmount = inputToken.balanceOf(address(this));
     (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = factory
       .getRedemptionStrategies(inputToken, outputToken);
+
+    if (redemptionStrategies.length == 0) revert ConvertFundsFailed();
 
     for (uint256 i = 0; i < redemptionStrategies.length; i++) {
       IRedemptionStrategy redemptionStrategy = redemptionStrategies[i];

@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { PriceOracle } from "../../compound/PriceOracle.sol";
 import { BasePriceOracle } from "../BasePriceOracle.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
-import { CTokenInterface } from "../../compound/CErc20.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import "../../midas/SafeOwnableUpgradeable.sol";
@@ -14,9 +12,9 @@ import "../../midas/SafeOwnableUpgradeable.sol";
  * @title SolidlyOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice SolidlyOracle is a price oracle for Solidly-style pairs.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `BasePriceOracle` interface used by Fuse pools (and Compound v2).
  */
-contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
+contract SolidlyPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Maps ERC20 token addresses to UniswapV3Pool addresses.
    */
@@ -76,11 +74,11 @@ contract SolidlyPriceOracle is PriceOracle, SafeOwnableUpgradeable {
 
   /**
    * @notice Returns the price in NATIVE of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `BasePriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in NATIVE of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) public view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));

@@ -5,7 +5,7 @@ import { UniswapV3PriceOracle } from "../../../oracles/default/UniswapV3PriceOra
 import { ChainlinkPriceOracleV2 } from "../../../oracles/default/ChainlinkPriceOracleV2.sol";
 import { ConcentratedLiquidityBasePriceOracle } from "../../../oracles/default/ConcentratedLiquidityBasePriceOracle.sol";
 import { IUniswapV3Pool } from "../../../external/uniswap/IUniswapV3Pool.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
 import { BaseTest } from "../../config/BaseTest.t.sol";
 
@@ -234,7 +234,7 @@ contract UniswapV3PriceOracleTest is BaseTest {
     // TODO: Remove these after mainnet deployment
     if (block.chainid == ETHEREUM_MAINNET) {
       setUpMpoAndAddresses();
-      IPriceOracle[] memory oracles = new IPriceOracle[](2);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](2);
       ChainlinkPriceOracleV2 chainlinkOracle = new ChainlinkPriceOracleV2(
         mpo.admin(),
         true,
@@ -252,8 +252,8 @@ contract UniswapV3PriceOracleTest is BaseTest {
         asArray(0xb49f677943BC038e9857d61E7d053CaA2C1734C1), // EUR/USD price feed
         ChainlinkPriceOracleV2.FeedBaseCurrency.USD
       );
-      oracles[0] = IPriceOracle(address(chainlinkOracle));
-      oracles[1] = IPriceOracle(address(chainlinkOracle));
+      oracles[0] = chainlinkOracle;
+      oracles[1] = chainlinkOracle;
 
       vm.prank(mpo.admin());
       mpo.add(asArray(stable, 0x68037790A0229e9Ce6EaA8A99ea92964106C4703), oracles);
@@ -262,9 +262,9 @@ contract UniswapV3PriceOracleTest is BaseTest {
 
   function setUpMpoAndAddresses() public {
     address[] memory assets = new address[](0);
-    IPriceOracle[] memory oracles = new IPriceOracle[](0);
+    BasePriceOracle[] memory oracles = new BasePriceOracle[](0);
     mpo = new MasterPriceOracle();
-    mpo.initialize(assets, oracles, IPriceOracle(address(0)), address(this), true, address(wtoken));
+    mpo.initialize(assets, oracles, BasePriceOracle(address(0)), address(this), true, address(wtoken));
   }
 
   function getPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)

@@ -5,7 +5,7 @@ import "./OptimizedAPRVaultBase.sol";
 import "./OptimizedAPRVaultExtension.sol";
 import "../strategies/CompoundMarketERC4626.sol";
 import "../strategies/flywheel/MidasFlywheel.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 
@@ -143,7 +143,7 @@ contract OptimizedVaultsRegistry is SafeOwnableUpgradeable {
         adaptersData[j].adapter = address(adapter);
         adaptersData[j].allocation = allocation;
         adaptersData[j].market = address(market);
-        adaptersData[j].pool = market.comptroller();
+        adaptersData[j].pool = address(market.comptroller());
       }
 
       (uint64 performanceFee, uint64 depositFee, uint64 withdrawalFee, uint64 managementFee) = vault.fees();

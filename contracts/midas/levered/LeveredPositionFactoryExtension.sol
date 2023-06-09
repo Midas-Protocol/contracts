@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import "../../midas/DiamondExtension.sol";
 import { LeveredPositionFactoryStorage } from "./LeveredPositionFactoryStorage.sol";
 import { ILeveredPositionFactoryExtension } from "./ILeveredPositionFactory.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { LeveredPosition } from "./LeveredPosition.sol";
 import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
@@ -127,8 +127,16 @@ contract LeveredPositionFactoryExtension is
     if (slippage == 0) return MAX_SLIPPAGE;
   }
 
-  function getPositionsByAccount(address account) external view returns (address[] memory) {
-    return positionsByAccount[account].values();
+  function getPositionsByAccount(address account)
+    external
+    view
+    returns (address[] memory positions, bool[] memory closed)
+  {
+    positions = positionsByAccount[account].values();
+    closed = new bool[](positions.length);
+    for (uint256 i = 0; i < positions.length; i++) {
+      closed[i] = LeveredPosition(positions[i]).isPositionClosed();
+    }
   }
 
   function getAccountsWithOpenPositions() external view returns (address[] memory) {

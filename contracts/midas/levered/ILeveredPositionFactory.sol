@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { LeveredPosition } from "./LeveredPosition.sol";
 import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
@@ -66,7 +66,7 @@ interface ILeveredPositionFactoryExtension {
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256);
 
-  function getPositionsByAccount(address account) external view returns (address[] memory);
+  function getPositionsByAccount(address account) external view returns (address[] memory, bool[] memory);
 
   function getAccountsWithOpenPositions() external view returns (address[] memory);
 
