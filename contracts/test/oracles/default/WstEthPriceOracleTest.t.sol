@@ -7,15 +7,15 @@ import { WstEthPriceOracle } from "../../../oracles/default/WstEthPriceOracle.so
 contract WstEthPriceOracleTest is BaseTest {
   // TODO: fix this after deploy of MPO
   WstEthPriceOracle private oracle;
-  address stkBnb = 0xc2E9d07F66A89c44062459A47a0D2Dc038E4fb16;
+  address wstETH = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
 
   function afterForkSetUp() internal override {
     oracle = new WstEthPriceOracle();
     oracle.initialize();
   }
 
-  function testStkBnbOraclePrice() public forkAtBlock(ETHEREUM_MAINNET, 17436402) {
-    uint256 priceWstEth = oracle.price(stkBnb);
+  function testWstEthOraclePrice() public forkAtBlock(ETHEREUM_MAINNET, 17436402) {
+    uint256 priceWstEth = oracle.price(wstETH);
 
     assertGt(priceWstEth, 1e18);
     assertEq(priceWstEth, 1006482474298479702);
