@@ -146,7 +146,7 @@ contract LeveredPositionsLens is Initializable {
     }
   }
 
-  function getNetAPY(LeveredPosition pos, uint256 _supplyAPY) public view returns (int256) {
+  function getNetApyForPosition(LeveredPosition pos, uint256 _supplyAPY) public view returns (int256) {
     return
       getNetAPY(
         _supplyAPY,
@@ -175,7 +175,7 @@ contract LeveredPositionsLens is Initializable {
     {
       uint256 supplyAmount = collateralMarket.balanceOfUnderlying(address(pos));
       info.positionValue = (collateralPrice * supplyAmount) / 1e18;
-      info.currentApy = getNetAPY(pos, supplyApy);
+      info.currentApy = getNetApyForPosition(pos, supplyApy);
     }
 
     {
