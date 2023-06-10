@@ -292,6 +292,9 @@ contract AdrastiaPrudentiaCapsTest is BaseTest {
   MockERC20 underlyingToken2;
   ICErc20 cToken2;
 
+  MockERC20 underlyingToken3;
+  ICErc20 cToken3;
+
   CErc20Delegate cErc20Delegate;
 
   PrudentiaStub prudentia;
@@ -312,6 +315,8 @@ contract AdrastiaPrudentiaCapsTest is BaseTest {
     underlyingToken1.mint(address(this), 1000000e18); // 1M tokens
     underlyingToken2 = new MockERC20("UnderlyingToken2", "UT2", 18);
     underlyingToken2.mint(address(this), 1000000e18); // 1M tokens
+    underlyingToken3 = new MockERC20("UnderlyingToken3", "UT3", 6);
+    underlyingToken3.mint(address(this), 1000000e6); // 1M tokens
 
     // Deploy cToken delegates
     cErc20Delegate = new CErc20Delegate();
@@ -394,11 +399,30 @@ contract AdrastiaPrudentiaCapsTest is BaseTest {
       0.9e18 // collateral factor = 90%
     );
 
+    // Deploy cToken3
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken3), // underlying token
+        comptroller, // comptroller
+        payable(address(fuseAdmin)), // admin
+        InterestRateModel(address(interestModel)), // interest rate model
+        "cToken 3", // cToken name
+        "CT3", // cToken symbol
+        address(cErc20Delegate), // implementation (CErc20Delegate)
+        "", // become implementation data
+        uint256(1), // reserve factor
+        uint256(0) // admin fee
+      ),
+      0.9e18 // collateral factor = 90%
+    );
+
     // Store the cToken addresses
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
-    assertEq(allMarkets.length, 2);
+    assertEq(allMarkets.length, 3);
     cToken1 = allMarkets[0];
     cToken2 = allMarkets[1];
+    cToken3 = allMarkets[2];
 
     // Deploy Prudentia
     prudentia = new PrudentiaStub();
@@ -777,6 +801,204 @@ contract AdrastiaPrudentiaCapsTest is BaseTest {
     // Borrow
     vm.expectRevert();
     cToken2.borrow(borrowAmount); // FAIL: Borrow
+  }
+
+  /*
+   * Prudentia caps tests with an offset of 0 and using a cToken with the underlying token having 6 decimals
+   */
+
+  function test_Prudentia_Supply_Unrestricted_6UnderlyingDecimals() public {
+    uint64 cap = 0; // Unrestricted supply cap
+    uint256 mintAmount = 9999e6; // mint of 9,999
+
+    // Set a native supply cap for cToken3
+    // This should be ignored since we're using Prudentia
+    ICErc20[] memory cTokens = new ICErc20[](1);
+    cTokens[0] = cToken3;
+    uint256[] memory supplyCaps = new uint256[](1);
+    supplyCaps[0] = 1;
+    comptroller._setMarketSupplyCaps(cTokens, supplyCaps);
+
+    // Enable Prudentia
+    ComptrollerPrudentiaCapsExt(address(comptroller))._setSupplyCapConfig(
+      ComptrollerV4Storage.PrudentiaConfig({ controller: address(prudentia), offset: 0 })
+    );
+
+    // Set Prudentia supply cap for cToken3
+    prudentia.stubPush(cToken3, cap);
+
+    // Mint
+    underlyingToken3.approve(address(cToken3), type(uint256).max); // Approve max
+    cToken3.mint(mintAmount); // Mint
+
+    assertEq(underlyingToken3.balanceOf(address(cToken3)), mintAmount);
+  }
+
+  function test_Prudentia_Supply_LessThanCap_6UnderlyingDecimals() public {
+    uint64 cap = 10000; // supply cap of 10,000
+    uint256 mintAmount = 9999e6; // mint of 9,999
+
+    // Set a native supply cap for cToken3
+    // This should be ignored since we're using Prudentia
+    ICErc20[] memory cTokens = new ICErc20[](1);
+    cTokens[0] = cToken3;
+    uint256[] memory supplyCaps = new uint256[](1);
+    supplyCaps[0] = 1;
+    comptroller._setMarketSupplyCaps(cTokens, supplyCaps);
+
+    // Enable Prudentia
+    ComptrollerPrudentiaCapsExt(address(comptroller))._setSupplyCapConfig(
+      ComptrollerV4Storage.PrudentiaConfig({ controller: address(prudentia), offset: 0 })
+    );
+
+    // Set Prudentia supply cap for cToken3
+    prudentia.stubPush(cToken3, cap);
+
+    // Mint
+    underlyingToken3.approve(address(cToken3), type(uint256).max); // Approve max
+    cToken3.mint(mintAmount); // Mint
+
+    assertEq(underlyingToken3.balanceOf(address(cToken3)), mintAmount);
+  }
+
+  function test_Prudentia_Supply_GreaterThanCap_6UnderlyingDecimals() public {
+    uint64 cap = 10000; // supply cap of 10,000
+    uint256 mintAmount = 10001e6; // mint of 10,001
+
+    // Set a native supply cap for cToken3
+    // This should be ignored since we're using Prudentia
+    ICErc20[] memory cTokens = new ICErc20[](1);
+    cTokens[0] = cToken3;
+    uint256[] memory supplyCaps = new uint256[](1);
+    supplyCaps[0] = 1;
+    comptroller._setMarketSupplyCaps(cTokens, supplyCaps);
+
+    // Enable Prudentia
+    ComptrollerPrudentiaCapsExt(address(comptroller))._setSupplyCapConfig(
+      ComptrollerV4Storage.PrudentiaConfig({ controller: address(prudentia), offset: 0 })
+    );
+
+    // Set Prudentia supply cap for cToken3
+    prudentia.stubPush(cToken3, cap);
+
+    // Mint
+    underlyingToken3.approve(address(cToken3), type(uint256).max); // Approve max
+    vm.expectRevert();
+    cToken3.mint(mintAmount); // FAIL: Mint
+
+    assertEq(underlyingToken3.balanceOf(address(cToken3)), 0);
+  }
+
+  function test_Prudentia_Borrow_LessThanCap_6UnderlyingDecimals() public {
+    uint64 cap = 1000; // borrow cap of 1,000
+    uint256 borrowAmount = 999e6; // borrow of 999
+
+    // Set a native borrow cap for cToken3
+    // This should be ignored since we're using Prudentia
+    ICErc20[] memory cTokens = new ICErc20[](1);
+    cTokens[0] = cToken3;
+    uint256[] memory borrowCaps = new uint256[](1);
+    borrowCaps[0] = 1;
+    comptroller._setMarketBorrowCaps(cTokens, borrowCaps);
+
+    // Mint cToken1 and cToken3
+    underlyingToken1.approve(address(cToken1), type(uint256).max); // Approve max
+    cToken1.mint(10000e18); // Mint 10,000 cToken1
+    underlyingToken3.approve(address(cToken3), type(uint256).max); // Approve max
+    cToken3.mint(10000e6); // Mint 10,000 cToken3
+
+    // Use cToken1 as collateral
+    address[] memory enterMarkets = new address[](1);
+    enterMarkets[0] = address(cToken1);
+    comptroller.enterMarkets(enterMarkets);
+
+    // Enable Prudentia
+    ComptrollerPrudentiaCapsExt(address(comptroller))._setBorrowCapConfig(
+      ComptrollerV4Storage.PrudentiaConfig({ controller: address(prudentia), offset: 0 })
+    );
+
+    // Set Prudentia borrow cap for cToken3
+    prudentia.stubPush(cToken3, cap);
+
+    // Borrow
+    cToken3.borrow(borrowAmount); // Borrow
+
+    assertEq(underlyingToken3.balanceOf(address(cToken3)), 10000e6 - borrowAmount);
+  }
+
+  function test_Prudentia_Borrow_Unrestricted_6UnderlyingDecimals() public {
+    uint64 cap = 0; // Unrestricted borrow cap
+    uint256 borrowAmount = 999e6; // borrow of 999
+
+    // Set a native borrow cap for cToken3
+    // This should be ignored since we're using Prudentia
+    ICErc20[] memory cTokens = new ICErc20[](1);
+    cTokens[0] = cToken3;
+    uint256[] memory borrowCaps = new uint256[](1);
+    borrowCaps[0] = 1;
+    comptroller._setMarketBorrowCaps(cTokens, borrowCaps);
+
+    // Mint cToken1 and cToken3
+    underlyingToken1.approve(address(cToken1), type(uint256).max); // Approve max
+    cToken1.mint(10000e18); // Mint 10,000 cToken1
+    underlyingToken3.approve(address(cToken3), type(uint256).max); // Approve max
+    cToken3.mint(10000e6); // Mint 10,000 cToken3
+
+    // Use cToken1 as collateral
+    address[] memory enterMarkets = new address[](1);
+    enterMarkets[0] = address(cToken1);
+    comptroller.enterMarkets(enterMarkets);
+
+    // Enable Prudentia
+    ComptrollerPrudentiaCapsExt(address(comptroller))._setBorrowCapConfig(
+      ComptrollerV4Storage.PrudentiaConfig({ controller: address(prudentia), offset: 0 })
+    );
+
+    // Set Prudentia borrow cap for cToken3
+    prudentia.stubPush(cToken3, cap);
+
+    // Borrow
+    cToken3.borrow(borrowAmount); // Borrow
+
+    assertEq(underlyingToken3.balanceOf(address(cToken3)), 10000e6 - borrowAmount);
+  }
+
+  function test_Prudentia_Borrow_GreaterThanCap_6UnderlyingDecimals() public {
+    uint64 cap = 1000; // borrow cap of 1,000
+    uint256 borrowAmount = 1001e6; // borrow of 1,001
+
+    // Set a native borrow cap for cToken3
+    // This should be ignored since we're using Prudentia
+    ICErc20[] memory cTokens = new ICErc20[](1);
+    cTokens[0] = cToken3;
+    uint256[] memory borrowCaps = new uint256[](1);
+    borrowCaps[0] = 1;
+    comptroller._setMarketBorrowCaps(cTokens, borrowCaps);
+
+    // Mint cToken1 and cToken3
+    underlyingToken1.approve(address(cToken1), type(uint256).max); // Approve max
+    cToken1.mint(10000e18); // Mint 10,000 cToken1
+    underlyingToken3.approve(address(cToken3), type(uint256).max); // Approve max
+    cToken3.mint(10000e6); // Mint 10,000 cToken3
+
+    // Use cToken1 as collateral
+    address[] memory enterMarkets = new address[](1);
+    enterMarkets[0] = address(cToken1);
+    comptroller.enterMarkets(enterMarkets);
+
+    // Enable Prudentia
+    ComptrollerPrudentiaCapsExt(address(comptroller))._setBorrowCapConfig(
+      ComptrollerV4Storage.PrudentiaConfig({ controller: address(prudentia), offset: 0 })
+    );
+
+    // Set Prudentia borrow cap for cToken3
+    prudentia.stubPush(cToken3, cap);
+
+    // Borrow
+    vm.expectRevert();
+    cToken3.borrow(borrowAmount); // FAIL: Borrow
+
+    assertEq(underlyingToken3.balanceOf(address(cToken3)), 10000e6);
   }
 
   /*
