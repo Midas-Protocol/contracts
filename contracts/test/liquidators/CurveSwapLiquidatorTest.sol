@@ -99,6 +99,25 @@ contract CurveSwapLiquidatorTest is BaseTest {
     assertApproxEqAbs(outputAmount, inputAmount, 1e5, "output amount does not match");
   }
 
+  function testSwapCurveV2EspBnbxBnb() public fork(BSC_MAINNET) {
+    address bnbxAddress = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
+    address wbnb = ap.getAddress("wtoken");
+    address bnbxWhale = 0x4eE98B27eeF58844E460922eC9Da7C05D32F284A;
+
+    IERC20Upgradeable inputToken = IERC20Upgradeable(bnbxAddress);
+    uint256 inputAmount = 3e18;
+
+    bytes memory data = abi.encode(curveV1Oracle, curveV2Oracle, bnbxAddress, wbnb, wbnb);
+
+    vm.prank(bnbxWhale);
+    inputToken.transfer(address(csl), inputAmount);
+
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = csl.redeem(inputToken, inputAmount, data);
+
+    assertEq(address(outputToken), wbnb, "output token does not match");
+    assertApproxEqRel(outputAmount, inputAmount, 8e16, "output amount does not match");
+  }
+
   function testRedeemMAI() public fork(BSC_MAINNET) {
     ICurvePool curvePool = ICurvePool(poolAddress);
 
