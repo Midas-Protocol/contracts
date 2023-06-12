@@ -80,6 +80,10 @@ contract CurveSwapLiquidatorTest is BaseTest {
     assertApproxEqAbs(xcForSt, stDotOutput, uint256(10), "output amount does not match");
   }
 
+  function testSwapDaiUsdc() public fork(POLYGON_MAINNET) {
+
+  }
+
   function testRedeemMAI() public fork(BSC_MAINNET) {
     ICurvePool curvePool = ICurvePool(poolAddress);
 

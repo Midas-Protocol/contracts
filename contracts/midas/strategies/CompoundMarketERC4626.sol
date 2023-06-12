@@ -76,6 +76,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     return market.supplyRatePerBlockAfterDeposit(amount) * blocksPerYear;
   }
 
+  // TODO rewards APY?
   function aprAfterWithdraw(uint256 amount) public view override returns (uint256) {
     return market.supplyRatePerBlockAfterWithdraw(amount) * blocksPerYear;
   }
