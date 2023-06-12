@@ -25,35 +25,59 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     linearPoolLiquidator = new BalancerLinearPoolTokenLiquidator();
   }
 
-  function testRedeem(
+  function testRedeemLpToken(
     address whaleAddress,
-    address lpTokenAddress,
+    address inputTokenAddress,
     address outputTokenAddress
   ) internal {
-    return testRedeem(lpTokenLiquidator, 1e18, whaleAddress, lpTokenAddress, outputTokenAddress);
+    return testRedeem(lpTokenLiquidator, 1e18, whaleAddress, inputTokenAddress, outputTokenAddress);
   }
 
   function testRedeem(
     IRedemptionStrategy liquidator,
     uint256 amount,
     address whaleAddress,
-    address lpTokenAddress,
+    address inputTokenAddress,
     address outputTokenAddress
   ) internal {
-    IERC20Upgradeable lpToken = IERC20Upgradeable(lpTokenAddress);
+    IERC20Upgradeable inputToken = IERC20Upgradeable(inputTokenAddress);
     IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddress);
 
     vm.prank(whaleAddress);
-    lpToken.transfer(address(liquidator), amount);
+    inputToken.transfer(address(liquidator), amount);
 
     uint256 balanceBefore = outputToken.balanceOf(address(liquidator));
 
     bytes memory data = abi.encode(address(outputToken));
-    liquidator.redeem(lpToken, amount, data);
+    liquidator.redeem(inputToken, amount, data);
 
     uint256 balanceAfter = outputToken.balanceOf(address(liquidator));
 
-    assertGt(balanceAfter - balanceBefore, 0, "!redeem lp token");
+    assertGt(balanceAfter - balanceBefore, 0, "!redeem input token");
+  }
+
+  function testSwap(
+    IRedemptionStrategy liquidator,
+    uint256 amount,
+    address whaleAddress,
+    address inputTokenAddress,
+    address outputTokenAddress,
+    address pool
+  ) internal {
+    IERC20Upgradeable inputToken = IERC20Upgradeable(inputTokenAddress);
+    IERC20Upgradeable outputToken = IERC20Upgradeable(outputTokenAddress);
+
+    vm.prank(whaleAddress);
+    inputToken.transfer(address(liquidator), amount);
+
+    uint256 balanceBefore = outputToken.balanceOf(address(liquidator));
+
+    bytes memory data = abi.encode(outputTokenAddress, pool);
+    liquidator.redeem(inputToken, amount, data);
+
+    uint256 balanceAfter = outputToken.balanceOf(address(liquidator));
+
+    assertGt(balanceAfter - balanceBefore, 0, "!swap input token");
   }
 
   function testRedeemLinearPool(
@@ -84,7 +108,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpTokenWhale = 0xbB60ADbe38B4e6ab7fb0f9546C2C1b665B86af11;
     address outputTokenAddress = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128; // PAR
 
-    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+    testRedeemLpToken(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
   function testWmaticStmaticLPLiquidatorRedeem() public fork(POLYGON_MAINNET) {
@@ -92,7 +116,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
-    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+    testRedeemLpToken(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
   function testWmaticMaticXLPLiquidatorRedeem() public fork(POLYGON_MAINNET) {
@@ -100,7 +124,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpTokenWhale = 0x48534d027f8962692122dB440714fFE88Ab1fA85;
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
-    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+    testRedeemLpToken(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
   function testJbrlBrzLiquidatorRedeem() public fork(POLYGON_MAINNET) {
@@ -108,7 +132,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // Balancer V2
     address outputTokenAddress = 0xf2f77FE7b8e66571E0fca7104c4d670BF1C8d722; // jBRL
 
-    testRedeem(lpTokenWhale, lpToken, outputTokenAddress);
+    testRedeemLpToken(lpTokenWhale, lpToken, outputTokenAddress);
   }
 
   function testBoostedAaveRedeem() public fork(POLYGON_MAINNET) {
@@ -156,5 +180,15 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address outputTokenAddress = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; // USDC
 
     testRedeem(swapLiquidator, amount, lpTokenWhale, lpToken, outputTokenAddress);
+  }
+
+  function testSwapWmaticStMatic() public fork(POLYGON_MAINNET) {
+    uint256 amount = 1000e18;
+    address pool = 0x8159462d255C1D24915CB51ec361F700174cD994; // wmatic-stmatic
+    address inputToken = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // wmatic
+    address inputTokenWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97; // aave wmatic
+    address outputToken = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4; // stmatic
+
+    testSwap(swapLiquidator, amount, inputTokenWhale, inputToken, outputToken, pool);
   }
 }
