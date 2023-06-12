@@ -17,34 +17,49 @@ contract CurveV2PriceOracleTest is BaseTest {
   address epsBnbxBnb_pool = 0xFD4afeAc39DA03a05f61844095A75c4fB7D766DA;
   address epsBusdBtc_pool = 0xeF8A7e653F18CFD4b92a0f5b644393A4C635f19f;
 
+  address eusd = 0x97de57eC338AB5d51557DA3434828C5DbFaDA371; // 18 decimals
+  address usdc = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; // 6 decimals
+  uint256 usdcPriceEth = 0.00057716e18;
+  address usdcEusdPool = 0x880F2fB3704f1875361DE6ee59629c6c6497a5E3;
+
   MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {
-    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    busd = ap.getAddress("bUSD");
-    wbtc = ap.getAddress("wBTCToken");
+    address[] memory tokens;
+    address[] memory pools;
 
-    address[] memory tokens = new address[](3);
-    tokens[0] = Bnbx;
-    tokens[1] = wbtc;
-    tokens[2] = busd;
+    if (block.chainid == ETHEREUM_MAINNET) {
+      tokens = new address[](1);
+      tokens[0] = eusd;
 
-    address[] memory pools = new address[](3);
-    pools[0] = epsBnbxBnb_pool;
-    pools[1] = epsBusdBtc_pool;
-    pools[2] = epsBusdBtc_pool;
+      pools = new address[](1);
+      pools[0] = usdcEusdPool;
+    } else {
+      mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+      busd = ap.getAddress("bUSD");
+      wbtc = ap.getAddress("wBTCToken");
+
+      tokens = new address[](3);
+      tokens[0] = Bnbx;
+      tokens[1] = wbtc;
+      tokens[2] = busd;
+
+      pools = new address[](3);
+      pools[0] = epsBnbxBnb_pool;
+      pools[1] = epsBusdBtc_pool;
+      pools[2] = epsBusdBtc_pool;
+    }
 
     oracle = new CurveV2PriceOracle();
     oracle.initialize(tokens, pools);
-    emit log_named_address("wbtc", wbtc);
   }
 
   function testCurveV2PriceOracleBNBxBNB() public fork(BSC_MAINNET) {
     vm.prank(address(mpo));
     uint256 bnbx_mpo_price = mpo.price(Bnbx);
     vm.startPrank(address(mpo));
-    uint256 price = oracle.price(Bnbx);
-    assertApproxEqRel(bnbx_mpo_price, price, 5e15); // 0.5%
+    uint256 priceBnbx = oracle.price(Bnbx);
+    assertApproxEqRel(bnbx_mpo_price, priceBnbx, 5e15); // 0.5%
     vm.stopPrank();
   }
 
@@ -58,5 +73,17 @@ contract CurveV2PriceOracleTest is BaseTest {
     assertApproxEqRel(wbtc_mpo_price, priceWbtc, 5e15); // 1%
     assertApproxEqRel(busd_mpo_price, priceBusd, 5e15); // 1%
     vm.stopPrank();
+  }
+
+  function testCurveV2PriceOracleEUsdUsdc() public fork(ETHEREUM_MAINNET) {
+    // TODO use the MPO when deployed
+    // testing the decimals scaling, eusd has 18, usdc has 6 decimals
+    uint256 priceEusd = oracle.price(eusd);
+    assertApproxEqRel(usdcPriceEth, priceEusd, 1e17); // 10%
+  }
+
+  function price(address asset) public view returns (uint256) {
+    if (asset == usdc) return usdcPriceEth;
+    else return 0;
   }
 }

@@ -32,6 +32,12 @@ contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     __SafeOwnable_init(msg.sender);
 
     for (uint256 i = 0; i < _pools.length; i++) {
+      try ICurvePool(_pools[i]).coins(2) returns (address) {
+        revert("!only two token pools");
+      } catch {
+        // ignore error
+      }
+
       poolFor[_tokens[i]] = _pools[i];
     }
   }
@@ -127,6 +133,12 @@ contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
    * @param _pool Pool address.
    */
   function registerPool(address _token, address _pool) external onlyOwner {
+    try ICurvePool(_pool).coins(2) returns (address) {
+      revert("!only two token pools");
+    } catch {
+      // ignore error
+    }
+
     address pool = poolFor[_token];
     require(pool == address(0), "This LP token is already registered.");
     poolFor[_token] = _pool;
