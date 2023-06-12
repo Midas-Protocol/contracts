@@ -29,6 +29,7 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
         CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle,
         address inputTokenAddress,
         address outputTokenAddress,
+
       ) = abi.decode(
           strategyData,
           (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address, address)
