@@ -124,6 +124,7 @@ contract LeveredPositionFactoryExtension is
     returns (uint256 slippage)
   {
     slippage = conversionSlippage[inputToken][outputToken];
+    // TODO slippage == 0 should be allowed
     if (slippage == 0) return MAX_SLIPPAGE;
   }
 
