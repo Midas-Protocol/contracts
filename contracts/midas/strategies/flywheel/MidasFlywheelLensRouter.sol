@@ -160,12 +160,37 @@ contract MidasFlywheelLensRouter {
     }
   }
 
+  function getUnclaimedRewardsForPool(
+    address user,
+    IComptroller comptroller,
+    bool accrue
+  ) public returns (address[] memory rewardTokens, uint256[] memory rewards) {
+    ICErc20[] memory cerc20s = comptroller.getAllMarkets();
+    ERC20[] memory markets = new ERC20[](cerc20s.length);
+    address[] memory flywheelAddresses = comptroller.getAccruingFlywheels();
+    MidasFlywheelCore[] memory flywheels = new MidasFlywheelCore[](flywheelAddresses.length);
+    rewardTokens = new address[](flywheelAddresses.length);
+    bool[] memory shouldAccrue = new bool[](flywheelAddresses.length);
+
+    for (uint256 j = 0; j < flywheelAddresses.length; j++) {
+      flywheels[j] = MidasFlywheelCore(flywheelAddresses[j]);
+      rewardTokens[j] = address(flywheels[j].rewardToken());
+      shouldAccrue[j] = accrue;
+    }
+
+    for (uint256 j = 0; j < cerc20s.length; j++) {
+      markets[j] = ERC20(address(cerc20s[j]));
+    }
+
+    rewards = getUnclaimedRewardsByMarkets(user, markets, flywheels, shouldAccrue);
+  }
+
   function getUnclaimedRewardsByMarkets(
     address user,
-    ERC20[] calldata markets,
-    MidasFlywheelCore[] calldata flywheels,
-    bool[] calldata accrue
-  ) external returns (uint256[] memory rewards) {
+    ERC20[] memory markets,
+    MidasFlywheelCore[] memory flywheels,
+    bool[] memory accrue
+  ) public returns (uint256[] memory rewards) {
     rewards = new uint256[](flywheels.length);
 
     for (uint256 i = 0; i < flywheels.length; i++) {
@@ -184,13 +209,6 @@ contract MidasFlywheelLensRouter {
       }
 
       flywheels[i].claimRewards(user);
-    }
-  }
-
-  // @dev this function is NOT a lens fn - it is meant to be called by the user on-chain
-  function claimRewardsFromFlywheels(MidasFlywheelCore[] calldata flywheels) external {
-    for (uint256 i = 0; i < flywheels.length; i++) {
-      flywheels[i].claimRewards(msg.sender);
     }
   }
 }

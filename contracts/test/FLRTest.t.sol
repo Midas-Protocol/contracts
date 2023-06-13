@@ -16,7 +16,7 @@ import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
 import { CErc20 } from "../compound/CErc20.sol";
-import { MidasFlywheelLensRouter, IComptroller, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, MidasFlywheelCore, IComptroller, ICErc20, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 
@@ -163,12 +163,11 @@ contract FLRTest is BaseTest {
   }
 
   function testBscLensRouter() public fork(BSC_MAINNET) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xb4c8353412633B779893Bb728435930b7d3610C8);
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
+    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+    MidasFlywheelLensRouter router = new MidasFlywheelLensRouter();
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));
-    }
+    router.getUnclaimedRewardsForPool(user, pool, true);
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
