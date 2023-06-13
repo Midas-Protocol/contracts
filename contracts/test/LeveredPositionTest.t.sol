@@ -221,16 +221,16 @@ abstract contract LeveredPositionTest is MarketsTest {
     vm.stopPrank();
   }
 
-  function testOpenLeveredPosition() public whenForking {
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
+  function testOpenLeveredPosition() public virtual whenForking {
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e15, "initial leverage ratio should be 1.0 (1e18)");
   }
 
   function testAnyLeverageRatio(uint64 ratioDiff) public whenForking {
     // ratioDiff is between 0 and 2^64 ~= 18.446e18
     uint256 minRatio = position.getMinLeverageRatio();
     emit log_named_uint("min ratio", minRatio);
-    vm.assume(minRatio < 1e18 + ratioDiff);
     uint256 targetLeverageRatio = 1e18 + uint256(ratioDiff);
+    vm.assume(minRatio < targetLeverageRatio);
 
     uint256 maxRatio = position.getMaxLeverageRatio();
     emit log_named_uint("max lev ratio", maxRatio);
@@ -238,7 +238,7 @@ abstract contract LeveredPositionTest is MarketsTest {
 
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
     emit log_named_uint("base collateral", position.baseCollateral());
-    assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e4, "target ratio not matching");
+    assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e15, "target ratio not matching");
   }
 
   function testMinMaxLeverageRatio() public whenForking {
@@ -266,43 +266,45 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 minRatio = position.getMinLeverageRatio();
     emit log_named_uint("min ratio", minRatio);
     position.adjustLeverageRatio(maxRatio);
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e4, "target max ratio not matching");
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e15, "target max ratio not matching");
   }
 
   function testRewardsAccruedClaimed() public whenForking {
-    //position.adjustLeverageRatio(position.getMaxLeverageRatio());
+    address[] memory flywheels = position.pool().getRewardsDistributors();
+    if (flywheels.length > 0) {
+      vm.warp(block.timestamp + 60 * 60 * 24);
+      vm.roll(block.number + 10000);
 
-    vm.warp(block.timestamp + 60 * 60 * 24);
-    vm.roll(block.number + 10000);
+      (ERC20[] memory rewardTokens, uint256[] memory amounts) = position.getAccruedRewards();
 
-    (ERC20[] memory rewardTokens, uint256[] memory amounts) = position.getAccruedRewards();
-
-    ERC20 rewardToken;
-    bool atLeastOneAccrued = false;
-    for (uint256 i = 0; i < amounts.length; i++) {
-      atLeastOneAccrued = amounts[i] > 0;
-      if (atLeastOneAccrued) {
-        rewardToken = rewardTokens[i];
-        emit log_named_address("accrued from reward token", address(rewardTokens[i]));
-        break;
+      ERC20 rewardToken;
+      bool atLeastOneAccrued = false;
+      for (uint256 i = 0; i < amounts.length; i++) {
+        atLeastOneAccrued = amounts[i] > 0;
+        if (atLeastOneAccrued) {
+          rewardToken = rewardTokens[i];
+          emit log_named_address("accrued from reward token", address(rewardTokens[i]));
+          break;
+        }
       }
+
+      assertEq(atLeastOneAccrued, true, "!should have accrued at least one reward token");
+
+      if (atLeastOneAccrued) {
+        uint256 rewardsBalanceBefore = rewardToken.balanceOf(address(this));
+        position.claimRewards();
+        uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
+        assertGt(rewardsBalanceAfter - rewardsBalanceBefore, 0, "should have claimed some rewards");
+      }
+    } else {
+      emit log("no flywheels/rewards for the pair pool");
     }
-
-    assertEq(atLeastOneAccrued, true, "!should have accrued at least one reward token");
-
-    uint256 rewardsBalanceBefore = rewardToken.balanceOf(address(this));
-
-    position.claimRewards();
-
-    uint256 rewardsBalanceAfter = rewardToken.balanceOf(address(this));
-
-    assertGt(rewardsBalanceAfter - rewardsBalanceBefore, 0, "should have claimed some rewards");
   }
 
   function testLeverMaxDown() public whenForking {
     uint256 maxRatio = position.getMaxLeverageRatio();
     uint256 leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
-    assertApproxEqAbs(leverageRatioRealized, maxRatio, 1e4, "target ratio not matching");
+    assertApproxEqAbs(leverageRatioRealized, maxRatio, 1e15, "target ratio not matching");
 
     uint256 minRatio = position.getMinLeverageRatio();
     emit log_named_uint("min ratio", minRatio);
@@ -313,7 +315,7 @@ abstract contract LeveredPositionTest is MarketsTest {
       uint256 targetLeverDownRatio = leverageRatioRealized - ratioDiffStep;
       if (targetLeverDownRatio - 1e18 < minRatio) targetLeverDownRatio = 1e18;
       leverageRatioRealized = position.adjustLeverageRatio(targetLeverDownRatio);
-      assertApproxEqAbs(leverageRatioRealized, targetLeverDownRatio, 1e4, "target lever down ratio not matching");
+      assertApproxEqAbs(leverageRatioRealized, targetLeverDownRatio, 1e15, "target lever down ratio not matching");
     }
 
     uint256 withdrawAmount = position.closePosition();
@@ -564,8 +566,8 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
     );
   }
 
-  function testOpenLeveredPositionAtRatio() public whenForking {
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1.2e18, 1e4, "initial leverage ratio should be 1.0 (1e18)");
+  function testOpenLeveredPosition() public override whenForking {
+    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1.2e18, 1e15, "initial leverage ratio should be 1.2");
   }
 }
 
