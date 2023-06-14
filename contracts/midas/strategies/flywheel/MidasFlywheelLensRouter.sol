@@ -256,13 +256,31 @@ contract MidasFlywheelLensRouter {
     }
 
     rewardTokens = new address[](rewardTokensCounter);
+
+    uint256 uniqueRewardTokensCounter = 0;
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
       address[] memory fws = pool.getRewardsDistributors();
 
       for (uint256 j = 0; j < fws.length; j++) {
-        rewardTokens[--rewardTokensCounter] = address(MidasFlywheelCore(fws[j]).rewardToken());
+        address rwToken = address(MidasFlywheelCore(fws[j]).rewardToken());
+        bool added;
+        for (uint256 k = 0; k < rewardTokens.length; k++) {
+          if (rwToken == rewardTokens[k]) {
+            added = true;
+            break;
+          } else if (rwToken == address(0)) {
+            added = false;
+            break;
+          }
+        }
+        if (!added) rewardTokens[uniqueRewardTokensCounter++] = rwToken;
       }
+    }
+
+    address[] memory uniqueRewardTokens = new address[](uniqueRewardTokensCounter);
+    for (uint256 i = 0; i < uniqueRewardTokensCounter; i++) {
+      uniqueRewardTokens[i] = rewardTokens[i];
     }
   }
 }
