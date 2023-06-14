@@ -16,7 +16,6 @@ interface IPriceOracle {
 }
 
 contract MidasFlywheelLensRouter {
-
   FusePoolDirectory public fpd;
 
   constructor(FusePoolDirectory _fpd) {
@@ -149,7 +148,14 @@ contract MidasFlywheelLensRouter {
     ERC20 market,
     MidasFlywheelCore[] calldata flywheels,
     bool[] calldata accrue
-  ) external returns (MidasFlywheelCore[] memory, address[] memory rewardTokens, uint256[] memory rewards) {
+  )
+    external
+    returns (
+      MidasFlywheelCore[] memory,
+      address[] memory rewardTokens,
+      uint256[] memory rewards
+    )
+  {
     uint256 size = flywheels.length;
     rewards = new uint256[](size);
     rewardTokens = new address[](size);
@@ -174,7 +180,11 @@ contract MidasFlywheelLensRouter {
 
   function getUnclaimedRewardsForPool(address user, IComptroller comptroller)
     public
-    returns (MidasFlywheelCore[] memory, address[] memory, uint256[] memory)
+    returns (
+      MidasFlywheelCore[] memory,
+      address[] memory,
+      uint256[] memory
+    )
   {
     ICErc20[] memory cerc20s = comptroller.getAllMarkets();
     ERC20[] memory markets = new ERC20[](cerc20s.length);
@@ -201,7 +211,14 @@ contract MidasFlywheelLensRouter {
     ERC20[] memory markets,
     MidasFlywheelCore[] memory flywheels,
     bool[] memory accrue
-  ) public returns (MidasFlywheelCore[] memory, address[] memory rewardTokens, uint256[] memory rewards) {
+  )
+    public
+    returns (
+      MidasFlywheelCore[] memory,
+      address[] memory rewardTokens,
+      uint256[] memory rewards
+    )
+  {
     rewards = new uint256[](flywheels.length);
     rewardTokens = new address[](flywheels.length);
 
