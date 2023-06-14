@@ -190,12 +190,10 @@ contract MidasFlywheelLensRouter {
     ERC20[] memory markets = new ERC20[](cerc20s.length);
     address[] memory flywheelAddresses = comptroller.getAccruingFlywheels();
     MidasFlywheelCore[] memory flywheels = new MidasFlywheelCore[](flywheelAddresses.length);
-    address[] memory rewardTokens = new address[](flywheelAddresses.length);
     bool[] memory accrue = new bool[](flywheelAddresses.length);
 
     for (uint256 j = 0; j < flywheelAddresses.length; j++) {
       flywheels[j] = MidasFlywheelCore(flywheelAddresses[j]);
-      rewardTokens[j] = address(flywheels[j].rewardToken());
       accrue[j] = true;
     }
 
