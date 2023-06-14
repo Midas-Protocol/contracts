@@ -11,7 +11,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract LeveredPositionFactoryStorage is SafeOwnable {
+abstract contract LeveredPositionFactoryStorage is SafeOwnable {
   EnumerableSet.AddressSet internal accountsWithOpenPositions;
   mapping(address => EnumerableSet.AddressSet) internal positionsByAccount;
   EnumerableSet.AddressSet internal collateralMarkets;
