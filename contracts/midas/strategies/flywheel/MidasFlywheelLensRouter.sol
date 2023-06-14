@@ -7,6 +7,7 @@ import { MidasFlywheelCore } from "./MidasFlywheelCore.sol";
 import { IComptroller } from "../../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
+import { FusePoolDirectory } from "../../../FusePoolDirectory.sol";
 
 interface IPriceOracle {
   function getUnderlyingPrice(ERC20 cToken) external view returns (uint256);
@@ -15,6 +16,13 @@ interface IPriceOracle {
 }
 
 contract MidasFlywheelLensRouter {
+
+  FusePoolDirectory public fpd;
+
+  constructor(FusePoolDirectory _fpd) {
+    fpd = _fpd;
+  }
+
   struct MarketRewardsInfo {
     /// @dev comptroller oracle price of market underlying
     uint256 underlyingPrice;
@@ -141,9 +149,10 @@ contract MidasFlywheelLensRouter {
     ERC20 market,
     MidasFlywheelCore[] calldata flywheels,
     bool[] calldata accrue
-  ) external returns (uint256[] memory rewards) {
+  ) external returns (MidasFlywheelCore[] memory, address[] memory rewardTokens, uint256[] memory rewards) {
     uint256 size = flywheels.length;
     rewards = new uint256[](size);
+    rewardTokens = new address[](size);
 
     for (uint256 i = 0; i < size; i++) {
       uint256 newRewards;
@@ -157,18 +166,21 @@ contract MidasFlywheelLensRouter {
       rewards[i] = rewards[i] >= newRewards ? rewards[i] : newRewards;
 
       flywheels[i].claimRewards(user);
+      rewardTokens[i] = address(flywheels[i].rewardToken());
     }
+
+    return (flywheels, rewardTokens, rewards);
   }
 
   function getUnclaimedRewardsForPool(address user, IComptroller comptroller)
     public
-    returns (address[] memory rewardTokens, uint256[] memory rewards)
+    returns (MidasFlywheelCore[] memory, address[] memory, uint256[] memory)
   {
     ICErc20[] memory cerc20s = comptroller.getAllMarkets();
     ERC20[] memory markets = new ERC20[](cerc20s.length);
     address[] memory flywheelAddresses = comptroller.getAccruingFlywheels();
     MidasFlywheelCore[] memory flywheels = new MidasFlywheelCore[](flywheelAddresses.length);
-    rewardTokens = new address[](flywheelAddresses.length);
+    address[] memory rewardTokens = new address[](flywheelAddresses.length);
     bool[] memory accrue = new bool[](flywheelAddresses.length);
 
     for (uint256 j = 0; j < flywheelAddresses.length; j++) {
@@ -181,7 +193,7 @@ contract MidasFlywheelLensRouter {
       markets[j] = ERC20(address(cerc20s[j]));
     }
 
-    rewards = getUnclaimedRewardsByMarkets(user, markets, flywheels, accrue);
+    return getUnclaimedRewardsByMarkets(user, markets, flywheels, accrue);
   }
 
   function getUnclaimedRewardsByMarkets(
@@ -189,8 +201,9 @@ contract MidasFlywheelLensRouter {
     ERC20[] memory markets,
     MidasFlywheelCore[] memory flywheels,
     bool[] memory accrue
-  ) public returns (uint256[] memory rewards) {
+  ) public returns (MidasFlywheelCore[] memory, address[] memory rewardTokens, uint256[] memory rewards) {
     rewards = new uint256[](flywheels.length);
+    rewardTokens = new address[](flywheels.length);
 
     for (uint256 i = 0; i < flywheels.length; i++) {
       for (uint256 j = 0; j < markets.length; j++) {
@@ -208,6 +221,31 @@ contract MidasFlywheelLensRouter {
       }
 
       flywheels[i].claimRewards(user);
+      rewardTokens[i] = address(flywheels[i].rewardToken());
+    }
+
+    return (flywheels, rewardTokens, rewards);
+  }
+
+  function getAllRewardTokens() public view returns (address[] memory rewardTokens) {
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    uint256 rewardTokensCounter;
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      address[] memory fws = pool.getRewardsDistributors();
+
+      rewardTokensCounter += fws.length;
+    }
+
+    rewardTokens = new address[](rewardTokensCounter);
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller pool = IComptroller(pools[i].comptroller);
+      address[] memory fws = pool.getRewardsDistributors();
+
+      for (uint256 j = 0; j < fws.length; j++) {
+        rewardTokens[--rewardTokensCounter] = address(MidasFlywheelCore(fws[j]).rewardToken());
+      }
     }
   }
 }
