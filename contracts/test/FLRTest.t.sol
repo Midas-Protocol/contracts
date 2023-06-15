@@ -30,8 +30,8 @@ contract FLRTest is BaseTest {
   FusePoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    lensRouter = new MidasFlywheelLensRouter();
     fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    lensRouter = new MidasFlywheelLensRouter(fpd);
   }
 
   function setUpFlywheel(
@@ -165,9 +165,9 @@ contract FLRTest is BaseTest {
   function testBscLensRouter() public fork(BSC_MAINNET) {
     IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
     address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
-    MidasFlywheelLensRouter router = new MidasFlywheelLensRouter();
+    MidasFlywheelLensRouter router = new MidasFlywheelLensRouter(fpd);
 
-    router.getUnclaimedRewardsForPool(user, pool);
+    router.getAllRewardTokens();
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {

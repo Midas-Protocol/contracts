@@ -8,7 +8,7 @@ import { AddressesProvider } from "../../midas/AddressesProvider.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract LiquidatorsRegistryStorage is SafeOwnable {
+abstract contract LiquidatorsRegistryStorage is SafeOwnable {
   AddressesProvider public ap;
 
   EnumerableSet.AddressSet internal redemptionStrategies;
