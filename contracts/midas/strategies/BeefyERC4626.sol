@@ -35,6 +35,8 @@ interface IBeefyStrategy {
   function setHarvestOnDeposit(bool) external;
 
   function keeper() external view returns (address);
+
+  function owner() external view returns (address);
 }
 
 /**

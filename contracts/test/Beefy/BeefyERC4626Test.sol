@@ -20,7 +20,7 @@ contract BeefyERC4626Test is AbstractERC4626Test {
     beefyVault = IBeefyVault(_beefyVault);
 
     IBeefyStrategy strategy = IBeefyStrategy(beefyVault.strategy());
-    vm.prank(strategy.keeper());
+    vm.prank(strategy.owner());
     strategy.setHarvestOnDeposit(false);
     underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
     BeefyERC4626 beefyERC4626 = new BeefyERC4626();

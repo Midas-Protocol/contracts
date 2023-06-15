@@ -47,13 +47,14 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     );
     if (inputTokenAddress == xbomb) {
       // burns the xBOMB and returns the underlying BOMB to the liquidator
+      inputToken.approve(address(xbomb), inputAmount);
       IXBomb(xbomb).leave(inputAmount);
 
       outputToken = _outputToken;
       outputAmount = outputToken.balanceOf(address(this));
     } else if (inputTokenAddress == address(bomb)) {
       // mints xBOMB
-      bomb.approve(address(xbomb), inputAmount);
+      inputToken.approve(address(xbomb), inputAmount);
       IXBomb(xbomb).enter(inputAmount);
 
       outputToken = _outputToken;

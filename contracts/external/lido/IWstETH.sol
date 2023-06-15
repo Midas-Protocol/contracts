@@ -22,10 +22,16 @@ interface IWstETH {
   function stETH() external view returns (address);
 
   /**
-   * @notice Get amount of wstETH for a one stETH
+   * @notice Get amount of stETH for a one wstETH
    * @return Amount of stETH for 1 wstETH
    */
   function stEthPerToken() external view returns (uint256);
+
+  /**
+   * @notice Get amount of wstETH for a one stETH
+   * @return Amount of wstETH for a 1 stETH
+   */
+  function tokensPerStEth() external view returns (uint256);
 
   /**
    * @notice Exchanges wstETH to stETH

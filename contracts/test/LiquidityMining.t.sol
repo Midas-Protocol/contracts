@@ -133,7 +133,7 @@ contract LiquidityMiningTest is BaseTest {
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
-    flywheelClaimer = new MidasFlywheelLensRouter();
+    flywheelClaimer = new MidasFlywheelLensRouter(fusePoolDirectory);
 
     flywheel.addStrategyForRewards(ERC20(address(cErc20)));
 

@@ -48,7 +48,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
     }
   }
 
-  function testRedeem() public fork(MOONBEAM_MAINNET) {
+  function testRedeemXcDotStDot() public fork(MOONBEAM_MAINNET) {
     IERC20Upgradeable xcDot = IERC20Upgradeable(xcDotAddress);
 
     ICurvePool curvePool = ICurvePool(xcDotStDotPool);
@@ -78,6 +78,44 @@ contract CurveSwapLiquidatorTest is BaseTest {
     assertEq(address(shouldBeStDot), stDotAddress, "output token does not match");
 
     assertApproxEqAbs(xcForSt, stDotOutput, uint256(10), "output amount does not match");
+  }
+
+  function testSwapCurveV1UsdtUsdc() public fork(ARBITRUM_ONE) {
+    address usdtAddress = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
+    address usdcAddress = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
+    address usdtWhale = 0xB38e8c17e38363aF6EbdCb3dAE12e0243582891D; // binance
+
+    IERC20Upgradeable inputToken = IERC20Upgradeable(usdtAddress);
+    uint256 inputAmount = 150e6;
+
+    bytes memory data = abi.encode(curveV1Oracle, curveV2Oracle, usdtAddress, usdcAddress, ap.getAddress("wtoken"));
+
+    vm.prank(usdtWhale);
+    inputToken.transfer(address(csl), inputAmount);
+
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = csl.redeem(inputToken, inputAmount, data);
+
+    assertEq(address(outputToken), usdcAddress, "output token does not match");
+    assertApproxEqAbs(outputAmount, inputAmount, 1e5, "output amount does not match");
+  }
+
+  function testSwapCurveV2EspBnbxBnb() public fork(BSC_MAINNET) {
+    address bnbxAddress = 0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275;
+    address wbnb = ap.getAddress("wtoken");
+    address bnbxWhale = 0x4eE98B27eeF58844E460922eC9Da7C05D32F284A;
+
+    IERC20Upgradeable inputToken = IERC20Upgradeable(bnbxAddress);
+    uint256 inputAmount = 3e18;
+
+    bytes memory data = abi.encode(curveV1Oracle, curveV2Oracle, bnbxAddress, wbnb, wbnb);
+
+    vm.prank(bnbxWhale);
+    inputToken.transfer(address(csl), inputAmount);
+
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = csl.redeem(inputToken, inputAmount, data);
+
+    assertEq(address(outputToken), wbnb, "output token does not match");
+    assertApproxEqRel(outputAmount, inputAmount, 8e16, "output amount does not match");
   }
 
   function testRedeemMAI() public fork(BSC_MAINNET) {
