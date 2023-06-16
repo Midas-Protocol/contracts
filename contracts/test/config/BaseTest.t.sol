@@ -195,7 +195,7 @@ abstract contract BaseTest is Test {
     }
     if (ap.getAddress("deployer") == address(0)) {
       vm.prank(ap.owner());
-      ap.setAddress("deployer", 0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
+      ap.setAddress("deployer", 0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
     }
   }
 

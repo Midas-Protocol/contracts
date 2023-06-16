@@ -133,7 +133,7 @@ contract LiquidityMiningTest is BaseTest {
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
-    flywheelClaimer = new MidasFlywheelLensRouter();
+    flywheelClaimer = new MidasFlywheelLensRouter(fusePoolDirectory);
 
     flywheel.addStrategyForRewards(ERC20(address(cErc20)));
 
@@ -191,7 +191,7 @@ contract LiquidityMiningTest is BaseTest {
     assertEq(index, 10**rewardDecimal + rewardsPerToken, "!index");
 
     // claim and check user balance
-    flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
+    flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
@@ -207,7 +207,7 @@ contract LiquidityMiningTest is BaseTest {
     uint256 userRewards2 = (10 * (rewardsPerToken2 * cErc20.balanceOf(user))) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
-    flywheelClaimer.getUnclaimedRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
+    flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
 
     emit log_named_uint("userRewards", userRewards);
     emit log_named_uint("userRewards2", userRewards2);

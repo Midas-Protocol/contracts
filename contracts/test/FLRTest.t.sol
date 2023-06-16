@@ -16,7 +16,7 @@ import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
 import { CErc20 } from "../compound/CErc20.sol";
-import { MidasFlywheelLensRouter, IComptroller, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
@@ -31,8 +31,8 @@ contract FLRTest is BaseTest {
   FusePoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    lensRouter = new MidasFlywheelLensRouter();
     fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    lensRouter = new MidasFlywheelLensRouter(fpd);
   }
 
   function setUpFlywheel(
@@ -164,13 +164,11 @@ contract FLRTest is BaseTest {
   }
 
   function testBscLensRouter() public fork(BSC_MAINNET) {
+    IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
     address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+    MidasFlywheelLensRouter router = new MidasFlywheelLensRouter(fpd);
 
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xf16f0E6C3F4ee9B380369Db229C7D826039af3d6);
-    MidasFlywheelCore[] memory fws = new MidasFlywheelCore[](1);
-    fws[0] = MidasFlywheelCore(0xa00775B261B6ACf24b3F692990907abA7E55591a);
-
-    fws[0].rewardsAccrued(user);
+    router.getAllRewardTokens();
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
@@ -195,7 +193,7 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x30a6630101baBE0da765e3Ed8323824d40eD9a42);
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 

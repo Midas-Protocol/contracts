@@ -70,9 +70,6 @@ contract MaxWithdrawTest is WithPool {
     address accountTwo = address(2);
     address accountThree = address(3);
 
-    FusePoolLensSecondary secondary = new FusePoolLensSecondary();
-    secondary.initialize(fusePoolDirectory);
-
     // Account One Supply
     deal(address(vars.bnb), accountOne, 5000000000e18);
     deal(address(vars.bnb), accountThree, 5000000000e18);
