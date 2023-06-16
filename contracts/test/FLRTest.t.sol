@@ -168,7 +168,9 @@ contract FLRTest is BaseTest {
     address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
     MidasFlywheelLensRouter router = new MidasFlywheelLensRouter(fpd);
 
-    router.getAllRewardTokens();
+//    address[] memory allRT = router.getAllRewardTokens();
+//    emit log_named_array("all rt", allRT);
+    router.claimAllRewardTokens(user);
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
