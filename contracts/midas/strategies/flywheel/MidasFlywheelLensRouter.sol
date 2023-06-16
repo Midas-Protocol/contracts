@@ -143,7 +143,7 @@ contract MidasFlywheelLensRouter {
     return apr;
   }
 
-  function getAllRewardTokens() public view returns (address[] memory rewardTokens) {
+  function getAllRewardTokens() public view returns (address[] memory uniqueRewardTokens) {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     uint256 rewardTokensCounter;
@@ -154,7 +154,7 @@ contract MidasFlywheelLensRouter {
       rewardTokensCounter += fws.length;
     }
 
-    rewardTokens = new address[](rewardTokensCounter);
+    address[] memory rewardTokens = new address[](rewardTokensCounter);
 
     uint256 uniqueRewardTokensCounter = 0;
     for (uint256 i = 0; i < pools.length; i++) {
@@ -163,13 +163,12 @@ contract MidasFlywheelLensRouter {
 
       for (uint256 j = 0; j < fws.length; j++) {
         address rwToken = address(MidasFlywheelCore(fws[j]).rewardToken());
+        if (rwToken == address(0)) break;
+
         bool added;
         for (uint256 k = 0; k < rewardTokens.length; k++) {
           if (rwToken == rewardTokens[k]) {
             added = true;
-            break;
-          } else if (rwToken == address(0)) {
-            added = false;
             break;
           }
         }
@@ -177,7 +176,7 @@ contract MidasFlywheelLensRouter {
       }
     }
 
-    address[] memory uniqueRewardTokens = new address[](uniqueRewardTokensCounter);
+    uniqueRewardTokens = new address[](uniqueRewardTokensCounter);
     for (uint256 i = 0; i < uniqueRewardTokensCounter; i++) {
       uniqueRewardTokens[i] = rewardTokens[i];
     }
