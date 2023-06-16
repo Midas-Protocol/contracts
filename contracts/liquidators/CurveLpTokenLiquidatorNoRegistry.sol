@@ -81,27 +81,16 @@ interface Funder {
 }
 
 contract CurveLpTokenWrapper is IRedemptionStrategy {
-
   function redeem(
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
     bytes memory strategyData
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-
-  }
-
-  function swapFor(
-    IERC20Upgradeable inputToken,
-    uint256 inputAmount,
-    IERC20Upgradeable outputToken,
-    uint256 minOutputAmount,
-    bytes memory strategyData
-  ) external {
-    (CurveLpTokenPriceOracleNoRegistry oracle) = abi.decode(
+    (CurveLpTokenPriceOracleNoRegistry oracle, ICurvePool curvePool) = abi.decode(
       strategyData,
-      (CurveLpTokenPriceOracleNoRegistry)
+      (CurveLpTokenPriceOracleNoRegistry, ICurvePool)
     );
-    ICurvePool curvePool = ICurvePool(address(outputToken));
+    outputToken = IERC20Upgradeable(address(curvePool));
 
     uint256[2] memory amounts;
     amounts[0] = inputAmount;

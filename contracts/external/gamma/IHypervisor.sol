@@ -43,4 +43,12 @@ interface IHypervisor is IERC20Upgradeable {
     address from,
     uint256[4] memory minAmounts
   ) external returns (uint256 amount0, uint256 amount1);
+
+  function deposit(
+    uint256 deposit0,
+    uint256 deposit1,
+    address to,
+    address from,
+    uint256[4] memory inMin
+  ) external returns (uint256 shares);
 }
