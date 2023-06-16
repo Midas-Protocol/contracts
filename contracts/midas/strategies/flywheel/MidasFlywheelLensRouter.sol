@@ -183,7 +183,7 @@ contract MidasFlywheelLensRouter {
     }
   }
 
-  function claimAllRewardTokens(address user) external returns(address[] memory, uint256[] memory) {
+  function claimAllRewardTokens(address user) external returns (address[] memory, uint256[] memory) {
     address[] memory rewardTokens = getAllRewardTokens();
     uint256[] memory rewardsClaimedForToken = new uint256[](rewardTokens.length);
 
@@ -196,11 +196,8 @@ contract MidasFlywheelLensRouter {
   }
 
   function claimRewardsOfRewardToken(address user, address rewardToken)
-  public
-  returns (
-    MidasFlywheelCore[] memory flywheels,
-    uint256 rewardsClaimed
-  )
+    public
+    returns (MidasFlywheelCore[] memory flywheels, uint256 rewardsClaimed)
   {
     uint256 balanceBefore = ERC20(rewardToken).balanceOf(user);
     ERC20[] memory markets;
@@ -281,12 +278,12 @@ contract MidasFlywheelLensRouter {
   }
 
   function claimRewardsForPool(address user, IComptroller comptroller)
-  public
-  returns (
-    MidasFlywheelCore[] memory,
-    address[] memory,
-    uint256[] memory
-  )
+    public
+    returns (
+      MidasFlywheelCore[] memory,
+      address[] memory,
+      uint256[] memory
+    )
   {
     ICErc20[] memory cerc20s = comptroller.getAllMarkets();
     ERC20[] memory markets = new ERC20[](cerc20s.length);
