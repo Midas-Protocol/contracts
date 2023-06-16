@@ -34,18 +34,18 @@ contract UniswapV3Liquidator is IRedemptionStrategy {
 
     inputToken.approve(address(swapRouter), inputAmount);
 
-    ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams(
-      address(inputToken),
-      _outputToken,
-      fee,
-      address(this),
-      block.timestamp,
-      inputAmount,
-      0,
-      0
+    outputAmount = swapRouter.exactInputSingle(
+      ISwapRouter.ExactInputSingleParams(
+        address(inputToken),
+        _outputToken,
+        fee,
+        address(this),
+        block.timestamp,
+        inputAmount,
+        0,
+        0
+      )
     );
-
-    outputAmount = swapRouter.exactInputSingle(params);
   }
 
   function name() public pure virtual override returns (string memory) {
