@@ -193,10 +193,7 @@ contract MidasFlywheelLensRouter {
     return (rewardTokens, rewardsClaimedForToken);
   }
 
-  function claimRewardsOfRewardToken(address user, address rewardToken)
-    public
-    returns (uint256 rewardsClaimed)
-  {
+  function claimRewardsOfRewardToken(address user, address rewardToken) public returns (uint256 rewardsClaimed) {
     uint256 balanceBefore = ERC20(rewardToken).balanceOf(user);
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
     for (uint256 i = 0; i < pools.length; i++) {
