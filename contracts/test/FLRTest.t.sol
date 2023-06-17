@@ -162,13 +162,13 @@ contract FLRTest is BaseTest {
     }
   }
 
-  function testBscLensRouter() public fork(BSC_MAINNET) {
-    IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
-    address user = 0x2924973E3366690eA7aE3FCdcb2b4e136Cf7f8Cc;
+  function testBscLensRouter() public fork(POLYGON_MAINNET) {
+    IComptroller pool = IComptroller(0xBd82D36B9CDfB9747aA12025CeCE3782EDe767FE);
+    address user = 0x4a03c2A9F3A11B1fc154C8bc9B825E0fF503B028;
     MidasFlywheelLensRouter router = new MidasFlywheelLensRouter(fpd);
 
-//    address[] memory allRT = router.getAllRewardTokens();
-//    emit log_named_array("all rt", allRT);
+    //    address[] memory allRT = router.getAllRewardTokens();
+    //    emit log_named_array("all rt", allRT);
     router.claimAllRewardTokens(user);
   }
 

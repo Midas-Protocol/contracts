@@ -24,7 +24,7 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
     IFuseFeeDistributor _fuseFeeDistributor,
     ILiquidatorsRegistry _registry,
     uint256 _blocksPerYear
-  ) public {
+  ) {
     fuseFeeDistributor = _fuseFeeDistributor;
     liquidatorsRegistry = _registry;
     blocksPerYear = _blocksPerYear;
