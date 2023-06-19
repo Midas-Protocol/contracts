@@ -18,6 +18,8 @@ interface IHypervisor is IERC20Upgradeable {
 
   function token1() external view returns (address);
 
+  function directDeposit() external view returns (bool);
+
   function getBasePosition()
     external
     view

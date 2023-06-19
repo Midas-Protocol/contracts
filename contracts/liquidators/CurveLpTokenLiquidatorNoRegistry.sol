@@ -70,16 +70,6 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
   }
 }
 
-interface Funder {
-  function swapFor(
-    IERC20Upgradeable inputToken,
-    uint256 inputAmount,
-    IERC20Upgradeable outputToken,
-    uint256 minOutputAmount,
-    bytes memory data
-  ) external;
-}
-
 contract CurveLpTokenWrapper is IRedemptionStrategy {
   function redeem(
     IERC20Upgradeable inputToken,
@@ -98,6 +88,8 @@ contract CurveLpTokenWrapper is IRedemptionStrategy {
 
     inputToken.approve(address(curvePool), inputAmount);
     curvePool.add_liquidity(amounts, 1);
+
+    outputAmount = outputToken.balanceOf(address(this));
   }
 
   function name() public pure returns (string memory) {
