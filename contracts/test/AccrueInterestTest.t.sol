@@ -145,4 +145,42 @@ contract AccrueInterestTest is UpgradesBaseTest {
     assertEq(diffBefore.totalFuseFees, diffAfter.totalFuseFees, "!totalFuseFeesDiff");
     assertEq(diffBefore.totalAdminFees, diffAfter.totalAdminFees, "!totalAdminFeesDiff");
   }
+
+  function _functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    (bool success, bytes memory returndata) = target.call(data);
+
+    if (!success) {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+
+    return returndata;
+  }
+
+  function testExploitFix() public debuggingOnly forkAtBlock(BSC_MAINNET, 29185768) {
+    // run a market upgrade just before the exploiting tx is called
+    address hayBusdMarket = 0xF8527Dc5611B589CbB365aCACaac0d1DC70b25cB;
+    _upgradeMarketWithExtension(CErc20Delegate(hayBusdMarket));
+
+    vm.prank(0x4b92cC3452Ef1E37528470495B86d3F976470734);
+    _functionCall(
+      0xC40119C7269A5FA813d878BF83d14E3462fC8Fde,
+      hex"8f93bfba",
+      "raw liquidation failed"
+    );
+  }
 }

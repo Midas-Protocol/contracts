@@ -64,12 +64,15 @@ abstract contract UpgradesBaseTest is BaseTest {
 
     // instantiate the new implementation
     CErc20Delegate newImpl;
+    bytes memory becomeImplData = "";
     if (compareStrings("CErc20Delegate", market.contractType())) {
       newImpl = new CErc20Delegate();
     } else if (compareStrings("CErc20PluginDelegate", market.contractType())) {
       newImpl = new CErc20PluginDelegate();
+      becomeImplData = abi.encode(address(0));
     } else {
       newImpl = new CErc20PluginRewardsDelegate();
+      becomeImplData = abi.encode(address(0));
     }
 
     // whitelist the upgrade
@@ -84,6 +87,6 @@ abstract contract UpgradesBaseTest is BaseTest {
 
     // upgrade to the new delegate
     vm.prank(address(ffd));
-    market._setImplementationSafe(address(newImpl), false, "");
+    market._setImplementationSafe(address(newImpl), false, becomeImplData);
   }
 }
