@@ -242,7 +242,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     uint256 accountTokensNew;
   }
 
-  function divRoundUp(uint256 x, uint256 memory y) internal pure returns (uint256 res) {
+  function divRoundUp(uint256 x, uint256 y) internal pure returns (uint256 res) {
     res = (x * 1e18) / y;
     if (x % y != 0) res += 1;
   }
