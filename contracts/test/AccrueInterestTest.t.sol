@@ -177,10 +177,6 @@ contract AccrueInterestTest is UpgradesBaseTest {
     _upgradeMarketWithExtension(CErc20Delegate(hayBusdMarket));
 
     vm.prank(0x4b92cC3452Ef1E37528470495B86d3F976470734);
-    _functionCall(
-      0xC40119C7269A5FA813d878BF83d14E3462fC8Fde,
-      hex"8f93bfba",
-      "raw liquidation failed"
-    );
+    _functionCall(0xC40119C7269A5FA813d878BF83d14E3462fC8Fde, hex"8f93bfba", "raw liquidation failed");
   }
 }

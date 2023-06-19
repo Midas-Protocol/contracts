@@ -272,10 +272,10 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
       if (totalSupply - redeemTokensIn < 1000) redeemTokensIn = totalSupply;
 
       /*
-        * We calculate the exchange rate and the amount of underlying to be redeemed:
-        *  redeemTokens = redeemTokensIn
-        *  redeemAmount = redeemTokensIn x exchangeRateCurrent
-        */
+       * We calculate the exchange rate and the amount of underlying to be redeemed:
+       *  redeemTokens = redeemTokensIn
+       *  redeemAmount = redeemTokensIn x exchangeRateCurrent
+       */
       vars.redeemTokens = redeemTokensIn;
 
       (vars.mathErr, vars.redeemAmount) = mulScalarTruncate(
@@ -296,15 +296,12 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
       if (totalUnderlyingSupplied - redeemAmountIn < 1000) redeemAmountIn = totalUnderlyingSupplied;
 
       /*
-        * We get the current exchange rate and calculate the amount to be redeemed:
-        *  redeemTokens = redeemAmountIn / exchangeRate
-        *  redeemAmount = redeemAmountIn
-        */
+       * We get the current exchange rate and calculate the amount to be redeemed:
+       *  redeemTokens = redeemAmountIn / exchangeRate
+       *  redeemAmount = redeemAmountIn
+       */
 
-      vars.redeemTokens = divRoundUp(
-        redeemAmountIn,
-        vars.exchangeRateMantissa
-      );
+      vars.redeemTokens = divRoundUp(redeemAmountIn, vars.exchangeRateMantissa);
 
       // don't allow dust tokens/assets to be left after
       if (totalSupply - vars.redeemTokens < 1000) vars.redeemTokens = totalSupply;
