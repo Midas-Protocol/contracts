@@ -160,6 +160,7 @@ contract LeveredPositionsLens is Initializable {
   struct PositionInfo {
     uint256 positionSupplyAmount;
     uint256 positionValue;
+    uint256 debtAmount;
     uint256 debtValue;
     uint256 equityValue;
     int256 currentApy;
@@ -181,7 +182,8 @@ contract LeveredPositionsLens is Initializable {
 
     {
       uint256 borrowedPrice = pool.oracle().getUnderlyingPrice(stableMarket);
-      info.debtValue = (borrowedPrice * stableMarket.borrowBalanceCurrent(address(pos))) / 1e18;
+      info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
+      info.debtValue = (borrowedPrice * info.debtAmount) / 1e18;
       info.equityValue = (collateralPrice * pos.baseCollateral()) / 1e18;
       info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
     }
