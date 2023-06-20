@@ -14,6 +14,7 @@ import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
 import { PatchedStorage } from "./utils/PatchedStorage.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
+import { PoolRolesAuthority } from "./midas/PoolRolesAuthority.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -454,5 +455,17 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
   function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
     pool._toggleAutoImplementations(enabled);
+  }
+
+  mapping(address => PoolRolesAuthority) public poolAuthority;
+
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool) {
+    // target can be the pool address or a market address?
+    return poolAuthority[pool].canCall(user, target, functionSig);
   }
 }
