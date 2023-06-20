@@ -113,7 +113,19 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
+  function testMarketsLatestImplementationsArbitrum() public fork(ARBITRUM_ONE) {
+    _testMarketsLatestImplementations();
+  }
+
   function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function testMarketsLatestImplementationsEth() public fork(ETHEREUM_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function testMarketsLatestImplementationsFantom() public fork(FANTOM_OPERA) {
     _testMarketsLatestImplementations();
   }
 
@@ -128,6 +140,9 @@ contract ContractsUpgradesTest is BaseTest {
       ICErc20[] memory markets = pool.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate market = CErc20Delegate(address(markets[j]));
+
+        // should fail for markets that don't have the exchange rate fix
+        market.marketFixed();
 
         address currentImpl = market.implementation();
         (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
