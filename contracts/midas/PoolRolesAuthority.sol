@@ -23,7 +23,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializeable {
 
   function configurePoolSupplierRole(IComptroller pool) external requiresAuth {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
-    for(uint256 i = 0; i < allMarkets.length; i++) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
       // TODO make fns gated
       setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), ICErc20.mint.selector, true);
       setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), ICErc20.redeem.selector, true);
@@ -33,7 +33,6 @@ contract PoolRolesAuthority is RolesAuthority, Initializeable {
       setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), ICErc20.transferFrom.selector, true);
       setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), ICErc20.approve.selector, true);
 
-
       //setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), ICErc20.multicall.selector, true);
     }
   }
@@ -41,7 +40,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializeable {
   function configurePoolBorrowerRole(IComptroller pool) external requiresAuth {
     // TODO borrowers are supplier role by default?
     ICErc20[] memory allMarkets = pool.getAllMarkets();
-    for(uint256 i = 0; i < allMarkets.length; i++) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
       // TODO make fns gated
       setRoleCapability(BORROWER_ROLE, address(allMarkets[i]), ICErc20.borrow.selector, true);
       setRoleCapability(BORROWER_ROLE, address(allMarkets[i]), ICErc20.repayBorrow.selector, true);
@@ -52,7 +51,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializeable {
 
   function configurePoolLiquidatorRole(IComptroller pool) external requiresAuth {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
-    for(uint256 i = 0; i < allMarkets.length; i++) {
+    for (uint256 i = 0; i < allMarkets.length; i++) {
       // TODO make fns gated
       setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), ICErc20.liquidateBorrow.selector, true);
       // seize is called by other CTokens
