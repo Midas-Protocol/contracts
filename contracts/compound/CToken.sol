@@ -268,10 +268,9 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
 
     vars.exchangeRateMantissa = asCTokenExtension().exchangeRateCurrent();
 
-    /* If redeemTokensIn > 0: */
     if (redeemTokensIn > 0) {
       // don't allow dust tokens/assets to be left after
-      if (totalSupply - redeemTokensIn < 1000) redeemTokensIn = totalSupply;
+      if (totalSupply - redeemTokensIn < 5000) redeemTokensIn = totalSupply;
 
       /*
        * We calculate the exchange rate and the amount of underlying to be redeemed:
