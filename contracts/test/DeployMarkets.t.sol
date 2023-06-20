@@ -488,6 +488,9 @@ contract DeployMarketsTest is Test {
     emit log_named_uint("exch rate after", exchRateAfter);
     assertGt(exchRateAfter, 1e30, "!inflated exch rate");
 
+    // the market should own 1e36 + 2 underlying assets
+    assertEq(underlyingToken.balanceOf(address(cToken)), 1e36 + 2, "!total underlying");
+
     // 50% + 1
     uint256 errCode = cToken.redeemUnderlying(0.5e36 + 2);
     assertEq(errCode, 0, "!redeem underlying");
