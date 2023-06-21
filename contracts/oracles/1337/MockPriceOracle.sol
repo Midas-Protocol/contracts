@@ -15,7 +15,7 @@ import "../BasePriceOracle.sol";
  */
 contract MockPriceOracle is BasePriceOracle {
   /**
-   * @notice The maxmimum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
+   * @notice The maximum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
    */
   uint256 public maxSecondsBeforePriceIsStale;
 

@@ -38,6 +38,43 @@ contract ComptrollerFirstExtension is
   /// @notice Emitted when an admin unsupports a market
   event MarketUnlisted(ICErc20 cToken);
 
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 30;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
+    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
+    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
+    functionSelectors[--fnsCount] = this._setMintPaused.selector;
+    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
+    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
+    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
+    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
+    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
+    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
+    functionSelectors[--fnsCount] = this.getWhitelist.selector;
+    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
+    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
+    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
+    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
+    functionSelectors[--fnsCount] = this.getAssetAsCollateralValueCap.selector;
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+
   /**
    * @notice Returns true if the accruing flyhwheel was found and replaced
    * @dev Adds a flywheel to the non-accruing list and if already in the accruing, removes it from that list
@@ -105,7 +142,8 @@ contract ComptrollerFirstExtension is
     if (supplyCaps[address(collateral)] > 0) {
       uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateral);
       uint256 supplyCapValue = (supplyCaps[address(collateral)] * collateralAssetPrice) / 1e18;
-      if (supplyCapValue > assetAsCollateralValueCap) assetAsCollateralValueCap = supplyCapValue;
+      supplyCapValue = (supplyCapValue * markets[address(collateral)].collateralFactorMantissa) / 1e18;
+      if (supplyCapValue < assetAsCollateralValueCap) assetAsCollateralValueCap = supplyCapValue;
     }
 
     return assetAsCollateralValueCap;
@@ -373,42 +411,6 @@ contract ComptrollerFirstExtension is
     for (uint256 i = 0; i < whitelistedBorrowers.length; i++) {
       borrowed += ICErc20(cToken).borrowBalanceCurrent(whitelistedBorrowers[i]);
     }
-  }
-
-  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 29;
-    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
-    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
-    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
-    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
-    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
-    functionSelectors[--fnsCount] = this._setMintPaused.selector;
-    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
-    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
-    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
-    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
-    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
-    functionSelectors[--fnsCount] = this.getWhitelist.selector;
-    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
-    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
-    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
-    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
-    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
-    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
-    require(fnsCount == 0, "use the correct array length");
-    return functionSelectors;
   }
 
   /**

@@ -497,4 +497,59 @@ contract DeployMarketsTest is Test {
 
     assertEq(cToken.totalSupply(), 0, "!should have redeemed all ctokens for 50% + 1 of the underlying");
   }
+
+
+  function testSupplyCapInflatedExchangeRate() public {
+    vm.roll(1);
+    comptroller._deployMarket(
+      false,
+      abi.encode(
+        address(underlyingToken),
+        comptroller,
+        payable(address(fuseAdmin)),
+        InterestRateModel(address(interestModel)),
+        "cUnderlyingToken",
+        "CUT",
+        address(cErc20Delegate),
+        "",
+        uint256(1),
+        uint256(0)
+      ),
+      0.9e18
+    );
+
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20 cToken = allMarkets[allMarkets.length - 1];
+    assertEq(cToken.name(), "cUnderlyingToken");
+    address[] memory cTokens = new address[](1);
+    cTokens[0] = address(cToken);
+    comptroller.enterMarkets(cTokens);
+    vm.roll(1);
+
+    // mint 1e18
+    underlyingToken.approve(address(cToken), 1e18);
+    cToken.mint(1e18);
+    assertEq(cToken.totalSupply(), 5 * 1e18, "!total supply 5");
+    assertEq(underlyingToken.balanceOf(address(cToken)), 1e18, "!market underlying balance 1");
+
+    (, uint256 liqBefore, uint256 sfBefore) = comptroller.getAccountLiquidity(address(this));
+
+    uint256[] memory caps = new uint256[](1);
+    caps[0] = 25e18;
+    ICErc20[] memory marketArray = new ICErc20[](1);
+    marketArray[0] = cToken;
+    vm.prank(comptroller.admin());
+    comptroller._setMarketSupplyCaps(marketArray, caps);
+
+    // donate 100e18
+    underlyingToken.transfer(address(cToken), 100e18);
+    assertEq(underlyingToken.balanceOf(address(cToken)), 101e18, "!market balance 101");
+    assertEq(cToken.balanceOfUnderlying(address(this)), 101e18, "!user balance 101");
+
+    (, uint256 liqAfter, uint256 sfAfter) = comptroller.getAccountLiquidity(address(this));
+    emit log_named_uint("liqBefore", liqBefore);
+    emit log_named_uint("liqAfter", liqAfter);
+
+    assertEq(liqAfter / liqBefore, 25, "liquidity should increase only 25x");
+  }
 }

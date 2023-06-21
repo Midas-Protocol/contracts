@@ -20,12 +20,16 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     asExtension = ComptrollerFirstExtension(address(pool));
     _upgradeExistingPool(address(pool));
 
+
+    _upgradeMarket(CErc20Delegate(address(ankrBNBMkt)));
+    _upgradeMarket(CErc20Delegate(address(ankrBNBAnkrMkt)));
+
     // just some logging
     {
       uint256 borrowedAnkr = ankrBNBMkt.borrowBalanceCurrent(borrower);
-      emit log_named_uint("Ankr borrower balance", borrowedAnkr);
+      emit log_named_uint("ankrBnb borrow balance", borrowedAnkr);
       uint256 collateralAnkr = ankrBNBAnkrMkt.balanceOf(borrower);
-      emit log_named_uint("Ankr collateral balance of ankrBNB-ANKR", collateralAnkr);
+      emit log_named_uint("ankrBnb collateral balance of ankrBNB-ANKR", collateralAnkr);
 
       uint256 borrowedOther = ankrBNBMkt.borrowBalanceCurrent(otherSupplier);
       emit log_named_uint("Other supplier borrower balance", borrowedOther);
@@ -130,8 +134,8 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     assertGt(liquidityBefore, 0, "should have positive liquidity before");
 
     ICErc20[] memory markets = new ICErc20[](2);
-    markets[0] = ICErc20(address(ankrBNBMkt));
-    markets[1] = ICErc20(address(ankrBNBAnkrMkt));
+    markets[0] = ankrBNBMkt;
+    markets[1] = ankrBNBAnkrMkt;
 
     vm.prank(pool.admin());
     asExtension._setMarketSupplyCaps(markets, asArray(1, 1));
@@ -155,15 +159,15 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     assertGt(liquidityBefore, 0, "should have positive liquidity before");
 
     ICErc20[] memory markets = new ICErc20[](2);
-    markets[0] = ICErc20(address(ankrBNBMkt));
-    markets[1] = ICErc20(address(ankrBNBAnkrMkt));
+    markets[0] = ankrBNBMkt;
+    markets[1] = ankrBNBAnkrMkt;
 
     vm.prank(pool.admin());
     asExtension._setMarketBorrowCaps(markets, asArray(1, 1));
 
     (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
     assertEq(liquidityBefore, liquidityAfterCap, "should have the same liquidity after cap");
-    assertEq(shortFallBefore, shortFallAfterCap, "should have the same liquidity after cap");
+    assertEq(shortFallBefore, shortFallAfterCap, "should have the same shortfall after cap");
 
     vm.expectRevert("!borrow:cap");
     pool.borrowAllowed(address(ankrBNBMkt), borrower, 2);
@@ -171,6 +175,26 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     vm.prank(pool.admin());
     asExtension._borrowCapWhitelist(address(ankrBNBMkt), borrower, true);
 
-    require(pool.mintAllowed(address(ankrBNBMkt), borrower, 2) == 0, "borrow not allowed after cap whitelist");
+    require(pool.borrowAllowed(address(ankrBNBMkt), borrower, 2) == 0, "borrow not allowed after cap whitelist");
+  }
+
+  function testSupplyCapValue() public debuggingOnly forkAtBlock(BSC_MAINNET, 27827185) {
+    (, uint256 liquidityBefore, uint256 shortFallBefore) = pool.getAccountLiquidity(borrower);
+    assertEq(shortFallBefore, 0, "should have no shortfall before");
+    assertGt(liquidityBefore, 0, "should have positive liquidity before");
+
+    ICErc20[] memory markets = new ICErc20[](2);
+    markets[0] = ankrBNBMkt;
+    markets[1] = ankrBNBAnkrMkt;
+
+    vm.prank(pool.admin());
+    asExtension._setMarketSupplyCaps(markets, asArray(1, 1));
+
+    (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
+    emit log_named_uint("liquidityAfterCap", liquidityAfterCap);
+    emit log_named_uint("shortFallAfterCap", shortFallAfterCap);
+
+    assertEq(liquidityAfterCap, 0, "should have no liquidity after");
+    assertGt(shortFallAfterCap, 0, "should have positive shortfall after");
   }
 }
