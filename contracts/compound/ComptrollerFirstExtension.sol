@@ -139,7 +139,7 @@ contract ComptrollerFirstExtension is
     }
 
     // if there is any supply cap, don't allow donations to the market/plugin to go around it
-    if (supplyCaps[address(collateral)] > 0 && !supplyCapWhitelist[account]) {
+    if (supplyCaps[address(collateral)] > 0 && !supplyCapWhitelist[address(collateral)].contains(account)) {
       uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateral);
       uint256 supplyCapValue = (supplyCaps[address(collateral)] * collateralAssetPrice) / 1e18;
       supplyCapValue = (supplyCapValue * markets[address(collateral)].collateralFactorMantissa) / 1e18;
