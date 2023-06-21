@@ -247,8 +247,6 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     if (x % y != 0) res += 1;
   }
 
-  function marketFixed() public pure {}
-
   /**
    * @notice User redeems cTokens in exchange for the underlying asset
    * @dev Assumes interest has already been accrued up to the current block
