@@ -593,10 +593,6 @@ contract CTokenFirstExtension is
     return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
   }
 
-  function borrowBalanceStored(address account) public view returns (uint256) {
-    return borrowBalanceCurrent(account);
-  }
-
   /**
    * @notice calculate the borrowIndex and the account's borrow balance using the fresh borrowIndex
    * @param account The address whose balance should be calculated after recalculating the borrowIndex
