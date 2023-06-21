@@ -498,7 +498,6 @@ contract DeployMarketsTest is Test {
     assertEq(cToken.totalSupply(), 0, "!should have redeemed all ctokens for 50% + 1 of the underlying");
   }
 
-
   function testSupplyCapInflatedExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(

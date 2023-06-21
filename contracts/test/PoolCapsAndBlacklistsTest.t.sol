@@ -20,7 +20,6 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     asExtension = ComptrollerFirstExtension(address(pool));
     _upgradeExistingPool(address(pool));
 
-
     _upgradeMarket(CErc20Delegate(address(ankrBNBMkt)));
     _upgradeMarket(CErc20Delegate(address(ankrBNBAnkrMkt)));
 
