@@ -78,9 +78,8 @@ contract ComptrollerFirstExtension is
     }
 
     uint256 assetAsCollateralValueCap = type(uint256).max;
-    // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
     if (address(cTokenModify) != address(0)) {
-      // if the borrowed collateral is capped against this collateral & account is not whitelisted
+      // if the borrowed asset is blacklisted against this collateral & account is not whitelisted
       if (
         borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(collateral)] &&
         !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(collateral)].contains(account)
@@ -101,6 +100,8 @@ contract ComptrollerFirstExtension is
         }
       }
     }
+
+    // if there is any supply cap, don't allow donations to the market/plugin to go around it
     if (supplyCaps[address(collateral)] > 0) {
       uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateral);
       uint256 supplyCapValue = (supplyCaps[address(collateral)] * collateralAssetPrice) / 1e18;
