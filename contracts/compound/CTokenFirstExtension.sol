@@ -666,7 +666,7 @@ contract CTokenFirstExtension is
   }
 
   function fixExchangeRate() external {
-    require (hasAdminRights(), "not admin");
+    require(hasAdminRights(), "not admin");
     address ankrMarket = 0x13aE975c5A1198e4F47c68C31C1230694DC44A57;
     address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
     address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
