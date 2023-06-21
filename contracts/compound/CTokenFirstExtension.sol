@@ -22,7 +22,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 27;
+    uint8 fnsCount = 26;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -48,7 +48,6 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
     functionSelectors[--fnsCount] = this.asCTokenExtensionInterface.selector;
-    functionSelectors[--fnsCount] = this.fixExchangeRate.selector;
 
     // TODO remove after next redeploy
     functionSelectors[--fnsCount] = this.borrowBalanceStored.selector;
