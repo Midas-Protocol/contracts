@@ -835,9 +835,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       }
       {
         // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
-        uint256 assetAsCollateralValueCap =
-          asComptrollerExtension()
-          .getAssetAsCollateralValueCap(asset, cTokenModify, redeemTokens > 0, account);
+        uint256 assetAsCollateralValueCap = asComptrollerExtension().getAssetAsCollateralValueCap(
+          asset,
+          cTokenModify,
+          redeemTokens > 0,
+          account
+        );
 
         // accumulate the collateral value to sumCollateral
         uint256 assetCollateralValue = mul_ScalarTruncate(vars.tokensToDenom, vars.cTokenBalance);
