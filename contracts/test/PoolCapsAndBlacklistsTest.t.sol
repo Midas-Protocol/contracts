@@ -189,11 +189,21 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     vm.prank(pool.admin());
     asExtension._setMarketSupplyCaps(markets, asArray(1, 1));
 
-    (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
-    emit log_named_uint("liquidityAfterCap", liquidityAfterCap);
-    emit log_named_uint("shortFallAfterCap", shortFallAfterCap);
+    {
+      (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
+      assertEq(liquidityAfterCap, 0, "should have no liquidity after");
+      assertGt(shortFallAfterCap, 0, "should have positive shortfall after");
+    }
 
-    assertEq(liquidityAfterCap, 0, "should have no liquidity after");
-    assertGt(shortFallAfterCap, 0, "should have positive shortfall after");
+    vm.prank(pool.admin());
+    asExtension._supplyCapWhitelist(address(markets[0]), borrower, true);
+    vm.prank(pool.admin());
+    asExtension._supplyCapWhitelist(address(markets[1]), borrower, true);
+
+    {
+      (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
+      assertEq(liquidityAfterCap, liquidityBefore, "liquidity after whitelist should match before");
+      assertEq(shortFallAfterCap, shortFallBefore, "shortfall after whitelist should match before");
+    }
   }
 }
