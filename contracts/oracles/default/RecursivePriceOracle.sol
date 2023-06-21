@@ -27,10 +27,10 @@ contract RecursivePriceOracle is IPriceOracle {
 
     // If cETH, return cETH/ETH exchange rate
     if (underlying.isCEther()) {
-      return underlying.exchangeRateStored();
+      return underlying.exchangeRateCurrent();
     }
 
     // Fuse cTokens: cToken/token price * token/ETH price = cToken/ETH price
-    return (underlying.exchangeRateStored() * comptroller.oracle().getUnderlyingPrice(underlying)) / 1e18;
+    return (underlying.exchangeRateCurrent() * comptroller.oracle().getUnderlyingPrice(underlying)) / 1e18;
   }
 }
