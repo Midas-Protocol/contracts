@@ -22,7 +22,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 26;
+    uint8 fnsCount = 25;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -48,10 +48,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
     functionSelectors[--fnsCount] = this.asCTokenExtensionInterface.selector;
-
-    // TODO remove after next redeploy
-    functionSelectors[--fnsCount] = this.borrowBalanceStored.selector;
-    functionSelectors[--fnsCount] = this.exchangeRateStored.selector;
+    functionSelectors[--fnsCount] = this.fixExchangeRate.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -394,10 +391,6 @@ contract CTokenFirstExtension is
       );
   }
 
-  function exchangeRateStored() public view returns (uint256) {
-    return exchangeRateCurrent();
-  }
-
   /**
    * @notice Accrue interest then return the up-to-date exchange rate
    * @return Calculated exchange rate scaled by 1e18
@@ -600,10 +593,6 @@ contract CTokenFirstExtension is
     return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
   }
 
-  function borrowBalanceStored(address account) public view returns (uint256) {
-    return borrowBalanceCurrent(account);
-  }
-
   /**
    * @notice calculate the borrowIndex and the account's borrow balance using the fresh borrowIndex
    * @param account The address whose balance should be calculated after recalculating the borrowIndex
@@ -670,6 +659,26 @@ contract CTokenFirstExtension is
     totalBorrows -= amount;
 
     emit Flash(msg.sender, amount);
+  }
+
+  function fixExchangeRate() external {
+    require(hasAdminRights(), "not admin");
+    address ankrMarket = 0x13aE975c5A1198e4F47c68C31C1230694DC44A57;
+    address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
+    address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
+
+    if (address(this) == ankrMarket || address(this) == ankrBnbMarket || address(this) == hayMarket) {
+      address exploiterBorrower = 0xd2094b870D80Cfb7DaDa4893aD0030d642CA9f72;
+
+      // fix the accounting
+      totalBorrows -= accountBorrows[exploiterBorrower].principal;
+      accountBorrows[exploiterBorrower].principal = 0;
+      totalAdminFees = 0;
+      totalFuseFees = 0;
+      totalReserves = 0;
+
+      accrueInterest();
+    }
   }
 
   /**
