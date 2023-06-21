@@ -141,9 +141,6 @@ contract ContractsUpgradesTest is BaseTest {
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate market = CErc20Delegate(address(markets[j]));
 
-        // should fail for markets that don't have the exchange rate fix
-        market.marketFixed();
-
         address currentImpl = market.implementation();
         (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 

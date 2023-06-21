@@ -66,6 +66,50 @@ contract ComptrollerFirstExtension is
     return false;
   }
 
+  function getAssetAsCollateralValueCap(
+    ICErc20 collateral,
+    ICErc20 cTokenModify,
+    bool redeeming,
+    address account
+  ) external view returns (uint256) {
+    if (address(collateral) == address(cTokenModify) && !redeeming) {
+      // the collateral asset counts as 0 liquidity when borrowed
+      return 0;
+    }
+
+    uint256 assetAsCollateralValueCap = type(uint256).max;
+    // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
+    if (address(cTokenModify) != address(0)) {
+      // if the borrowed collateral is capped against this collateral & account is not whitelisted
+      if (
+        borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(collateral)] &&
+        !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(collateral)].contains(account)
+      ) {
+        assetAsCollateralValueCap = 0;
+      } else {
+        // for each user the value of this kind of collateral is capped regardless of the amount borrowed
+        // denominated in the borrowed asset
+        uint256 borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(collateral)];
+        // check if set to any value & account is not whitelisted
+        if (
+          borrowCapForCollateral != 0 &&
+          !borrowCapForCollateralWhitelist[address(cTokenModify)][address(collateral)].contains(account)
+        ) {
+          uint256 borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
+          // this asset usage as collateral is capped at the native value of the borrow cap
+          assetAsCollateralValueCap = (borrowCapForCollateral * borrowedAssetPrice) / 1e18;
+        }
+      }
+    }
+    if (supplyCaps[address(collateral)] > 0) {
+      uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateral);
+      uint256 supplyCapValue = (supplyCaps[address(collateral)] * collateralAssetPrice) / 1e18;
+      if (supplyCapValue > assetAsCollateralValueCap) assetAsCollateralValueCap = supplyCapValue;
+    }
+
+    return assetAsCollateralValueCap;
+  }
+
   /**
    * @notice Set the given supply caps for the given cToken markets. Supplying that brings total underlying supply to or above supply cap will revert.
    * @dev Admin or borrowCapGuardian function to set the supply caps. A supply cap of 0 corresponds to unlimited supplying.
