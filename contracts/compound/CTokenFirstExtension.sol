@@ -672,6 +672,26 @@ contract CTokenFirstExtension is
     emit Flash(msg.sender, amount);
   }
 
+  function fixExchangeRate() external {
+    require (hasAdminRights(), "not admin");
+    address ankrMarket = 0x13aE975c5A1198e4F47c68C31C1230694DC44A57;
+    address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
+    address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
+
+    if (address(this) == ankrMarket || address(this) == ankrBnbMarket || address(this) == hayMarket) {
+      address exploiterBorrower = 0xd2094b870D80Cfb7DaDa4893aD0030d642CA9f72;
+
+      // fix the accounting
+      totalBorrows -= accountBorrows[exploiterBorrower].principal;
+      accountBorrows[exploiterBorrower].principal = 0;
+      totalAdminFees = 0;
+      totalFuseFees = 0;
+      totalReserves = 0;
+
+      accrueInterest();
+    }
+  }
+
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */
