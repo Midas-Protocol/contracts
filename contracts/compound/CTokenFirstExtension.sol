@@ -22,7 +22,7 @@ contract CTokenFirstExtension is
   Multicall
 {
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 26;
+    uint8 fnsCount = 25;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -48,10 +48,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
     functionSelectors[--fnsCount] = this.asCTokenExtensionInterface.selector;
-
-    // TODO remove after next redeploy
-    functionSelectors[--fnsCount] = this.borrowBalanceStored.selector;
-    functionSelectors[--fnsCount] = this.exchangeRateStored.selector;
+    functionSelectors[--fnsCount] = this.fixExchangeRate.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
@@ -392,10 +389,6 @@ contract CTokenFirstExtension is
         totalReserves + totalAdminFees + totalFuseFees,
         reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
       );
-  }
-
-  function exchangeRateStored() public view returns (uint256) {
-    return exchangeRateCurrent();
   }
 
   /**
