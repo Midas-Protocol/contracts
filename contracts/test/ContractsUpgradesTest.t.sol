@@ -190,4 +190,25 @@ contract ContractsUpgradesTest is BaseTest {
       }
     }
   }
+
+  function testExploiterBorrows() public fork(BSC_MAINNET) {
+    address exploiterBorrower = 0xd2094b870D80Cfb7DaDa4893aD0030d642CA9f72;
+    address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
+    address ankrMarket = 0x13aE975c5A1198e4F47c68C31C1230694DC44A57;
+
+    {
+      uint256 bbc = ICErc20(ankrBnbMarket).borrowBalanceCurrent(0xd2094b870D80Cfb7DaDa4893aD0030d642CA9f72);
+      uint256 tbc = ICErc20(ankrBnbMarket).totalBorrowsCurrent();
+
+      emit log_named_uint("bbc", bbc);
+      emit log_named_uint("tbc", tbc);
+    }
+    {
+      uint256 bbc = ICErc20(ankrMarket).borrowBalanceCurrent(0xd2094b870D80Cfb7DaDa4893aD0030d642CA9f72);
+      uint256 tbc = ICErc20(ankrMarket).totalBorrowsCurrent();
+
+      emit log_named_uint("bbc", bbc);
+      emit log_named_uint("tbc", tbc);
+    }
+  }
 }
