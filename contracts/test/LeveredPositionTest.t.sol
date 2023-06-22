@@ -55,7 +55,7 @@ contract LeveredPositionLensTest is BaseTest {
     for (uint256 j = 0; j < positions.length; j++) {
       apys[j] = 1e10;
 
-      if (address(0) == positions[j]) revert("DEBA");
+      if (address(0) == positions[j]) revert("zero pos address");
       pos[j] = LeveredPosition(positions[j]);
     }
 
@@ -67,9 +67,8 @@ contract LeveredPositionLensTest is BaseTest {
       emit log_named_uint("debtAmount", infos[k].debtAmount);
       emit log_named_uint("debtValue", infos[k].debtValue);
       emit log_named_uint("equityValue", infos[k].equityValue);
-
+      emit log_named_uint("equityAmount", infos[k].equityAmount);
       emit log_named_int("currentApy", infos[k].currentApy);
-
       emit log_named_uint("debtRatio", infos[k].debtRatio);
       emit log_named_uint("liquidationThreshold", infos[k].liquidationThreshold);
       emit log_named_uint("safetyBuffer", infos[k].safetyBuffer);
