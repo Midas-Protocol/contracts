@@ -82,6 +82,7 @@ contract LeveredPositionsLens is Initializable {
     returns (
       address[] memory markets,
       address[] memory underlyings,
+      uint256[] memory underlyingsPrices,
       string[] memory names,
       string[] memory symbols,
       uint256[] memory rates,
@@ -94,6 +95,7 @@ contract LeveredPositionsLens is Initializable {
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
+    underlyingsPrices = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       address underlyingAddress = market.underlying();
@@ -103,6 +105,7 @@ contract LeveredPositionsLens is Initializable {
       symbols[i] = underlying.symbol();
       rates[i] = market.borrowRatePerBlock();
       decimals[i] = underlying.decimals();
+      underlyingsPrices[i] = market.comptroller().oracle().getUnderlyingPrice(market);
     }
   }
 
@@ -114,7 +117,7 @@ contract LeveredPositionsLens is Initializable {
     ICErc20 _stableMarket,
     uint256 _targetLeverageRatio
   ) public view returns (int256 netAPY) {
-    if (_supplyAPY == 0 || _supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
+    if (_supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
 
     IComptroller pool = IComptroller(_collateralMarket.comptroller());
     BasePriceOracle oracle = pool.oracle();
@@ -158,10 +161,13 @@ contract LeveredPositionsLens is Initializable {
   }
 
   struct PositionInfo {
+    uint256 collateralAssetPrice;
+    uint256 borrowedAssetPrice;
     uint256 positionSupplyAmount;
     uint256 positionValue;
     uint256 debtAmount;
     uint256 debtValue;
+    uint256 equityAmount;
     uint256 equityValue;
     int256 currentApy;
     uint256 debtRatio;
@@ -171,21 +177,22 @@ contract LeveredPositionsLens is Initializable {
 
   function getPositionInfo(LeveredPosition pos, uint256 supplyApy) public view returns (PositionInfo memory info) {
     ICErc20 collateralMarket = pos.collateralMarket();
-    ICErc20 stableMarket = pos.stableMarket();
     IComptroller pool = pos.pool();
-    uint256 collateralPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
+    info.collateralAssetPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
     {
       info.positionSupplyAmount = collateralMarket.balanceOfUnderlying(address(pos));
-      info.positionValue = (collateralPrice * info.positionSupplyAmount) / 1e18;
+      info.positionValue = (info.collateralAssetPrice * info.positionSupplyAmount) / 1e18;
       info.currentApy = getNetApyForPosition(pos, supplyApy);
     }
 
     {
-      uint256 borrowedPrice = pool.oracle().getUnderlyingPrice(stableMarket);
+      ICErc20 stableMarket = pos.stableMarket();
+      info.borrowedAssetPrice = pool.oracle().getUnderlyingPrice(stableMarket);
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
-      info.debtValue = (borrowedPrice * info.debtAmount) / 1e18;
-      info.equityValue = (collateralPrice * pos.baseCollateral()) / 1e18;
+      info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
+      info.equityValue = info.positionValue - info.debtValue;
       info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
+      info.equityAmount = (info.equityValue * 1e18) / info.collateralAssetPrice;
     }
 
     {

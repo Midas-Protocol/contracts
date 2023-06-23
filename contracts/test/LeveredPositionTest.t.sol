@@ -26,6 +26,58 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
+contract LeveredPositionLensTest is BaseTest {
+  LeveredPositionsLens lens;
+  ILeveredPositionFactory factory;
+
+  function afterForkSetUp() internal override {
+    factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    lens = LeveredPositionsLens(ap.getAddress("LeveredPositionsLens"));
+  }
+
+  function testLPLens() public debuggingOnly fork(BSC_CHAPEL) {
+    _testLPLens();
+  }
+
+  function _testLPLens() internal {
+    address[] memory positions;
+    bool[] memory closed;
+    (positions, closed) = factory.getPositionsByAccount(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
+
+    //    address[] memory accounts = factory.getAccountsWithOpenPositions();
+    //    for (uint256 i = 0; i < accounts.length; i++) {
+    //      (positions, closed) = factory.getPositionsByAccount(accounts[i]);
+    //      if (positions.length > 0) break;
+    //    }
+
+    uint256[] memory apys = new uint256[](positions.length);
+    LeveredPosition[] memory pos = new LeveredPosition[](positions.length);
+    for (uint256 j = 0; j < positions.length; j++) {
+      apys[j] = 1e10;
+
+      if (address(0) == positions[j]) revert("zero pos address");
+      pos[j] = LeveredPosition(positions[j]);
+    }
+
+    LeveredPositionsLens.PositionInfo[] memory infos = lens.getPositionsInfo(pos, apys);
+
+    for (uint256 k = 0; k < infos.length; k++) {
+      emit log_named_uint("positionSupplyAmount", infos[k].positionSupplyAmount);
+      emit log_named_uint("positionValue", infos[k].positionValue);
+      emit log_named_uint("debtAmount", infos[k].debtAmount);
+      emit log_named_uint("debtValue", infos[k].debtValue);
+      emit log_named_uint("equityValue", infos[k].equityValue);
+      emit log_named_uint("equityAmount", infos[k].equityAmount);
+      emit log_named_int("currentApy", infos[k].currentApy);
+      emit log_named_uint("debtRatio", infos[k].debtRatio);
+      emit log_named_uint("liquidationThreshold", infos[k].liquidationThreshold);
+      emit log_named_uint("safetyBuffer", infos[k].safetyBuffer);
+
+      emit log("");
+    }
+  }
+}
+
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
   LeveredPositionsLens lens;

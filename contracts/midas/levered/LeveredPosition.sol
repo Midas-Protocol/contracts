@@ -222,8 +222,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
   function getMinLeverageRatio() public view returns (uint256) {
     if (baseCollateral == 0) return 0;
 
-    BasePriceOracle oracle = pool.oracle();
-    uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
+    uint256 collateralAssetPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
 
     // not accounting for slippage
     return 1e18 + (factory.getMinBorrowNative() * 1e36) / (baseCollateral * collateralAssetPrice);
