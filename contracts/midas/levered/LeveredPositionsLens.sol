@@ -95,7 +95,7 @@ contract LeveredPositionsLens is Initializable {
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
-    underlyingsPrices = new uint8[](markets.length);
+    underlyingsPrices = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       address underlyingAddress = market.underlying();
