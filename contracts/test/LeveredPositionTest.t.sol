@@ -96,6 +96,13 @@ contract LeveredPositionFactoryTest is BaseTest {
     );
   }
 
+  function testClosePosition() public debuggingOnly fork(BSC_CHAPEL) {
+    LeveredPosition pos = LeveredPosition(0x263718679A41AafDAa8f3d94425BC80bf72439e5);
+
+    vm.prank(pos.positionOwner());
+    pos.closePosition();
+  }
+
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
     ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // DAI
 
