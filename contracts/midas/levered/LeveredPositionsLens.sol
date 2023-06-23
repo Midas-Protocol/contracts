@@ -82,6 +82,7 @@ contract LeveredPositionsLens is Initializable {
     returns (
       address[] memory markets,
       address[] memory underlyings,
+      uint256[] memory underlyingsPrices,
       string[] memory names,
       string[] memory symbols,
       uint256[] memory rates,
@@ -94,6 +95,7 @@ contract LeveredPositionsLens is Initializable {
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
+    decimals = new uint8[](underlyingsPrices.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       address underlyingAddress = market.underlying();
@@ -103,6 +105,7 @@ contract LeveredPositionsLens is Initializable {
       symbols[i] = underlying.symbol();
       rates[i] = market.borrowRatePerBlock();
       decimals[i] = underlying.decimals();
+      underlyingsPrices[i] = market.comptroller().oracle().getUnderlyingPrice(market);
     }
   }
 
