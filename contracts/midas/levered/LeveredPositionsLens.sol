@@ -158,6 +158,8 @@ contract LeveredPositionsLens is Initializable {
   }
 
   struct PositionInfo {
+    uint256 collateralAssetPrice;
+    uint256 borrowedAssetPrice;
     uint256 positionSupplyAmount;
     uint256 positionValue;
     uint256 debtAmount;
@@ -173,21 +175,21 @@ contract LeveredPositionsLens is Initializable {
   function getPositionInfo(LeveredPosition pos, uint256 supplyApy) public view returns (PositionInfo memory info) {
     ICErc20 collateralMarket = pos.collateralMarket();
     IComptroller pool = pos.pool();
-    uint256 collateralPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
+    info.collateralAssetPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
     {
       info.positionSupplyAmount = collateralMarket.balanceOfUnderlying(address(pos));
-      info.positionValue = (collateralPrice * info.positionSupplyAmount) / 1e18;
+      info.positionValue = (info.collateralAssetPrice * info.positionSupplyAmount) / 1e18;
       info.currentApy = getNetApyForPosition(pos, supplyApy);
     }
 
     {
       ICErc20 stableMarket = pos.stableMarket();
-      uint256 borrowedPrice = pool.oracle().getUnderlyingPrice(stableMarket);
+      info.borrowedAssetPrice = pool.oracle().getUnderlyingPrice(stableMarket);
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
-      info.debtValue = (borrowedPrice * info.debtAmount) / 1e18;
-      info.equityValue = (collateralPrice * pos.baseCollateral()) / 1e18;
+      info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
+      info.equityValue = (info.collateralAssetPrice * pos.baseCollateral()) / 1e18;
       info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
-      info.equityAmount = ((info.positionValue - info.debtValue) * 1e18) / collateralPrice;
+      info.equityAmount = ((info.positionValue - info.debtValue) * 1e18) / info.collateralAssetPrice;
     }
 
     {
