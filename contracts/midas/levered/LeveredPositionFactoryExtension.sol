@@ -90,13 +90,23 @@ contract LeveredPositionFactoryExtension is
   }
 
   // @return true if removed, otherwise false
-  function removeClosedPosition(address closedPosition) external returns (bool removed) {
-    EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
+  function removeClosedPosition(address closedPosition) external returns (bool) {
+    return _removeClosedPosition(closedPosition, msg.sender);
+  }
+
+  function closeAndRemoveUserPosition(LeveredPosition position) external onlyOwner returns (bool) {
+    address positionOwner = position.positionOwner();
+    position.closePosition(positionOwner);
+    return _removeClosedPosition(address(position), positionOwner);
+  }
+
+  function _removeClosedPosition(address closedPosition, address positionOwner) internal returns (bool removed) {
+    EnumerableSet.AddressSet storage userPositions = positionsByAccount[positionOwner];
     if (!userPositions.contains(closedPosition)) revert NoSuchPosition();
     if (!LeveredPosition(closedPosition).isPositionClosed()) revert PositionNotClosed();
 
     removed = userPositions.remove(closedPosition);
-    if (userPositions.length() == 0) accountsWithOpenPositions.remove(msg.sender);
+    if (userPositions.length() == 0) accountsWithOpenPositions.remove(positionOwner);
   }
 
   /*----------------------------------------------------------------

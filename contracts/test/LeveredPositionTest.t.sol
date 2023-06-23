@@ -289,7 +289,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     vm.assume(targetLeverageRatio < maxRatio);
 
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
-    emit log_named_uint("base collateral", position.baseCollateral());
+    emit log_named_uint("base collateral", position.getEquityAmount());
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e15, "target ratio not matching");
   }
 
@@ -373,7 +373,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 withdrawAmount = position.closePosition();
     emit log_named_uint("withdraw amount", withdrawAmount);
 
-    assertEq(position.baseCollateral(), 0, "!nonzero base collateral");
+    assertEq(position.getEquityAmount(), 0, "!nonzero base collateral");
     assertEq(position.getCurrentLeverageRatio(), 0, "!nonzero leverage ratio");
   }
 }

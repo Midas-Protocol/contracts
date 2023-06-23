@@ -46,7 +46,6 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     stableMarket = _stableMarket;
     stableAsset = IERC20Upgradeable(_stableMarket.underlying());
 
-    baseCollateral = 0;
     factory = ILeveredPositionFactory(msg.sender);
   }
 
@@ -56,7 +55,6 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
 
   function fundPosition(IERC20Upgradeable fundingAsset, uint256 amount) public {
     fundingAsset.safeTransferFrom(msg.sender, address(this), amount);
-    baseCollateral += _supplyCollateral(fundingAsset);
 
     if (!pool.checkMembership(address(this), collateralMarket)) {
       address[] memory cTokens = new address[](1);
@@ -70,7 +68,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
   }
 
   function closePosition(address withdrawTo) public returns (uint256 withdrawAmount) {
-    if (msg.sender != positionOwner) revert NotPositionOwner();
+    if (msg.sender != positionOwner && msg.sender != address(factory)) revert NotPositionOwner();
 
     _leverDown(type(uint256).max);
 
@@ -82,9 +80,6 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     // redeem all cTokens should leave no dust
     errorCode = collateralMarket.redeem(collateralMarket.balanceOf(address(this)));
     if (errorCode != 0) revert RedeemFailed(errorCode);
-
-    // baseCollateral should become 0 here
-    baseCollateral = collateralMarket.balanceOfUnderlying(address(this));
 
     // withdraw the redeemed collateral
     withdrawAmount = collateralAsset.balanceOf(address(this));
@@ -134,7 +129,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
 
   function withdrawStableLeftovers(address withdrawTo) public returns (uint256) {
     if (msg.sender != positionOwner) revert NotPositionOwner();
-    if (baseCollateral > 0) revert OnlyWhenClosed();
+    if (getEquityAmount() > 0) revert OnlyWhenClosed();
 
     uint256 stableLeftovers = stableAsset.balanceOf(address(this));
     stableAsset.safeTransfer(withdrawTo, stableLeftovers);
@@ -213,23 +208,26 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
   }
 
   function getCurrentLeverageRatio() public view returns (uint256) {
-    if (baseCollateral == 0) return 0;
+    uint256 equityAmount = getEquityAmount();
+    if (equityAmount == 0) return 0;
 
     uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlying(address(this));
-    return (suppliedCollateralCurrent * 1e18) / baseCollateral;
+    return (suppliedCollateralCurrent * 1e18) / equityAmount;
   }
 
   function getMinLeverageRatio() public view returns (uint256) {
-    if (baseCollateral == 0) return 0;
+    uint256 equityAmount = getEquityAmount();
+    if (equityAmount == 0) return 0;
 
     uint256 collateralAssetPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
 
     // not accounting for slippage
-    return 1e18 + (factory.getMinBorrowNative() * 1e36) / (baseCollateral * collateralAssetPrice);
+    return 1e18 + (factory.getMinBorrowNative() * 1e36) / (equityAmount * collateralAssetPrice);
   }
 
   function getMaxLeverageRatio() public view returns (uint256) {
-    if (baseCollateral == 0) return 0;
+    uint256 equityAmount = getEquityAmount();
+    if (equityAmount == 0) return 0;
 
     (, uint256 stableCollateralFactor) = pool.markets(address(stableMarket));
     (, uint256 collatCollateralFactor) = pool.markets(address(collateralMarket));
@@ -249,7 +247,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     uint256 maxCollateralToRepay = (maxTopUpRepay * stableCollateralFactor) / (1e18 - stableCollateralFactor);
     uint256 maxFlashLoaned = (maxCollateralToRepay * collatCollateralFactor) / 1e18;
     uint256 suppliedCollateralCurrent = collateralMarket.balanceOfUnderlying(address(this));
-    return ((suppliedCollateralCurrent + maxFlashLoaned) * 1e18) / baseCollateral;
+    return ((suppliedCollateralCurrent + maxFlashLoaned) * 1e18) / equityAmount;
   }
 
   function isFundingAssetSupported(IERC20Upgradeable fundingAsset) public view returns (bool) {
@@ -257,7 +255,21 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
   }
 
   function isPositionClosed() public view returns (bool) {
-    return baseCollateral == 0;
+    return getEquityAmount() == 0;
+  }
+
+  function getEquityAmount() public view returns (uint256 equityAmount) {
+    BasePriceOracle oracle = pool.oracle();
+    uint256 borrowedAssetPrice = oracle.getUnderlyingPrice(stableMarket);
+    uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
+    uint256 positionSupplyAmount = collateralMarket.balanceOfUnderlying(address(this));
+    uint256 positionValue = (collateralAssetPrice * positionSupplyAmount) / 1e18;
+
+    uint256 debtAmount = stableMarket.borrowBalanceCurrent(address(this));
+    uint256 debtValue = (borrowedAssetPrice * debtAmount) / 1e18;
+
+    uint256 equityValue = positionValue - debtValue;
+    equityAmount = (equityValue * 1e18) / collateralAssetPrice;
   }
 
   /*----------------------------------------------------------------
@@ -284,7 +296,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateralMarket);
 
-    uint256 flashLoanCollateralAmount = (baseCollateral * ratioDiff) / 1e18;
+    uint256 flashLoanCollateralAmount = (getEquityAmount() * ratioDiff) / 1e18;
     uint256 flashLoanedCollateralValueScaled = flashLoanCollateralAmount * collateralAssetPrice;
 
     uint256 stableToBorrow = flashLoanedCollateralValueScaled / stableAssetPrice;
@@ -328,7 +340,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
       amountToRedeem = ((borrowsToRepayValueScaled / collateralAssetPrice) * 1e18) / stableCollateralFactor;
     } else {
       // else derive the debt to be repaid from the amount to redeem
-      amountToRedeem = (baseCollateral * ratioDiff) / 1e18;
+      amountToRedeem = (getEquityAmount() * ratioDiff) / 1e18;
       uint256 amountToRedeemValueScaled = amountToRedeem * collateralAssetPrice;
       // not accounting for swaps slippage
       borrowsToRepay = ((amountToRedeemValueScaled / stableAssetPrice) * stableCollateralFactor) / 1e18;
