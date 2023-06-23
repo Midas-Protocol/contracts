@@ -42,7 +42,7 @@ contract LeveredPositionLensTest is BaseTest {
   function _testLPLens() internal {
     address[] memory positions;
     bool[] memory closed;
-    (positions, closed) = factory.getPositionsByAccount(0xdc3d8A4ee43dDe6a4E92F0D7A749C8eBD921239b);
+    (positions, closed) = factory.getPositionsByAccount(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
 
     //    address[] memory accounts = factory.getAccountsWithOpenPositions();
     //    for (uint256 i = 0; i < accounts.length; i++) {

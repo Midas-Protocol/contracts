@@ -117,7 +117,7 @@ contract LeveredPositionsLens is Initializable {
     ICErc20 _stableMarket,
     uint256 _targetLeverageRatio
   ) public view returns (int256 netAPY) {
-    if (_supplyAPY == 0 || _supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
+    if (_supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
 
     IComptroller pool = IComptroller(_collateralMarket.comptroller());
     BasePriceOracle oracle = pool.oracle();
