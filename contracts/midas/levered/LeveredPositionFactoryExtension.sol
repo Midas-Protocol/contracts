@@ -30,7 +30,7 @@ contract LeveredPositionFactoryExtension is
   uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 13;
+    uint8 fnsCount = 14;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.createPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPosition.selector;
@@ -45,8 +45,35 @@ contract LeveredPositionFactoryExtension is
     functionSelectors[--fnsCount] = this.getAccountsWithOpenPositions.selector;
     functionSelectors[--fnsCount] = this.getPositionsByAccount.selector;
     functionSelectors[--fnsCount] = this.getPositionsExtension.selector;
+
+    functionSelectors[--fnsCount] = this.fixChapelPositions.selector;
+
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function fixChapelPositions() public {
+    if (block.chainid == 97) {
+      address[] memory accounts = getAccountsWithOpenPositions();
+      for (uint256 i; i < accounts.length; i++) {
+        (address[] memory positions, bool[] memory closed) = getPositionsByAccount(accounts[i]);
+
+        for (uint256 j = 0; j < positions.length; j++) {
+          if (closed[j]) removeClosedPosition(positions[j]);
+          else {
+            try LeveredPosition(positions[j]).getCurrentLeverageRatio() returns (uint256) {
+            //} catch Error(bytes memory error) {
+            } catch (bytes memory error) {
+              if (bytes4(error) == ExtensionNotFound.selector) {
+                EnumerableSet.AddressSet storage userPositions = positionsByAccount[accounts[i]];
+                userPositions.remove(positions[j]);
+                if (userPositions.length() == 0) accountsWithOpenPositions.remove(accounts[i]);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   /*----------------------------------------------------------------
@@ -90,7 +117,7 @@ contract LeveredPositionFactoryExtension is
   }
 
   // @return true if removed, otherwise false
-  function removeClosedPosition(address closedPosition) external returns (bool removed) {
+  function removeClosedPosition(address closedPosition) public returns (bool removed) {
     EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
     if (!userPositions.contains(closedPosition)) revert NoSuchPosition();
     if (!LeveredPosition(closedPosition).isPositionClosed()) revert PositionNotClosed();
@@ -130,7 +157,7 @@ contract LeveredPositionFactoryExtension is
   }
 
   function getPositionsByAccount(address account)
-    external
+    public
     view
     returns (address[] memory positions, bool[] memory closed)
   {
@@ -141,7 +168,7 @@ contract LeveredPositionFactoryExtension is
     }
   }
 
-  function getAccountsWithOpenPositions() external view returns (address[] memory) {
+  function getAccountsWithOpenPositions() public view returns (address[] memory) {
     return accountsWithOpenPositions.values();
   }
 

@@ -36,7 +36,8 @@ contract LeveredPositionLensTest is BaseTest {
   }
 
   function testLPLens() public debuggingOnly fork(BSC_CHAPEL) {
-    _testLPLens();
+    //_testLPLens();
+    _testLensPositionInfo();
   }
 
   function _testLPLens() internal {
@@ -76,6 +77,11 @@ contract LeveredPositionLensTest is BaseTest {
       emit log("");
     }
   }
+
+  function _testLensPositionInfo() internal {
+    LeveredPosition position = LeveredPosition(0x29D36E791c6d7F9f94Fc11d0274c0cD462bCCC13);
+    lens.getPositionInfo(position, 1e16);
+  }
 }
 
 contract LeveredPositionFactoryTest is BaseTest {
@@ -91,9 +97,33 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
-      0x27521eae4eE4153214CaDc3eCD703b9B0326C908
-    );
+    LeveredPositionFactoryExtension newExt = new LeveredPositionFactoryExtension();
+    DiamondBase asBase = DiamondBase(address(factory));
+    address[] memory oldExts = asBase._listExtensions();
+    DiamondExtension oldExt = DiamondExtension(address(0));
+    if (oldExts.length > 0) oldExt = DiamondExtension(oldExts[0]);
+    vm.prank(factory.owner());
+    asBase._registerExtension(newExt, oldExt);
+
+    {
+      address[] memory accounts = factory.getAccountsWithOpenPositions();
+      for (uint256 i = 0; i < accounts.length; i++) {
+        (address[] memory positions, bool[] memory closed) = factory.getPositionsByAccount(accounts[i]);
+        emit log_named_address("account",  accounts[i]);
+        emit log_named_uint("positions", positions.length);
+      }
+    }
+
+    ILeveredPositionFactory(address(factory)).fixChapelPositions();
+
+    {
+      address[] memory accounts = factory.getAccountsWithOpenPositions();
+      for (uint256 i = 0; i < accounts.length; i++) {
+        (address[] memory positions, bool[] memory closed) = factory.getPositionsByAccount(accounts[i]);
+        emit log_named_address("account",  accounts[i]);
+        emit log_named_uint("positions", positions.length);
+      }
+    }
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {

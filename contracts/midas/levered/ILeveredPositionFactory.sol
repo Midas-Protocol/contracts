@@ -36,6 +36,8 @@ interface ILeveredPositionFactoryBase {
 }
 
 interface ILeveredPositionFactoryExtension {
+  function fixChapelPositions() external;
+
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     view
