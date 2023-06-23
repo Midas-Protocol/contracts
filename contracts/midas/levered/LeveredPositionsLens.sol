@@ -162,6 +162,7 @@ contract LeveredPositionsLens is Initializable {
     uint256 positionValue;
     uint256 debtAmount;
     uint256 debtValue;
+    uint256 equityAmount;
     uint256 equityValue;
     int256 currentApy;
     uint256 debtRatio;
@@ -171,7 +172,6 @@ contract LeveredPositionsLens is Initializable {
 
   function getPositionInfo(LeveredPosition pos, uint256 supplyApy) public view returns (PositionInfo memory info) {
     ICErc20 collateralMarket = pos.collateralMarket();
-    ICErc20 stableMarket = pos.stableMarket();
     IComptroller pool = pos.pool();
     uint256 collateralPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
     {
@@ -181,11 +181,13 @@ contract LeveredPositionsLens is Initializable {
     }
 
     {
+      ICErc20 stableMarket = pos.stableMarket();
       uint256 borrowedPrice = pool.oracle().getUnderlyingPrice(stableMarket);
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
       info.debtValue = (borrowedPrice * info.debtAmount) / 1e18;
       info.equityValue = (collateralPrice * pos.baseCollateral()) / 1e18;
       info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
+      info.equityAmount = ((info.positionValue - info.debtValue) * 1e18) / collateralPrice;
     }
 
     {
