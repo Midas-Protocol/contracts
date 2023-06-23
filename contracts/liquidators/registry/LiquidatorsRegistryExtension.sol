@@ -126,7 +126,10 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
         }
       }
 
-      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(tokenToRedeem, nextRedeemedToken);
+      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(
+        tokenToRedeem,
+        nextRedeemedToken
+      );
       if (address(strategy) == address(0)) break;
 
       strategiesTemp[k] = strategy;
