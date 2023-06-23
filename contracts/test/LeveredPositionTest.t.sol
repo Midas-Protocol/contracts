@@ -91,9 +91,17 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
-      0x27521eae4eE4153214CaDc3eCD703b9B0326C908
-    );
+    address[] memory acc = factory.getAccountsWithOpenPositions();
+    for (uint256 i = 0; i < acc.length; i++) {
+      emit log("");
+      emit log_named_address("account", acc[i]);
+      (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
+        acc[i]
+      );
+      for (uint256 j = 0; j < pos.length; j++) {
+        emit log_named_address("position", pos[j]);
+      }
+    }
   }
 
   function testClosePosition() public debuggingOnly fork(BSC_CHAPEL) {
