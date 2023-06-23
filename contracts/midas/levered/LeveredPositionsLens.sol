@@ -190,9 +190,9 @@ contract LeveredPositionsLens is Initializable {
       info.borrowedAssetPrice = pool.oracle().getUnderlyingPrice(stableMarket);
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
       info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
-      info.equityValue = (info.collateralAssetPrice * pos.baseCollateral()) / 1e18;
+      info.equityValue = info.positionValue - info.debtValue;
       info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
-      info.equityAmount = ((info.positionValue - info.debtValue) * 1e18) / info.collateralAssetPrice;
+      info.equityAmount = (info.equityValue * 1e18) / info.collateralAssetPrice;
     }
 
     {
