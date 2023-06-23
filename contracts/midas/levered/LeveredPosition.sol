@@ -55,6 +55,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
 
   function fundPosition(IERC20Upgradeable fundingAsset, uint256 amount) public {
     fundingAsset.safeTransferFrom(msg.sender, address(this), amount);
+    _supplyCollateral(fundingAsset);
 
     if (!pool.checkMembership(address(this), collateralMarket)) {
       address[] memory cTokens = new address[](1);
