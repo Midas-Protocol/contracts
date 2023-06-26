@@ -149,10 +149,33 @@ contract LeveredPositionsLens is Initializable {
     }
   }
 
-  function getNetApyForPosition(LeveredPosition pos, uint256 _supplyAPY) public view returns (int256) {
+  function getLeverageRatioAfterFunding(LeveredPosition pos, uint256 newFunding) public view returns (uint256) {
+    uint256 equityAmount = pos.getEquityAmount();
+    if (equityAmount == 0 && newFunding == 0) return 0;
+
+    uint256 suppliedCollateralCurrent = pos.collateralMarket().balanceOfUnderlying(address(this));
+    return ((suppliedCollateralCurrent + newFunding) * 1e18) / (equityAmount + newFunding);
+  }
+
+  function getNetApyForPositionAfterFunding(
+    LeveredPosition pos,
+    uint256 supplyAPY,
+    uint256 newFunding
+  ) external view returns (int256) {
     return
       getNetAPY(
-        _supplyAPY,
+        supplyAPY,
+        pos.getEquityAmount() + newFunding,
+        pos.collateralMarket(),
+        pos.stableMarket(),
+        getLeverageRatioAfterFunding(pos, newFunding)
+      );
+  }
+
+  function getNetApyForPosition(LeveredPosition pos, uint256 supplyAPY) public view returns (int256) {
+    return
+      getNetAPY(
+        supplyAPY,
         pos.getEquityAmount(),
         pos.collateralMarket(),
         pos.stableMarket(),
@@ -191,7 +214,7 @@ contract LeveredPositionsLens is Initializable {
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
       info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
       info.equityValue = info.positionValue - info.debtValue;
-      info.debtRatio = (info.debtValue * 1e18) / info.positionValue;
+      info.debtRatio = info.positionValue == 0 ? 0 : (info.debtValue * 1e18) / info.positionValue;
       info.equityAmount = (info.equityValue * 1e18) / info.collateralAssetPrice;
     }
 
