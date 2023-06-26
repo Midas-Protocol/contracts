@@ -8,8 +8,6 @@ import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract LeveredPositionStorage {
-  // @notice the base collateral is the amount of collateral that is not funded by borrowing stables
-  uint256 public baseCollateral;
   address public immutable positionOwner;
   ILeveredPositionFactory public factory;
 

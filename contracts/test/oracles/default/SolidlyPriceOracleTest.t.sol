@@ -124,6 +124,29 @@ contract SolidlyPriceOracleTest is BaseTest {
     }
   }
 
+  function testPolygonAssets() public fork(POLYGON_MAINNET) {
+    address usdr = 0xb5DFABd7fF7F83BAB83995E72A52B97ABb7bcf63;
+    address usdc = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174;
+
+    address[] memory underlyings = new address[](1);
+    SolidlyPriceOracle.AssetConfig[] memory configs = new SolidlyPriceOracle.AssetConfig[](1);
+
+    underlyings[0] = usdr;
+
+    // USDR/USDC (9/6), usinf Pearl Exchange
+    configs[0] = SolidlyPriceOracle.AssetConfig(0xf6A72Bd46F53Cd5103812ea1f4B5CF38099aB797, stable);
+
+    PriceExpected[] memory expPrices = new PriceExpected[](4);
+
+    expPrices[0] = PriceExpected({ price: mpo.price(usdc), percentErrorAllowed: 1e17 }); // 0.1%
+
+    emit log_named_uint("USDC PRICE", mpo.price(stable));
+    uint256[] memory prices = getPriceFeed(underlyings, configs);
+    for (uint256 i = 0; i < prices.length; i++) {
+      assertApproxEqRel(prices[i], expPrices[i].price, expPrices[i].percentErrorAllowed, "!Price Error");
+    }
+  }
+
   function getPriceFeed(address[] memory underlyings, SolidlyPriceOracle.AssetConfig[] memory configs)
     internal
     returns (uint256[] memory price)

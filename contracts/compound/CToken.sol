@@ -176,6 +176,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
      *  mintTokens = actualMintAmount / exchangeRate
      */
 
+    // mintTokens is rounded down here - correct
     (vars.mathErr, vars.mintTokens) = divScalarByExpTruncate(
       vars.actualMintAmount,
       Exp({ mantissa: vars.exchangeRateMantissa })
@@ -241,6 +242,11 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     uint256 accountTokensNew;
   }
 
+  function divRoundUp(uint256 x, uint256 y) internal pure returns (uint256 res) {
+    res = (x * 1e18) / y;
+    if (x % y != 0) res += 1;
+  }
+
   /**
    * @notice User redeems cTokens in exchange for the underlying asset
    * @dev Assumes interest has already been accrued up to the current block
@@ -260,16 +266,10 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
 
     vars.exchangeRateMantissa = asCTokenExtension().exchangeRateCurrent();
 
-    if (redeemAmountIn == type(uint256).max) {
-      redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, ICErc20(address(this)), false);
-    }
-
-    uint256 totalUnderlyingSupplied = asCTokenExtension().getTotalUnderlyingSupplied();
-    // don't allow dust tokens/assets to be left after
-    if (totalUnderlyingSupplied - redeemAmountIn < 1000) redeemAmountIn = totalUnderlyingSupplied;
-
-    /* If redeemTokensIn > 0: */
     if (redeemTokensIn > 0) {
+      // don't allow dust tokens/assets to be left after
+      if (totalSupply - redeemTokensIn < 5000) redeemTokensIn = totalSupply;
+
       /*
        * We calculate the exchange rate and the amount of underlying to be redeemed:
        *  redeemTokens = redeemTokensIn
@@ -286,26 +286,27 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
           failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_TOKENS_CALCULATION_FAILED, uint256(vars.mathErr));
       }
     } else {
+      if (redeemAmountIn == type(uint256).max) {
+        redeemAmountIn = comptroller.getMaxRedeemOrBorrow(redeemer, ICErc20(address(this)), false);
+      }
+
+      // don't allow dust tokens/assets to be left after
+      uint256 totalUnderlyingSupplied = asCTokenExtension().getTotalUnderlyingSupplied();
+      if (totalUnderlyingSupplied - redeemAmountIn < 1000) redeemAmountIn = totalUnderlyingSupplied;
+
       /*
        * We get the current exchange rate and calculate the amount to be redeemed:
        *  redeemTokens = redeemAmountIn / exchangeRate
        *  redeemAmount = redeemAmountIn
        */
 
-      (vars.mathErr, vars.redeemTokens) = divScalarByExpTruncate(
-        redeemAmountIn,
-        Exp({ mantissa: vars.exchangeRateMantissa })
-      );
-      if (vars.mathErr != MathError.NO_ERROR) {
-        return
-          failOpaque(Error.MATH_ERROR, FailureInfo.REDEEM_EXCHANGE_AMOUNT_CALCULATION_FAILED, uint256(vars.mathErr));
-      }
+      vars.redeemTokens = divRoundUp(redeemAmountIn, vars.exchangeRateMantissa);
+
+      // don't allow dust tokens/assets to be left after
+      if (totalSupply - vars.redeemTokens < 1000) vars.redeemTokens = totalSupply;
 
       vars.redeemAmount = redeemAmountIn;
     }
-
-    // don't allow dust tokens/assets to be left after
-    if (totalSupply - vars.redeemTokens < 1000) vars.redeemTokens = totalSupply;
 
     /* Fail if redeem not allowed */
     uint256 allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);

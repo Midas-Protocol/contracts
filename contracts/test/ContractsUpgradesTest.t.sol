@@ -85,8 +85,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
-    (address latestCErc20DelegateAfter, bool allowResignAfter, bytes memory becomeImplementationDataAfter) = ffd
-      .latestCErc20Delegate(oldCercDelegate);
+    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
 
     emit log_uint(marketsCounterAfter);
@@ -113,7 +112,19 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
+  function testMarketsLatestImplementationsArbitrum() public fork(ARBITRUM_ONE) {
+    _testMarketsLatestImplementations();
+  }
+
   function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function testMarketsLatestImplementationsEth() public fork(ETHEREUM_MAINNET) {
+    _testMarketsLatestImplementations();
+  }
+
+  function testMarketsLatestImplementationsFantom() public fork(FANTOM_OPERA) {
     _testMarketsLatestImplementations();
   }
 

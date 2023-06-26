@@ -297,12 +297,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     address redeemer,
     uint256 redeemTokens
   ) internal view returns (uint256) {
-    uint256 totalSupplyNew = ICErc20(cToken).totalSupply() - redeemTokens;
-    if (totalSupplyNew != 0 && totalSupplyNew < 1000) {
-      // don't let the total supply go too low to prevent inflation attacks
-      return uint256(Error.REJECTION);
-    }
-
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
     }
@@ -807,60 +801,46 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     )
   {
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
-    uint256 oErr;
 
     if (address(cTokenModify) != address(0)) {
       vars.borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
     }
 
     // For each asset the account is in
-    ICErc20[] memory assets = accountAssets[account];
-    for (uint256 i = 0; i < assets.length; i++) {
-      ICErc20 asset = assets[i];
+    for (uint256 i = 0; i < accountAssets[account].length; i++) {
+      ICErc20 asset = accountAssets[account][i];
 
-      // Read the balances and exchange rate from the cToken
-      (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = asset.getAccountSnapshot(account);
-      if (oErr != 0) {
-        // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
-        return (Error.SNAPSHOT_ERROR, 0, 0);
-      }
-      vars.collateralFactor = Exp({ mantissa: markets[address(asset)].collateralFactorMantissa });
-      vars.exchangeRate = Exp({ mantissa: vars.exchangeRateMantissa });
-
-      // Get the normalized price of the asset
-      vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
-      if (vars.oraclePriceMantissa == 0) {
-        return (Error.PRICE_ERROR, 0, 0);
-      }
-      vars.oraclePrice = Exp({ mantissa: vars.oraclePriceMantissa });
-
-      // Pre-compute a conversion factor from tokens -> ether (normalized price value)
-      vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
-
-      uint256 assetAsCollateralValueCap = type(uint256).max;
-      // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
-      if (address(asset) != address(cTokenModify) || redeemTokens > 0) {
-        if (address(cTokenModify) != address(0)) {
-          // if the borrowed asset is capped against this collateral & account is not whitelisted
-          if (
-            borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(asset)] &&
-            !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(asset)].contains(account)
-          ) {
-            assetAsCollateralValueCap = 0;
-          } else {
-            // for each user the value of this kind of collateral is capped regardless of the amount borrowed
-            // denominated in the borrowed asset
-            vars.borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(asset)];
-            // check if set to any value & account is not whitelisted
-            if (
-              vars.borrowCapForCollateral != 0 &&
-              !borrowCapForCollateralWhitelist[address(cTokenModify)][address(asset)].contains(account)
-            ) {
-              // this asset usage as collateral is capped at the native value of the borrow cap
-              assetAsCollateralValueCap = (vars.borrowCapForCollateral * vars.borrowedAssetPrice) / 1e18;
-            }
-          }
+      {
+        // Read the balances and exchange rate from the cToken
+        uint256 oErr;
+        (oErr, vars.cTokenBalance, vars.borrowBalance, vars.exchangeRateMantissa) = asset.getAccountSnapshot(account);
+        if (oErr != 0) {
+          // semi-opaque error code, we assume NO_ERROR == 0 is invariant between upgrades
+          return (Error.SNAPSHOT_ERROR, 0, 0);
         }
+      }
+      {
+        vars.collateralFactor = Exp({ mantissa: markets[address(asset)].collateralFactorMantissa });
+        vars.exchangeRate = Exp({ mantissa: vars.exchangeRateMantissa });
+
+        // Get the normalized price of the asset
+        vars.oraclePriceMantissa = oracle.getUnderlyingPrice(asset);
+        if (vars.oraclePriceMantissa == 0) {
+          return (Error.PRICE_ERROR, 0, 0);
+        }
+        vars.oraclePrice = Exp({ mantissa: vars.oraclePriceMantissa });
+
+        // Pre-compute a conversion factor from tokens -> ether (normalized price value)
+        vars.tokensToDenom = mul_(mul_(vars.collateralFactor, vars.exchangeRate), vars.oraclePrice);
+      }
+      {
+        // Exclude the asset-to-be-borrowed from the liquidity, except for when redeeming
+        uint256 assetAsCollateralValueCap = asComptrollerExtension().getAssetAsCollateralValueCap(
+          asset,
+          cTokenModify,
+          redeemTokens > 0,
+          account
+        );
 
         // accumulate the collateral value to sumCollateral
         uint256 assetCollateralValue = mul_ScalarTruncate(vars.tokensToDenom, vars.cTokenBalance);
