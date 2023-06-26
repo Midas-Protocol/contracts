@@ -61,7 +61,7 @@ contract LeveredPositionsLens is Initializable {
   function getBorrowRateAtRatio(
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket,
-    uint256 _baseCollateral,
+    uint256 _equityAmount,
     uint256 _targetLeverageRatio
   ) external view returns (uint256) {
     IComptroller pool = IComptroller(_stableMarket.comptroller());
@@ -69,7 +69,7 @@ contract LeveredPositionsLens is Initializable {
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 
-    uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _baseCollateral * collateralAssetPrice) /
+    uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _equityAmount * collateralAssetPrice) /
       (stableAssetPrice * 1e18);
     return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount);
   }
@@ -153,7 +153,7 @@ contract LeveredPositionsLens is Initializable {
     return
       getNetAPY(
         _supplyAPY,
-        pos.baseCollateral(),
+        pos.getEquityAmount(),
         pos.collateralMarket(),
         pos.stableMarket(),
         pos.getCurrentLeverageRatio()
@@ -191,15 +191,14 @@ contract LeveredPositionsLens is Initializable {
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
       info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
       info.equityValue = info.positionValue - info.debtValue;
-      info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
+      info.debtRatio = (info.debtValue * 1e18) / info.positionValue;
       info.equityAmount = (info.equityValue * 1e18) / info.collateralAssetPrice;
     }
 
     {
       (, uint256 collateralFactor) = pool.markets(address(collateralMarket));
-      uint256 liquidity = (info.positionValue * collateralFactor) / 1e18;
-      info.liquidationThreshold = (liquidity * 1e18) / info.equityValue;
-      info.safetyBuffer = ((liquidity - info.debtValue) * 1e18) / info.equityValue;
+      info.liquidationThreshold = collateralFactor;
+      info.safetyBuffer = collateralFactor - info.debtRatio;
     }
   }
 }

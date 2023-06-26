@@ -33,6 +33,8 @@ contract LeveredPositionLensTest is BaseTest {
   function afterForkSetUp() internal override {
     factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
     lens = LeveredPositionsLens(ap.getAddress("LeveredPositionsLens"));
+    //    lens = new LeveredPositionsLens();
+    //    lens.initialize(factory);
   }
 
   function testLPLens() public debuggingOnly fork(BSC_CHAPEL) {
@@ -42,7 +44,7 @@ contract LeveredPositionLensTest is BaseTest {
   function _testLPLens() internal {
     address[] memory positions;
     bool[] memory closed;
-    (positions, closed) = factory.getPositionsByAccount(0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
+    (positions, closed) = factory.getPositionsByAccount(0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
 
     //    address[] memory accounts = factory.getAccountsWithOpenPositions();
     //    for (uint256 i = 0; i < accounts.length; i++) {
@@ -53,7 +55,7 @@ contract LeveredPositionLensTest is BaseTest {
     uint256[] memory apys = new uint256[](positions.length);
     LeveredPosition[] memory pos = new LeveredPosition[](positions.length);
     for (uint256 j = 0; j < positions.length; j++) {
-      apys[j] = 1e10;
+      apys[j] = 1e17;
 
       if (address(0) == positions[j]) revert("zero pos address");
       pos[j] = LeveredPosition(positions[j]);
@@ -91,9 +93,22 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
-      0x27521eae4eE4153214CaDc3eCD703b9B0326C908
-    );
+    address[] memory acc = factory.getAccountsWithOpenPositions();
+    for (uint256 i = 0; i < acc.length; i++) {
+      emit log("");
+      emit log_named_address("account", acc[i]);
+      (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
+        acc[i]
+      );
+      for (uint256 j = 0; j < pos.length; j++) {
+        emit log_named_address("position", pos[j]);
+      }
+    }
+  }
+
+  function testBorrowTDai() public debuggingOnly fork(BSC_CHAPEL) {
+    vm.prank(ap.getAddress("deployer"));
+    ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e).borrow(1e36);
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
@@ -289,7 +304,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     vm.assume(targetLeverageRatio < maxRatio);
 
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
-    emit log_named_uint("base collateral", position.baseCollateral());
+    emit log_named_uint("base collateral", position.getEquityAmount());
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e15, "target ratio not matching");
   }
 
@@ -373,7 +388,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 withdrawAmount = position.closePosition();
     emit log_named_uint("withdraw amount", withdrawAmount);
 
-    assertEq(position.baseCollateral(), 0, "!nonzero base collateral");
+    assertEq(position.getEquityAmount(), 0, "!nonzero base collateral");
     assertEq(position.getCurrentLeverageRatio(), 0, "!nonzero leverage ratio");
   }
 }

@@ -114,18 +114,28 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
     uint256 k = 0;
     while (tokenToRedeem != targetOutputToken) {
-      IERC20Upgradeable redeemedToken = outputTokensByInputToken[tokenToRedeem];
-      for (uint256 i = 0; i < tokenPath.length; i++) {
-        if (redeemedToken == tokenPath[i]) break;
+      IERC20Upgradeable nextRedeemedToken;
+      IRedemptionStrategy directStrategy = redemptionStrategiesByTokens[tokenToRedeem][targetOutputToken];
+      if (address(directStrategy) != address(0)) {
+        nextRedeemedToken = targetOutputToken;
+      } else {
+        // chain the next redeemed token from the default path
+        nextRedeemedToken = outputTokensByInputToken[tokenToRedeem];
+        for (uint256 i = 0; i < tokenPath.length; i++) {
+          if (nextRedeemedToken == tokenPath[i]) break;
+        }
       }
 
-      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(tokenToRedeem, redeemedToken);
+      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(
+        tokenToRedeem,
+        nextRedeemedToken
+      );
       if (address(strategy) == address(0)) break;
 
       strategiesTemp[k] = strategy;
       strategiesDataTemp[k] = strategyData;
-      tokenPath[k] = redeemedToken;
-      tokenToRedeem = redeemedToken;
+      tokenPath[k] = nextRedeemedToken;
+      tokenToRedeem = nextRedeemedToken;
 
       k++;
       if (k == 10) break;

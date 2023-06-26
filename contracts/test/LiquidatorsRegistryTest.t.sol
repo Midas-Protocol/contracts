@@ -23,10 +23,10 @@ contract LiquidatorsRegistryTest is BaseTest {
     IERC20Upgradeable chapelTDai = IERC20Upgradeable(0x8870f7102F1DcB1c35b01af10f1baF1B00aD6805);
 
     emit log("bomb tusd");
-    emit log(registry.redemptionStrategiesByTokens(chapelBomb, chapelTUsd).name());
+    emit log(registry.redemptionStrategiesByTokens(chapelBomb, chapelTDai).name());
     emit log("tusd bomb");
-    emit log(registry.redemptionStrategiesByTokens(chapelTUsd, chapelBomb).name());
+    emit log(registry.redemptionStrategiesByTokens(chapelTDai, chapelBomb).name());
 
-    (IRedemptionStrategy strategy, bytes memory strategyData) = registry.getRedemptionStrategy(chapelBomb, chapelTUsd);
+    (IRedemptionStrategy strategy, bytes memory strategyData) = registry.getRedemptionStrategy(chapelBomb, chapelTDai);
   }
 }
