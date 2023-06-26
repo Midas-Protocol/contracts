@@ -77,38 +77,48 @@ contract GammaLpTokenWrapper is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (ISwapRouter swapRouter, IUniProxy proxy, IHypervisor vault) = abi.decode(strategyData, (ISwapRouter, IUniProxy, IHypervisor));
+    (ISwapRouter swapRouter, IUniProxy proxy, IHypervisor vault) = abi.decode(
+      strategyData,
+      (ISwapRouter, IUniProxy, IHypervisor)
+    );
     address otherToken;
     uint256 amountOtherOut;
     {
-      require(address(inputToken) == vault.token0() || address(inputToken) == vault.token1(), "input token not pair underlying");
+      require(
+        address(inputToken) == vault.token0() || address(inputToken) == vault.token1(),
+        "input token not pair underlying"
+      );
       otherToken = address(inputToken) == vault.token0() ? vault.token1() : vault.token0();
     }
 
-//    {
-//      uint256 halfInputAmount = inputAmount / 2;
-//      (uint256 depositOtherMin, uint256 depositOtherMax) = proxy.getDepositAmount(address(vault), address(inputToken), inputAmount);
-//      uint256 targetAmountOther = (depositOtherMin + depositOtherMax) / 2;
-//
-//      inputToken.approve(address(swapRouter), halfInputAmount);
-//      amountOtherOut = swapRouter.exactInputSingle(
-//        ISwapRouter.ExactInputSingleParams(
-//          address(inputToken),
-//          otherToken,
-//          address(this),
-//          block.timestamp,
-//          halfInputAmount,
-//          0, //depositOtherMin, // amountOutMinimum
-//          0 // limitSqrtPrice
-//        )
-//      );
-//    }
+    //    {
+    //      uint256 halfInputAmount = inputAmount / 2;
+    //      (uint256 depositOtherMin, uint256 depositOtherMax) = proxy.getDepositAmount(address(vault), address(inputToken), inputAmount);
+    //      uint256 targetAmountOther = (depositOtherMin + depositOtherMax) / 2;
+    //
+    //      inputToken.approve(address(swapRouter), halfInputAmount);
+    //      amountOtherOut = swapRouter.exactInputSingle(
+    //        ISwapRouter.ExactInputSingleParams(
+    //          address(inputToken),
+    //          otherToken,
+    //          address(this),
+    //          block.timestamp,
+    //          halfInputAmount,
+    //          0, //depositOtherMin, // amountOutMinimum
+    //          0 // limitSqrtPrice
+    //        )
+    //      );
+    //    }
 
     uint256 deposit0;
     uint256 deposit1;
     bool zeroForOne = address(inputToken) == vault.token0();
     {
-      (uint256 depositInputTokenMin, uint256 depositInputTokenMax) = proxy.getDepositAmount(address(vault), otherToken, amountOtherOut);
+      (uint256 depositInputTokenMin, uint256 depositInputTokenMax) = proxy.getDepositAmount(
+        address(vault),
+        otherToken,
+        amountOtherOut
+      );
       deposit0 = zeroForOne ? (depositInputTokenMin + depositInputTokenMax) / 2 : amountOtherOut;
       deposit1 = !zeroForOne ? (depositInputTokenMin + depositInputTokenMax) / 2 : amountOtherOut;
     }
