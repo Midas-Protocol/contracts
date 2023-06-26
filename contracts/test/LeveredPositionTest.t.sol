@@ -97,9 +97,7 @@ contract LeveredPositionFactoryTest is BaseTest {
     for (uint256 i = 0; i < acc.length; i++) {
       emit log("");
       emit log_named_address("account", acc[i]);
-      (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
-        acc[i]
-      );
+      (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(acc[i]);
       for (uint256 j = 0; j < pos.length; j++) {
         emit log_named_address("position", pos[j]);
       }
