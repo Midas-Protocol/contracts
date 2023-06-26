@@ -79,12 +79,12 @@ contract UmbrellaPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     IUmbrellaFeeds.PriceData memory nativeTokenUsdPriceData = UMBRELLA_FEEDS_ADDRESS.priceData(NATIVE_TOKEN_USD_KEY);
     uint256 nativeTokenUsdPrice = uint256(nativeTokenUsdPriceData.price);
 
-    if (nativeTokenUsdPriceData.price <= 0) return 0;
+    if (nativeTokenUsdPriceData.price == 0) return 0;
     // 8 decimals are used
     IUmbrellaFeeds.PriceData memory priceData = UMBRELLA_FEEDS_ADDRESS.priceData(feed);
     uint256 tokenPrice = uint256(priceData.price);
-    // Flux price feed is 8 decimals:
-    return tokenPrice >= 0 ? (tokenPrice * 1e28) / uint256(nativeTokenUsdPrice) : 0;
+    // Umbrella price feed is 8 decimals:
+    return (tokenPrice * 1e18) / uint256(nativeTokenUsdPrice);
   }
 
   /**
