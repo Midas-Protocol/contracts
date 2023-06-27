@@ -64,6 +64,7 @@ contract LeveredPositionLensTest is BaseTest {
     LeveredPositionsLens.PositionInfo[] memory infos = lens.getPositionsInfo(pos, apys);
 
     for (uint256 k = 0; k < infos.length; k++) {
+      emit log_named_address("address", address(pos[k]));
       emit log_named_uint("positionSupplyAmount", infos[k].positionSupplyAmount);
       emit log_named_uint("positionValue", infos[k].positionValue);
       emit log_named_uint("debtAmount", infos[k].debtAmount);
@@ -102,11 +103,6 @@ contract LeveredPositionFactoryTest is BaseTest {
         emit log_named_address("position", pos[j]);
       }
     }
-  }
-
-  function testBorrowTDai() public debuggingOnly fork(BSC_CHAPEL) {
-    vm.prank(ap.getAddress("deployer"));
-    ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e).borrow(1e36);
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
