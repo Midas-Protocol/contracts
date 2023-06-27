@@ -157,10 +157,6 @@ contract LeveredPositionsLens is Initializable {
     return ((suppliedCollateralCurrent + newFunding) * 1e18) / (equityAmount + newFunding);
   }
 
-  function getNetApyForPosition(LeveredPosition pos, uint256 supplyAPY) public view returns (int256) {
-    return getNetApyForPositionAfterFunding(pos, supplyAPY, 0);
-  }
-
   function getNetApyForPositionAfterFunding(
     LeveredPosition pos,
     uint256 supplyAPY,
@@ -172,8 +168,12 @@ contract LeveredPositionsLens is Initializable {
         pos.getEquityAmount() + newFunding,
         pos.collateralMarket(),
         pos.stableMarket(),
-        pos.getCurrentLeverageRatio()
+        getLeverageRatioAfterFunding(pos, newFunding)
       );
+  }
+
+  function getNetApyForPosition(LeveredPosition pos, uint256 supplyAPY) public view returns (int256) {
+    return getNetApyForPositionAfterFunding(pos, supplyAPY, 0);
   }
 
   struct PositionInfo {
@@ -207,7 +207,7 @@ contract LeveredPositionsLens is Initializable {
       info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
       info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
       info.equityValue = info.positionValue - info.debtValue;
-      info.debtRatio = (info.debtValue * 1e18) / info.positionValue;
+      info.debtRatio = info.positionValue == 0 ? 0 : (info.debtValue * 1e18) / info.positionValue;
       info.equityAmount = (info.equityValue * 1e18) / info.collateralAssetPrice;
     }
 
