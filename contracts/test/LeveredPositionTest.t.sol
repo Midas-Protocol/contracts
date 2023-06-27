@@ -44,7 +44,7 @@ contract LeveredPositionLensTest is BaseTest {
   function _testLPLens() internal {
     address[] memory positions;
     bool[] memory closed;
-    (positions, closed) = factory.getPositionsByAccount(0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
+    (positions, closed) = factory.getPositionsByAccount(0x8982aa50bb919E42e9204f12e5b59D053Eb2A602);
 
     //    address[] memory accounts = factory.getAccountsWithOpenPositions();
     //    for (uint256 i = 0; i < accounts.length; i++) {
@@ -55,7 +55,7 @@ contract LeveredPositionLensTest is BaseTest {
     uint256[] memory apys = new uint256[](positions.length);
     LeveredPosition[] memory pos = new LeveredPosition[](positions.length);
     for (uint256 j = 0; j < positions.length; j++) {
-      apys[j] = 1e17;
+      apys[j] = 0;
 
       if (address(0) == positions[j]) revert("zero pos address");
       pos[j] = LeveredPosition(positions[j]);
@@ -64,6 +64,7 @@ contract LeveredPositionLensTest is BaseTest {
     LeveredPositionsLens.PositionInfo[] memory infos = lens.getPositionsInfo(pos, apys);
 
     for (uint256 k = 0; k < infos.length; k++) {
+      emit log_named_address("address", address(pos[k]));
       emit log_named_uint("positionSupplyAmount", infos[k].positionSupplyAmount);
       emit log_named_uint("positionValue", infos[k].positionValue);
       emit log_named_uint("debtAmount", infos[k].debtAmount);
@@ -104,9 +105,12 @@ contract LeveredPositionFactoryTest is BaseTest {
     }
   }
 
-  function testBorrowTDai() public debuggingOnly fork(BSC_CHAPEL) {
-    vm.prank(ap.getAddress("deployer"));
-    ICErc20(0x8c4FaB47f0E5F4263A37e5Dbe65Dd275EAF6687e).borrow(1e36);
+  function testApproveBomb() public debuggingOnly fork(BSC_CHAPEL) {
+    LeveredPosition lp = LeveredPosition(0xD06DD032993d031f1E07533707b7d120cC419B52);
+    ERC20 bomb = ERC20(0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768);
+
+    vm.prank(0xdc3d8A4ee43dDe6a4E92F0D7A749C8eBD921239b);
+    bomb.approve(address(factory), 46799689988 * 1e18);
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {

@@ -149,11 +149,27 @@ contract LeveredPositionsLens is Initializable {
     }
   }
 
-  function getNetApyForPosition(LeveredPosition pos, uint256 _supplyAPY) public view returns (int256) {
+  function getLeverageRatioAfterFunding(LeveredPosition pos, uint256 newFunding) public view returns (uint256) {
+    uint256 equityAmount = pos.getEquityAmount();
+    if (equityAmount == 0 && newFunding == 0) return 0;
+
+    uint256 suppliedCollateralCurrent = pos.collateralMarket().balanceOfUnderlying(address(pos));
+    return ((suppliedCollateralCurrent + newFunding) * 1e18) / (equityAmount + newFunding);
+  }
+
+  function getNetApyForPosition(LeveredPosition pos, uint256 supplyAPY) public view returns (int256) {
+    return getNetApyForPositionAfterFunding(pos, supplyAPY, 0);
+  }
+
+  function getNetApyForPositionAfterFunding(
+    LeveredPosition pos,
+    uint256 supplyAPY,
+    uint256 newFunding
+  ) public view returns (int256) {
     return
       getNetAPY(
-        _supplyAPY,
-        pos.getEquityAmount(),
+        supplyAPY,
+        pos.getEquityAmount() + newFunding,
         pos.collateralMarket(),
         pos.stableMarket(),
         pos.getCurrentLeverageRatio()
