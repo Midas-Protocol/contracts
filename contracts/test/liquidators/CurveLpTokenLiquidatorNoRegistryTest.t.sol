@@ -107,8 +107,9 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     vm.prank(whaleUsdr);
     usdr.transfer(address(wrapper), 100e11);
 
-    wrapper.redeem(IERC20Upgradeable(usdrAddress), 100e11, abi.encode(curveV1Oracle, usdr3Crv));
+    wrapper.redeem(IERC20Upgradeable(usdrAddress), 100e11, abi.encode(usdr3Crv));
 
     assertGt(usdr3Crv.balanceOf(address(wrapper)), 0, "!wrapped");
+    assertEq(usdr.balanceOf(address(wrapper)), 0, "!unused usdr");
   }
 }

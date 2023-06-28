@@ -35,7 +35,7 @@ contract GammaLpTokenLiquidatorTest is BaseTest {
     assertGt(outputAmount, 0, "!failed to withdraw and swap");
   }
 
-  function testGammaLpTokenWrapper() public fork(BSC_MAINNET) {
+  function testGammaLpTokenWrapperWbnb() public fork(BSC_MAINNET) {
     address USDT_WBNB_THENA_GAMMA_VAULT = 0x921C7aC35D9a528440B75137066adb1547289555; // Wide
     IHypervisor vault = IHypervisor(USDT_WBNB_THENA_GAMMA_VAULT);
     address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
@@ -56,5 +56,29 @@ contract GammaLpTokenLiquidatorTest is BaseTest {
     assertGt(outputToken.balanceOf(address(wrapper)), 0, "!wrapped");
     assertEq(IERC20Upgradeable(wbnb).balanceOf(address(wrapper)), 0, "!unused wbnb");
     assertEq(IERC20Upgradeable(usdtAddress).balanceOf(address(wrapper)), 0, "!unused usdt");
+  }
+
+  function testGammaLpTokenWrapperUsdt() public fork(BSC_MAINNET) {
+    address USDT_WBNB_THENA_GAMMA_VAULT = 0x921C7aC35D9a528440B75137066adb1547289555; // Wide
+    IHypervisor vault = IHypervisor(USDT_WBNB_THENA_GAMMA_VAULT);
+    address usdtAddress = 0x55d398326f99059fF775485246999027B3197955;
+    address usdtWhale = 0x4B16c5dE96EB2117bBE5fd171E4d203624B014aa;
+    IERC20Upgradeable usdt = IERC20Upgradeable(usdtAddress);
+
+    GammaLpTokenWrapper wrapper = new GammaLpTokenWrapper();
+    vm.prank(usdtWhale);
+    usdt.transfer(address(wrapper), 100e18);
+
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = wrapper.redeem(
+      usdt,
+      100e18,
+      abi.encode(algebraSwapRouter, uniProxy, vault)
+    );
+
+    emit log_named_uint("lp tokens minted", outputAmount);
+
+    assertGt(outputToken.balanceOf(address(wrapper)), 0, "!wrapped");
+    assertEq(IERC20Upgradeable(wbnb).balanceOf(address(wrapper)), 0, "!unused wbnb");
+    assertEq(usdt.balanceOf(address(wrapper)), 0, "!unused usdt");
   }
 }
