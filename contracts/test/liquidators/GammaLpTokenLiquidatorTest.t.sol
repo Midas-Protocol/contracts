@@ -39,6 +39,7 @@ contract GammaLpTokenLiquidatorTest is BaseTest {
     address USDT_WBNB_THENA_GAMMA_VAULT = 0x921C7aC35D9a528440B75137066adb1547289555; // Wide
     IHypervisor vault = IHypervisor(USDT_WBNB_THENA_GAMMA_VAULT);
     address wbnbWhale = 0x0eD7e52944161450477ee417DE9Cd3a859b14fD0;
+    address usdtAddress = 0x55d398326f99059fF775485246999027B3197955;
 
     GammaLpTokenWrapper wrapper = new GammaLpTokenWrapper();
     vm.prank(wbnbWhale);
@@ -50,8 +51,10 @@ contract GammaLpTokenLiquidatorTest is BaseTest {
       abi.encode(algebraSwapRouter, uniProxy, vault)
     );
 
-    assertGt(outputToken.balanceOf(address(this)), 0, "!wrapped");
-
     emit log_named_uint("lp tokens minted", outputAmount);
+
+    assertGt(outputToken.balanceOf(address(wrapper)), 0, "!wrapped");
+    assertEq(IERC20Upgradeable(wbnb).balanceOf(address(wrapper)), 0, "!unused wbnb");
+    assertEq(IERC20Upgradeable(usdtAddress).balanceOf(address(wrapper)), 0, "!unused usdt");
   }
 }

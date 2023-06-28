@@ -5,6 +5,9 @@ import "./IRedemptionStrategy.sol";
 import { IHypervisor } from "../external/gamma/IHypervisor.sol";
 import { IUniProxy } from "../external/gamma/IUniProxy.sol";
 import { ISwapRouter } from "../external/algebra/ISwapRouter.sol";
+import { IAlgebraPool } from "../external/algebra/IAlgebraPool.sol";
+
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 /**
  * @title GammaLpTokenLiquidator
@@ -66,7 +69,7 @@ contract GammaLpTokenLiquidator is IRedemptionStrategy {
     outputAmount = outputToken.balanceOf(address(this));
   }
 
-  function name() public view returns (string memory) {
+  function name() public pure returns (string memory) {
     return "GammaLpTokenLiquidator";
   }
 }
@@ -81,54 +84,55 @@ contract GammaLpTokenWrapper is IRedemptionStrategy {
       strategyData,
       (ISwapRouter, IUniProxy, IHypervisor)
     );
-    address otherToken;
-    uint256 amountOtherOut;
+
+    bool zeroForOne = address(inputToken) == vault.token0();
+    uint256[4] memory minIn;
+    uint256 swap0;
+    uint256 swap1;
     {
-      require(
-        address(inputToken) == vault.token0() || address(inputToken) == vault.token1(),
-        "input token not pair underlying"
-      );
-      otherToken = address(inputToken) == vault.token0() ? vault.token1() : vault.token0();
+      uint256 ratio;
+      uint256 price;
+      {
+        uint256 lp0Decimals = 10**ERC20Upgradeable(vault.token0()).decimals();
+        uint256 lp1Decimals = 10**ERC20Upgradeable(vault.token1()).decimals();
+        {
+          uint256 decimalsDiff = (1e18 * lp0Decimals) / lp1Decimals;
+          uint256 decimalsDenominator = decimalsDiff > 1e12 ? 1e6 : 1;
+          (uint256 sqrtPriceX96, , , , , , ) = IAlgebraPool(vault.pool()).globalState();
+          price = ((sqrtPriceX96**2 * (decimalsDiff / decimalsDenominator)) / (2**192)) * decimalsDenominator;
+        }
+        (uint256 amountStart, uint256 amountEnd) = proxy.getDepositAmount(address(vault), vault.token0(), lp0Decimals);
+        uint256 amount1 = (((amountStart + amountEnd) / 2) * 1e18) / lp1Decimals;
+        ratio = (amount1 * 1e18) / price;
+      }
+
+      swap0 = (inputAmount * 1e18) / (ratio + 1e18);
+      swap1 = inputAmount - swap0;
     }
 
-    //    {
-    //      uint256 halfInputAmount = inputAmount / 2;
-    //      (uint256 depositOtherMin, uint256 depositOtherMax) = proxy.getDepositAmount(address(vault), address(inputToken), inputAmount);
-    //      uint256 targetAmountOther = (depositOtherMin + depositOtherMax) / 2;
-    //
-    //      inputToken.approve(address(swapRouter), halfInputAmount);
-    //      amountOtherOut = swapRouter.exactInputSingle(
-    //        ISwapRouter.ExactInputSingleParams(
-    //          address(inputToken),
-    //          otherToken,
-    //          address(this),
-    //          block.timestamp,
-    //          halfInputAmount,
-    //          0, //depositOtherMin, // amountOutMinimum
-    //          0 // limitSqrtPrice
-    //        )
-    //      );
-    //    }
+    {
+      inputToken.approve(address(swapRouter), inputAmount);
+      swapRouter.exactInputSingle(
+        ISwapRouter.ExactInputSingleParams(
+          address(inputToken),
+          zeroForOne ? vault.token1() : vault.token0(),
+          address(this),
+          block.timestamp,
+          zeroForOne ? swap1 : swap0,
+          0, // amount out min
+          0 // limitSqrtPrice
+        )
+      );
+    }
 
     uint256 deposit0;
     uint256 deposit1;
-    bool zeroForOne = address(inputToken) == vault.token0();
     {
-      (uint256 depositInputTokenMin, uint256 depositInputTokenMax) = proxy.getDepositAmount(
-        address(vault),
-        otherToken,
-        amountOtherOut
-      );
-      deposit0 = zeroForOne ? (depositInputTokenMin + depositInputTokenMax) / 2 : amountOtherOut;
-      deposit1 = !zeroForOne ? (depositInputTokenMin + depositInputTokenMax) / 2 : amountOtherOut;
+      deposit0 = IERC20Upgradeable(vault.token0()).balanceOf(address(this));
+      deposit1 = IERC20Upgradeable(vault.token1()).balanceOf(address(this));
+      IERC20Upgradeable(vault.token0()).approve(address(vault), deposit0);
+      IERC20Upgradeable(vault.token1()).approve(address(vault), deposit1);
     }
-
-    uint256[4] memory minIn;
-    //    if (vault.directDeposit()) {
-    //      // TODO should we estimate minIn or 0 values are ok?
-    //      (uint256 depositInputTokenMin, uint256 depositInputTokenMax) = proxy.getDepositAmount(address(vault), otherToken, amountOtherOut);
-    //      minIn[0]
-    //    }
 
     outputAmount = proxy.deposit(
       deposit0,
@@ -141,7 +145,9 @@ contract GammaLpTokenWrapper is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(address(vault));
   }
 
-  function name() public view returns (string memory) {
+  function log(string memory, uint256) public pure {}
+
+  function name() public pure returns (string memory) {
     return "GammaLpTokenWrapper";
   }
 }
