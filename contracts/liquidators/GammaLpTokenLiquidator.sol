@@ -85,39 +85,39 @@ contract GammaLpTokenWrapper is IRedemptionStrategy {
       (ISwapRouter, IUniProxy, IHypervisor)
     );
 
+    address token0 = vault.token0();
+    address token1 = vault.token1();
     {
-      bool zeroForOne = address(inputToken) == vault.token0();
-      uint256 swap0;
-      uint256 swap1;
+      uint256 swapAmount;
       {
         uint256 ratio;
         uint256 price;
         {
-          uint256 lp0Decimals = 10**ERC20Upgradeable(vault.token0()).decimals();
-          uint256 lp1Decimals = 10**ERC20Upgradeable(vault.token1()).decimals();
+          uint256 token0Decimals = 10**ERC20Upgradeable(token0).decimals();
+          uint256 token1Decimals = 10**ERC20Upgradeable(token1).decimals();
           {
-            uint256 decimalsDiff = (1e18 * lp0Decimals) / lp1Decimals;
+            uint256 decimalsDiff = (1e18 * token0Decimals) / token1Decimals;
             uint256 decimalsDenominator = decimalsDiff > 1e12 ? 1e6 : 1;
             (uint256 sqrtPriceX96, , , , , , ) = IAlgebraPool(vault.pool()).globalState();
             price = ((sqrtPriceX96**2 * (decimalsDiff / decimalsDenominator)) / (2**192)) * decimalsDenominator;
           }
-          (uint256 amountStart, uint256 amountEnd) = proxy.getDepositAmount(address(vault), vault.token0(), lp0Decimals);
-          uint256 amount1 = (((amountStart + amountEnd) / 2) * 1e18) / lp1Decimals;
+          (uint256 amountStart, uint256 amountEnd) = proxy.getDepositAmount(address(vault), token0, token0Decimals);
+          uint256 amount1 = (((amountStart + amountEnd) / 2) * 1e18) / token1Decimals;
           ratio = (amount1 * 1e18) / price;
         }
 
-        swap0 = (inputAmount * 1e18) / (ratio + 1e18);
-        swap1 = inputAmount - swap0;
+        uint256 swap0 = (inputAmount * 1e18) / (ratio + 1e18);
+        swapAmount = address(inputToken) == token0 ? inputAmount - swap0 : swap0;
       }
 
       inputToken.approve(address(swapRouter), inputAmount);
       swapRouter.exactInputSingle(
         ISwapRouter.ExactInputSingleParams(
           address(inputToken),
-          zeroForOne ? vault.token1() : vault.token0(),
+          address(inputToken) == token0 ? token1 : token0,
           address(this),
           block.timestamp,
-          zeroForOne ? swap1 : swap0,
+          swapAmount,
           0, // amount out min
           0 // limitSqrtPrice
         )
@@ -127,10 +127,10 @@ contract GammaLpTokenWrapper is IRedemptionStrategy {
     uint256 deposit0;
     uint256 deposit1;
     {
-      deposit0 = IERC20Upgradeable(vault.token0()).balanceOf(address(this));
-      deposit1 = IERC20Upgradeable(vault.token1()).balanceOf(address(this));
-      IERC20Upgradeable(vault.token0()).approve(address(vault), deposit0);
-      IERC20Upgradeable(vault.token1()).approve(address(vault), deposit1);
+      deposit0 = IERC20Upgradeable(token0).balanceOf(address(this));
+      deposit1 = IERC20Upgradeable(token1).balanceOf(address(this));
+      IERC20Upgradeable(token0).approve(address(vault), deposit0);
+      IERC20Upgradeable(token1).approve(address(vault), deposit1);
     }
 
     uint256[4] memory minIn;
