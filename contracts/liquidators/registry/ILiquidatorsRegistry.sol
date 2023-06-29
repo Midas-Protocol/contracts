@@ -13,10 +13,12 @@ interface ILiquidatorsRegistryStorage {
     view
     returns (IRedemptionStrategy);
 
-  function outputTokensByInputToken(IERC20Upgradeable inputToken) external view returns (IERC20Upgradeable);
+  function defaultOutputToken(IERC20Upgradeable inputToken) external view returns (IERC20Upgradeable);
 }
 
 interface ILiquidatorsRegistryExtension {
+  function getInputTokensByOutputToken(IERC20Upgradeable outputToken) external view returns (address[] memory);
+
   function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     view
@@ -31,6 +33,8 @@ interface ILiquidatorsRegistryExtension {
     external
     view
     returns (IRedemptionStrategy strategy, bytes memory strategyData);
+
+  function swap(IERC20Upgradeable inputToken, uint256 inputAmount, IERC20Upgradeable outputToken) external returns (uint256);
 
   function _setRedemptionStrategy(
     IRedemptionStrategy strategy,
