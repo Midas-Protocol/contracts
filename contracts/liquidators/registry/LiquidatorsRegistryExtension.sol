@@ -42,18 +42,22 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return functionSelectors;
   }
 
-  function swap(IERC20Upgradeable inputToken, uint256 inputAmount, IERC20Upgradeable outputToken) external returns (uint256 outputAmount) {
+  function swap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256 outputAmount) {
     inputToken.safeTransferFrom(msg.sender, address(this), inputAmount);
     outputAmount = convertAllTo(inputToken, outputToken);
     outputToken.safeTransfer(msg.sender, outputAmount);
   }
 
-  function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  private
-  returns (uint256)
-  {
+  function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) private returns (uint256) {
     uint256 inputAmount = inputToken.balanceOf(address(this));
-    (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = getRedemptionStrategies(inputToken, outputToken);
+    (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = getRedemptionStrategies(
+      inputToken,
+      outputToken
+    );
 
     if (redemptionStrategies.length == 0) revert NoRedemptionPath();
 
@@ -62,12 +66,17 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     for (uint256 i = 0; i < redemptionStrategies.length; i++) {
       IRedemptionStrategy redemptionStrategy = redemptionStrategies[i];
       bytes memory strategyData = strategiesData[i];
-      (IERC20Upgradeable swapOutputToken, uint256 swapOutputAmount) = convertCustomFunds(swapInputToken, swapInputAmount, redemptionStrategy, strategyData);
+      (IERC20Upgradeable swapOutputToken, uint256 swapOutputAmount) = convertCustomFunds(
+        swapInputToken,
+        swapInputAmount,
+        redemptionStrategy,
+        strategyData
+      );
       swapInputAmount = swapOutputAmount;
       swapInputToken = swapOutputToken;
     }
 
-    if(swapInputToken != outputToken) revert OutputTokenMismatch();
+    if (swapInputToken != outputToken) revert OutputTokenMismatch();
     return outputToken.balanceOf(address(this));
   }
 

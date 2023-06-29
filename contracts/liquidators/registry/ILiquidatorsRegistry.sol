@@ -34,7 +34,11 @@ interface ILiquidatorsRegistryExtension {
     view
     returns (IRedemptionStrategy strategy, bytes memory strategyData);
 
-  function swap(IERC20Upgradeable inputToken, uint256 inputAmount, IERC20Upgradeable outputToken) external returns (uint256);
+  function swap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256);
 
   function _setRedemptionStrategy(
     IRedemptionStrategy strategy,
