@@ -42,7 +42,7 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     uint8 outputIndex = type(uint8).max;
 
     uint8 j = 0;
-    while (true) {
+    while (outputIndex == type(uint8).max) {
       try curvePool.coins(uint256(j)) returns (address coin) {
         if (coin == outputTokenAddress) outputIndex = j;
       } catch {
@@ -67,5 +67,29 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
 
   function name() public pure returns (string memory) {
     return "CurveLpTokenLiquidatorNoRegistry";
+  }
+}
+
+contract CurveLpTokenWrapper is IRedemptionStrategy {
+  function redeem(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    bytes memory strategyData
+  ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    ICurvePool curvePool = abi.decode(strategyData, (ICurvePool));
+    outputToken = IERC20Upgradeable(address(curvePool));
+
+    uint256[2] memory amounts;
+    amounts[0] = inputAmount;
+    amounts[1] = 0;
+
+    inputToken.approve(address(curvePool), inputAmount);
+    curvePool.add_liquidity(amounts, 1);
+
+    outputAmount = outputToken.balanceOf(address(this));
+  }
+
+  function name() public pure returns (string memory) {
+    return "CurveLpTokenWrapper";
   }
 }
