@@ -402,11 +402,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
     address[] memory swapPath = new address[](2);
     if (token0IsOutputToken) {
-      swapPath[0] = token0;
-      swapPath[1] = token1;
-    } else {
       swapPath[0] = token1;
       swapPath[1] = token0;
+    } else {
+      swapPath[0] = token0;
+      swapPath[1] = token1;
     }
     address[] memory emptyPath = new address[](0);
 
