@@ -28,7 +28,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 8;
+    uint8 fnsCount = 9;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -38,8 +38,13 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this._removeRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this.getInputTokensByOutputToken.selector;
     functionSelectors[--fnsCount] = this.swap.selector;
+    functionSelectors[--fnsCount] = this.getAllRedemptionStrategies.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function getAllRedemptionStrategies() public view returns (address[] memory) {
+    return redemptionStrategies.values();
   }
 
   function swap(
@@ -396,14 +401,19 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     require(token0IsOutputToken || token1IsOutputToken, "Output token does not match either of the pair tokens");
 
     address[] memory swapPath = new address[](2);
-    swapPath[0] = token0IsOutputToken ? token1 : token0;
-    swapPath[1] = token1IsOutputToken ? token0 : token1;
+    if (token0IsOutputToken) {
+      swapPath[0] = token0;
+      swapPath[1] = token1;
+    } else {
+      swapPath[0] = token1;
+      swapPath[1] = token0;
+    }
     address[] memory emptyPath = new address[](0);
 
     strategyData = abi.encode(
       getUniswapV2Router(inputToken),
       token0IsOutputToken ? emptyPath : swapPath,
-      token1IsOutputToken ? emptyPath : swapPath
+      !token0IsOutputToken ? emptyPath : swapPath
     );
   }
 
