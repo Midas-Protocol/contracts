@@ -74,9 +74,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal returns (uint256) {
     uint256 tokenDecimals = uint256(ERC20Upgradeable(address(token)).decimals());
     return
-    tokenDecimals <= 18
-    ? uint256(unscaledPrice) * (10**(18 - tokenDecimals))
-    : uint256(unscaledPrice) / (10**(tokenDecimals - 18));
+      tokenDecimals <= 18
+        ? uint256(unscaledPrice) * (10**(18 - tokenDecimals))
+        : uint256(unscaledPrice) / (10**(tokenDecimals - 18));
   }
 
   function swap(
@@ -278,10 +278,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     redemptionStrategies.remove(strategyToRemove);
   }
 
-  function _removeDirectSwapStep(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) external onlyOwner {
+  function _removeDirectSwapStep(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
     IERC20Upgradeable defaultOutToken = defaultOutputToken[inputToken];
     if (defaultOutToken == outputToken) defaultOutputToken[inputToken] = IERC20Upgradeable(address(0));
     redemptionStrategiesByTokens[inputToken][outputToken] = IRedemptionStrategy(address(0));
