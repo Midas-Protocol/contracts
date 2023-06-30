@@ -80,11 +80,7 @@ contract LiquidatorsRegistryTest is BaseTest {
     upgradeRegistry();
 
     vm.prank(ap.getAddress("deployer"));
-    _functionCall(
-      address(registry),
-      hex"00",
-      "reset strategies failed"
-    );
+    _functionCall(address(registry), hex"00", "reset strategies failed");
   }
 
   function testRedemptionPathChapel() public debuggingOnly fork(BSC_CHAPEL) {

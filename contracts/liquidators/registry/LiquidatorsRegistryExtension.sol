@@ -529,8 +529,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   function getUnderlyingTokens(ICurvePool curvePool) internal view returns (address[] memory tokens) {
     uint8 j = 0;
     while (true) {
-      try curvePool.coins(uint256(j)) returns (address coin) {
-      } catch {
+      try curvePool.coins(uint256(j)) returns (address coin) {} catch {
         break;
       }
       j++;
