@@ -30,7 +30,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
+    uint8 fnsCount = 11;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -41,7 +41,6 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this.getInputTokensByOutputToken.selector;
     functionSelectors[--fnsCount] = this.swap.selector;
     functionSelectors[--fnsCount] = this.getAllRedemptionStrategies.selector;
-    functionSelectors[--fnsCount] = this._removeDirectSwapStep.selector;
     functionSelectors[--fnsCount] = this._resetRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
     require(fnsCount == 0, "use the correct array length");
@@ -69,7 +68,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     uint256 inputTokensValue = inputAmount * toScaledPrice(inputTokenPrice, inputToken);
     uint256 outputTokensValue = outputAmount * toScaledPrice(outputTokenPrice, outputToken);
 
-    slippage = ((inputTokensValue - outputTokensValue) * 1e18) / inputTokensValue;
+    if (outputTokensValue < inputTokensValue) {
+      slippage = ((inputTokensValue - outputTokensValue) * 1e18) / inputTokensValue;
+    }
   }
 
   /// @dev returns price scaled to 1e36 - decimals
@@ -241,25 +242,27 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
-  function _removeRedemptionStrategy(
-    address strategyToRemove,
-    string calldata name,
-    IERC20Upgradeable inputToken
-  ) external onlyOwner {
-    IERC20Upgradeable outputToken = defaultOutputToken[inputToken];
+  function _removeRedemptionStrategy(address strategyToRemove) external onlyOwner {
+    address[] memory _outputTokens = outputTokensSet.values();
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
+        if (_currentStrategy == IRedemptionStrategy(strategyToRemove)) {
+          redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
+          inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+          if (defaultOutputToken[_inputToken] == _outputToken) {
+            defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
+          }
+        }
+      }
+      outputTokensSet.remove(_outputTokens[i]);
+    }
 
-    redemptionStrategiesByName[name] = IRedemptionStrategy(address(0));
-    redemptionStrategiesByTokens[inputToken][outputToken] = IRedemptionStrategy(address(0));
-    defaultOutputToken[inputToken] = IERC20Upgradeable(address(0));
-    inputTokensByOutputToken[outputToken].remove(address(inputToken));
+    redemptionStrategiesByName[IRedemptionStrategy(strategyToRemove).name()] = IRedemptionStrategy(address(0));
     redemptionStrategies.remove(strategyToRemove);
-  }
-
-  function _removeDirectSwapStep(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
-    IERC20Upgradeable defaultOutToken = defaultOutputToken[inputToken];
-    if (defaultOutToken == outputToken) defaultOutputToken[inputToken] = IERC20Upgradeable(address(0));
-    redemptionStrategiesByTokens[inputToken][outputToken] = IRedemptionStrategy(address(0));
-    inputTokensByOutputToken[outputToken].remove(address(inputToken));
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

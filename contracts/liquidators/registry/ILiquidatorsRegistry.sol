@@ -49,11 +49,7 @@ interface ILiquidatorsRegistryExtension {
     IERC20Upgradeable[] calldata outputTokens
   ) external;
 
-  function _removeRedemptionStrategy(
-    address strategyToRemove,
-    string calldata name,
-    IERC20Upgradeable inputToken
-  ) external;
+  function _removeRedemptionStrategy(address strategyToRemove) external;
 }
 
 interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {}
