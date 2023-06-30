@@ -19,11 +19,6 @@ interface ILiquidatorsRegistryStorage {
 interface ILiquidatorsRegistryExtension {
   function getInputTokensByOutputToken(IERC20Upgradeable outputToken) external view returns (address[] memory);
 
-  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (bool);
-
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     view
@@ -54,11 +49,7 @@ interface ILiquidatorsRegistryExtension {
     IERC20Upgradeable[] calldata outputTokens
   ) external;
 
-  function _removeRedemptionStrategy(
-    address strategyToRemove,
-    string calldata name,
-    IERC20Upgradeable inputToken
-  ) external;
+  function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external;
 }
 
 interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {}
