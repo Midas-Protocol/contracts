@@ -10,6 +10,8 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
+import "../midas/DiamondExtension.sol";
+import { SafeOwnable } from "../midas/SafeOwnable.sol";
 
 contract LiquidatorsRegistryTest is BaseTest {
   ILiquidatorsRegistry registry;
@@ -39,6 +41,50 @@ contract LiquidatorsRegistryTest is BaseTest {
     stable = IERC20Upgradeable(ap.getAddress("stableToken"));
     wtoken = IERC20Upgradeable(ap.getAddress("wtoken"));
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+  }
+
+  function upgradeRegistry() internal {
+    DiamondBase asBase = DiamondBase(address(registry));
+    address[] memory exts = asBase._listExtensions();
+    LiquidatorsRegistryExtension newExt = new LiquidatorsRegistryExtension();
+    vm.prank(SafeOwnable(address(registry)).owner());
+    asBase._registerExtension(newExt, DiamondExtension(exts[0]));
+  }
+
+  function _functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    (bool success, bytes memory returndata) = target.call(data);
+
+    if (!success) {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+
+    return returndata;
+  }
+
+  function testResetStrategies() public debuggingOnly fork(POLYGON_MAINNET) {
+    upgradeRegistry();
+
+    vm.prank(ap.getAddress("deployer"));
+    _functionCall(
+      address(registry),
+      hex"00",
+      "reset strategies failed"
+    );
   }
 
   function testRedemptionPathChapel() public debuggingOnly fork(BSC_CHAPEL) {

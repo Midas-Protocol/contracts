@@ -162,14 +162,6 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return inputTokensByOutputToken[outputToken].values();
   }
 
-  function _addInputTokenForOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    onlyOwner
-    returns (bool)
-  {
-    return inputTokensByOutputToken[outputToken].add(address(inputToken));
-  }
-
   function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
     defaultOutputToken[inputToken] = outputToken;
   }
@@ -219,9 +211,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
       address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
       for (uint256 j = 0; j < _inputTokens.length; j++) {
-        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
         redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
-        inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+        inputTokensByOutputToken[_outputToken].remove(_inputTokens[j]);
         defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
       }
       outputTokensSet.remove(_outputTokens[i]);
