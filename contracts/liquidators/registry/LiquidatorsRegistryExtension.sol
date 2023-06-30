@@ -30,11 +30,10 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 13;
+    uint8 fnsCount = 12;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
-    functionSelectors[--fnsCount] = this.isRedemptionPathSupported.selector;
     functionSelectors[--fnsCount] = this._setDefaultOutputToken.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategies.selector;
@@ -58,7 +57,10 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     uint256 inputAmount,
     IERC20Upgradeable outputToken
   ) external returns (uint256 outputAmount, uint256 slippage) {
+    if (inputAmount == 0) return (0, 0);
+
     outputAmount = swap(inputToken, inputAmount, outputToken);
+    if (outputAmount == 0) return (0, 0);
 
     MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     uint256 inputTokenPrice = mpo.price(address(inputToken));
@@ -70,7 +72,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     slippage = ((inputTokensValue - outputTokensValue) * 1e18) / inputTokensValue;
   }
 
-  // returns price scaled to 1e36 - decimals
+  /// @dev returns price scaled to 1e36 - decimals
   function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal returns (uint256) {
     uint256 tokenDecimals = uint256(ERC20Upgradeable(address(token)).decimals());
     return
@@ -157,31 +159,6 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
   function getInputTokensByOutputToken(IERC20Upgradeable outputToken) external view returns (address[] memory) {
     return inputTokensByOutputToken[outputToken].values();
-  }
-
-  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    public
-    view
-    returns (bool)
-  {
-    if (inputToken == outputToken) return false;
-
-    IERC20Upgradeable tokenToRedeem = inputToken;
-
-    uint256 k = 0;
-    while (tokenToRedeem != outputToken) {
-      IERC20Upgradeable redeemedToken = defaultOutputToken[tokenToRedeem];
-
-      IRedemptionStrategy strategy = redemptionStrategiesByTokens[inputToken][outputToken];
-      if (address(strategy) == address(0)) return false;
-
-      tokenToRedeem = redeemedToken;
-
-      k++;
-      if (k == 10) break;
-    }
-
-    return tokenToRedeem == outputToken;
   }
 
   function _addInputTokenForOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

@@ -19,11 +19,6 @@ interface ILiquidatorsRegistryStorage {
 interface ILiquidatorsRegistryExtension {
   function getInputTokensByOutputToken(IERC20Upgradeable outputToken) external view returns (address[] memory);
 
-  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (bool);
-
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
     view

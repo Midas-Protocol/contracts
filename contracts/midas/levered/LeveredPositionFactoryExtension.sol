@@ -30,13 +30,12 @@ contract LeveredPositionFactoryExtension is
   uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 13;
+    uint8 fnsCount = 12;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.createPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPositionAtRatio.selector;
     functionSelectors[--fnsCount] = this.removeClosedPosition.selector;
-    functionSelectors[--fnsCount] = this.isFundingAllowed.selector;
     functionSelectors[--fnsCount] = this.getMinBorrowNative.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getSlippage.selector;
@@ -112,10 +111,6 @@ contract LeveredPositionFactoryExtension is
   /*----------------------------------------------------------------
                             View Functions
   ----------------------------------------------------------------*/
-
-  function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (bool) {
-    return liquidatorsRegistry.isRedemptionPathSupported(inputToken, outputToken);
-  }
 
   function getMinBorrowNative() external view returns (uint256) {
     return fuseFeeDistributor.minBorrowEth();
