@@ -29,6 +29,7 @@ contract CurveLpTokenLiquidatorNoRegistry is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
+    // TODO get the curvePool from the strategyData instead of the _oracle
     (address outputTokenAddress, address payable wtoken, address _oracle) = abi.decode(
       strategyData,
       (address, address, address)

@@ -11,6 +11,7 @@ import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { IRouter } from "../../external/solidly/IRouter.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
+import { ICurvePool } from "../../external/curve/ICurvePool.sol";
 
 import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
@@ -511,7 +512,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(
       ap.getAddress("CurveLpTokenPriceOracleNoRegistry")
     );
-    address[] memory tokens = curveLpOracle.getUnderlyingTokens(address(inputToken));
+    ICurvePool curvePool = ICurvePool(curveLpOracle.poolOf(address(inputToken)));
+    address[] memory tokens = getUnderlyingTokens(curvePool);
 
     address preferredToken = pickPreferredToken(tokens, address(outputToken));
     address actualOutputToken = preferredToken;
@@ -522,6 +524,21 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     // TODO outputToken = actualOutputToken
 
     strategyData = abi.encode(preferredToken, wnative, curveLpOracle);
+  }
+
+  function getUnderlyingTokens(ICurvePool curvePool) internal view returns (address[] memory tokens) {
+    uint8 j = 0;
+    while (true) {
+      try curvePool.coins(uint256(j)) returns (address coin) {
+      } catch {
+        break;
+      }
+      j++;
+    }
+    tokens = new address[](j);
+    for (uint256 i = 0; i < j; i++) {
+      tokens[i] = curvePool.coins(i);
+    }
   }
 
   function curveSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

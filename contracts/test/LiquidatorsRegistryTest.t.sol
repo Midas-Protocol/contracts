@@ -147,6 +147,8 @@ contract LiquidatorsRegistryTest is BaseTest {
   }
 
   function testSwappingCurveLpPolygon() public fork(POLYGON_MAINNET) {
+    upgradeRegistry();
+
     address lpTokenWhale = 0x875CE7e0565b4C8852CA2a9608F27B7213A90786; // curve gauge
 
     IERC20Upgradeable inputToken = usdr3CrvCurveLpToken;
