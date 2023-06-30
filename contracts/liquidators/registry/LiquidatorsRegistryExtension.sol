@@ -74,7 +74,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   /// @dev returns price scaled to 1e36 - decimals
-  function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal returns (uint256) {
+  function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal view returns (uint256) {
     uint256 tokenDecimals = uint256(ERC20Upgradeable(address(token)).decimals());
     return
       tokenDecimals <= 18
@@ -243,6 +243,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external onlyOwner {
+    // check all the input/output tokens if they match the strategy to remove
     address[] memory _outputTokens = outputTokensSet.values();
     for (uint256 i = 0; i < _outputTokens.length; i++) {
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
@@ -250,6 +251,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       for (uint256 j = 0; j < _inputTokens.length; j++) {
         IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
         IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
+
+        // only nullify the input/output tokens config if the strategy matches
         if (_currentStrategy == strategyToRemove) {
           redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
           inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
