@@ -63,7 +63,7 @@ interface ILiquidatorsRegistryExtension {
 
   function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external;
 
-  function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner;
+  function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external;
 }
 
 interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {}
