@@ -6,6 +6,7 @@ import "./LiquidatorsRegistryStorage.sol";
 
 import "../IRedemptionStrategy.sol";
 import "../../midas/DiamondExtension.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 
 import { IRouter } from "../../external/solidly/IRouter.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
@@ -16,6 +17,7 @@ import { CurveV2LpTokenPriceOracleNoRegistry } from "../../oracles/default/Curve
 import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import { XBombSwap } from "../XBombLiquidatorFunder.sol";
@@ -28,7 +30,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 10;
+    uint8 fnsCount = 13;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -40,6 +42,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this.getInputTokensByOutputToken.selector;
     functionSelectors[--fnsCount] = this.swap.selector;
     functionSelectors[--fnsCount] = this.getAllRedemptionStrategies.selector;
+    functionSelectors[--fnsCount] = this._removeDirectSwapStep.selector;
+    functionSelectors[--fnsCount] = this._resetRedemptionStrategies.selector;
+    functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -48,11 +53,37 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return redemptionStrategies.values();
   }
 
+  function amountOutAndSlippageOfSwap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256 outputAmount, uint256 slippage) {
+    outputAmount = swap(inputToken, inputAmount, outputToken);
+
+    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    uint256 inputTokenPrice = mpo.price(address(inputToken));
+    uint256 outputTokenPrice = mpo.price(address(outputToken));
+
+    uint256 inputTokensValue = inputAmount * toScaledPrice(inputTokenPrice, inputToken);
+    uint256 outputTokensValue = outputAmount * toScaledPrice(outputTokenPrice, outputToken);
+
+    slippage = ((inputTokensValue - outputTokensValue) * 1e18) / inputTokensValue;
+  }
+
+  // returns price scaled to 1e36 - decimals
+  function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal returns (uint256) {
+    uint256 tokenDecimals = uint256(ERC20Upgradeable(address(token)).decimals());
+    return
+    tokenDecimals <= 18
+    ? uint256(unscaledPrice) * (10**(18 - tokenDecimals))
+    : uint256(unscaledPrice) / (10**(tokenDecimals - 18));
+  }
+
   function swap(
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
     IERC20Upgradeable outputToken
-  ) external returns (uint256 outputAmount) {
+  ) public returns (uint256 outputAmount) {
     inputToken.safeTransferFrom(msg.sender, address(this), inputAmount);
     outputAmount = convertAllTo(inputToken, outputToken);
     outputToken.safeTransfer(msg.sender, outputAmount);
@@ -183,15 +214,51 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       defaultOutputToken[inputToken] = outputToken;
     }
     inputTokensByOutputToken[outputToken].add(address(inputToken));
+    outputTokensSet.add(address(outputToken));
   }
 
   function _setRedemptionStrategies(
     IRedemptionStrategy[] calldata strategies,
     IERC20Upgradeable[] calldata inputTokens,
     IERC20Upgradeable[] calldata outputTokens
-  ) public onlyOwner {
+  ) external onlyOwner {
+    require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
+    for (uint256 i = 0; i < strategies.length; i++) {
+      _setRedemptionStrategy(strategies[i], inputTokens[i], outputTokens[i]);
+    }
+  }
+
+  function _resetRedemptionStrategies(
+    IRedemptionStrategy[] calldata strategies,
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens
+  ) external onlyOwner {
     require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
 
+    // empty the input/output token mappings/sets
+    address[] memory _outputTokens = outputTokensSet.values();
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
+        inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+        defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
+      }
+      outputTokensSet.remove(_outputTokens[i]);
+    }
+
+    // empty the strategies mappings/sets
+    address[] memory _currentStrategies = redemptionStrategies.values();
+    for (uint256 i = 0; i < _currentStrategies.length; i++) {
+      IRedemptionStrategy _currentStrategy = IRedemptionStrategy(_currentStrategies[i]);
+      string memory _name = _currentStrategy.name();
+      redemptionStrategiesByName[_name] = IRedemptionStrategy(address(0));
+      redemptionStrategies.remove(_currentStrategies[i]);
+    }
+
+    // write the new strategies and their tokens configs
     for (uint256 i = 0; i < strategies.length; i++) {
       _setRedemptionStrategy(strategies[i], inputTokens[i], outputTokens[i]);
     }
@@ -209,6 +276,16 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     defaultOutputToken[inputToken] = IERC20Upgradeable(address(0));
     inputTokensByOutputToken[outputToken].remove(address(inputToken));
     redemptionStrategies.remove(strategyToRemove);
+  }
+
+  function _removeDirectSwapStep(
+    IERC20Upgradeable inputToken,
+    IERC20Upgradeable outputToken
+  ) external onlyOwner {
+    IERC20Upgradeable defaultOutToken = defaultOutputToken[inputToken];
+    if (defaultOutToken == outputToken) defaultOutputToken[inputToken] = IERC20Upgradeable(address(0));
+    redemptionStrategiesByTokens[inputToken][outputToken] = IRedemptionStrategy(address(0));
+    inputTokensByOutputToken[outputToken].remove(address(inputToken));
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -301,19 +378,18 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function pickPreferredToken(address[] memory tokens, address strategyOutputToken) internal view returns (address) {
-    address wnative = ap.getAddress("wtoken");
-    address stableToken = ap.getAddress("stableToken");
-    address wbtc = ap.getAddress("wBTCToken");
-
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == strategyOutputToken) return strategyOutputToken;
     }
+    address wnative = ap.getAddress("wtoken");
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == wnative) return wnative;
     }
+    address stableToken = ap.getAddress("stableToken");
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == stableToken) return stableToken;
     }
+    address wbtc = ap.getAddress("wBTCToken");
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == wbtc) return wbtc;
     }
@@ -463,9 +539,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     );
     address[] memory tokens = curveLpOracle.getUnderlyingTokens(address(inputToken));
 
-    address wnative = ap.getAddress("wtoken");
     address preferredToken = pickPreferredToken(tokens, address(outputToken));
     address actualOutputToken = preferredToken;
+    address wnative = ap.getAddress("wtoken");
     if (preferredToken == address(0) || preferredToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
       actualOutputToken = wnative;
     }
