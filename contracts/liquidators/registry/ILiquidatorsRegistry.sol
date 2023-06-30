@@ -37,6 +37,12 @@ interface ILiquidatorsRegistryExtension {
     IERC20Upgradeable outputToken
   ) external returns (uint256);
 
+  function amountOutAndSlippageOfSwap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256 outputAmount, uint256 slippage);
+
   function _setRedemptionStrategy(
     IRedemptionStrategy strategy,
     IERC20Upgradeable inputToken,
@@ -49,7 +55,15 @@ interface ILiquidatorsRegistryExtension {
     IERC20Upgradeable[] calldata outputTokens
   ) external;
 
+  function _resetRedemptionStrategies(
+    IRedemptionStrategy[] calldata strategies,
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens
+  ) external;
+
   function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external;
+
+  function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner;
 }
 
 interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {}
