@@ -107,9 +107,24 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     vm.prank(whaleUsdr);
     usdr.transfer(address(wrapper), 100e11);
 
-    wrapper.redeem(IERC20Upgradeable(usdrAddress), 100e11, abi.encode(usdr3Crv));
+    wrapper.redeem(usdr, 100e11, abi.encode(usdr3Crv));
 
     assertGt(usdr3Crv.balanceOf(address(wrapper)), 0, "!wrapped");
     assertEq(usdr.balanceOf(address(wrapper)), 0, "!unused usdr");
+  }
+
+  function test3CrvWrap3CrvUsdr() public fork(POLYGON_MAINNET) {
+    address threeCrvWhale = 0x7117de93b352AE048925323F3fCb1Cd4b4d52eC4;
+    address threeCrvAddress = 0xE7a24EF0C5e95Ffb0f6684b813A78F2a3AD7D171;
+    IERC20Upgradeable threeCrv = IERC20Upgradeable(threeCrvAddress);
+
+    CurveLpTokenWrapper wrapper = new CurveLpTokenWrapper();
+    vm.prank(threeCrvWhale);
+    threeCrv.transfer(address(wrapper), 1e18);
+
+    wrapper.redeem(threeCrv, 1e18, abi.encode(usdr3Crv));
+
+    assertGt(usdr3Crv.balanceOf(address(wrapper)), 0, "!wrapped");
+    assertEq(threeCrv.balanceOf(address(wrapper)), 0, "!unused 3Crv");
   }
 }
