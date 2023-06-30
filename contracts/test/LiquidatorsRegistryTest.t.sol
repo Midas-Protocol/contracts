@@ -16,12 +16,14 @@ contract LiquidatorsRegistryTest is BaseTest {
   IERC20Upgradeable chapelTUsd = IERC20Upgradeable(0x4f1885D25eF219D3D4Fa064809D6D4985FAb9A0b);
   IERC20Upgradeable chapelTDai = IERC20Upgradeable(0x8870f7102F1DcB1c35b01af10f1baF1B00aD6805);
   IERC20Upgradeable busd = IERC20Upgradeable(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+  IERC20Upgradeable wbnbBusdLpToken = IERC20Upgradeable(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16);
+  IERC20Upgradeable usdcBusdLpToken = IERC20Upgradeable(0x2354ef4DF11afacb85a5C7f98B624072ECcddbB1);
 
   function afterForkSetUp() internal override {
     registry = ILiquidatorsRegistry(ap.getAddress("LiquidatorsRegistry"));
   }
 
-  function testRedemptionPath() public debuggingOnly fork(BSC_CHAPEL) {
+  function testRedemptionPathChapel() public debuggingOnly fork(BSC_CHAPEL) {
     emit log("bomb tusd");
     emit log(registry.redemptionStrategiesByTokens(chapelBomb, chapelTDai).name());
     emit log("tusd bomb");
@@ -43,10 +45,9 @@ contract LiquidatorsRegistryTest is BaseTest {
   }
 
   function testSwappingBsc() public debuggingOnly fork(BSC_MAINNET) {
-    address lpTokenWhale = 0xa5f8C5Dbd5F286960b9d90548680aE5ebFf07652; // pcs main staking contract
-    address WBNB_BUSD_Uniswap = 0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16;
+    address lpTokenWhale = 0x14B2e8329b8e06BCD524eb114E23fAbD21910109;
 
-    IERC20Upgradeable inputToken = IERC20Upgradeable(WBNB_BUSD_Uniswap);
+    IERC20Upgradeable inputToken = usdcBusdLpToken;
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = busd;
 

@@ -28,11 +28,12 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 9;
+    uint8 fnsCount = 10;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this.isRedemptionPathSupported.selector;
+    functionSelectors[--fnsCount] = this._setDefaultOutputToken.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this._removeRedemptionStrategy.selector;
@@ -152,6 +153,10 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return tokenToRedeem == outputToken;
   }
 
+  function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
+    defaultOutputToken[inputToken] = outputToken;
+  }
+
   function _setRedemptionStrategy(
     IRedemptionStrategy strategy,
     IERC20Upgradeable inputToken,
@@ -166,7 +171,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     redemptionStrategies.remove(address(oldStrategy));
     redemptionStrategies.add(address(strategy));
 
-    defaultOutputToken[inputToken] = outputToken;
+    if (defaultOutputToken[inputToken] == IERC20Upgradeable(address(0))) {
+      defaultOutputToken[inputToken] = outputToken;
+    }
     inputTokensByOutputToken[outputToken].add(address(inputToken));
   }
 
@@ -396,25 +403,27 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     IUniswapV2Pair lpToken = IUniswapV2Pair(address(inputToken));
     address token0 = lpToken.token0();
     address token1 = lpToken.token1();
-    bool token0IsOutputToken = address(outputToken) == lpToken.token0();
-    bool token1IsOutputToken = address(outputToken) == lpToken.token1();
+    bool token0IsOutputToken = address(outputToken) == token0;
+    bool token1IsOutputToken = address(outputToken) == token1;
     require(token0IsOutputToken || token1IsOutputToken, "Output token does not match either of the pair tokens");
 
-    address[] memory swapPath = new address[](2);
-    if (token0IsOutputToken) {
-      swapPath[0] = token0;
-      swapPath[1] = token1;
-    } else {
-      swapPath[0] = token1;
-      swapPath[1] = token0;
+    address[] memory swap0Path;
+    address[] memory swap1Path;
+    {
+      if (token0IsOutputToken) {
+        swap0Path = new address[](0);
+        swap1Path = new address[](2);
+        swap1Path[0] = token1;
+        swap1Path[1] = token0;
+      } else {
+        swap1Path = new address[](0);
+        swap0Path = new address[](2);
+        swap0Path[0] = token0;
+        swap0Path[1] = token1;
+      }
     }
-    address[] memory emptyPath = new address[](0);
 
-    strategyData = abi.encode(
-      getUniswapV2Router(inputToken),
-      token0IsOutputToken ? emptyPath : swapPath,
-      !token0IsOutputToken ? emptyPath : swapPath
-    );
+    strategyData = abi.encode(getUniswapV2Router(inputToken), swap0Path, swap1Path);
   }
 
   function saddleLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
