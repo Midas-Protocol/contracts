@@ -242,7 +242,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
-  function _removeRedemptionStrategy(address strategyToRemove) external onlyOwner {
+  function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external onlyOwner {
     address[] memory _outputTokens = outputTokensSet.values();
     for (uint256 i = 0; i < _outputTokens.length; i++) {
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
@@ -250,7 +250,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       for (uint256 j = 0; j < _inputTokens.length; j++) {
         IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
         IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
-        if (_currentStrategy == IRedemptionStrategy(strategyToRemove)) {
+        if (_currentStrategy == strategyToRemove) {
           redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
           inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
           if (defaultOutputToken[_inputToken] == _outputToken) {
@@ -261,8 +261,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       outputTokensSet.remove(_outputTokens[i]);
     }
 
-    redemptionStrategiesByName[IRedemptionStrategy(strategyToRemove).name()] = IRedemptionStrategy(address(0));
-    redemptionStrategies.remove(strategyToRemove);
+    redemptionStrategiesByName[strategyToRemove.name()] = IRedemptionStrategy(address(0));
+    redemptionStrategies.remove(address(strategyToRemove));
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
