@@ -258,7 +258,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
           }
         }
       }
-      outputTokensSet.remove(_outputTokens[i]);
+      if (inputTokensByOutputToken[_outputToken].length() == 0) {
+        outputTokensSet.remove(address(_outputToken));
+      }
     }
 
     redemptionStrategiesByName[strategyToRemove.name()] = IRedemptionStrategy(address(0));
