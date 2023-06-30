@@ -153,6 +153,14 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return tokenToRedeem == outputToken;
   }
 
+  function _addInputTokenForOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    onlyOwner
+    returns (bool)
+  {
+    return inputTokensByOutputToken[outputToken].add(address(inputToken));
+  }
+
   function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
     defaultOutputToken[inputToken] = outputToken;
   }
