@@ -27,8 +27,10 @@ contract LiquidatorsRegistryTest is BaseTest {
   // bsc
   IERC20Upgradeable wbnbBusdLpToken = IERC20Upgradeable(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16);
   IERC20Upgradeable usdcBusdCakeLpToken = IERC20Upgradeable(0x2354ef4DF11afacb85a5C7f98B624072ECcddbB1);
-
   IERC20Upgradeable ankrAnkrBnbGammaLpToken = IERC20Upgradeable(0x3f8f3caefF393B1994a9968E835Fd38eCba6C1be);
+
+  // polygon
+  IERC20Upgradeable usdr3CrvCurveLpToken = IERC20Upgradeable(0xa138341185a9D0429B0021A11FB717B225e13e1F);
 
   function afterForkSetUp() internal override {
     registry = ILiquidatorsRegistry(ap.getAddress("LiquidatorsRegistry"));
@@ -58,6 +60,23 @@ contract LiquidatorsRegistryTest is BaseTest {
     emit log_named_array("inputs", inputTokens);
   }
 
+  function _swap(
+    address whale,
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) internal {
+    uint256 inputAmountValue = (mpo.price(address(inputToken)) * inputAmount) / 1e18;
+    vm.startPrank(whale);
+    inputToken.approve(address(registry), inputAmount);
+    uint256 swappedAmountOut = registry.swap(inputToken, inputAmount, outputToken);
+    vm.stopPrank();
+    uint256 outputAmountValue = (mpo.price(address(outputToken)) * swappedAmountOut) / 1e18;
+
+    assertApproxEqRel(inputAmountValue, outputAmountValue, 1e16); // 1%
+    emit log_named_uint("received", swappedAmountOut);
+  }
+
   function testSwappingUniLpBsc() public fork(BSC_MAINNET) {
     address lpTokenWhale = 0x14B2e8329b8e06BCD524eb114E23fAbD21910109;
 
@@ -80,14 +99,16 @@ contract LiquidatorsRegistryTest is BaseTest {
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = wtoken;
 
-    uint256 inputAmountValue = (mpo.price(address(inputToken)) * inputAmount) / 1e18;
-    vm.startPrank(lpTokenWhale);
-    inputToken.approve(address(registry), inputAmount);
-    uint256 swappedAmountOut = registry.swap(inputToken, inputAmount, outputToken);
-    vm.stopPrank();
-    uint256 outputAmountValue = (mpo.price(address(outputToken)) * swappedAmountOut) / 1e18;
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken);
+  }
 
-    assertApproxEqRel(inputAmountValue, outputAmountValue, 1e16); // 1%
-    emit log_named_uint("received", swappedAmountOut);
+  function testSwappingCurveLpPolygon() public fork(POLYGON_MAINNET) {
+    address lpTokenWhale = 0x875CE7e0565b4C8852CA2a9608F27B7213A90786; // curve gauge
+
+    IERC20Upgradeable inputToken = usdr3CrvCurveLpToken;
+    uint256 inputAmount = 1e18;
+    IERC20Upgradeable outputToken = stable;
+
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken);
   }
 }
