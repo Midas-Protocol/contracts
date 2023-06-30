@@ -31,6 +31,8 @@ contract LiquidatorsRegistryTest is BaseTest {
 
   // polygon
   IERC20Upgradeable usdr3CrvCurveLpToken = IERC20Upgradeable(0xa138341185a9D0429B0021A11FB717B225e13e1F);
+  IERC20Upgradeable maticBbaBalancerStableLpToken = IERC20Upgradeable(0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0);
+  IERC20Upgradeable mimoParBalancerWeightedLpToken = IERC20Upgradeable(0x82d7f08026e21c7713CfAd1071df7C8271B17Eae);
 
   function afterForkSetUp() internal override {
     registry = ILiquidatorsRegistry(ap.getAddress("LiquidatorsRegistry"));
@@ -64,7 +66,8 @@ contract LiquidatorsRegistryTest is BaseTest {
     address whale,
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
-    IERC20Upgradeable outputToken
+    IERC20Upgradeable outputToken,
+    uint256 tolerance
   ) internal {
     uint256 inputAmountValue = (mpo.price(address(inputToken)) * inputAmount) / 1e18;
     vm.startPrank(whale);
@@ -73,7 +76,7 @@ contract LiquidatorsRegistryTest is BaseTest {
     vm.stopPrank();
     uint256 outputAmountValue = (mpo.price(address(outputToken)) * swappedAmountOut) / 1e18;
 
-    assertApproxEqRel(inputAmountValue, outputAmountValue, 1e16); // 1%
+    assertApproxEqRel(inputAmountValue, outputAmountValue, tolerance); // 1%
     emit log_named_uint("received", swappedAmountOut);
   }
 
@@ -84,12 +87,7 @@ contract LiquidatorsRegistryTest is BaseTest {
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = stable;
 
-    vm.startPrank(lpTokenWhale);
-    inputToken.approve(address(registry), inputAmount);
-    uint256 swappedAmountOut = registry.swap(inputToken, inputAmount, outputToken);
-    vm.stopPrank();
-
-    emit log_named_uint("received", swappedAmountOut);
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
   }
 
   function testSwappingGammaLpBsc() public fork(BSC_MAINNET) {
@@ -99,7 +97,7 @@ contract LiquidatorsRegistryTest is BaseTest {
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = wtoken;
 
-    _swap(lpTokenWhale, inputToken, inputAmount, outputToken);
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
   }
 
   function testSwappingCurveLpPolygon() public fork(POLYGON_MAINNET) {
@@ -109,6 +107,26 @@ contract LiquidatorsRegistryTest is BaseTest {
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = stable;
 
-    _swap(lpTokenWhale, inputToken, inputAmount, outputToken);
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
+  }
+
+  function testSwappingBalancerStableLpPolygon() public fork(POLYGON_MAINNET) {
+    address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // balancer gauge
+
+    IERC20Upgradeable inputToken = maticBbaBalancerStableLpToken;
+    uint256 inputAmount = 1e18;
+    IERC20Upgradeable outputToken = wtoken;
+
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
+  }
+
+  function testSwappingBalancerWeightedLpPolygon() public fork(POLYGON_MAINNET) {
+    address lpTokenWhale = 0xbB60ADbe38B4e6ab7fb0f9546C2C1b665B86af11; // mimo staker
+
+    IERC20Upgradeable inputToken = mimoParBalancerWeightedLpToken;
+    uint256 inputAmount = 1e18;
+    IERC20Upgradeable outputToken = IERC20Upgradeable(0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128); // PAR
+
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 5e16);
   }
 }
