@@ -5,13 +5,15 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 
 import "../external/compound/ICErc20.sol";
 import "../external/aave/IAToken.sol";
+import "../external/aave/ILendingPool.sol";
 
 import "./IRedemptionStrategy.sol";
 
 /**
  * @title AaveTokenLiquidator
- * @notice Redeems seized Aave Market Toekns for underlying tokens for use as a step in a liquidation.
+ * @notice Redeems seized Aave Market Tokens for underlying tokens for use as a step in a liquidation.
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
+ * @author Veliko Minkov <veliko@midascapital.xyz> (https://github.com/vminkov)
  */
 contract AaveTokenLiquidator is IRedemptionStrategy {
   /**
@@ -27,18 +29,18 @@ contract AaveTokenLiquidator is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external override returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (address _outputToken, address user) = abi.decode(strategyData, (address, address));
+    address _outputToken = abi.decode(strategyData, (address));
 
     IAToken aaveMarket = IAToken(address(inputToken));
-    uint256 index = aaveMarket.getPreviousIndex(user);
+    ILendingPool pool = aaveMarket.POOL();
 
-    aaveMarket.burn(user, address(this), inputAmount, index);
+    pool.withdraw(_outputToken, type(uint256).max, address(this));
 
     outputToken = IERC20Upgradeable(_outputToken);
     outputAmount = outputToken.balanceOf(address(this));
   }
 
   function name() public pure returns (string memory) {
-    return "CErc20Liquidator";
+    return "AaveTokenLiquidator";
   }
 }

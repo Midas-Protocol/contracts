@@ -17,15 +17,16 @@ contract AaveTokenLiquidatorTest is BaseTest {
 
   function testAmUsdcPolygon() public fork(POLYGON_MAINNET) {
     address amUsdcWhale = 0xe52F5349153b8eb3B89675AF45aC7502C4997E6A; // curve pool
+    inputAmount = 1000e6;
 
     IERC20Upgradeable amUsdcToken = IERC20Upgradeable(amUsdc);
     vm.prank(amUsdcWhale);
-    amUsdcToken.transfer(address(liquidator), 1e18);
+    amUsdcToken.transfer(address(liquidator), inputAmount);
 
     (IERC20Upgradeable outputToken, uint256 outputAmount) = liquidator.redeem(
       amUsdcToken,
       inputAmount,
-      abi.encode(stable, amUsdcWhale)
+      abi.encode(stable)
     );
 
     assertEq(address(outputToken), stable, "!usdc output");

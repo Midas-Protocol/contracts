@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity >=0.8.0;
 
+import "./ILendingPool.sol";
+
 /**
  * @title IAToken
  * @author Aave
@@ -87,4 +89,6 @@ interface IAToken {
    * @return The address of the underlying asset
    */
   function UNDERLYING_ASSET_ADDRESS() external view returns (address);
+
+  function POOL() external view returns (ILendingPool);
 }
