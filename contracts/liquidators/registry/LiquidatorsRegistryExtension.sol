@@ -11,6 +11,7 @@ import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { IRouter } from "../../external/solidly/IRouter.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
+import { ICurvePool } from "../../external/curve/ICurvePool.sol";
 
 import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
@@ -74,7 +75,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   /// @dev returns price scaled to 1e36 - decimals
-  function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal returns (uint256) {
+  function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal view returns (uint256) {
     uint256 tokenDecimals = uint256(ERC20Upgradeable(address(token)).decimals());
     return
       tokenDecimals <= 18
@@ -162,14 +163,6 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     return inputTokensByOutputToken[outputToken].values();
   }
 
-  function _addInputTokenForOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    onlyOwner
-    returns (bool)
-  {
-    return inputTokensByOutputToken[outputToken].add(address(inputToken));
-  }
-
   function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
     defaultOutputToken[inputToken] = outputToken;
   }
@@ -219,9 +212,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
       address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
       for (uint256 j = 0; j < _inputTokens.length; j++) {
-        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
         redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
-        inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+        inputTokensByOutputToken[_outputToken].remove(_inputTokens[j]);
         defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
       }
       outputTokensSet.remove(_outputTokens[i]);
@@ -243,6 +236,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external onlyOwner {
+    // check all the input/output tokens if they match the strategy to remove
     address[] memory _outputTokens = outputTokensSet.values();
     for (uint256 i = 0; i < _outputTokens.length; i++) {
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
@@ -250,6 +244,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       for (uint256 j = 0; j < _inputTokens.length; j++) {
         IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
         IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
+
+        // only nullify the input/output tokens config if the strategy matches
         if (_currentStrategy == strategyToRemove) {
           redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
           inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
@@ -516,7 +512,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(
       ap.getAddress("CurveLpTokenPriceOracleNoRegistry")
     );
-    address[] memory tokens = curveLpOracle.getUnderlyingTokens(address(inputToken));
+    ICurvePool curvePool = ICurvePool(curveLpOracle.poolOf(address(inputToken)));
+    address[] memory tokens = getUnderlyingTokens(curvePool);
 
     address preferredToken = pickPreferredToken(tokens, address(outputToken));
     address actualOutputToken = preferredToken;
@@ -527,6 +524,20 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     // TODO outputToken = actualOutputToken
 
     strategyData = abi.encode(preferredToken, wnative, curveLpOracle);
+  }
+
+  function getUnderlyingTokens(ICurvePool curvePool) internal view returns (address[] memory tokens) {
+    uint8 j = 0;
+    while (true) {
+      try curvePool.coins(uint256(j)) returns (address coin) {} catch {
+        break;
+      }
+      j++;
+    }
+    tokens = new address[](j);
+    for (uint256 i = 0; i < j; i++) {
+      tokens[i] = curvePool.coins(i);
+    }
   }
 
   function curveSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
