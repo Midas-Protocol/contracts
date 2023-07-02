@@ -8,7 +8,7 @@ contract AaveTokenLiquidatorTest is BaseTest {
   AaveTokenLiquidator public liquidator;
   address stable;
   address amUsdc = 0x1a13F4Ca1d028320A707D99520AbFefca3998b7F;
-  uint256 inputAmount = 1e18;
+  uint256 inputAmount;
 
   function afterForkSetUp() internal override {
     liquidator = new AaveTokenLiquidator();
@@ -30,6 +30,6 @@ contract AaveTokenLiquidatorTest is BaseTest {
     );
 
     assertEq(address(outputToken), stable, "!usdc output");
-    assertApproxEqRel(outputAmount, inputAmount, 8e16, "!wbnb amount");
+    assertApproxEqRel(outputAmount, inputAmount, 8e16, "!output does not match input");
   }
 }
