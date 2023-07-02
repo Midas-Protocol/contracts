@@ -343,6 +343,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = xBombLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "BalancerLinearPoolTokenLiquidator")) {
       strategyData = balancerLinearPoolTokenLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "AaveTokenLiquidator")) {
+      strategyData = aaveLiquidatorData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
       //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
@@ -427,9 +429,17 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_ROUTER"), outputToken);
   }
 
+  function aaveLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    pure
+    returns (bytes memory strategyData)
+  {
+    strategyData = abi.encode(outputToken);
+  }
+
   function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     internal
-    view
+    pure
     returns (bytes memory strategyData)
   {
     strategyData = abi.encode(outputToken);
