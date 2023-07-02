@@ -113,7 +113,11 @@ contract LiquidatorsRegistryTest is BaseTest {
   ) internal {
     vm.startPrank(whale);
     inputToken.approve(address(registry), inputAmount);
-    (uint256 swappedAmountOut, uint256 slippage) = registry.amountOutAndSlippageOfSwap(inputToken, inputAmount, outputToken);
+    (uint256 swappedAmountOut, uint256 slippage) = registry.amountOutAndSlippageOfSwap(
+      inputToken,
+      inputAmount,
+      outputToken
+    );
     vm.stopPrank();
 
     emit log_named_uint("received", swappedAmountOut);
