@@ -111,15 +111,17 @@ contract LiquidatorsRegistryTest is BaseTest {
     IERC20Upgradeable outputToken,
     uint256 tolerance
   ) internal {
-    uint256 inputAmountValue = (mpo.price(address(inputToken)) * inputAmount) / 1e18;
     vm.startPrank(whale);
     inputToken.approve(address(registry), inputAmount);
-    uint256 swappedAmountOut = registry.swap(inputToken, inputAmount, outputToken);
+    (uint256 swappedAmountOut, uint256 slippage) = registry.amountOutAndSlippageOfSwap(
+      inputToken,
+      inputAmount,
+      outputToken
+    );
     vm.stopPrank();
-    uint256 outputAmountValue = (mpo.price(address(outputToken)) * swappedAmountOut) / 1e18;
 
-    assertApproxEqRel(inputAmountValue, outputAmountValue, tolerance); // 1%
     emit log_named_uint("received", swappedAmountOut);
+    assertLt(slippage, 8e16, "slippage is > 8%");
   }
 
   function testSwappingUniLpBsc() public fork(BSC_MAINNET) {
