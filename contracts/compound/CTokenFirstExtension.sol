@@ -47,15 +47,14 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.flash.selector;
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
-    functionSelectors[--fnsCount] = this.asCTokenExtensionInterface.selector;
+    functionSelectors[--fnsCount] = this.getExtensionForFunction.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 
-  // TODO remove after next deploy
-  function asCTokenExtensionInterface() external view returns (CTokenFirstExtension) {
-    return this;
+  function getExtensionForSig(bytes4 fnSig) external view returns (address) {
+    return LibDiamond.getExtensionForFunction(fnSig);
   }
 
   function getTotalUnderlyingSupplied() public view override returns (uint256) {
