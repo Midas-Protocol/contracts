@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
 import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
@@ -47,7 +47,7 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.flash.selector;
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
-    functionSelectors[--fnsCount] = this.getExtensionForFunction.selector;
+    functionSelectors[--fnsCount] = this.getExtensionForSig.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
