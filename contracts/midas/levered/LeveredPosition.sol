@@ -251,10 +251,6 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     return ((suppliedCollateralCurrent + maxFlashLoaned) * 1e18) / equityAmount;
   }
 
-  function isFundingAssetSupported(IERC20Upgradeable fundingAsset) public view returns (bool) {
-    return factory.isFundingAllowed(fundingAsset, collateralAsset);
-  }
-
   function isPositionClosed() public view returns (bool) {
     return getEquityAmount() == 0;
   }
