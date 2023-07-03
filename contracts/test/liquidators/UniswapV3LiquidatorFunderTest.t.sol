@@ -27,8 +27,11 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
   address univ3SwapRouter;
   uint256 poolFee;
   Quoter quoter;
+  MasterPriceOracle mpo;
 
   function afterForkSetUp() internal override {
+    mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+
     if (block.chainid == POLYGON_MAINNET) {
       quoter = new Quoter(0x1F98431c8aD98523631AE4a59f267346ea31F984);
       univ3SwapRouter = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
@@ -49,7 +52,10 @@ contract UniswapV3LiquidatorFunderTest is BaseTest {
     bytes memory data = abi.encode(parToken, usdcToken, poolFee, ISwapRouter(univ3SwapRouter), quoter);
     (IERC20Upgradeable outputToken, uint256 outputAmount) = uniswapv3Liquidator.redeem(parToken, parInputAmount, data);
 
+    uint256 inputValue = (parInputAmount * mpo.price(address(parToken))) / 1e18;
+    uint256 outputValue = (outputAmount * mpo.price(address(usdcToken))) / 1e6;
+
     assertEq(address(outputToken), address(usdcToken), "!out tok");
-    assertApproxEqRel(outputAmount, (parInputAmount / 1e12), 8e16, "!out amount");
+    assertApproxEqRel(inputValue, outputValue, 1e16, "!out amount");
   }
 }

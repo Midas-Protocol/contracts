@@ -10,6 +10,11 @@ on:
       - main
       - development
 
+env:
+  EXCLUDE_TESTS: "Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test"
+  FLAKY_TESTS: "AnyLiquidationTest|LiquidityMiningTest"
+  SLOW_TESTS: "MaxBorrowTest|OraclesDecimalsScalingTest|MinBorrowTest|LeveredPositionTest|OraclesDecimalsScalingTest"
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -56,8 +61,17 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-bsc-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for BSC mainnet
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for BSC mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for BSC mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for BSC mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+        
 
   build-and-test-polygon:
     needs: [lint]
@@ -87,8 +101,17 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-polygon-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for Polygon
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Polygon mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for Polygon mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Polygon mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+        
 
   build-and-test-moonbeam:
     needs: [lint]
@@ -118,8 +141,16 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-moonbeam-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for Moonbeam
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Moonbeam mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for Moonbeam mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Moonbeam mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
   build-and-test-arbitrum:
     needs: [lint]
@@ -149,8 +180,16 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-arbitrum-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for Arbitrum One
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Moonbeam mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for Moonbeam mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Moonbeam mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
   build-and-test-neon:
     needs: [lint]

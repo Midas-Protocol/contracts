@@ -149,7 +149,7 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     address maticX = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
     address erc4626TokenAddress = 0xE4885Ed2818Cc9E840A25f94F9b2A28169D1AEA7; // bb-a-WMATIC
     address poolAddress = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917; // Balancer MaticX Boosted Aave WMATIC StablePool
-    address maticXWhale = 0x4bE0eB1Ed4dcd216c303Cf964F3730Eda6EC3051;
+    address maticXWhale = 0x80cA0d8C38d2e2BcbaB66aA1648Bd1C7160500FE;
     address outputTokenAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // WMATIC
 
     testRedeemLinearPool(amount, maticXWhale, maticX, poolAddress, erc4626TokenAddress);
