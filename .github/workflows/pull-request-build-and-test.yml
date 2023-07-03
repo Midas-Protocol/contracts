@@ -147,6 +147,8 @@ jobs:
       - name: Run slow tests for Moonbeam mainnet
         if: always()
         run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+        env:
+          MOONBEAM_MAINNET_RPC_URL: https://rpc.api.moonbeam.network
 
       - name: Run flaky tests for Moonbeam mainnet
         if: always()
@@ -156,7 +158,7 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      ARBITRUM_MAINNET_RPC_URL: https://1rpc.io/arb
+      ARBITRUM_MAINNET_RPC_URL: https://endpoints.omniatech.io/v1/arbitrum/one/public
       ARBITRUM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/arbitrum
       TEST_RUN_CHAINID: 42161
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
@@ -180,14 +182,14 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-arbitrum-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run base tests for Moonbeam mainnet
+      - name: Run base tests for Arbitrum mainnet
         run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
 
-      - name: Run slow tests for Moonbeam mainnet
+      - name: Run slow tests for Arbitrum mainnet
         if: always()
         run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
 
-      - name: Run flaky tests for Moonbeam mainnet
+      - name: Run flaky tests for Arbitrum mainnet
         if: always()
         run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
@@ -250,8 +252,16 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-evmos-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for Evmos mainnet
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Evmos mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for Evmos mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Evmos mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
   build-and-test-fantom:
     needs: [lint]
@@ -281,9 +291,17 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-fantom-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for Fantom Opera
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Fantom mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
 
+      - name: Run slow tests for Fantom mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Fantom mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+  
   build-and-test-chapel:
     needs: [lint]
     env:
@@ -312,8 +330,16 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-chapel-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for BSC testnet
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Chapel testnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for Chapel testnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Chapel testnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
   build-and-test-ethereum:
     needs: [lint]
@@ -343,9 +369,17 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-local-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests locally
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+      - name: Run base tests for Ethereum mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
 
+      - name: Run slow tests for Ethereum mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Ethereum mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+        
   build-and-test-local:
     needs: [lint]
     env:
