@@ -77,11 +77,8 @@ contract LiquidatorsRegistryTest is BaseTest {
   }
 
   function testSwapAllowance() public debuggingOnly fork(BSC_CHAPEL) {
-    vm.prank(0x8982aa50bb919E42e9204f12e5b59D053Eb2A602);
-    IERC20Upgradeable chapelBomb = IERC20Upgradeable(0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768);
-    IERC20Upgradeable chapelTUsd = IERC20Upgradeable(0x4f1885D25eF219D3D4Fa064809D6D4985FAb9A0b);
-
-    registry.amountOutAndSlippageOfSwap(chapelTUsd, 1000000000000000000000, chapelBomb);
+    vm.prank(0xdc3d8A4ee43dDe6a4E92F0D7A749C8eBD921239b);
+    registry.amountOutAndSlippageOfSwap(chapelBomb, 1e18, chapelTUsd);
   }
 
   function testRedemptionPathChapel() public debuggingOnly fork(BSC_CHAPEL) {

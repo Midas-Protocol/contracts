@@ -109,7 +109,8 @@ contract ExtensionsTest is MarketsTest {
 
     CTokenFirstExtension asExt = CTokenFirstExtension(marketAddress);
 
-    asExt.supplyRatePerBlock();
+    asExt.getExtensionForSig(asExt.borrowBalanceCurrent.selector);
+    //asExt.supplyRatePerBlock();
 
     //    emit log_named_array("fn selectors", fns);
   }

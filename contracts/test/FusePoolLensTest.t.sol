@@ -14,7 +14,7 @@ contract FusePoolLensTest is BaseTest {
 
   function testChapelFPL() public debuggingOnly fork(BSC_CHAPEL) {
     FusePoolLens fpl = FusePoolLens(0xD880d5D33221F3992E695f5C6bFBC558e9Ad31cF);
-    //vm.prank(0x8982aa50bb919E42e9204f12e5b59D053Eb2A602);
+    vm.prank(0x8982aa50bb919E42e9204f12e5b59D053Eb2A602);
     fpl.getPoolAssetsWithData(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
   }
 }
