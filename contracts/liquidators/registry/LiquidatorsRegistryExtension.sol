@@ -235,6 +235,42 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
+  function getAllPairsStrategies() external view returns (
+    IRedemptionStrategy[] memory strategies,
+    IERC20Upgradeable[] memory inputTokens,
+    IERC20Upgradeable[] memory outputTokens
+  ) {
+    address[] memory _outputTokens = outputTokensSet.values();
+    uint256 pairsCounter = 0;
+
+    {
+      for (uint256 i = 0; i < _outputTokens.length; i++) {
+        IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+        address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+        pairsCounter += inputTokens.length;
+      }
+
+      strategies = new IRedemptionStrategy[](pairsCounter);
+      inputTokens = new IERC20Upgradeable[](pairsCounter);
+      outputTokens = new IERC20Upgradeable[](pairsCounter);
+    }
+
+    pairsCounter = 0;
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
+        IRedemptionStrategy strategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
+
+        strategies[pairsCounter] = strategy;
+        inputTokens[pairsCounter] = _inputToken;
+        outputTokens[pairsCounter] = _outputToken;
+        pairsCounter++;
+      }
+    }
+  }
+
   function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external onlyOwner {
     // check all the input/output tokens if they match the strategy to remove
     address[] memory _outputTokens = outputTokensSet.values();
