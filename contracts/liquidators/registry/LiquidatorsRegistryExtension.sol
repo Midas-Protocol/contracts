@@ -31,7 +31,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 11;
+    uint8 fnsCount = 12;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -44,6 +44,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this.getAllRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this._resetRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
+    functionSelectors[--fnsCount] = this.getAllPairsStrategies.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -232,6 +233,46 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     // write the new strategies and their tokens configs
     for (uint256 i = 0; i < strategies.length; i++) {
       _setRedemptionStrategy(strategies[i], inputTokens[i], outputTokens[i]);
+    }
+  }
+
+  function getAllPairsStrategies()
+    external
+    view
+    returns (
+      IRedemptionStrategy[] memory strategies,
+      IERC20Upgradeable[] memory inputTokens,
+      IERC20Upgradeable[] memory outputTokens
+    )
+  {
+    address[] memory _outputTokens = outputTokensSet.values();
+    uint256 pairsCounter = 0;
+
+    {
+      for (uint256 i = 0; i < _outputTokens.length; i++) {
+        IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+        address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+        pairsCounter += inputTokens.length;
+      }
+
+      strategies = new IRedemptionStrategy[](pairsCounter);
+      inputTokens = new IERC20Upgradeable[](pairsCounter);
+      outputTokens = new IERC20Upgradeable[](pairsCounter);
+    }
+
+    pairsCounter = 0;
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
+        IRedemptionStrategy strategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
+
+        strategies[pairsCounter] = strategy;
+        inputTokens[pairsCounter] = _inputToken;
+        outputTokens[pairsCounter] = _outputToken;
+        pairsCounter++;
+      }
     }
   }
 

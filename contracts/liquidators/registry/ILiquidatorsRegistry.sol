@@ -31,6 +31,15 @@ interface ILiquidatorsRegistryExtension {
 
   function getAllRedemptionStrategies() external view returns (address[] memory);
 
+  function getAllPairsStrategies()
+    external
+    view
+    returns (
+      IRedemptionStrategy[] memory strategies,
+      IERC20Upgradeable[] memory inputTokens,
+      IERC20Upgradeable[] memory outputTokens
+    );
+
   function swap(
     IERC20Upgradeable inputToken,
     uint256 inputAmount,
