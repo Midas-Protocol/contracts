@@ -315,9 +315,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
       for (uint256 j = 0; j < _inputTokens.length; j++) {
         IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
-        IRedemptionStrategy strategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
-
-        strategies[pairsCounter] = strategy;
+        strategies[pairsCounter] = redemptionStrategiesByTokens[_inputToken][_outputToken];
         inputTokens[pairsCounter] = _inputToken;
         outputTokens[pairsCounter] = _outputToken;
         pairsCounter++;
