@@ -35,10 +35,10 @@ interface ILiquidatorsRegistryExtension {
     external
     view
     returns (
-    IRedemptionStrategy[] memory strategies,
-    IERC20Upgradeable[] memory inputTokens,
-    IERC20Upgradeable[] memory outputTokens
-  );
+      IRedemptionStrategy[] memory strategies,
+      IERC20Upgradeable[] memory inputTokens,
+      IERC20Upgradeable[] memory outputTokens
+    );
 
   function swap(
     IERC20Upgradeable inputToken,
