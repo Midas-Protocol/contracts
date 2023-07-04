@@ -327,8 +327,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = uniswapV2LiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "AlgebraSwapLiquidator") || isStrategy(strategy, "GammaLpTokenLiquidator")) {
       strategyData = algebraSwapLiquidatorData(inputToken, outputToken);
-    } else if (isStrategy(strategy, "BalancerSwapLiquidator") || isStrategy(strategy, "BalancerLpTokenLiquidator")) {
-      strategyData = balancerLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "BalancerSwapLiquidator")) {
+      strategyData = balancerSwapLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "UniswapLpTokenLiquidator") || isStrategy(strategy, "GelatoGUniLiquidator")) {
       strategyData = uniswapLpTokenLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "SaddleLpTokenLiquidator")) {
@@ -341,8 +341,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
     } else if (isStrategy(strategy, "XBombLiquidatorFunder")) {
       strategyData = xBombLiquidatorData(inputToken, outputToken);
-    } else if (isStrategy(strategy, "BalancerLinearPoolTokenLiquidator")) {
-      strategyData = balancerLinearPoolTokenLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "BalancerLpTokenLiquidator")) {
+      strategyData = balancerLpTokenLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "AaveTokenLiquidator")) {
       strategyData = aaveLiquidatorData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
@@ -437,7 +437,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     strategyData = abi.encode(outputToken);
   }
 
-  function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function balancerLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     internal
     pure
     returns (bytes memory strategyData)
@@ -580,47 +580,16 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
-  function balancerLinearPoolTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function balancerSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     internal
     view
     returns (bytes memory strategyData)
   {
     address poolAddress = ap.getBalancerPoolForTokens(address(inputToken), address(outputToken));
-    // TODO remove after the pools are configure on-chain
     if (poolAddress == address(0)) {
-      address wnative = ap.getAddress("wtoken");
-      address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
-      address maticx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
-      address twoeur = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E;
-      address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
-      address maticxBbaWmatic = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
-
-      if (
-        (address(inputToken) == wnative && address(outputToken) == stmatic) ||
-        (address(inputToken) == stmatic && address(outputToken) == wnative)
-      ) {
-        poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
-      }
-      if (
-        (address(inputToken) == wnative && address(outputToken) == maticx) ||
-        (address(inputToken) == maticx && address(outputToken) == wnative)
-      ) {
-        poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
-      }
-      if (
-        (address(inputToken) == par && address(outputToken) == twoeur) ||
-        (address(inputToken) == twoeur && address(outputToken) == par)
-      ) {
-        poolAddress = twoeur; // Balancer 2EUR Stable Pool
-      }
-      if (
-        (address(inputToken) == maticxBbaWmatic && address(outputToken) == maticx) ||
-        (address(inputToken) == maticx && address(outputToken) == maticxBbaWmatic)
-      ) {
-        poolAddress = maticxBbaWmatic;
-      }
+      // throw an error
+      revert("No balancer pool found for the given tokens");
     }
-
     strategyData = abi.encode(poolAddress, outputToken);
   }
 
