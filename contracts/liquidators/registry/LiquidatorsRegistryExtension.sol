@@ -236,6 +236,38 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
+  function pairsStrategiesMatch(
+    IRedemptionStrategy[] calldata configStrategies,
+    IERC20Upgradeable[] calldata configInputTokens,
+    IERC20Upgradeable[] calldata configOutputTokens
+  ) external view returns (bool) {
+    (
+      IRedemptionStrategy[] memory onChainStrategies,
+      IERC20Upgradeable[] memory onChainInputTokens,
+      IERC20Upgradeable[] memory onChainOutputTokens
+    ) = getAllRedemptionStrategies();
+    if (onChainStrategies.length != configStrategies.length) return false;
+    else {
+      // find a match for each on chain strategy
+      for (uint256 i = 0; i < onChainStrategies.length; i++) {
+        bool foundMatch = false;
+        for (uint256 j = 0; j < configStrategies.length; j++) {
+          if (
+            onChainStrategies[i] == configStrategies[j] &&
+            onChainInputTokens[i] == configInputTokens[j] &&
+            onChainOutputTokens[i] == configOutputTokens[j]
+          ) {
+            foundMatch = true;
+            break;
+          }
+        }
+        if (!foundMatch) return false;
+      }
+
+      return true;
+    }
+  }
+
   function getAllPairsStrategies()
     external
     view
