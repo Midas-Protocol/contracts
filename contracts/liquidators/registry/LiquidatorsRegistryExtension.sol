@@ -235,11 +235,15 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
-  function getAllPairsStrategies() external view returns (
-    IRedemptionStrategy[] memory strategies,
-    IERC20Upgradeable[] memory inputTokens,
-    IERC20Upgradeable[] memory outputTokens
-  ) {
+  function getAllPairsStrategies()
+    external
+    view
+    returns (
+      IRedemptionStrategy[] memory strategies,
+      IERC20Upgradeable[] memory inputTokens,
+      IERC20Upgradeable[] memory outputTokens
+    )
+  {
     address[] memory _outputTokens = outputTokensSet.values();
     uint256 pairsCounter = 0;
 
