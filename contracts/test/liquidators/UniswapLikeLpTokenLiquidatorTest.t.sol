@@ -6,11 +6,12 @@ import { UniswapLpTokenPriceOracle } from "../../oracles/default/UniswapLpTokenP
 import { SolidlyLpTokenPriceOracle } from "../../oracles/default/SolidlyLpTokenPriceOracle.sol";
 import { UniswapLikeLpTokenPriceOracle } from "../../oracles/default/UniswapLikeLpTokenPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../../liquidators/UniswapLpTokenLiquidator.sol";
-import { SolidlyLpTokenLiquidator } from "../../liquidators/SolidlyLpTokenLiquidator.sol";
+import { SolidlyLpTokenLiquidator, SolidlyLpTokenWrapper } from "../../liquidators/SolidlyLpTokenLiquidator.sol";
 import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
+import { IRouter } from "../../external/solidly/IRouter.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
@@ -19,6 +20,7 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   UniswapLpTokenLiquidator private uniLiquidator;
   SolidlyLpTokenLiquidator private solidlyLpTokenLiquidator;
+  SolidlyLpTokenWrapper solidlyLpTokenWrapper;
   SolidlyLpTokenPriceOracle private oracleSolidly;
   UniswapLpTokenPriceOracle private oracleUniswap;
   MasterPriceOracle mpo;
@@ -36,6 +38,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
 
     uniLiquidator = new UniswapLpTokenLiquidator();
     solidlyLpTokenLiquidator = new SolidlyLpTokenLiquidator();
+    solidlyLpTokenWrapper = new SolidlyLpTokenWrapper();
     oracleSolidly = new SolidlyLpTokenPriceOracle(wtoken);
     oracleUniswap = new UniswapLpTokenPriceOracle(wtoken);
   }
@@ -125,8 +128,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
       vm.prank(whale);
       lpTokenContract.transfer(address(solidlyLpTokenLiquidator), redeemAmount);
 
-      vm.prank(address(solidlyLpTokenLiquidator));
-      lpTokenContract.approve(lpToken, redeemAmount);
       solidlyLpTokenLiquidator.redeem(lpTokenContract, redeemAmount, data);
     }
 
@@ -172,5 +173,48 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     testSolidlyLpTokenRedeem(WBNB_BUSD_whale, WBNB_BUSD, wtoken, oracleSolidly);
     testSolidlyLpTokenRedeem(HAY_BUSD_whale, HAY_BUSD, stableToken, oracleSolidly);
     testSolidlyLpTokenRedeem(ANKR_ankrBNB_whale, ANKR_ankrBNB, ankrBNB, oracleSolidly);
+  }
+
+  function _testSolidlyLpTokenWrapper(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    address whale,
+    IPair lpToken
+  ) internal {
+    IRouter.route[] memory swapPath0 = new IRouter.route[](1);
+    IRouter.route[] memory swapPath1 = new IRouter.route[](1);
+    {
+      //      bool isInputToken0 = lpToken.token0() == address(inputToken);
+      //      bool isInputToken1 = lpToken.token1() == address(inputToken);
+      //      require(isInputToken0 || isInputToken1, "!input token not underlying");
+
+      swapPath0[0].stable = lpToken.stable();
+      swapPath0[0].from = lpToken.token0();
+      swapPath0[0].to = lpToken.token1();
+
+      swapPath1[0].stable = lpToken.stable();
+      swapPath1[0].from = lpToken.token1();
+      swapPath1[0].to = lpToken.token0();
+    }
+
+    bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1);
+
+    vm.prank(whale);
+    inputToken.transfer(address(solidlyLpTokenWrapper), inputAmount);
+
+    solidlyLpTokenWrapper.redeem(inputToken, inputAmount, data);
+
+    uint256 lpTokensBalance = lpToken.balanceOf(address(solidlyLpTokenWrapper));
+    assertGt(lpTokensBalance, 0, "!no lp tokens wrapped");
+    uint256 inputTokensAfter = inputToken.balanceOf(address(solidlyLpTokenWrapper));
+    assertEq(inputTokensAfter, 0, "!input tokens left after");
+  }
+
+  function testWrapSolidlyLpTokens() public fork(BSC_MAINNET) {
+    IERC20Upgradeable wbnb = IERC20Upgradeable(ap.getAddress("wtoken"));
+    address WBNB_BUSD = 0x483653bcF3a10d9a1c334CE16a19471a614F4385;
+    address wbnbWhale = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
+
+    _testSolidlyLpTokenWrapper(wbnb, 1e18, wbnbWhale, IPair(WBNB_BUSD));
   }
 }

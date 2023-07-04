@@ -129,15 +129,19 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
       vars.amountFor1 = inputAmount - vars.amountFor0;
     }
 
-    if (vars.token0 != address(inputToken)) {
+    if (vars.token0 == address(inputToken)) {
+      inputToken.approve(address(vars.solidlyRouter), vars.amountFor0);
       vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor0, 0, vars.swapPath0, address(this), block.timestamp);
     }
-    if (vars.token1 != address(inputToken)) {
+    if (vars.token1 == address(inputToken)) {
+      inputToken.approve(address(vars.solidlyRouter), vars.amountFor1);
       vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor1, 0, vars.swapPath1, address(this), block.timestamp);
     }
 
     uint256 lp0Bal = IERC20Upgradeable(vars.token0).balanceOf(address(this));
     uint256 lp1Bal = IERC20Upgradeable(vars.token1).balanceOf(address(this));
+    IERC20Upgradeable(vars.token0).approve(address(vars.solidlyRouter), lp0Bal);
+    IERC20Upgradeable(vars.token1).approve(address(vars.solidlyRouter), lp1Bal);
     vars.solidlyRouter.addLiquidity(
       vars.token0,
       vars.token1,
@@ -149,6 +153,9 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
       address(this),
       block.timestamp
     );
+
+    outputToken = IERC20Upgradeable(address(vars.pair));
+    outputAmount = outputToken.balanceOf(address(this));
   }
 
   function name() public pure returns (string memory) {
