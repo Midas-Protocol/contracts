@@ -210,11 +210,19 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     assertEq(inputTokensAfter, 0, "!input tokens left after");
   }
 
-  function testWrapSolidlyLpTokens() public fork(BSC_MAINNET) {
+  function testWrapSolidlyLpTokensWbnbBusd() public fork(BSC_MAINNET) {
     IERC20Upgradeable wbnb = IERC20Upgradeable(ap.getAddress("wtoken"));
     address WBNB_BUSD = 0x483653bcF3a10d9a1c334CE16a19471a614F4385;
     address wbnbWhale = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
 
     _testSolidlyLpTokenWrapper(wbnb, 1e18, wbnbWhale, IPair(WBNB_BUSD));
+  }
+
+  function testWrapSolidlyLpTokensHayBusd() public fork(BSC_MAINNET) {
+    IERC20Upgradeable busd = IERC20Upgradeable(ap.getAddress("stableToken"));
+    address HAY_BUSD = 0x93B32a8dfE10e9196403dd111974E325219aec24;
+    address busdWhale = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
+
+    _testSolidlyLpTokenWrapper(busd, 1000e18, busdWhale, IPair(HAY_BUSD));
   }
 }
