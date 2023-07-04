@@ -248,7 +248,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     ) = getAllPairsStrategies();
     if (onChainStrategies.length != configStrategies.length) return false;
     else {
-      // find a match for each on chain strategy
+      // find a match for each on-chain strategy
       for (uint256 i = 0; i < onChainStrategies.length; i++) {
         bool foundMatch = false;
         for (uint256 j = 0; j < configStrategies.length; j++) {
@@ -264,7 +264,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
         if (!foundMatch) return false;
       }
 
-      // if 0 strategies are there on-chain, it would have returned true...
+      // if there were duplicate on-chain strategies, it would have returned true...
       // therefore, find a match for each config strategy
       for (uint256 i = 0; i < configStrategies.length; i++) {
         bool foundMatch = false;
