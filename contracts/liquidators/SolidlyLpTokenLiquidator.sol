@@ -98,8 +98,10 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     vars.amountFor0 = inputAmount / 2;
     vars.amountFor1 = inputAmount - vars.amountFor0;
 
-    (vars.solidlyRouter, vars.pair, vars.swapPath0, vars.swapPath1) = abi
-      .decode(strategyData, (IRouter, IPair, IRouter.route[], IRouter.route[]));
+    (vars.solidlyRouter, vars.pair, vars.swapPath0, vars.swapPath1) = abi.decode(
+      strategyData,
+      (IRouter, IPair, IRouter.route[], IRouter.route[])
+    );
     vars.token0 = vars.pair.token0();
     vars.token1 = vars.pair.token1();
 
@@ -107,10 +109,18 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     if (vars.stable) {
       uint256 token0Decimals = 10**ERC20Upgradeable(vars.token0).decimals();
       uint256 token1Decimals = 10**ERC20Upgradeable(vars.token1).decimals();
-      uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) / token0Decimals;
-      uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) / token1Decimals;
+      uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) /
+        token0Decimals;
+      uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) /
+        token1Decimals;
 
-      (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(vars.token0, vars.token1, vars.stable, out0, out1);
+      (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(
+        vars.token0,
+        vars.token1,
+        vars.stable,
+        out0,
+        out1
+      );
 
       amountA = (amountA * 1e18) / token0Decimals;
       amountB = (amountB * 1e18) / token1Decimals;
@@ -128,7 +138,17 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
 
     uint256 lp0Bal = IERC20Upgradeable(vars.token0).balanceOf(address(this));
     uint256 lp1Bal = IERC20Upgradeable(vars.token1).balanceOf(address(this));
-    vars.solidlyRouter.addLiquidity(vars.token0, vars.token1, vars.stable, lp0Bal, lp1Bal, 1, 1, address(this), block.timestamp);
+    vars.solidlyRouter.addLiquidity(
+      vars.token0,
+      vars.token1,
+      vars.stable,
+      lp0Bal,
+      lp1Bal,
+      1,
+      1,
+      address(this),
+      block.timestamp
+    );
   }
 
   function name() public pure returns (string memory) {
