@@ -247,43 +247,39 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       IERC20Upgradeable[] memory onChainInputTokens,
       IERC20Upgradeable[] memory onChainOutputTokens
     ) = getAllPairsStrategies();
-    if (onChainStrategies.length != configStrategies.length) return false;
-    else {
-      // find a match for each on-chain strategy
-      for (uint256 i = 0; i < onChainStrategies.length; i++) {
-        bool foundMatch = false;
-        for (uint256 j = 0; j < configStrategies.length; j++) {
-          if (
-            onChainStrategies[i] == configStrategies[j] &&
-            onChainInputTokens[i] == configInputTokens[j] &&
-            onChainOutputTokens[i] == configOutputTokens[j]
-          ) {
-            foundMatch = true;
-            break;
-          }
+    // find a match for each config strategy
+    for (uint256 i = 0; i < configStrategies.length; i++) {
+      bool foundMatch = false;
+      for (uint256 j = 0; j < onChainStrategies.length; j++) {
+        if (
+          onChainStrategies[j] == configStrategies[i] &&
+          onChainInputTokens[j] == configInputTokens[i] &&
+          onChainOutputTokens[j] == configOutputTokens[i]
+        ) {
+          foundMatch = true;
+          break;
         }
-        if (!foundMatch) return false;
       }
-
-      // if there were duplicate on-chain strategies, it would have returned true...
-      // therefore, find a match for each config strategy
-      for (uint256 i = 0; i < configStrategies.length; i++) {
-        bool foundMatch = false;
-        for (uint256 j = 0; j < onChainStrategies.length; j++) {
-          if (
-            onChainStrategies[j] == configStrategies[i] &&
-            onChainInputTokens[j] == configInputTokens[i] &&
-            onChainOutputTokens[j] == configOutputTokens[i]
-          ) {
-            foundMatch = true;
-            break;
-          }
-        }
-        if (!foundMatch) return false;
-      }
-
-      return true;
+      if (!foundMatch) return false;
     }
+
+    // find a match for each on-chain strategy
+    for (uint256 i = 0; i < onChainStrategies.length; i++) {
+      bool foundMatch = false;
+      for (uint256 j = 0; j < configStrategies.length; j++) {
+        if (
+          onChainStrategies[i] == configStrategies[j] &&
+          onChainInputTokens[i] == configInputTokens[j] &&
+          onChainOutputTokens[i] == configOutputTokens[j]
+        ) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) return false;
+    }
+
+    return true;
   }
 
   function getAllPairsStrategies()
