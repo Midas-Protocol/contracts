@@ -345,6 +345,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = balancerLinearPoolTokenLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "AaveTokenLiquidator")) {
       strategyData = aaveLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "SolidlyLpTokenWrapper")) {
+      strategyData = solidlyLpTokenWrapperData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
       //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
@@ -622,6 +624,37 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
 
     strategyData = abi.encode(poolAddress, outputToken);
+  }
+
+  function solidlyLpTokenWrapperData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  internal
+  view
+  returns (bytes memory strategyData)
+  {
+    IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_ROUTER"));
+    IPair pair = IPair(address(outputToken));
+
+    IRouter.Route[] memory swapPath0 = new IRouter.Route[](1);
+    IRouter.Route[] memory swapPath1 = new IRouter.Route[](1);
+    {
+      bool isInputToken0 = pair.token0() == address(inputToken);
+      bool isInputToken1 = pair.token1() == address(inputToken);
+      require(isInputToken0 || isInputToken1, "!input token not underlying");
+
+      swapPath0[0].stable = pair.stable();
+      swapPath0[0].from = pair.token0();
+      swapPath0[0].to = pair.token1();
+
+      swapPath1[0].stable = pair.stable();
+      swapPath1[0].from = pair.token1();
+      swapPath1[0].to = pair.token0();
+    }
+
+    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    uint256 price0 = mpo.price(pair.token0());
+    uint256 price1 = mpo.price(pair.token1());
+
+    strategyData = abi.encode(solidlyRouter, pair, swapPath0, swapPath1, price0, price1);
   }
 
   // TODO remove after testing
