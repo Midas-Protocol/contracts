@@ -181,7 +181,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     address whale,
     IPair lpToken
   ) internal {
-
     // TODO get the data from the liquidators registry
     IRouter.Route[] memory swapPath0 = new IRouter.Route[](1);
     IRouter.Route[] memory swapPath1 = new IRouter.Route[](1);

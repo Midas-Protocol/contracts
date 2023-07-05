@@ -627,9 +627,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function solidlyLpTokenWrapperData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  internal
-  view
-  returns (bytes memory strategyData)
+    internal
+    view
+    returns (bytes memory strategyData)
   {
     IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_ROUTER"));
     IPair pair = IPair(address(outputToken));

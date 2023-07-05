@@ -127,9 +127,9 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
 
     // evaluate how much we would have received by swapping one for the other
     uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) /
-    token0Decimals;
+      token0Decimals;
     uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) /
-    token1Decimals;
+      token1Decimals;
 
     // use the comparative output amounts to check what is the actual required ratio of inputs
     (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(
