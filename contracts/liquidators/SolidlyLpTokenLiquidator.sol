@@ -98,6 +98,7 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     WrapSolidlyLpTokenVars memory vars;
 
+    // calculate the amount for token0 or token1 that needs to be swapped for the other before adding the liquidity
     vars.amountFor0 = inputAmount / 2;
     vars.amountFor1 = inputAmount - vars.amountFor0;
 
@@ -110,6 +111,8 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     uint256 token0Decimals = 10**vars.token0.decimals();
     uint256 token1Decimals = 10**vars.token1.decimals();
 
+    // if the pair is not stable, then we cannot rely on the amounts to have comparable value
+    // so we calculate the testing amount of token0/token1 by denominating in the other token
     vars.stable = vars.pair.stable();
     if (!vars.stable) {
       vars.price0 = (vars.price0 * 1e18) / token0Decimals;
@@ -122,11 +125,13 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
       }
     }
 
+    // evaluate how much we would have received by swapping one for the other
     uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) /
     token0Decimals;
     uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) /
     token1Decimals;
 
+    // use the comparative output amounts to check what is the actual required ratio of inputs
     (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(
       address(vars.token0),
       address(vars.token1),
@@ -138,9 +143,12 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     amountA = (amountA * 1e18) / token0Decimals;
     amountB = (amountB * 1e18) / token1Decimals;
     uint256 ratio = (((out0 * 1e18) / out1) * amountB) / amountA;
+
+    // recalculate the amounts to swap based on the ratio of the liquidity amounts required
     vars.amountFor0 = (inputAmount * 1e18) / (ratio + 1e18);
     vars.amountFor1 = inputAmount - vars.amountFor0;
 
+    // swap amount of the input token for the other token
     if (vars.token0 == inputToken) {
       inputToken.approve(address(vars.solidlyRouter), vars.amountFor0);
       vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor0, 0, vars.swapPath0, address(this), block.timestamp);
@@ -150,11 +158,11 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
       vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor1, 0, vars.swapPath1, address(this), block.timestamp);
     }
 
+    // provide the liquidity
     uint256 token0Balance = vars.token0.balanceOf(address(this));
     uint256 token1Balance = vars.token1.balanceOf(address(this));
     vars.token0.approve(address(vars.solidlyRouter), token0Balance);
     vars.token1.approve(address(vars.solidlyRouter), token1Balance);
-
     vars.solidlyRouter.addLiquidity(
       address(vars.token0),
       address(vars.token1),
