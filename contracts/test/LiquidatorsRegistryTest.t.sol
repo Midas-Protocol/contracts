@@ -33,7 +33,8 @@ contract LiquidatorsRegistryTest is BaseTest {
 
   // polygon
   IERC20Upgradeable usdr3CrvCurveLpToken = IERC20Upgradeable(0xa138341185a9D0429B0021A11FB717B225e13e1F);
-  IERC20Upgradeable maticBbaBalancerStableLpToken = IERC20Upgradeable(0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0);
+  IERC20Upgradeable maticxBbaBalancerStableLpToken = IERC20Upgradeable(0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0);
+  IERC20Upgradeable stMaticBbaBalancerStableLpToken = IERC20Upgradeable(0x216690738Aac4aa0C4770253CA26a28f0115c595);
   IERC20Upgradeable mimoParBalancerWeightedLpToken = IERC20Upgradeable(0x82d7f08026e21c7713CfAd1071df7C8271B17Eae);
 
   function afterForkSetUp() internal override {
@@ -157,12 +158,18 @@ contract LiquidatorsRegistryTest is BaseTest {
   }
 
   function testSwappingBalancerStableLpPolygon() public fork(POLYGON_MAINNET) {
+    // TODO: run deployment to fix the liquidation path and set the balancer liquidator data
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // balancer gauge
 
-    IERC20Upgradeable inputToken = maticBbaBalancerStableLpToken;
+    // maticx-wmatic aave boosted
+    IERC20Upgradeable inputToken = maticxBbaBalancerStableLpToken;
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = wtoken;
 
+    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
+
+    // stmatic-wmatic aave boosted
+    inputToken = stMaticBbaBalancerStableLpToken;
     _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
   }
 

@@ -8,7 +8,7 @@ import { LeveredPosition } from "../midas/levered/LeveredPosition.sol";
 import { LeveredPositionFactory, IFuseFeeDistributor } from "../midas/levered/LeveredPositionFactory.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
 import { SolidlySwapLiquidator } from "../liquidators/SolidlySwapLiquidator.sol";
-import { BalancerLinearPoolTokenLiquidator } from "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
+import { BalancerSwapLiquidator } from "../liquidators/BalancerSwapLiquidator.sol";
 import { AlgebraSwapLiquidator } from "../liquidators/AlgebraSwapLiquidator.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import { LeveredPositionFactoryExtension } from "../midas/levered/LeveredPositionFactoryExtension.sol";
@@ -420,8 +420,8 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
     address stmaticWhale = 0x52997D5abC01e9BFDd29cccB183ffc60F6d6bF8c;
 
-    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePairAndLiquidator(wmaticMarket, stmaticMarket, linearSwapLiquidator);
+    BalancerSwapLiquidator balancerSwapLiquidator = new BalancerSwapLiquidator();
+    _configurePairAndLiquidator(wmaticMarket, stmaticMarket, balancerSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(stmaticMarket), stmaticWhale);
 
@@ -471,8 +471,8 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
     address maticxWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePairAndLiquidator(wmaticMarket, maticxMarket, linearSwapLiquidator);
+    BalancerSwapLiquidator balancerSwapLiquidator = new BalancerSwapLiquidator();
+    _configurePairAndLiquidator(wmaticMarket, maticxMarket, balancerSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(maticxMarket), maticxWhale);
 
@@ -556,7 +556,7 @@ contract Par2EurLeveredPositionTest is LeveredPositionTest {
     vm.prank(balancer);
     twoEur.transfer(twoEurWhale, 80 * depositAmount);
 
-    BalancerLinearPoolTokenLiquidator liquidator = new BalancerLinearPoolTokenLiquidator();
+    BalancerSwapLiquidator liquidator = new BalancerSwapLiquidator();
     _configurePairAndLiquidator(twoEurMarket, parMarket, liquidator);
     _fundMarketAndSelf(ICErc20(twoEurMarket), twoEurWhale);
     _fundMarketAndSelf(ICErc20(parMarket), parWhale);
@@ -579,7 +579,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
     address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
     IComptroller pool = IComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
-    _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerLinearPoolTokenLiquidator());
+    _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerSwapLiquidator());
 
     {
       vm.prank(pool.admin());
