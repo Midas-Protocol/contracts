@@ -31,7 +31,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
+    uint8 fnsCount = 13;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -45,6 +45,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this._resetRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
     functionSelectors[--fnsCount] = this.getAllPairsStrategies.selector;
+    functionSelectors[--fnsCount] = this.pairsStrategiesMatch.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
@@ -236,8 +237,53 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
+  function pairsStrategiesMatch(
+    IRedemptionStrategy[] calldata configStrategies,
+    IERC20Upgradeable[] calldata configInputTokens,
+    IERC20Upgradeable[] calldata configOutputTokens
+  ) external view returns (bool) {
+    (
+      IRedemptionStrategy[] memory onChainStrategies,
+      IERC20Upgradeable[] memory onChainInputTokens,
+      IERC20Upgradeable[] memory onChainOutputTokens
+    ) = getAllPairsStrategies();
+    // find a match for each config strategy
+    for (uint256 i = 0; i < configStrategies.length; i++) {
+      bool foundMatch = false;
+      for (uint256 j = 0; j < onChainStrategies.length; j++) {
+        if (
+          onChainStrategies[j] == configStrategies[i] &&
+          onChainInputTokens[j] == configInputTokens[i] &&
+          onChainOutputTokens[j] == configOutputTokens[i]
+        ) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) return false;
+    }
+
+    // find a match for each on-chain strategy
+    for (uint256 i = 0; i < onChainStrategies.length; i++) {
+      bool foundMatch = false;
+      for (uint256 j = 0; j < configStrategies.length; j++) {
+        if (
+          onChainStrategies[i] == configStrategies[j] &&
+          onChainInputTokens[i] == configInputTokens[j] &&
+          onChainOutputTokens[i] == configOutputTokens[j]
+        ) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) return false;
+    }
+
+    return true;
+  }
+
   function getAllPairsStrategies()
-    external
+    public
     view
     returns (
       IRedemptionStrategy[] memory strategies,
@@ -266,9 +312,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
       for (uint256 j = 0; j < _inputTokens.length; j++) {
         IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
-        IRedemptionStrategy strategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
-
-        strategies[pairsCounter] = strategy;
+        strategies[pairsCounter] = redemptionStrategiesByTokens[_inputToken][_outputToken];
         inputTokens[pairsCounter] = _inputToken;
         outputTokens[pairsCounter] = _outputToken;
         pairsCounter++;

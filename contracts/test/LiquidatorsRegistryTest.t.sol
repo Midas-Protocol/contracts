@@ -77,11 +77,63 @@ contract LiquidatorsRegistryTest is BaseTest {
     return returndata;
   }
 
-  function testResetStrategies() public debuggingOnly fork(POLYGON_MAINNET) {
+  function testResetStrategies() public debuggingOnly fork(BSC_CHAPEL) {
     upgradeRegistry();
 
+    IRedemptionStrategy[] memory strategiesConfig = new IRedemptionStrategy[](3);
+    IERC20Upgradeable[] memory inputTokensConfig = new IERC20Upgradeable[](3);
+    IERC20Upgradeable[] memory outputTokensConfig = new IERC20Upgradeable[](3);
+    {
+      strategiesConfig[0] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      strategiesConfig[1] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      strategiesConfig[2] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      inputTokensConfig[0] = IERC20Upgradeable(chapelBomb);
+      inputTokensConfig[1] = IERC20Upgradeable(chapelTUsd);
+      inputTokensConfig[2] = IERC20Upgradeable(chapelTDai);
+      outputTokensConfig[0] = IERC20Upgradeable(chapelTUsd);
+      outputTokensConfig[1] = IERC20Upgradeable(chapelBomb);
+      outputTokensConfig[2] = IERC20Upgradeable(chapelBomb);
+    }
+
+    bool matchingBefore = registry.pairsStrategiesMatch(strategiesConfig, inputTokensConfig, outputTokensConfig);
+    assertEq(matchingBefore, false, "should not match prior");
+
     vm.prank(ap.getAddress("deployer"));
-    _functionCall(address(registry), hex"00", "reset strategies failed");
+    registry._resetRedemptionStrategies(strategiesConfig, inputTokensConfig, outputTokensConfig);
+
+    bool matchingAfter = registry.pairsStrategiesMatch(strategiesConfig, inputTokensConfig, outputTokensConfig);
+    assertEq(matchingAfter, true, "should match after");
+  }
+
+  function testResetDuplicatingStrategies() public debuggingOnly fork(BSC_CHAPEL) {
+    upgradeRegistry();
+
+    IRedemptionStrategy[] memory strategiesConfig = new IRedemptionStrategy[](4);
+    IERC20Upgradeable[] memory inputTokensConfig = new IERC20Upgradeable[](4);
+    IERC20Upgradeable[] memory outputTokensConfig = new IERC20Upgradeable[](4);
+    {
+      strategiesConfig[0] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      strategiesConfig[1] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      strategiesConfig[2] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      strategiesConfig[3] = IRedemptionStrategy(0xC875a8D8E8a593953115131697a788faEAa37109);
+      inputTokensConfig[0] = IERC20Upgradeable(chapelBomb);
+      inputTokensConfig[1] = IERC20Upgradeable(chapelTUsd);
+      inputTokensConfig[2] = IERC20Upgradeable(chapelTDai);
+      inputTokensConfig[3] = IERC20Upgradeable(chapelTDai);
+      outputTokensConfig[0] = IERC20Upgradeable(chapelTUsd);
+      outputTokensConfig[1] = IERC20Upgradeable(chapelBomb);
+      outputTokensConfig[2] = IERC20Upgradeable(chapelBomb);
+      outputTokensConfig[3] = IERC20Upgradeable(chapelBomb);
+    }
+
+    bool matchingBefore = registry.pairsStrategiesMatch(strategiesConfig, inputTokensConfig, outputTokensConfig);
+    assertEq(matchingBefore, false, "should not match prior");
+
+    vm.prank(ap.getAddress("deployer"));
+    registry._resetRedemptionStrategies(strategiesConfig, inputTokensConfig, outputTokensConfig);
+
+    bool matchingAfter = registry.pairsStrategiesMatch(strategiesConfig, inputTokensConfig, outputTokensConfig);
+    assertEq(matchingAfter, true, "should match after");
   }
 
   function testRedemptionPathChapel() public debuggingOnly fork(BSC_CHAPEL) {
