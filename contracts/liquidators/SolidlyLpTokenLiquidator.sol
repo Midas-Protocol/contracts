@@ -82,8 +82,6 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     IRouter solidlyRouter;
     ERC20Upgradeable token0;
     ERC20Upgradeable token1;
-    uint256 token0Decimals;
-    uint256 token1Decimals;
     bool stable;
     IPair pair;
     IRouter.Route[] swapPath0;
@@ -104,8 +102,6 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     );
     vars.token0 = ERC20Upgradeable(vars.pair.token0());
     vars.token1 = ERC20Upgradeable(vars.pair.token1());
-    vars.token0Decimals = 10**vars.token0.decimals();
-    vars.token1Decimals = 10**vars.token1.decimals();
     vars.stable = vars.pair.stable();
 
     // calculate the amount for token0 or token1 that needs to be swapped for the other
@@ -113,18 +109,18 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     vars.amountToSwapOfToken1 = inputAmount - vars.amountToSwapOfToken0;
     if (vars.token1 == inputToken) {
       uint256 out0 = vars.solidlyRouter.getAmountsOut(vars.amountToSwapOfToken1, vars.swapPath1)[vars.swapPath1.length];
-      // price0For1 is scaled to 18 decimals
-      vars.price0For1 = (out0 * vars.token1Decimals * 1e18) / (vars.amountToSwapOfToken1 * vars.token0Decimals);
-      vars.amountToSwapOfToken0 = (vars.amountToSwapOfToken0 * vars.token0Decimals * vars.price0For1) / (1e18 * vars.token1Decimals);
-      // price1For0 is scaled to 18 decimals
+      // price0For1 is scaled to 18 + token0.decimals - token1.decimals
+      vars.price0For1 = (out0 * 1e18) / vars.amountToSwapOfToken1;
+      vars.amountToSwapOfToken0 = (vars.amountToSwapOfToken0 * vars.price0For1) / 1e18;
+      // price1For0 is scaled to 18 + token1.decimals - token0.decimals
       vars.price1For0 = 1e36 / vars.price0For1;
     }
     if (vars.token0 == inputToken) {
       uint256 out1 = vars.solidlyRouter.getAmountsOut(vars.amountToSwapOfToken0, vars.swapPath0)[vars.swapPath0.length];
-      // price1For0 is scaled to 18 decimals
-      vars.price1For0 = (out1 * vars.token0Decimals * 1e18) / (vars.amountToSwapOfToken0 * vars.token1Decimals);
-      vars.amountToSwapOfToken1 = (vars.amountToSwapOfToken1 * vars.token1Decimals * vars.price1For0) / (1e18 * vars.token0Decimals);
-      // price0For1 is scaled to 18 decimals
+      // price1For0 is scaled to 18 + token1.decimals - token0.decimals
+      vars.price1For0 = (out1 * 1e18) / vars.amountToSwapOfToken0;
+      vars.amountToSwapOfToken1 = (vars.amountToSwapOfToken1 * vars.price1For0) / 1e18;
+      // price0For1 is scaled to 18 + token0.decimals - token1.decimals
       vars.price0For1 = 1e36 / vars.price1For0;
     }
 
@@ -138,7 +134,7 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     );
 
     // recalculate the amounts to swap based on the ratio of the value of the required input amounts
-    uint256 ratio = (amountB * vars.token0Decimals * vars.price0For1) / (amountA * vars.token1Decimals);
+    uint256 ratio = (amountB * vars.price0For1) / amountA;
     vars.amountToSwapOfToken1 = (inputAmount * 1e18) / (ratio + 1e18);
     vars.amountToSwapOfToken0 = inputAmount - vars.amountToSwapOfToken1;
 
