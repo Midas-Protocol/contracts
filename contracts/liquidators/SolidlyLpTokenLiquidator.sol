@@ -77,17 +77,19 @@ contract SolidlyLpTokenLiquidator is IRedemptionStrategy {
 
 contract SolidlyLpTokenWrapper is IRedemptionStrategy {
   struct WrapSolidlyLpTokenVars {
-    uint256 amountFor0;
-    uint256 amountFor1;
+    uint256 amountToSwapOfToken0;
+    uint256 amountToSwapOfToken1;
     IRouter solidlyRouter;
     ERC20Upgradeable token0;
     ERC20Upgradeable token1;
+    uint256 token0Decimals;
+    uint256 token1Decimals;
     bool stable;
     IPair pair;
     IRouter.Route[] swapPath0;
     IRouter.Route[] swapPath1;
-    uint256 price0;
-    uint256 price1;
+    uint256 price0For1;
+    uint256 price1For0;
   }
 
   function redeem(
@@ -96,77 +98,60 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     bytes memory strategyData
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
     WrapSolidlyLpTokenVars memory vars;
-
-    // calculate the amount for token0 or token1 that needs to be swapped for the other before adding the liquidity
-    vars.amountFor0 = inputAmount / 2;
-    vars.amountFor1 = inputAmount - vars.amountFor0;
-
-    (vars.solidlyRouter, vars.pair, vars.swapPath0, vars.swapPath1, vars.price0, vars.price1) = abi.decode(
+    (vars.solidlyRouter, vars.pair, vars.swapPath0, vars.swapPath1) = abi.decode(
       strategyData,
-      (IRouter, IPair, IRouter.Route[], IRouter.Route[], uint256, uint256)
+      (IRouter, IPair, IRouter.Route[], IRouter.Route[])
     );
     vars.token0 = ERC20Upgradeable(vars.pair.token0());
     vars.token1 = ERC20Upgradeable(vars.pair.token1());
-    uint256 token0Decimals = 10**vars.token0.decimals();
-    uint256 token1Decimals = 10**vars.token1.decimals();
+    vars.token0Decimals = 10 ** vars.token0.decimals();
+    vars.token1Decimals = 10 ** vars.token1.decimals();
+    vars.stable = vars.pair.stable();
 
+    // calculate the amount for token0 or token1 that needs to be swapped for the other
+    vars.amountToSwapOfToken0 = inputAmount / 2;
+    vars.amountToSwapOfToken1 = inputAmount - vars.amountToSwapOfToken0;
     if (vars.token1 == inputToken) {
-      vars.amountFor0 = (vars.amountFor0 * token0Decimals) / token1Decimals;
+      uint256 out0 = vars.solidlyRouter.getAmountsOut(vars.amountToSwapOfToken1, vars.swapPath1)[vars.swapPath1.length];
+      vars.price0For1 = (out0 * vars.token1Decimals * 1e18) / (vars.amountToSwapOfToken1 * vars.token0Decimals);
+      vars.amountToSwapOfToken0 = (vars.amountToSwapOfToken0 * vars.price0For1) / 1e18;
+      vars.price1For0 = 1e36 / vars.price0For1;
     }
     if (vars.token0 == inputToken) {
-      vars.amountFor1 = (vars.amountFor1 * token1Decimals) / token0Decimals;
+      uint256 out1 = vars.solidlyRouter.getAmountsOut(vars.amountToSwapOfToken0, vars.swapPath0)[vars.swapPath0.length];
+      vars.price1For0 = (out1 * vars.token0Decimals * 1e18) / (vars.amountToSwapOfToken0 * vars.token1Decimals);
+      vars.amountToSwapOfToken1 = (vars.amountToSwapOfToken1 * vars.price1For0) / 1e18;
+      vars.price0For1 = 1e36 / vars.price1For0;
     }
 
-    // if the pair is not stable, then we cannot rely on the amounts to have comparable value
-    // so we calculate the testing amount of token0/token1 by denominating in the other token
-    vars.stable = vars.pair.stable();
-    if (!vars.stable) {
-      vars.price0 = (vars.price0 * 1e18) / token0Decimals;
-      vars.price1 = (vars.price1 * 1e18) / token1Decimals;
-      if (vars.token1 == inputToken) {
-        vars.amountFor0 = (vars.amountFor0 * vars.price1) / vars.price0;
-      }
-      if (vars.token0 == inputToken) {
-        vars.amountFor1 = (vars.amountFor1 * vars.price0) / vars.price1;
-      }
-    }
-
-    // evaluate how much we would have received by swapping one for the other
-    uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) /
-      token0Decimals;
-    uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) /
-      token1Decimals;
-
-    // use the comparative output amounts to check what is the actual required ratio of inputs
+    // use the quoted input amounts to check what is the actual required ratio of inputs
     (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(
       address(vars.token0),
       address(vars.token1),
       vars.stable,
-      out0,
-      out1
+      vars.amountToSwapOfToken0,
+      vars.amountToSwapOfToken1
     );
 
-    amountA = (amountA * 1e18) / token0Decimals;
-    amountB = (amountB * 1e18) / token1Decimals;
-    uint256 ratio = (((out0 * 1e18) / out1) * amountB) / amountA;
+    // recalculate the amounts to swap based on the ratio of the value of the required input amounts
+    uint256 ratio = (amountB * vars.token0Decimals * vars.price0For1) / (amountA * vars.token1Decimals);
+    vars.amountToSwapOfToken1 = (inputAmount * 1e18) / (ratio + 1e18);
+    vars.amountToSwapOfToken0 = inputAmount - vars.amountToSwapOfToken1;
 
-    // recalculate the amounts to swap based on the ratio of the liquidity amounts required
-    vars.amountFor0 = (inputAmount * 1e18) / (ratio + 1e18);
-    vars.amountFor1 = inputAmount - vars.amountFor0;
-
-    // swap amount of the input token for the other token
+    // swap a part of the input token amount for the other token
     if (vars.token0 == inputToken) {
-      inputToken.approve(address(vars.solidlyRouter), vars.amountFor0);
-      vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor0, 0, vars.swapPath0, address(this), block.timestamp);
+      inputToken.approve(address(vars.solidlyRouter), vars.amountToSwapOfToken0);
+      vars.solidlyRouter.swapExactTokensForTokens(vars.amountToSwapOfToken0, 0, vars.swapPath0, address(this), block.timestamp);
     }
     if (vars.token1 == inputToken) {
-      inputToken.approve(address(vars.solidlyRouter), vars.amountFor1);
-      vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor1, 0, vars.swapPath1, address(this), block.timestamp);
+      inputToken.approve(address(vars.solidlyRouter), vars.amountToSwapOfToken1);
+      vars.solidlyRouter.swapExactTokensForTokens(vars.amountToSwapOfToken1, 0, vars.swapPath1, address(this), block.timestamp);
     }
 
     // provide the liquidity
     uint256 token0Balance = vars.token0.balanceOf(address(this));
     uint256 token1Balance = vars.token1.balanceOf(address(this));
+
     vars.token0.approve(address(vars.solidlyRouter), token0Balance);
     vars.token1.approve(address(vars.solidlyRouter), token1Balance);
     vars.solidlyRouter.addLiquidity(

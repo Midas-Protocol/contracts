@@ -204,9 +204,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
       swapPath1[0].to = lpToken.token0();
     }
 
-    uint256 price0 = mpo.price(lpToken.token0());
-    uint256 price1 = mpo.price(lpToken.token1());
-    bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1, price0, price1);
+    bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1);
 
     vm.prank(whale);
     inputToken.transfer(address(solidlyLpTokenWrapper), inputAmount);
@@ -241,7 +239,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     address jBRL_BRZ = 0xA0695f78AF837F570bcc50f53e58Cda300798B65;
     address jBRLWhale = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
 
-    _testSolidlyLpTokenWrapper(jBRL, 1e21, jBRLWhale, IPair(jBRL_BRZ));
+    _testSolidlyLpTokenWrapper(jBRL, 1000e18, jBRLWhale, IPair(jBRL_BRZ));
   }
 
   // passes (9 / 6 decimals)
@@ -268,6 +266,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     address STMATIC_USDR = 0x733eEEf37De013283da29cE9EB4758dC59CaFc87;
     address USDRWhale = 0xa138341185a9D0429B0021A11FB717B225e13e1F; // curve lp token
 
-    _testSolidlyLpTokenWrapper(usdr, 1000e8, USDRWhale, IPair(STMATIC_USDR));
+    _testSolidlyLpTokenWrapper(usdr, 1000e9, USDRWhale, IPair(STMATIC_USDR));
   }
 }
