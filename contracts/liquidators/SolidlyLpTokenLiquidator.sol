@@ -7,7 +7,6 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 
 import "../external/solidly/IRouter.sol";
 import "../external/solidly/IPair.sol";
-import "../oracles/default/SolidlyPriceOracle.sol";
 
 import "./IRedemptionStrategy.sol";
 
