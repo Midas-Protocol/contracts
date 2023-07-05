@@ -113,14 +113,18 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     vars.amountToSwapOfToken1 = inputAmount - vars.amountToSwapOfToken0;
     if (vars.token1 == inputToken) {
       uint256 out0 = vars.solidlyRouter.getAmountsOut(vars.amountToSwapOfToken1, vars.swapPath1)[vars.swapPath1.length];
+      // price0For1 is scaled to 18 decimals
       vars.price0For1 = (out0 * vars.token1Decimals * 1e18) / (vars.amountToSwapOfToken1 * vars.token0Decimals);
-      vars.amountToSwapOfToken0 = (vars.amountToSwapOfToken0 * vars.price0For1) / 1e18;
+      vars.amountToSwapOfToken0 = (vars.amountToSwapOfToken0 * vars.token0Decimals * vars.price0For1) / (1e18 * vars.token1Decimals);
+      // price1For0 is scaled to 18 decimals
       vars.price1For0 = 1e36 / vars.price0For1;
     }
     if (vars.token0 == inputToken) {
       uint256 out1 = vars.solidlyRouter.getAmountsOut(vars.amountToSwapOfToken0, vars.swapPath0)[vars.swapPath0.length];
+      // price1For0 is scaled to 18 decimals
       vars.price1For0 = (out1 * vars.token0Decimals * 1e18) / (vars.amountToSwapOfToken0 * vars.token1Decimals);
-      vars.amountToSwapOfToken1 = (vars.amountToSwapOfToken1 * vars.price1For0) / 1e18;
+      vars.amountToSwapOfToken1 = (vars.amountToSwapOfToken1 * vars.token1Decimals * vars.price1For0) / (1e18 * vars.token0Decimals);
+      // price0For1 is scaled to 18 decimals
       vars.price0For1 = 1e36 / vars.price1For0;
     }
 

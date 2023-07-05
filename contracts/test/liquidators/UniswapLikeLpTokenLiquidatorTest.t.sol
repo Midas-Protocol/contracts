@@ -233,7 +233,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     _testSolidlyLpTokenWrapper(busd, 1000e18, busdWhale, IPair(HAY_BUSD));
   }
 
-  // fails (18 / 4 decimals)
   function testWrapSolidlyLpTokensjBrlBrz() public fork(BSC_MAINNET) {
     IERC20Upgradeable jBRL = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
     address jBRL_BRZ = 0xA0695f78AF837F570bcc50f53e58Cda300798B65;
@@ -242,7 +241,14 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     _testSolidlyLpTokenWrapper(jBRL, 1000e18, jBRLWhale, IPair(jBRL_BRZ));
   }
 
-  // passes (9 / 6 decimals)
+  function testWrapSolidlyLpTokensBrzJBrl() public fork(BSC_MAINNET) {
+    IERC20Upgradeable brz = IERC20Upgradeable(0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb);
+    address jBRL_BRZ = 0xA0695f78AF837F570bcc50f53e58Cda300798B65;
+    address brzWhale = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
+
+    _testSolidlyLpTokenWrapper(brz, 1000e4, brzWhale, IPair(jBRL_BRZ));
+  }
+
   function testWrapSolidlyLpTokensUsdrUsdc() public fork(POLYGON_MAINNET) {
     IERC20Upgradeable usdc = IERC20Upgradeable(ap.getAddress("stableToken"));
     address USDC_USDR = 0xf6A72Bd46F53Cd5103812ea1f4B5CF38099aB797;
@@ -251,7 +257,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     _testSolidlyLpTokenWrapper(usdc, 1000e6, USDCWhale, IPair(USDC_USDR));
   }
 
-  // Missing PO for wusdr, will be fixed on next deploy
   function testWrapSolidlyLpTokensUsdrUsdr() public fork(POLYGON_MAINNET) {
     IERC20Upgradeable usdr = IERC20Upgradeable(0xb5DFABd7fF7F83BAB83995E72A52B97ABb7bcf63);
     address WUSDR_USDR = 0x10E1b58B3C93890D04D539b5f39Aa4Df27A362b2;
@@ -260,7 +265,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     _testSolidlyLpTokenWrapper(usdr, 1000e9, USDRWhale, IPair(WUSDR_USDR));
   }
 
-  // fails (18 / 9 decimals)
   function testWrapSolidlyLpTokensStMaticUsdr() public fork(POLYGON_MAINNET) {
     IERC20Upgradeable usdr = IERC20Upgradeable(0xb5DFABd7fF7F83BAB83995E72A52B97ABb7bcf63);
     address STMATIC_USDR = 0x733eEEf37De013283da29cE9EB4758dC59CaFc87;
