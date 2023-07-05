@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
-import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 
 import "../external/solidly/IRouter.sol";
@@ -80,8 +79,8 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     uint256 amountToSwapOfToken0;
     uint256 amountToSwapOfToken1;
     IRouter solidlyRouter;
-    ERC20Upgradeable token0;
-    ERC20Upgradeable token1;
+    IERC20Upgradeable token0;
+    IERC20Upgradeable token1;
     bool stable;
     IPair pair;
     IRouter.Route[] swapPath0;
@@ -100,8 +99,8 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
       strategyData,
       (IRouter, IPair, IRouter.Route[], IRouter.Route[])
     );
-    vars.token0 = ERC20Upgradeable(vars.pair.token0());
-    vars.token1 = ERC20Upgradeable(vars.pair.token1());
+    vars.token0 = IERC20Upgradeable(vars.pair.token0());
+    vars.token1 = IERC20Upgradeable(vars.pair.token1());
     vars.stable = vars.pair.stable();
 
     // calculate the amount for token0 or token1 that needs to be swapped for the other
