@@ -110,6 +110,13 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     uint256 token0Decimals = 10**vars.token0.decimals();
     uint256 token1Decimals = 10**vars.token1.decimals();
 
+    if (vars.token1 == inputToken) {
+      vars.amountFor0 = (vars.amountFor0 * token0Decimals) / token1Decimals;
+    }
+    if (vars.token0 == inputToken) {
+      vars.amountFor1 = (vars.amountFor1 * token1Decimals) / token0Decimals;
+    }
+
     // if the pair is not stable, then we cannot rely on the amounts to have comparable value
     // so we calculate the testing amount of token0/token1 by denominating in the other token
     vars.stable = vars.pair.stable();

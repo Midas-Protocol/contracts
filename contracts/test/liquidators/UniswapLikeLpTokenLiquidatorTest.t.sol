@@ -241,7 +241,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     address jBRL_BRZ = 0xA0695f78AF837F570bcc50f53e58Cda300798B65;
     address jBRLWhale = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
 
-    _testSolidlyLpTokenWrapper(jBRL, 1e15, jBRLWhale, IPair(jBRL_BRZ));
+    _testSolidlyLpTokenWrapper(jBRL, 1e21, jBRLWhale, IPair(jBRL_BRZ));
   }
 
   // passes (9 / 6 decimals)
