@@ -31,7 +31,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
+    uint8 fnsCount = 13;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -45,6 +45,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this._resetRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
     functionSelectors[--fnsCount] = this.getAllPairsStrategies.selector;
+    functionSelectors[--fnsCount] = this.pairsStrategiesMatch.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
