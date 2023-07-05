@@ -104,8 +104,8 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     );
     vars.token0 = ERC20Upgradeable(vars.pair.token0());
     vars.token1 = ERC20Upgradeable(vars.pair.token1());
-    vars.token0Decimals = 10 ** vars.token0.decimals();
-    vars.token1Decimals = 10 ** vars.token1.decimals();
+    vars.token0Decimals = 10**vars.token0.decimals();
+    vars.token1Decimals = 10**vars.token1.decimals();
     vars.stable = vars.pair.stable();
 
     // calculate the amount for token0 or token1 that needs to be swapped for the other
@@ -141,11 +141,23 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     // swap a part of the input token amount for the other token
     if (vars.token0 == inputToken) {
       inputToken.approve(address(vars.solidlyRouter), vars.amountToSwapOfToken0);
-      vars.solidlyRouter.swapExactTokensForTokens(vars.amountToSwapOfToken0, 0, vars.swapPath0, address(this), block.timestamp);
+      vars.solidlyRouter.swapExactTokensForTokens(
+        vars.amountToSwapOfToken0,
+        0,
+        vars.swapPath0,
+        address(this),
+        block.timestamp
+      );
     }
     if (vars.token1 == inputToken) {
       inputToken.approve(address(vars.solidlyRouter), vars.amountToSwapOfToken1);
-      vars.solidlyRouter.swapExactTokensForTokens(vars.amountToSwapOfToken1, 0, vars.swapPath1, address(this), block.timestamp);
+      vars.solidlyRouter.swapExactTokensForTokens(
+        vars.amountToSwapOfToken1,
+        0,
+        vars.swapPath1,
+        address(this),
+        block.timestamp
+      );
     }
 
     // provide the liquidity
