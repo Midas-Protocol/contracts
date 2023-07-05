@@ -704,11 +704,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       swapPath1[0].to = pair.token0();
     }
 
-    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    uint256 price0 = mpo.price(pair.token0());
-    uint256 price1 = mpo.price(pair.token1());
-
-    strategyData = abi.encode(solidlyRouter, pair, swapPath0, swapPath1, price0, price1);
+    strategyData = abi.encode(solidlyRouter, pair, swapPath0, swapPath1);
   }
 
   // TODO remove after testing
