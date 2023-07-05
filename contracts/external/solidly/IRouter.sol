@@ -1,7 +1,7 @@
 pragma solidity >=0.8.0;
 
 interface IRouter {
-  struct route {
+  struct Route {
     address from;
     address to;
     bool stable;
@@ -63,12 +63,12 @@ interface IRouter {
   function swapExactTokensForTokens(
     uint256 amountIn,
     uint256 amountOutMin,
-    route[] calldata routes,
+    Route[] calldata routes,
     address to,
     uint256 deadline
   ) external returns (uint256[] memory amounts);
 
-  function getAmountsOut(uint256 amountIn, route[] memory routes) external view returns (uint256[] memory amounts);
+  function getAmountsOut(uint256 amountIn, Route[] memory routes) external view returns (uint256[] memory amounts);
 
   function quoteAddLiquidity(
     address tokenA,

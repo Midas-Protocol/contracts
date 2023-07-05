@@ -181,12 +181,12 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     address whale,
     IPair lpToken
   ) internal {
-    IRouter.route[] memory swapPath0 = new IRouter.route[](1);
-    IRouter.route[] memory swapPath1 = new IRouter.route[](1);
+    IRouter.Route[] memory swapPath0 = new IRouter.Route[](1);
+    IRouter.Route[] memory swapPath1 = new IRouter.Route[](1);
     {
-      //      bool isInputToken0 = lpToken.token0() == address(inputToken);
-      //      bool isInputToken1 = lpToken.token1() == address(inputToken);
-      //      require(isInputToken0 || isInputToken1, "!input token not underlying");
+      bool isInputToken0 = lpToken.token0() == address(inputToken);
+      bool isInputToken1 = lpToken.token1() == address(inputToken);
+      require(isInputToken0 || isInputToken1, "!input token not underlying");
 
       swapPath0[0].stable = lpToken.stable();
       swapPath0[0].from = lpToken.token0();
@@ -197,7 +197,9 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
       swapPath1[0].to = lpToken.token0();
     }
 
-    bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1);
+    uint256 price0 = mpo.price(lpToken.token0());
+    uint256 price1 = mpo.price(lpToken.token1());
+    bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1, price0, price1);
 
     vm.prank(whale);
     inputToken.transfer(address(solidlyLpTokenWrapper), inputAmount);

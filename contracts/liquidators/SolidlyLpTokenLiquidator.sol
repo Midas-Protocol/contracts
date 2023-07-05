@@ -7,6 +7,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20
 
 import "../external/solidly/IRouter.sol";
 import "../external/solidly/IPair.sol";
+import "../oracles/default/SolidlyPriceOracle.sol";
 
 import "./IRedemptionStrategy.sol";
 
@@ -80,12 +81,14 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     uint256 amountFor0;
     uint256 amountFor1;
     IRouter solidlyRouter;
-    address token0;
-    address token1;
+    ERC20Upgradeable token0;
+    ERC20Upgradeable token1;
     bool stable;
     IPair pair;
-    IRouter.route[] swapPath0;
-    IRouter.route[] swapPath1;
+    IRouter.Route[] swapPath0;
+    IRouter.Route[] swapPath1;
+    uint256 price0;
+    uint256 price1;
   }
 
   function redeem(
@@ -98,56 +101,66 @@ contract SolidlyLpTokenWrapper is IRedemptionStrategy {
     vars.amountFor0 = inputAmount / 2;
     vars.amountFor1 = inputAmount - vars.amountFor0;
 
-    (vars.solidlyRouter, vars.pair, vars.swapPath0, vars.swapPath1) = abi.decode(
+    (vars.solidlyRouter, vars.pair, vars.swapPath0, vars.swapPath1, vars.price0, vars.price1) = abi.decode(
       strategyData,
-      (IRouter, IPair, IRouter.route[], IRouter.route[])
+      (IRouter, IPair, IRouter.Route[], IRouter.Route[], uint256, uint256)
     );
-    vars.token0 = vars.pair.token0();
-    vars.token1 = vars.pair.token1();
+    vars.token0 = ERC20Upgradeable(vars.pair.token0());
+    vars.token1 = ERC20Upgradeable(vars.pair.token1());
+    uint256 token0Decimals = 10**vars.token0.decimals();
+    uint256 token1Decimals = 10**vars.token1.decimals();
 
     vars.stable = vars.pair.stable();
-    if (vars.stable) {
-      uint256 token0Decimals = 10**ERC20Upgradeable(vars.token0).decimals();
-      uint256 token1Decimals = 10**ERC20Upgradeable(vars.token1).decimals();
-      uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) /
-        token0Decimals;
-      uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) /
-        token1Decimals;
-
-      (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(
-        vars.token0,
-        vars.token1,
-        vars.stable,
-        out0,
-        out1
-      );
-
-      amountA = (amountA * 1e18) / token0Decimals;
-      amountB = (amountB * 1e18) / token1Decimals;
-      uint256 ratio = (((out0 * 1e18) / out1) * amountB) / amountA;
-      vars.amountFor0 = (inputAmount * 1e18) / (ratio + 1e18);
-      vars.amountFor1 = inputAmount - vars.amountFor0;
+    if (!vars.stable) {
+      vars.price0 = (vars.price0 * 1e18) / token0Decimals;
+      vars.price1 = (vars.price1 * 1e18) / token1Decimals;
+      if (vars.token1 == inputToken) {
+        vars.amountFor0 = (vars.amountFor0 * vars.price1) / vars.price0;
+      }
+      if (vars.token0 == inputToken) {
+        vars.amountFor1 = (vars.amountFor1 * vars.price0) / vars.price1;
+      }
     }
 
-    if (vars.token0 == address(inputToken)) {
+    uint256 out1 = (vars.solidlyRouter.getAmountsOut(vars.amountFor0, vars.swapPath0)[vars.swapPath0.length] * 1e18) /
+    token0Decimals;
+    uint256 out0 = (vars.solidlyRouter.getAmountsOut(vars.amountFor1, vars.swapPath1)[vars.swapPath1.length] * 1e18) /
+    token1Decimals;
+
+    (uint256 amountA, uint256 amountB, ) = vars.solidlyRouter.quoteAddLiquidity(
+      address(vars.token0),
+      address(vars.token1),
+      vars.stable,
+      out0,
+      out1
+    );
+
+    amountA = (amountA * 1e18) / token0Decimals;
+    amountB = (amountB * 1e18) / token1Decimals;
+    uint256 ratio = (((out0 * 1e18) / out1) * amountB) / amountA;
+    vars.amountFor0 = (inputAmount * 1e18) / (ratio + 1e18);
+    vars.amountFor1 = inputAmount - vars.amountFor0;
+
+    if (vars.token0 == inputToken) {
       inputToken.approve(address(vars.solidlyRouter), vars.amountFor0);
       vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor0, 0, vars.swapPath0, address(this), block.timestamp);
     }
-    if (vars.token1 == address(inputToken)) {
+    if (vars.token1 == inputToken) {
       inputToken.approve(address(vars.solidlyRouter), vars.amountFor1);
       vars.solidlyRouter.swapExactTokensForTokens(vars.amountFor1, 0, vars.swapPath1, address(this), block.timestamp);
     }
 
-    uint256 lp0Bal = IERC20Upgradeable(vars.token0).balanceOf(address(this));
-    uint256 lp1Bal = IERC20Upgradeable(vars.token1).balanceOf(address(this));
-    IERC20Upgradeable(vars.token0).approve(address(vars.solidlyRouter), lp0Bal);
-    IERC20Upgradeable(vars.token1).approve(address(vars.solidlyRouter), lp1Bal);
+    uint256 token0Balance = vars.token0.balanceOf(address(this));
+    uint256 token1Balance = vars.token1.balanceOf(address(this));
+    vars.token0.approve(address(vars.solidlyRouter), token0Balance);
+    vars.token1.approve(address(vars.solidlyRouter), token1Balance);
+
     vars.solidlyRouter.addLiquidity(
-      vars.token0,
-      vars.token1,
+      address(vars.token0),
+      address(vars.token1),
       vars.stable,
-      lp0Bal,
-      lp1Bal,
+      token0Balance,
+      token1Balance,
       1,
       1,
       address(this),
