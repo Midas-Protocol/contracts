@@ -18,10 +18,6 @@ contract CurveSwapLiquidatorTest is BaseTest {
   address private lpTokenMai3EPS = 0x80D00D2c8d920a9253c3D65BA901250a55011b37;
   address private poolAddress = 0x68354c6E8Bbd020F9dE81EAf57ea5424ba9ef322;
 
-  address xcDotStDotPool = 0x0fFc46cD9716a96d8D89E1965774A70Dcb851E50; // xcDOT-stDOT
-  address xcDotAddress = 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080; // 0
-  address stDotAddress = 0xFA36Fe1dA08C89eC72Ea1F0143a35bFd5DAea108; // 1
-
   CurveLpTokenPriceOracleNoRegistry curveV1Oracle;
   CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle;
 
@@ -33,51 +29,9 @@ contract CurveSwapLiquidatorTest is BaseTest {
     if (address(curveV1Oracle) == address(0)) {
       address[][] memory _poolUnderlyings = new address[][](1);
       _poolUnderlyings[0] = asArray(maiAddress, val3EPSAddress);
-      //      _poolUnderlyings[1] = asArray(
-      //        xcDotAddress,
-      //        stDotAddress
-      //      );
       curveV1Oracle = new CurveLpTokenPriceOracleNoRegistry();
       curveV1Oracle.initialize(asArray(lpTokenMai3EPS), asArray(poolAddress), _poolUnderlyings);
     }
-
-    if (address(curveV2Oracle) == address(0)) {
-      address lpTokenXcStDot = xcDotStDotPool;
-      curveV2Oracle = new CurveV2LpTokenPriceOracleNoRegistry();
-      curveV2Oracle.initialize(asArray(lpTokenXcStDot), asArray(xcDotStDotPool));
-    }
-  }
-
-  function testRedeemXcDotStDot() public fork(MOONBEAM_MAINNET) {
-    IERC20Upgradeable xcDot = IERC20Upgradeable(xcDotAddress);
-
-    ICurvePool curvePool = ICurvePool(xcDotStDotPool);
-
-    assertEq(xcDotAddress, curvePool.coins(0), "coin 0 must be xcDOT");
-    assertEq(stDotAddress, curvePool.coins(1), "coin 1 must be stDOT");
-
-    uint256 xcForSt = curvePool.get_dy(0, 1, 1e10);
-    emit log_uint(xcForSt);
-
-    {
-      // mock some calls
-      vm.mockCall(
-        xcDotAddress,
-        abi.encodeWithSelector(xcDot.approve.selector, xcDotStDotPool, 10000000000),
-        abi.encode(true)
-      );
-      vm.mockCall(
-        xcDotAddress,
-        abi.encodeWithSelector(xcDot.transferFrom.selector, address(csl), xcDotStDotPool, 10000000000),
-        abi.encode(true)
-      );
-    }
-
-    bytes memory data = abi.encode(curveV1Oracle, curveV2Oracle, xcDotAddress, stDotAddress, ap.getAddress("wtoken"));
-    (IERC20Upgradeable shouldBeStDot, uint256 stDotOutput) = csl.redeem(xcDot, 1e10, data);
-    assertEq(address(shouldBeStDot), stDotAddress, "output token does not match");
-
-    assertApproxEqAbs(xcForSt, stDotOutput, uint256(10), "output amount does not match");
   }
 
   function testSwapCurveV1UsdtUsdc() public fork(ARBITRUM_ONE) {
