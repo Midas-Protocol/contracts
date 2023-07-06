@@ -18,6 +18,8 @@ interface IPair {
 
   function totalSupply() external view returns (uint256);
 
+  function balanceOf(address owner) external view returns (uint256);
+
   function factory() external view returns (address);
 
   function token0() external view returns (address);
