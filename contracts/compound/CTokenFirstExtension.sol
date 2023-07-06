@@ -21,7 +21,6 @@ contract CTokenFirstExtension is
   DiamondExtension,
   Multicall
 {
-
   modifier isAuthorized() {
     require(
       IFuseFeeDistributor(fuseAdmin).canCall(address(this), msg.sender, address(this), msg.sig),
