@@ -237,7 +237,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
 
   function valueOf(IERC20Upgradeable token, uint256 amount) internal view returns (uint256) {
     uint256 price = mpo.price(address(token));
-    uint256 decimalsScale = 10 ** ERC20Upgradeable(address(token)).decimals();
+    uint256 decimalsScale = 10**ERC20Upgradeable(address(token)).decimals();
     return (amount * price) / decimalsScale;
   }
 
