@@ -22,27 +22,31 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
   uint8 public constant BORROWER_ROLE = 2;
   uint8 public constant LIQUIDATOR_ROLE = 3;
 
-  function configurePoolSupplierRole(IComptroller pool) external requiresAuth {
+  function configurePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
+    _configurePoolSupplierCapabilities(pool, SUPPLIER_ROLE);
+  }
+
+  function _configurePoolSupplierCapabilities(IComptroller pool, uint8 role) internal {
+    setRoleCapability(role, address(pool), pool.enterMarkets.selector, true);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
-      // TODO make fns gated
-      setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].mint.selector, true);
-      setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].redeem.selector, true);
-      setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].redeemUnderlying.selector, true);
-      setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].transfer.selector, true);
+      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].mint.selector, true);
+      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].redeem.selector, true);
+      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].redeemUnderlying.selector, true);
+      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].transfer.selector, true);
       // TODO fns needed at all?
-      setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].transferFrom.selector, true);
-      setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].approve.selector, true);
+      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].transferFrom.selector, true);
+      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].approve.selector, true);
 
-      //setRoleCapability(SUPPLIER_ROLE, address(allMarkets[i]), allMarkets[i].multicall.selector, true);
+      //setRoleCapability(role, address(allMarkets[i]), allMarkets[i].multicall.selector, true);
     }
   }
 
-  function configurePoolBorrowerRole(IComptroller pool) external requiresAuth {
+  function configurePoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
     // TODO borrowers are supplier role by default?
+    _configurePoolSupplierCapabilities(pool, BORROWER_ROLE);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
-      // TODO make fns gated
       setRoleCapability(BORROWER_ROLE, address(allMarkets[i]), allMarkets[i].borrow.selector, true);
       setRoleCapability(BORROWER_ROLE, address(allMarkets[i]), allMarkets[i].repayBorrow.selector, true);
       setRoleCapability(BORROWER_ROLE, address(allMarkets[i]), allMarkets[i].repayBorrowBehalf.selector, true);
@@ -50,10 +54,9 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configurePoolLiquidatorRole(IComptroller pool) external requiresAuth {
+  function configurePoolLiquidatorCapabilities(IComptroller pool) external requiresAuth {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
-      // TODO make fns gated
       setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
       // seize is called by other CTokens
       //setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].seize.selector, true);

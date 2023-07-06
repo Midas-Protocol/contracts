@@ -45,6 +45,13 @@ interface IFuseFeeDistributor {
 
   function deployCErc20(bytes calldata constructorData) external returns (address);
 
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool);
+
   fallback() external payable;
 
   receive() external payable;

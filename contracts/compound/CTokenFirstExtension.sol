@@ -21,8 +21,17 @@ contract CTokenFirstExtension is
   DiamondExtension,
   Multicall
 {
+
+  modifier isAuthorized() {
+    require(
+      IFuseFeeDistributor(fuseAdmin).canCall(address(this), msg.sender, address(this), msg.sig),
+      "not authorized"
+    );
+    _;
+  }
+
   function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 24;
+    uint8 fnsCount = 23;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -47,15 +56,9 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.flash.selector;
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
-    functionSelectors[--fnsCount] = this.asCTokenExtensionInterface.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
-  }
-
-  // TODO remove after next deploy
-  function asCTokenExtensionInterface() external view returns (CTokenFirstExtension) {
-    return this;
   }
 
   function getTotalUnderlyingSupplied() public view override returns (uint256) {
@@ -147,7 +150,7 @@ contract CTokenFirstExtension is
    * @param amount The number of tokens to transfer
    * @return Whether or not the transfer succeeded
    */
-  function transfer(address dst, uint256 amount) public override nonReentrant(false) returns (bool) {
+  function transfer(address dst, uint256 amount) public override nonReentrant(false) isAuthorized returns (bool) {
     return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
   }
 
@@ -162,7 +165,7 @@ contract CTokenFirstExtension is
     address src,
     address dst,
     uint256 amount
-  ) public override nonReentrant(false) returns (bool) {
+  ) public override nonReentrant(false) isAuthorized returns (bool) {
     return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
   }
 
@@ -174,7 +177,7 @@ contract CTokenFirstExtension is
    * @param amount The number of tokens that are approved (-1 means infinite)
    * @return Whether or not the approval succeeded
    */
-  function approve(address spender, uint256 amount) public override returns (bool) {
+  function approve(address spender, uint256 amount) public override isAuthorized returns (bool) {
     address src = msg.sender;
     transferAllowances[src][spender] = amount;
     emit Approval(src, spender, amount);
@@ -646,7 +649,7 @@ contract CTokenFirstExtension is
     return balance;
   }
 
-  function flash(uint256 amount, bytes calldata data) public override {
+  function flash(uint256 amount, bytes calldata data) public override isAuthorized {
     accrueInterest();
 
     totalBorrows += amount;

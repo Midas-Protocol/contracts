@@ -465,7 +465,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     address target,
     bytes4 functionSig
   ) external view returns (bool) {
-    // target can be the pool address or a market address?
-    return poolAuthority[pool].canCall(user, target, functionSig);
+    PoolRolesAuthority authorityForPool = poolAuthority[pool];
+    // TODO revert or allow by default?
+    if (address(authorityForPool) == address(0)) return true;
+
+    return authorityForPool.canCall(user, target, functionSig);
   }
 }

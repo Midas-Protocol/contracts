@@ -230,7 +230,7 @@ contract ComptrollerFirstExtension is
 
   function _setMintPaused(ICErc20 cToken, bool state) public returns (bool) {
     require(markets[address(cToken)].isListed, "!market");
-    require(msg.sender == pauseGuardian || hasAdminRights(), "!gaurdian");
+    require(msg.sender == pauseGuardian || hasAdminRights(), "!guardian");
     require(hasAdminRights() || state == true, "!admin");
 
     mintGuardianPaused[address(cToken)] = state;
