@@ -14,6 +14,7 @@ import { IPair } from "../../external/solidly/IPair.sol";
 import { IRouter } from "../../external/solidly/IRouter.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -190,18 +191,24 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     // TODO get the data from the liquidators registry
     IRouter.Route[] memory swapPath0 = new IRouter.Route[](1);
     IRouter.Route[] memory swapPath1 = new IRouter.Route[](1);
+    IERC20Upgradeable otherUnderlying;
     {
-      bool isInputToken0 = lpToken.token0() == address(inputToken);
-      bool isInputToken1 = lpToken.token1() == address(inputToken);
+      address token0 = lpToken.token0();
+      address token1 = lpToken.token1();
+      bool isInputToken0 = token0 == address(inputToken);
+      bool isInputToken1 = token1 == address(inputToken);
       require(isInputToken0 || isInputToken1, "!input token not underlying");
 
+      if (isInputToken0) otherUnderlying = IERC20Upgradeable(token1);
+      else otherUnderlying = IERC20Upgradeable(token0);
+
       swapPath0[0].stable = lpToken.stable();
-      swapPath0[0].from = lpToken.token0();
-      swapPath0[0].to = lpToken.token1();
+      swapPath0[0].from = token0;
+      swapPath0[0].to = token1;
 
       swapPath1[0].stable = lpToken.stable();
-      swapPath1[0].from = lpToken.token1();
-      swapPath1[0].to = lpToken.token0();
+      swapPath1[0].from = token1;
+      swapPath1[0].to = token0;
     }
 
     bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1);
@@ -215,6 +222,16 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     assertGt(lpTokensBalance, 0, "!no lp tokens wrapped");
     uint256 inputTokensAfter = inputToken.balanceOf(address(solidlyLpTokenWrapper));
     assertEq(inputTokensAfter, 0, "!input tokens left after");
+    uint256 otherTokensAfter = otherUnderlying.balanceOf(address(solidlyLpTokenWrapper));
+    assertEq(otherTokensAfter, 0, "!other underlying tokens left after");
+
+    emit log_named_uint("bps other leftover", (valueOf(otherUnderlying, otherTokensAfter) * 10000) / valueOf(inputToken, inputAmount));
+  }
+
+  function valueOf(IERC20Upgradeable token, uint256 amount) internal view returns (uint256) {
+    uint256 price = mpo.price(address(token));
+    uint256 decimalsScale = 10 ** ERC20Upgradeable(address(token)).decimals();
+    return (amount * price) / decimalsScale;
   }
 
   function testWrapSolidlyLpTokensWbnbBusd() public fork(BSC_MAINNET) {
