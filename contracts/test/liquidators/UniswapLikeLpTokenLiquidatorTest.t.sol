@@ -216,7 +216,14 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     vm.prank(whale);
     inputToken.transfer(address(solidlyLpTokenWrapper), inputAmount);
 
-    solidlyLpTokenWrapper.redeem(inputToken, inputAmount, data);
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = solidlyLpTokenWrapper.redeem(inputToken, inputAmount, data);
+
+    BasePriceOracle[] memory solOracles = new BasePriceOracle[](1);
+    solOracles[0] = oracleSolidly;
+    if (mpo.oracles(address(outputToken)) == BasePriceOracle(address(0))) {
+      vm.prank(mpo.admin());
+      mpo.add(asArray(address(outputToken)), solOracles);
+    }
 
     uint256 lpTokensBalance = lpToken.balanceOf(address(solidlyLpTokenWrapper));
     assertGt(lpTokensBalance, 0, "!no lp tokens wrapped");
@@ -225,6 +232,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     //    uint256 otherTokensAfter = otherUnderlying.balanceOf(address(solidlyLpTokenWrapper));
     //    assertEq(otherTokensAfter, 0, "!other underlying tokens left after");
     //    emit log_named_uint("bps other leftover", (valueOf(otherUnderlying, otherTokensAfter) * 10000) / valueOf(inputToken, inputAmount));
+    assertApproxEqRel(valueOf(inputToken, inputAmount), valueOf(outputToken, outputAmount), 5e16, "!slippage too high");
   }
 
   function valueOf(IERC20Upgradeable token, uint256 amount) internal view returns (uint256) {
