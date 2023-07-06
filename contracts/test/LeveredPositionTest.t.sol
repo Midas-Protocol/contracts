@@ -8,7 +8,7 @@ import { LeveredPosition } from "../midas/levered/LeveredPosition.sol";
 import { LeveredPositionFactory, IFuseFeeDistributor } from "../midas/levered/LeveredPositionFactory.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
 import { SolidlySwapLiquidator } from "../liquidators/SolidlySwapLiquidator.sol";
-import { BalancerLinearPoolTokenLiquidator } from "../liquidators/BalancerLinearPoolTokenLiquidator.sol";
+import { BalancerSwapLiquidator } from "../liquidators/BalancerSwapLiquidator.sol";
 import { AlgebraSwapLiquidator } from "../liquidators/AlgebraSwapLiquidator.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
 import { LeveredPositionFactoryExtension } from "../midas/levered/LeveredPositionFactoryExtension.sol";
@@ -26,6 +26,61 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
+contract LeveredPositionLensTest is BaseTest {
+  LeveredPositionsLens lens;
+  ILeveredPositionFactory factory;
+
+  function afterForkSetUp() internal override {
+    factory = ILeveredPositionFactory(ap.getAddress("LeveredPositionFactory"));
+    lens = LeveredPositionsLens(ap.getAddress("LeveredPositionsLens"));
+    //    lens = new LeveredPositionsLens();
+    //    lens.initialize(factory);
+  }
+
+  function testLPLens() public debuggingOnly fork(BSC_CHAPEL) {
+    _testLPLens();
+  }
+
+  function _testLPLens() internal {
+    address[] memory positions;
+    bool[] memory closed;
+    (positions, closed) = factory.getPositionsByAccount(0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
+
+    //    address[] memory accounts = factory.getAccountsWithOpenPositions();
+    //    for (uint256 i = 0; i < accounts.length; i++) {
+    //      (positions, closed) = factory.getPositionsByAccount(accounts[i]);
+    //      if (positions.length > 0) break;
+    //    }
+
+    uint256[] memory apys = new uint256[](positions.length);
+    LeveredPosition[] memory pos = new LeveredPosition[](positions.length);
+    for (uint256 j = 0; j < positions.length; j++) {
+      apys[j] = 1e17;
+
+      if (address(0) == positions[j]) revert("zero pos address");
+      pos[j] = LeveredPosition(positions[j]);
+    }
+
+    LeveredPositionsLens.PositionInfo[] memory infos = lens.getPositionsInfo(pos, apys);
+
+    for (uint256 k = 0; k < infos.length; k++) {
+      emit log_named_address("address", address(pos[k]));
+      emit log_named_uint("positionSupplyAmount", infos[k].positionSupplyAmount);
+      emit log_named_uint("positionValue", infos[k].positionValue);
+      emit log_named_uint("debtAmount", infos[k].debtAmount);
+      emit log_named_uint("debtValue", infos[k].debtValue);
+      emit log_named_uint("equityValue", infos[k].equityValue);
+      emit log_named_uint("equityAmount", infos[k].equityAmount);
+      emit log_named_int("currentApy", infos[k].currentApy);
+      emit log_named_uint("debtRatio", infos[k].debtRatio);
+      emit log_named_uint("liquidationThreshold", infos[k].liquidationThreshold);
+      emit log_named_uint("safetyBuffer", infos[k].safetyBuffer);
+
+      emit log("");
+    }
+  }
+}
+
 contract LeveredPositionFactoryTest is BaseTest {
   ILeveredPositionFactory factory;
   LeveredPositionsLens lens;
@@ -39,9 +94,15 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(
-      0x27521eae4eE4153214CaDc3eCD703b9B0326C908
-    );
+    address[] memory acc = factory.getAccountsWithOpenPositions();
+    for (uint256 i = 0; i < acc.length; i++) {
+      emit log("");
+      emit log_named_address("account", acc[i]);
+      (address[] memory pos, bool[] memory closed) = factory.getPositionsByAccount(acc[i]);
+      for (uint256 j = 0; j < pos.length; j++) {
+        emit log_named_address("position", pos[j]);
+      }
+    }
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
@@ -237,7 +298,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     vm.assume(targetLeverageRatio < maxRatio);
 
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
-    emit log_named_uint("base collateral", position.baseCollateral());
+    emit log_named_uint("base collateral", position.getEquityAmount());
     assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e15, "target ratio not matching");
   }
 
@@ -321,7 +382,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 withdrawAmount = position.closePosition();
     emit log_named_uint("withdraw amount", withdrawAmount);
 
-    assertEq(position.baseCollateral(), 0, "!nonzero base collateral");
+    assertEq(position.getEquityAmount(), 0, "!nonzero base collateral");
     assertEq(position.getCurrentLeverageRatio(), 0, "!nonzero leverage ratio");
   }
 }
@@ -359,8 +420,8 @@ contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
     address stmaticWhale = 0x52997D5abC01e9BFDd29cccB183ffc60F6d6bF8c;
 
-    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePairAndLiquidator(wmaticMarket, stmaticMarket, linearSwapLiquidator);
+    BalancerSwapLiquidator balancerSwapLiquidator = new BalancerSwapLiquidator();
+    _configurePairAndLiquidator(wmaticMarket, stmaticMarket, balancerSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(stmaticMarket), stmaticWhale);
 
@@ -410,8 +471,8 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
     address maticxWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    BalancerLinearPoolTokenLiquidator linearSwapLiquidator = new BalancerLinearPoolTokenLiquidator();
-    _configurePairAndLiquidator(wmaticMarket, maticxMarket, linearSwapLiquidator);
+    BalancerSwapLiquidator balancerSwapLiquidator = new BalancerSwapLiquidator();
+    _configurePairAndLiquidator(wmaticMarket, maticxMarket, balancerSwapLiquidator);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(maticxMarket), maticxWhale);
 
@@ -495,7 +556,7 @@ contract Par2EurLeveredPositionTest is LeveredPositionTest {
     vm.prank(balancer);
     twoEur.transfer(twoEurWhale, 80 * depositAmount);
 
-    BalancerLinearPoolTokenLiquidator liquidator = new BalancerLinearPoolTokenLiquidator();
+    BalancerSwapLiquidator liquidator = new BalancerSwapLiquidator();
     _configurePairAndLiquidator(twoEurMarket, parMarket, liquidator);
     _fundMarketAndSelf(ICErc20(twoEurMarket), twoEurWhale);
     _fundMarketAndSelf(ICErc20(parMarket), parWhale);
@@ -518,7 +579,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
     address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
     IComptroller pool = IComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
-    _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerLinearPoolTokenLiquidator());
+    _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerSwapLiquidator());
 
     {
       vm.prank(pool.admin());

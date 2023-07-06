@@ -6,57 +6,167 @@ import "./LiquidatorsRegistryStorage.sol";
 
 import "../IRedemptionStrategy.sol";
 import "../../midas/DiamondExtension.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 
 import { IRouter } from "../../external/solidly/IRouter.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
+import { ICurvePool } from "../../external/curve/ICurvePool.sol";
 
 import { CurveLpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { SaddleLpPriceOracle } from "../../oracles/default/SaddleLpPriceOracle.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
 import { XBombSwap } from "../XBombLiquidatorFunder.sol";
 
 contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExtension, ILiquidatorsRegistryExtension {
   using EnumerableSet for EnumerableSet.AddressSet;
+  using SafeERC20Upgradeable for IERC20Upgradeable;
+
+  error NoRedemptionPath();
+  error OutputTokenMismatch();
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 6;
+    uint8 fnsCount = 13;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
-    functionSelectors[--fnsCount] = this.isRedemptionPathSupported.selector;
+    functionSelectors[--fnsCount] = this._setDefaultOutputToken.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategy.selector;
     functionSelectors[--fnsCount] = this._setRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this._removeRedemptionStrategy.selector;
+    functionSelectors[--fnsCount] = this.getInputTokensByOutputToken.selector;
+    functionSelectors[--fnsCount] = this.swap.selector;
+    functionSelectors[--fnsCount] = this.getAllRedemptionStrategies.selector;
+    functionSelectors[--fnsCount] = this._resetRedemptionStrategies.selector;
+    functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
+    functionSelectors[--fnsCount] = this.getAllPairsStrategies.selector;
+    functionSelectors[--fnsCount] = this.pairsStrategiesMatch.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 
-  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    public
-    view
-    returns (bool)
-  {
-    if (inputToken == outputToken) return false;
+  function getAllRedemptionStrategies() public view returns (address[] memory) {
+    return redemptionStrategies.values();
+  }
 
-    IERC20Upgradeable tokenToRedeem = inputToken;
+  function amountOutAndSlippageOfSwap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256 outputAmount, uint256 slippage) {
+    if (inputAmount == 0) return (0, 0);
 
-    uint256 k = 0;
-    while (tokenToRedeem != outputToken) {
-      IERC20Upgradeable redeemedToken = outputTokensByInputToken[tokenToRedeem];
+    outputAmount = swap(inputToken, inputAmount, outputToken);
+    if (outputAmount == 0) return (0, 0);
 
-      IRedemptionStrategy strategy = redemptionStrategiesByTokens[inputToken][outputToken];
-      if (address(strategy) == address(0)) return false;
+    MasterPriceOracle mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
+    uint256 inputTokenPrice = mpo.price(address(inputToken));
+    uint256 outputTokenPrice = mpo.price(address(outputToken));
 
-      tokenToRedeem = redeemedToken;
+    uint256 inputTokensValue = inputAmount * toScaledPrice(inputTokenPrice, inputToken);
+    uint256 outputTokensValue = outputAmount * toScaledPrice(outputTokenPrice, outputToken);
 
-      k++;
-      if (k == 10) break;
+    if (outputTokensValue < inputTokensValue) {
+      slippage = ((inputTokensValue - outputTokensValue) * 1e18) / inputTokensValue;
+    }
+  }
+
+  /// @dev returns price scaled to 1e36 - decimals
+  function toScaledPrice(uint256 unscaledPrice, IERC20Upgradeable token) internal view returns (uint256) {
+    uint256 tokenDecimals = uint256(ERC20Upgradeable(address(token)).decimals());
+    return
+      tokenDecimals <= 18
+        ? uint256(unscaledPrice) * (10**(18 - tokenDecimals))
+        : uint256(unscaledPrice) / (10**(tokenDecimals - 18));
+  }
+
+  function swap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) public returns (uint256 outputAmount) {
+    inputToken.safeTransferFrom(msg.sender, address(this), inputAmount);
+    outputAmount = convertAllTo(inputToken, outputToken);
+    outputToken.safeTransfer(msg.sender, outputAmount);
+  }
+
+  function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) private returns (uint256) {
+    uint256 inputAmount = inputToken.balanceOf(address(this));
+    (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = getRedemptionStrategies(
+      inputToken,
+      outputToken
+    );
+
+    if (redemptionStrategies.length == 0) revert NoRedemptionPath();
+
+    IERC20Upgradeable swapInputToken = inputToken;
+    uint256 swapInputAmount = inputAmount;
+    for (uint256 i = 0; i < redemptionStrategies.length; i++) {
+      IRedemptionStrategy redemptionStrategy = redemptionStrategies[i];
+      bytes memory strategyData = strategiesData[i];
+      (IERC20Upgradeable swapOutputToken, uint256 swapOutputAmount) = convertCustomFunds(
+        swapInputToken,
+        swapInputAmount,
+        redemptionStrategy,
+        strategyData
+      );
+      swapInputAmount = swapOutputAmount;
+      swapInputToken = swapOutputToken;
     }
 
-    return tokenToRedeem == outputToken;
+    if (swapInputToken != outputToken) revert OutputTokenMismatch();
+    return outputToken.balanceOf(address(this));
+  }
+
+  function convertCustomFunds(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IRedemptionStrategy strategy,
+    bytes memory strategyData
+  ) private returns (IERC20Upgradeable, uint256) {
+    bytes memory returndata = _functionDelegateCall(
+      address(strategy),
+      abi.encodeWithSelector(strategy.redeem.selector, inputToken, inputAmount, strategyData)
+    );
+    return abi.decode(returndata, (IERC20Upgradeable, uint256));
+  }
+
+  function _functionDelegateCall(address target, bytes memory data) private returns (bytes memory) {
+    require(AddressUpgradeable.isContract(target), "Address: delegate call to non-contract");
+    (bool success, bytes memory returndata) = target.delegatecall(data);
+    return _verifyCallResult(success, returndata, "Address: low-level delegate call failed");
+  }
+
+  function _verifyCallResult(
+    bool success,
+    bytes memory returndata,
+    string memory errorMessage
+  ) private pure returns (bytes memory) {
+    if (success) {
+      return returndata;
+    } else {
+      if (returndata.length > 0) {
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+  }
+
+  function getInputTokensByOutputToken(IERC20Upgradeable outputToken) external view returns (address[] memory) {
+    return inputTokensByOutputToken[outputToken].values();
+  }
+
+  function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external onlyOwner {
+    defaultOutputToken[inputToken] = outputToken;
   }
 
   function _setRedemptionStrategy(
@@ -73,36 +183,173 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     redemptionStrategies.remove(address(oldStrategy));
     redemptionStrategies.add(address(strategy));
 
-    outputTokensByInputToken[inputToken] = outputToken;
+    if (defaultOutputToken[inputToken] == IERC20Upgradeable(address(0))) {
+      defaultOutputToken[inputToken] = outputToken;
+    }
+    inputTokensByOutputToken[outputToken].add(address(inputToken));
+    outputTokensSet.add(address(outputToken));
   }
 
   function _setRedemptionStrategies(
     IRedemptionStrategy[] calldata strategies,
     IERC20Upgradeable[] calldata inputTokens,
     IERC20Upgradeable[] calldata outputTokens
-  ) public onlyOwner {
+  ) external onlyOwner {
     require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
-
     for (uint256 i = 0; i < strategies.length; i++) {
       _setRedemptionStrategy(strategies[i], inputTokens[i], outputTokens[i]);
     }
   }
 
-  function _removeRedemptionStrategy(
-    address strategyToRemove,
-    string calldata name,
-    IERC20Upgradeable inputToken
+  function _resetRedemptionStrategies(
+    IRedemptionStrategy[] calldata strategies,
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens
   ) external onlyOwner {
-    IERC20Upgradeable outputToken = outputTokensByInputToken[inputToken];
+    require(strategies.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
 
-    redemptionStrategiesByName[name] = IRedemptionStrategy(address(0));
-    redemptionStrategiesByTokens[inputToken][outputToken] = IRedemptionStrategy(address(0));
-    outputTokensByInputToken[inputToken] = IERC20Upgradeable(address(0));
-    redemptionStrategies.remove(strategyToRemove);
+    // empty the input/output token mappings/sets
+    address[] memory _outputTokens = outputTokensSet.values();
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
+        redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
+        inputTokensByOutputToken[_outputToken].remove(_inputTokens[j]);
+        defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
+      }
+      outputTokensSet.remove(_outputTokens[i]);
+    }
+
+    // empty the strategies mappings/sets
+    address[] memory _currentStrategies = redemptionStrategies.values();
+    for (uint256 i = 0; i < _currentStrategies.length; i++) {
+      IRedemptionStrategy _currentStrategy = IRedemptionStrategy(_currentStrategies[i]);
+      string memory _name = _currentStrategy.name();
+      redemptionStrategiesByName[_name] = IRedemptionStrategy(address(0));
+      redemptionStrategies.remove(_currentStrategies[i]);
+    }
+
+    // write the new strategies and their tokens configs
+    for (uint256 i = 0; i < strategies.length; i++) {
+      _setRedemptionStrategy(strategies[i], inputTokens[i], outputTokens[i]);
+    }
+  }
+
+  function pairsStrategiesMatch(
+    IRedemptionStrategy[] calldata configStrategies,
+    IERC20Upgradeable[] calldata configInputTokens,
+    IERC20Upgradeable[] calldata configOutputTokens
+  ) external view returns (bool) {
+    (
+      IRedemptionStrategy[] memory onChainStrategies,
+      IERC20Upgradeable[] memory onChainInputTokens,
+      IERC20Upgradeable[] memory onChainOutputTokens
+    ) = getAllPairsStrategies();
+    // find a match for each config strategy
+    for (uint256 i = 0; i < configStrategies.length; i++) {
+      bool foundMatch = false;
+      for (uint256 j = 0; j < onChainStrategies.length; j++) {
+        if (
+          onChainStrategies[j] == configStrategies[i] &&
+          onChainInputTokens[j] == configInputTokens[i] &&
+          onChainOutputTokens[j] == configOutputTokens[i]
+        ) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) return false;
+    }
+
+    // find a match for each on-chain strategy
+    for (uint256 i = 0; i < onChainStrategies.length; i++) {
+      bool foundMatch = false;
+      for (uint256 j = 0; j < configStrategies.length; j++) {
+        if (
+          onChainStrategies[i] == configStrategies[j] &&
+          onChainInputTokens[i] == configInputTokens[j] &&
+          onChainOutputTokens[i] == configOutputTokens[j]
+        ) {
+          foundMatch = true;
+          break;
+        }
+      }
+      if (!foundMatch) return false;
+    }
+
+    return true;
+  }
+
+  function getAllPairsStrategies()
+    public
+    view
+    returns (
+      IRedemptionStrategy[] memory strategies,
+      IERC20Upgradeable[] memory inputTokens,
+      IERC20Upgradeable[] memory outputTokens
+    )
+  {
+    address[] memory _outputTokens = outputTokensSet.values();
+    uint256 pairsCounter = 0;
+
+    {
+      for (uint256 i = 0; i < _outputTokens.length; i++) {
+        IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+        address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+        pairsCounter += _inputTokens.length;
+      }
+
+      strategies = new IRedemptionStrategy[](pairsCounter);
+      inputTokens = new IERC20Upgradeable[](pairsCounter);
+      outputTokens = new IERC20Upgradeable[](pairsCounter);
+    }
+
+    pairsCounter = 0;
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
+        strategies[pairsCounter] = redemptionStrategiesByTokens[_inputToken][_outputToken];
+        inputTokens[pairsCounter] = _inputToken;
+        outputTokens[pairsCounter] = _outputToken;
+        pairsCounter++;
+      }
+    }
+  }
+
+  function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external onlyOwner {
+    // check all the input/output tokens if they match the strategy to remove
+    address[] memory _outputTokens = outputTokensSet.values();
+    for (uint256 i = 0; i < _outputTokens.length; i++) {
+      IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
+      address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
+      for (uint256 j = 0; j < _inputTokens.length; j++) {
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
+
+        // only nullify the input/output tokens config if the strategy matches
+        if (_currentStrategy == strategyToRemove) {
+          redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
+          inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+          if (defaultOutputToken[_inputToken] == _outputToken) {
+            defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
+          }
+        }
+      }
+      if (inputTokensByOutputToken[_outputToken].length() == 0) {
+        outputTokensSet.remove(address(_outputToken));
+      }
+    }
+
+    redemptionStrategiesByName[strategyToRemove.name()] = IRedemptionStrategy(address(0));
+    redemptionStrategies.remove(address(strategyToRemove));
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
+    public
     view
     returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
   {
@@ -114,18 +361,28 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
     uint256 k = 0;
     while (tokenToRedeem != targetOutputToken) {
-      IERC20Upgradeable redeemedToken = outputTokensByInputToken[tokenToRedeem];
-      for (uint256 i = 0; i < tokenPath.length; i++) {
-        if (redeemedToken == tokenPath[i]) break;
+      IERC20Upgradeable nextRedeemedToken;
+      IRedemptionStrategy directStrategy = redemptionStrategiesByTokens[tokenToRedeem][targetOutputToken];
+      if (address(directStrategy) != address(0)) {
+        nextRedeemedToken = targetOutputToken;
+      } else {
+        // chain the next redeemed token from the default path
+        nextRedeemedToken = defaultOutputToken[tokenToRedeem];
+        for (uint256 i = 0; i < tokenPath.length; i++) {
+          if (nextRedeemedToken == tokenPath[i]) break;
+        }
       }
 
-      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(tokenToRedeem, redeemedToken);
+      (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(
+        tokenToRedeem,
+        nextRedeemedToken
+      );
       if (address(strategy) == address(0)) break;
 
       strategiesTemp[k] = strategy;
       strategiesDataTemp[k] = strategyData;
-      tokenPath[k] = redeemedToken;
-      tokenToRedeem = redeemedToken;
+      tokenPath[k] = nextRedeemedToken;
+      tokenToRedeem = nextRedeemedToken;
 
       k++;
       if (k == 10) break;
@@ -155,8 +412,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = uniswapV2LiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "AlgebraSwapLiquidator") || isStrategy(strategy, "GammaLpTokenLiquidator")) {
       strategyData = algebraSwapLiquidatorData(inputToken, outputToken);
-    } else if (isStrategy(strategy, "BalancerSwapLiquidator") || isStrategy(strategy, "BalancerLpTokenLiquidator")) {
-      strategyData = balancerLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "BalancerSwapLiquidator")) {
+      strategyData = balancerSwapLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "UniswapLpTokenLiquidator") || isStrategy(strategy, "GelatoGUniLiquidator")) {
       strategyData = uniswapLpTokenLiquidatorData(inputToken, outputToken);
     } else if (isStrategy(strategy, "SaddleLpTokenLiquidator")) {
@@ -169,8 +426,12 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
     } else if (isStrategy(strategy, "XBombLiquidatorFunder")) {
       strategyData = xBombLiquidatorData(inputToken, outputToken);
-    } else if (isStrategy(strategy, "BalancerLinearPoolTokenLiquidator")) {
-      strategyData = balancerLinearPoolTokenLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "BalancerLpTokenLiquidator")) {
+      strategyData = balancerLpTokenLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "AaveTokenLiquidator")) {
+      strategyData = aaveLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "SolidlyLpTokenWrapper")) {
+      strategyData = solidlyLpTokenWrapperData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
       //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
     }
@@ -181,19 +442,18 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function pickPreferredToken(address[] memory tokens, address strategyOutputToken) internal view returns (address) {
-    address wnative = ap.getAddress("wtoken");
-    address stableToken = ap.getAddress("stableToken");
-    address wbtc = ap.getAddress("wBTCToken");
-
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == strategyOutputToken) return strategyOutputToken;
     }
+    address wnative = ap.getAddress("wtoken");
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == wnative) return wnative;
     }
+    address stableToken = ap.getAddress("stableToken");
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == stableToken) return stableToken;
     }
+    address wbtc = ap.getAddress("wBTCToken");
     for (uint256 i = 0; i < tokens.length; i++) {
       if (tokens[i] == wbtc) return wbtc;
     }
@@ -256,9 +516,17 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     strategyData = abi.encode(ap.getAddress("SOLIDLY_SWAP_ROUTER"), outputToken);
   }
 
-  function balancerLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function aaveLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     internal
-    view
+    pure
+    returns (bytes memory strategyData)
+  {
+    strategyData = abi.encode(outputToken);
+  }
+
+  function balancerLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    pure
     returns (bytes memory strategyData)
   {
     strategyData = abi.encode(outputToken);
@@ -291,20 +559,27 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     IUniswapV2Pair lpToken = IUniswapV2Pair(address(inputToken));
     address token0 = lpToken.token0();
     address token1 = lpToken.token1();
-    bool token0IsOutputToken = address(outputToken) == lpToken.token0();
-    bool token1IsOutputToken = address(outputToken) == lpToken.token1();
+    bool token0IsOutputToken = address(outputToken) == token0;
+    bool token1IsOutputToken = address(outputToken) == token1;
     require(token0IsOutputToken || token1IsOutputToken, "Output token does not match either of the pair tokens");
 
-    address[] memory swapPath = new address[](2);
-    swapPath[0] = token0IsOutputToken ? token1 : token0;
-    swapPath[1] = token1IsOutputToken ? token0 : token1;
-    address[] memory emptyPath = new address[](0);
+    address[] memory swap0Path;
+    address[] memory swap1Path;
+    {
+      if (token0IsOutputToken) {
+        swap0Path = new address[](0);
+        swap1Path = new address[](2);
+        swap1Path[0] = token1;
+        swap1Path[1] = token0;
+      } else {
+        swap1Path = new address[](0);
+        swap0Path = new address[](2);
+        swap0Path[0] = token0;
+        swap0Path[1] = token1;
+      }
+    }
 
-    strategyData = abi.encode(
-      getUniswapV2Router(inputToken),
-      token0IsOutputToken ? emptyPath : swapPath,
-      token1IsOutputToken ? emptyPath : swapPath
-    );
+    strategyData = abi.encode(getUniswapV2Router(inputToken), swap0Path, swap1Path);
   }
 
   function saddleLpTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -334,17 +609,32 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(
       ap.getAddress("CurveLpTokenPriceOracleNoRegistry")
     );
-    address[] memory tokens = curveLpOracle.getUnderlyingTokens(address(inputToken));
+    ICurvePool curvePool = ICurvePool(curveLpOracle.poolOf(address(inputToken)));
+    address[] memory tokens = getUnderlyingTokens(curvePool);
 
-    address wnative = ap.getAddress("wtoken");
     address preferredToken = pickPreferredToken(tokens, address(outputToken));
     address actualOutputToken = preferredToken;
+    address wnative = ap.getAddress("wtoken");
     if (preferredToken == address(0) || preferredToken == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE) {
       actualOutputToken = wnative;
     }
     // TODO outputToken = actualOutputToken
 
     strategyData = abi.encode(preferredToken, wnative, curveLpOracle);
+  }
+
+  function getUnderlyingTokens(ICurvePool curvePool) internal view returns (address[] memory tokens) {
+    uint8 j = 0;
+    while (true) {
+      try curvePool.coins(uint256(j)) returns (address coin) {} catch {
+        break;
+      }
+      j++;
+    }
+    tokens = new address[](j);
+    for (uint256 i = 0; i < j; i++) {
+      tokens[i] = curvePool.coins(i);
+    }
   }
 
   function curveSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
@@ -377,48 +667,44 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
-  function balancerLinearPoolTokenLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  function balancerSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     internal
     view
     returns (bytes memory strategyData)
   {
     address poolAddress = ap.getBalancerPoolForTokens(address(inputToken), address(outputToken));
-    // TODO remove after the pools are configure on-chain
     if (poolAddress == address(0)) {
-      address wnative = ap.getAddress("wtoken");
-      address stmatic = 0x3A58a54C066FdC0f2D55FC9C89F0415C92eBf3C4;
-      address maticx = 0xfa68FB4628DFF1028CFEc22b4162FCcd0d45efb6;
-      address twoeur = 0x513CdEE00251F39DE280d9E5f771A6eaFebCc88E;
-      address par = 0xE2Aa7db6dA1dAE97C5f5C6914d285fBfCC32A128;
-      address maticxBbaWmatic = 0xE78b25c06dB117fdF8F98583CDaaa6c92B79E917;
+      // throw an error
+      revert("No balancer pool found for the given tokens");
+    }
+    strategyData = abi.encode(poolAddress, outputToken);
+  }
 
-      if (
-        (address(inputToken) == wnative && address(outputToken) == stmatic) ||
-        (address(inputToken) == stmatic && address(outputToken) == wnative)
-      ) {
-        poolAddress = 0x8159462d255C1D24915CB51ec361F700174cD994; // Balancer stMATIC Stable Pool
-      }
-      if (
-        (address(inputToken) == wnative && address(outputToken) == maticx) ||
-        (address(inputToken) == maticx && address(outputToken) == wnative)
-      ) {
-        poolAddress = 0xb20fC01D21A50d2C734C4a1262B4404d41fA7BF0; // Balancer MaticX Stable Pool
-      }
-      if (
-        (address(inputToken) == par && address(outputToken) == twoeur) ||
-        (address(inputToken) == twoeur && address(outputToken) == par)
-      ) {
-        poolAddress = twoeur; // Balancer 2EUR Stable Pool
-      }
-      if (
-        (address(inputToken) == maticxBbaWmatic && address(outputToken) == maticx) ||
-        (address(inputToken) == maticx && address(outputToken) == maticxBbaWmatic)
-      ) {
-        poolAddress = maticxBbaWmatic;
-      }
+  function solidlyLpTokenWrapperData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    view
+    returns (bytes memory strategyData)
+  {
+    IRouter solidlyRouter = IRouter(ap.getAddress("SOLIDLY_SWAP_ROUTER"));
+    IPair pair = IPair(address(outputToken));
+
+    IRouter.Route[] memory swapPath0 = new IRouter.Route[](1);
+    IRouter.Route[] memory swapPath1 = new IRouter.Route[](1);
+    {
+      bool isInputToken0 = pair.token0() == address(inputToken);
+      bool isInputToken1 = pair.token1() == address(inputToken);
+      require(isInputToken0 || isInputToken1, "!input token not underlying");
+
+      swapPath0[0].stable = pair.stable();
+      swapPath0[0].from = pair.token0();
+      swapPath0[0].to = pair.token1();
+
+      swapPath1[0].stable = pair.stable();
+      swapPath1[0].from = pair.token1();
+      swapPath1[0].to = pair.token0();
     }
 
-    strategyData = abi.encode(poolAddress, outputToken);
+    strategyData = abi.encode(solidlyRouter, pair, swapPath0, swapPath1);
   }
 
   // TODO remove after testing
@@ -435,13 +721,13 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       XBombSwap xbombSwapTDai = XBombSwap(0xd816eb4660615BBF080ddf425F28ea4AF30d04D5);
 
       if (inputToken == chapelBomb) {
-        XBombSwap swap;
+        XBombSwap bombSwap;
         if (outputToken == chapelTUsd) {
-          swap = xbombSwapTUsd;
+          bombSwap = xbombSwapTUsd;
         } else if (outputToken == chapelTDai) {
-          swap = xbombSwapTDai;
+          bombSwap = xbombSwapTDai;
         }
-        strategyData = abi.encode(swap, swap, outputToken, outputToken);
+        strategyData = abi.encode(bombSwap, bombSwap, outputToken, outputToken);
       } else if (inputToken == chapelTUsd) {
         strategyData = abi.encode(inputToken, xbombSwapTUsd, inputToken, chapelBomb);
       } else if (inputToken == chapelTDai) {

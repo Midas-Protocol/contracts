@@ -62,7 +62,7 @@ interface ILeveredPositionFactoryExtension {
 
   function removeClosedPosition(address closedPosition) external returns (bool removed);
 
-  function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (bool);
+  function closeAndRemoveUserPosition(LeveredPosition position) external returns (bool);
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256);
 

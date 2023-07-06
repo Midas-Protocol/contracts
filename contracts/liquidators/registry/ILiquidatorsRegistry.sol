@@ -13,14 +13,11 @@ interface ILiquidatorsRegistryStorage {
     view
     returns (IRedemptionStrategy);
 
-  function outputTokensByInputToken(IERC20Upgradeable inputToken) external view returns (IERC20Upgradeable);
+  function defaultOutputToken(IERC20Upgradeable inputToken) external view returns (IERC20Upgradeable);
 }
 
 interface ILiquidatorsRegistryExtension {
-  function isRedemptionPathSupported(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (bool);
+  function getInputTokensByOutputToken(IERC20Upgradeable outputToken) external view returns (address[] memory);
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     external
@@ -31,6 +28,35 @@ interface ILiquidatorsRegistryExtension {
     external
     view
     returns (IRedemptionStrategy strategy, bytes memory strategyData);
+
+  function getAllRedemptionStrategies() external view returns (address[] memory);
+
+  function getAllPairsStrategies()
+    external
+    view
+    returns (
+      IRedemptionStrategy[] memory strategies,
+      IERC20Upgradeable[] memory inputTokens,
+      IERC20Upgradeable[] memory outputTokens
+    );
+
+  function pairsStrategiesMatch(
+    IRedemptionStrategy[] calldata configStrategies,
+    IERC20Upgradeable[] calldata configInputTokens,
+    IERC20Upgradeable[] calldata configOutputTokens
+  ) external view returns (bool);
+
+  function swap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256);
+
+  function amountOutAndSlippageOfSwap(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    IERC20Upgradeable outputToken
+  ) external returns (uint256 outputAmount, uint256 slippage);
 
   function _setRedemptionStrategy(
     IRedemptionStrategy strategy,
@@ -44,11 +70,15 @@ interface ILiquidatorsRegistryExtension {
     IERC20Upgradeable[] calldata outputTokens
   ) external;
 
-  function _removeRedemptionStrategy(
-    address strategyToRemove,
-    string calldata name,
-    IERC20Upgradeable inputToken
+  function _resetRedemptionStrategies(
+    IRedemptionStrategy[] calldata strategies,
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens
   ) external;
+
+  function _removeRedemptionStrategy(IRedemptionStrategy strategyToRemove) external;
+
+  function _setDefaultOutputToken(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external;
 }
 
 interface ILiquidatorsRegistry is ILiquidatorsRegistryExtension, ILiquidatorsRegistryStorage {}

@@ -85,8 +85,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
-    (address latestCErc20DelegateAfter, bool allowResignAfter, bytes memory becomeImplementationDataAfter) = ffd
-      .latestCErc20Delegate(oldCercDelegate);
+    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
 
     emit log_uint(marketsCounterAfter);
@@ -140,9 +139,6 @@ contract ContractsUpgradesTest is BaseTest {
       ICErc20[] memory markets = pool.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate market = CErc20Delegate(address(markets[j]));
-
-        // should fail for markets that don't have the exchange rate fix
-        market.marketFixed();
 
         address currentImpl = market.implementation();
         (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);

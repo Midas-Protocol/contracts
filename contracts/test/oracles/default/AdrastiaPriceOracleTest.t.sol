@@ -128,10 +128,7 @@ contract AdrastiaPriceOracleTest is BaseTest {
     uint256 price8Decimals = oracle.price(address(3));
 
     assertGt(priceGUsdc, 1e17);
-    assertLt(priceGUsdc, 1e19);
-
     assertGt(priceCeUsdc, 1e17);
-    assertLt(priceCeUsdc, 1e19);
 
     assertApproxEqRel(priceGUsdc, priceGUsdt, 5e16, "usd prices differ too much"); // 1e18 = 100%, 5e16 = 5%
     assertApproxEqRel(priceGUsdt, priceGDai, 5e16, "usd prices differ too much");

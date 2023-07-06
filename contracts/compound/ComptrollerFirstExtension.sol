@@ -38,6 +38,43 @@ contract ComptrollerFirstExtension is
   /// @notice Emitted when an admin unsupports a market
   event MarketUnlisted(ICErc20 cToken);
 
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 30;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
+    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
+    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
+    functionSelectors[--fnsCount] = this._setMintPaused.selector;
+    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
+    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
+    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
+    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
+    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
+    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
+    functionSelectors[--fnsCount] = this.getWhitelist.selector;
+    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
+    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
+    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
+    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
+    functionSelectors[--fnsCount] = this.getAssetAsCollateralValueCap.selector;
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+
   /**
    * @notice Returns true if the accruing flyhwheel was found and replaced
    * @dev Adds a flywheel to the non-accruing list and if already in the accruing, removes it from that list
@@ -64,6 +101,52 @@ contract ComptrollerFirstExtension is
     }
 
     return false;
+  }
+
+  function getAssetAsCollateralValueCap(
+    ICErc20 collateral,
+    ICErc20 cTokenModify,
+    bool redeeming,
+    address account
+  ) external view returns (uint256) {
+    if (address(collateral) == address(cTokenModify) && !redeeming) {
+      // the collateral asset counts as 0 liquidity when borrowed
+      return 0;
+    }
+
+    uint256 assetAsCollateralValueCap = type(uint256).max;
+    if (address(cTokenModify) != address(0)) {
+      // if the borrowed asset is blacklisted against this collateral & account is not whitelisted
+      if (
+        borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(collateral)] &&
+        !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(collateral)].contains(account)
+      ) {
+        assetAsCollateralValueCap = 0;
+      } else {
+        // for each user the value of this kind of collateral is capped regardless of the amount borrowed
+        // denominated in the borrowed asset
+        uint256 borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(collateral)];
+        // check if set to any value & account is not whitelisted
+        if (
+          borrowCapForCollateral != 0 &&
+          !borrowCapForCollateralWhitelist[address(cTokenModify)][address(collateral)].contains(account)
+        ) {
+          uint256 borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
+          // this asset usage as collateral is capped at the native value of the borrow cap
+          assetAsCollateralValueCap = (borrowCapForCollateral * borrowedAssetPrice) / 1e18;
+        }
+      }
+    }
+
+    // if there is any supply cap, don't allow donations to the market/plugin to go around it
+    if (supplyCaps[address(collateral)] > 0 && !supplyCapWhitelist[address(collateral)].contains(account)) {
+      uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateral);
+      uint256 supplyCapValue = (supplyCaps[address(collateral)] * collateralAssetPrice) / 1e18;
+      supplyCapValue = (supplyCapValue * markets[address(collateral)].collateralFactorMantissa) / 1e18;
+      if (supplyCapValue < assetAsCollateralValueCap) assetAsCollateralValueCap = supplyCapValue;
+    }
+
+    return assetAsCollateralValueCap;
   }
 
   /**
@@ -328,42 +411,6 @@ contract ComptrollerFirstExtension is
     for (uint256 i = 0; i < whitelistedBorrowers.length; i++) {
       borrowed += ICErc20(cToken).borrowBalanceCurrent(whitelistedBorrowers[i]);
     }
-  }
-
-  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 29;
-    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
-    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
-    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
-    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
-    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
-    functionSelectors[--fnsCount] = this._setMintPaused.selector;
-    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
-    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
-    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
-    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
-    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
-    functionSelectors[--fnsCount] = this.getWhitelist.selector;
-    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
-    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
-    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
-    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
-    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
-    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
-    require(fnsCount == 0, "use the correct array length");
-    return functionSelectors;
   }
 
   /**

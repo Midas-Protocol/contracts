@@ -30,13 +30,12 @@ contract LeveredPositionFactoryExtension is
   uint256 public constant MAX_SLIPPAGE = 900; // 9%
 
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 13;
+    uint8 fnsCount = 12;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.createPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPositionAtRatio.selector;
     functionSelectors[--fnsCount] = this.removeClosedPosition.selector;
-    functionSelectors[--fnsCount] = this.isFundingAllowed.selector;
     functionSelectors[--fnsCount] = this.getMinBorrowNative.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getSlippage.selector;
@@ -90,22 +89,28 @@ contract LeveredPositionFactoryExtension is
   }
 
   // @return true if removed, otherwise false
-  function removeClosedPosition(address closedPosition) external returns (bool removed) {
-    EnumerableSet.AddressSet storage userPositions = positionsByAccount[msg.sender];
+  function removeClosedPosition(address closedPosition) external returns (bool) {
+    return _removeClosedPosition(closedPosition, msg.sender);
+  }
+
+  function closeAndRemoveUserPosition(LeveredPosition position) external onlyOwner returns (bool) {
+    address positionOwner = position.positionOwner();
+    position.closePosition(positionOwner);
+    return _removeClosedPosition(address(position), positionOwner);
+  }
+
+  function _removeClosedPosition(address closedPosition, address positionOwner) internal returns (bool removed) {
+    EnumerableSet.AddressSet storage userPositions = positionsByAccount[positionOwner];
     if (!userPositions.contains(closedPosition)) revert NoSuchPosition();
     if (!LeveredPosition(closedPosition).isPositionClosed()) revert PositionNotClosed();
 
     removed = userPositions.remove(closedPosition);
-    if (userPositions.length() == 0) accountsWithOpenPositions.remove(msg.sender);
+    if (userPositions.length() == 0) accountsWithOpenPositions.remove(positionOwner);
   }
 
   /*----------------------------------------------------------------
                             View Functions
   ----------------------------------------------------------------*/
-
-  function isFundingAllowed(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (bool) {
-    return liquidatorsRegistry.isRedemptionPathSupported(inputToken, outputToken);
-  }
 
   function getMinBorrowNative() external view returns (uint256) {
     return fuseFeeDistributor.minBorrowEth();

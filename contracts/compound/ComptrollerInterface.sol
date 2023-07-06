@@ -280,6 +280,13 @@ interface ComptrollerExtensionInterface {
   function _setSeizePaused(bool state) external returns (bool);
 
   function _unsupportMarket(ICErc20 cToken) external returns (uint256);
+
+  function getAssetAsCollateralValueCap(
+    ICErc20 collateral,
+    ICErc20 cTokenModify,
+    bool redeeming,
+    address account
+  ) external view returns (uint256);
 }
 
 interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {}

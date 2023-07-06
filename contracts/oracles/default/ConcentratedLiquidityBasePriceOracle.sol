@@ -95,13 +95,9 @@ abstract contract ConcentratedLiquidityBasePriceOracle is BasePriceOracle, SafeO
     address token0,
     address priceToken,
     uint160 sqrtPriceX96
-  ) public pure returns (uint256 _price) {
-    if (token0 == priceToken) {
-      _price = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
-    } else {
-      _price = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
-      _price = 1e36 / _price;
-    }
+  ) public pure returns (uint256 price_) {
+    price_ = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
+    if (token0 != priceToken) price_ = 1e36 / price_;
   }
 
   function _isBaseTokenSupported(address token) internal view returns (bool) {

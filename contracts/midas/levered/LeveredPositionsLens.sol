@@ -61,7 +61,7 @@ contract LeveredPositionsLens is Initializable {
   function getBorrowRateAtRatio(
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket,
-    uint256 _baseCollateral,
+    uint256 _equityAmount,
     uint256 _targetLeverageRatio
   ) external view returns (uint256) {
     IComptroller pool = IComptroller(_stableMarket.comptroller());
@@ -69,7 +69,7 @@ contract LeveredPositionsLens is Initializable {
     uint256 stableAssetPrice = oracle.getUnderlyingPrice(_stableMarket);
     uint256 collateralAssetPrice = oracle.getUnderlyingPrice(_collateralMarket);
 
-    uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _baseCollateral * collateralAssetPrice) /
+    uint256 borrowAmount = ((_targetLeverageRatio - 1e18) * _equityAmount * collateralAssetPrice) /
       (stableAssetPrice * 1e18);
     return _stableMarket.borrowRatePerBlockAfterBorrow(borrowAmount);
   }
@@ -82,6 +82,7 @@ contract LeveredPositionsLens is Initializable {
     returns (
       address[] memory markets,
       address[] memory underlyings,
+      uint256[] memory underlyingsPrices,
       string[] memory names,
       string[] memory symbols,
       uint256[] memory rates,
@@ -94,6 +95,7 @@ contract LeveredPositionsLens is Initializable {
     symbols = new string[](markets.length);
     rates = new uint256[](markets.length);
     decimals = new uint8[](markets.length);
+    underlyingsPrices = new uint256[](markets.length);
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 market = ICErc20(markets[i]);
       address underlyingAddress = market.underlying();
@@ -103,6 +105,7 @@ contract LeveredPositionsLens is Initializable {
       symbols[i] = underlying.symbol();
       rates[i] = market.borrowRatePerBlock();
       decimals[i] = underlying.decimals();
+      underlyingsPrices[i] = market.comptroller().oracle().getUnderlyingPrice(market);
     }
   }
 
@@ -114,7 +117,7 @@ contract LeveredPositionsLens is Initializable {
     ICErc20 _stableMarket,
     uint256 _targetLeverageRatio
   ) public view returns (int256 netAPY) {
-    if (_supplyAPY == 0 || _supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
+    if (_supplyAmount == 0 || _targetLeverageRatio <= 1e18) return 0;
 
     IComptroller pool = IComptroller(_collateralMarket.comptroller());
     BasePriceOracle oracle = pool.oracle();
@@ -146,20 +149,41 @@ contract LeveredPositionsLens is Initializable {
     }
   }
 
-  function getNetApyForPosition(LeveredPosition pos, uint256 _supplyAPY) public view returns (int256) {
+  function getLeverageRatioAfterFunding(LeveredPosition pos, uint256 newFunding) public view returns (uint256) {
+    uint256 equityAmount = pos.getEquityAmount();
+    if (equityAmount == 0 && newFunding == 0) return 0;
+
+    uint256 suppliedCollateralCurrent = pos.collateralMarket().balanceOfUnderlying(address(pos));
+    return ((suppliedCollateralCurrent + newFunding) * 1e18) / (equityAmount + newFunding);
+  }
+
+  function getNetApyForPositionAfterFunding(
+    LeveredPosition pos,
+    uint256 supplyAPY,
+    uint256 newFunding
+  ) public view returns (int256) {
     return
       getNetAPY(
-        _supplyAPY,
-        pos.baseCollateral(),
+        supplyAPY,
+        pos.getEquityAmount() + newFunding,
         pos.collateralMarket(),
         pos.stableMarket(),
-        pos.getCurrentLeverageRatio()
+        getLeverageRatioAfterFunding(pos, newFunding)
       );
   }
 
+  function getNetApyForPosition(LeveredPosition pos, uint256 supplyAPY) public view returns (int256) {
+    return getNetApyForPositionAfterFunding(pos, supplyAPY, 0);
+  }
+
   struct PositionInfo {
+    uint256 collateralAssetPrice;
+    uint256 borrowedAssetPrice;
+    uint256 positionSupplyAmount;
     uint256 positionValue;
+    uint256 debtAmount;
     uint256 debtValue;
+    uint256 equityAmount;
     uint256 equityValue;
     int256 currentApy;
     uint256 debtRatio;
@@ -169,27 +193,28 @@ contract LeveredPositionsLens is Initializable {
 
   function getPositionInfo(LeveredPosition pos, uint256 supplyApy) public view returns (PositionInfo memory info) {
     ICErc20 collateralMarket = pos.collateralMarket();
-    ICErc20 stableMarket = pos.stableMarket();
     IComptroller pool = pos.pool();
-    uint256 collateralPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
+    info.collateralAssetPrice = pool.oracle().getUnderlyingPrice(collateralMarket);
     {
-      uint256 supplyAmount = collateralMarket.balanceOfUnderlying(address(pos));
-      info.positionValue = (collateralPrice * supplyAmount) / 1e18;
+      info.positionSupplyAmount = collateralMarket.balanceOfUnderlying(address(pos));
+      info.positionValue = (info.collateralAssetPrice * info.positionSupplyAmount) / 1e18;
       info.currentApy = getNetApyForPosition(pos, supplyApy);
     }
 
     {
-      uint256 borrowedPrice = pool.oracle().getUnderlyingPrice(stableMarket);
-      info.debtValue = (borrowedPrice * stableMarket.borrowBalanceCurrent(address(pos))) / 1e18;
-      info.equityValue = (collateralPrice * pos.baseCollateral()) / 1e18;
-      info.debtRatio = (info.debtValue * 1e18) / info.equityValue;
+      ICErc20 stableMarket = pos.stableMarket();
+      info.borrowedAssetPrice = pool.oracle().getUnderlyingPrice(stableMarket);
+      info.debtAmount = stableMarket.borrowBalanceCurrent(address(pos));
+      info.debtValue = (info.borrowedAssetPrice * info.debtAmount) / 1e18;
+      info.equityValue = info.positionValue - info.debtValue;
+      info.debtRatio = info.positionValue == 0 ? 0 : (info.debtValue * 1e18) / info.positionValue;
+      info.equityAmount = (info.equityValue * 1e18) / info.collateralAssetPrice;
     }
 
     {
       (, uint256 collateralFactor) = pool.markets(address(collateralMarket));
-      uint256 liquidity = (info.positionValue * collateralFactor) / 1e18;
-      info.liquidationThreshold = (liquidity * 1e18) / info.equityValue;
-      info.safetyBuffer = ((liquidity - info.debtValue) * 1e18) / info.equityValue;
+      info.liquidationThreshold = collateralFactor;
+      info.safetyBuffer = collateralFactor - info.debtRatio;
     }
   }
 }
