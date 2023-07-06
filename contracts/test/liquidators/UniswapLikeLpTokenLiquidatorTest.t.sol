@@ -6,19 +6,22 @@ import { UniswapLpTokenPriceOracle } from "../../oracles/default/UniswapLpTokenP
 import { SolidlyLpTokenPriceOracle } from "../../oracles/default/SolidlyLpTokenPriceOracle.sol";
 import { UniswapLikeLpTokenPriceOracle } from "../../oracles/default/UniswapLikeLpTokenPriceOracle.sol";
 import { UniswapLpTokenLiquidator } from "../../liquidators/UniswapLpTokenLiquidator.sol";
-import { SolidlyLpTokenLiquidator } from "../../liquidators/SolidlyLpTokenLiquidator.sol";
+import { SolidlyLpTokenLiquidator, SolidlyLpTokenWrapper } from "../../liquidators/SolidlyLpTokenLiquidator.sol";
 import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IUniswapV2Router02 } from "../../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 import { IPair } from "../../external/solidly/IPair.sol";
+import { IRouter } from "../../external/solidly/IRouter.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   UniswapLpTokenLiquidator private uniLiquidator;
   SolidlyLpTokenLiquidator private solidlyLpTokenLiquidator;
+  SolidlyLpTokenWrapper solidlyLpTokenWrapper;
   SolidlyLpTokenPriceOracle private oracleSolidly;
   UniswapLpTokenPriceOracle private oracleUniswap;
   MasterPriceOracle mpo;
@@ -30,14 +33,21 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
     uniswapV2Router = ap.getAddress("IUniswapV2Router02");
-    solidlyRouter = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
     wtoken = ap.getAddress("wtoken");
     stableToken = ap.getAddress("stableToken");
 
     uniLiquidator = new UniswapLpTokenLiquidator();
     solidlyLpTokenLiquidator = new SolidlyLpTokenLiquidator();
+    solidlyLpTokenWrapper = new SolidlyLpTokenWrapper();
     oracleSolidly = new SolidlyLpTokenPriceOracle(wtoken);
     oracleUniswap = new UniswapLpTokenPriceOracle(wtoken);
+    if (block.chainid == BSC_MAINNET) {
+      // thena
+      solidlyRouter = 0xd4ae6eCA985340Dd434D38F470aCCce4DC78D109;
+    } else if (block.chainid == POLYGON_MAINNET) {
+      // pearl
+      solidlyRouter = 0xda822340F5E8216C277DBF66627648Ff5D57b527;
+    }
   }
 
   function setUpOracles(address lpToken, UniswapLikeLpTokenPriceOracle oracle) internal {
@@ -125,8 +135,6 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
       vm.prank(whale);
       lpTokenContract.transfer(address(solidlyLpTokenLiquidator), redeemAmount);
 
-      vm.prank(address(solidlyLpTokenLiquidator));
-      lpTokenContract.approve(lpToken, redeemAmount);
       solidlyLpTokenLiquidator.redeem(lpTokenContract, redeemAmount, data);
     }
 
@@ -172,5 +180,120 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     testSolidlyLpTokenRedeem(WBNB_BUSD_whale, WBNB_BUSD, wtoken, oracleSolidly);
     testSolidlyLpTokenRedeem(HAY_BUSD_whale, HAY_BUSD, stableToken, oracleSolidly);
     testSolidlyLpTokenRedeem(ANKR_ankrBNB_whale, ANKR_ankrBNB, ankrBNB, oracleSolidly);
+  }
+
+  function _testSolidlyLpTokenWrapper(
+    IERC20Upgradeable inputToken,
+    uint256 inputAmount,
+    address whale,
+    IPair lpToken
+  ) internal {
+    // TODO get the data from the liquidators registry
+    IRouter.Route[] memory swapPath0 = new IRouter.Route[](1);
+    IRouter.Route[] memory swapPath1 = new IRouter.Route[](1);
+    IERC20Upgradeable otherUnderlying;
+    {
+      address token0 = lpToken.token0();
+      address token1 = lpToken.token1();
+      bool isInputToken0 = token0 == address(inputToken);
+      bool isInputToken1 = token1 == address(inputToken);
+      require(isInputToken0 || isInputToken1, "!input token not underlying");
+
+      if (isInputToken0) otherUnderlying = IERC20Upgradeable(token1);
+      else otherUnderlying = IERC20Upgradeable(token0);
+
+      swapPath0[0].stable = lpToken.stable();
+      swapPath0[0].from = token0;
+      swapPath0[0].to = token1;
+
+      swapPath1[0].stable = lpToken.stable();
+      swapPath1[0].from = token1;
+      swapPath1[0].to = token0;
+    }
+
+    bytes memory data = abi.encode(solidlyRouter, lpToken, swapPath0, swapPath1);
+
+    vm.prank(whale);
+    inputToken.transfer(address(solidlyLpTokenWrapper), inputAmount);
+
+    (IERC20Upgradeable outputToken, uint256 outputAmount) = solidlyLpTokenWrapper.redeem(inputToken, inputAmount, data);
+
+    BasePriceOracle[] memory solOracles = new BasePriceOracle[](1);
+    solOracles[0] = oracleSolidly;
+    if (mpo.oracles(address(outputToken)) == BasePriceOracle(address(0))) {
+      vm.prank(mpo.admin());
+      mpo.add(asArray(address(outputToken)), solOracles);
+    }
+
+    uint256 lpTokensBalance = lpToken.balanceOf(address(solidlyLpTokenWrapper));
+    assertGt(lpTokensBalance, 0, "!no lp tokens wrapped");
+    uint256 inputTokensAfter = inputToken.balanceOf(address(solidlyLpTokenWrapper));
+    assertEq(inputTokensAfter, 0, "!input tokens left after");
+    //    uint256 otherTokensAfter = otherUnderlying.balanceOf(address(solidlyLpTokenWrapper));
+    //    assertEq(otherTokensAfter, 0, "!other underlying tokens left after");
+    //    emit log_named_uint("bps other leftover", (valueOf(otherUnderlying, otherTokensAfter) * 10000) / valueOf(inputToken, inputAmount));
+    assertApproxEqRel(valueOf(inputToken, inputAmount), valueOf(outputToken, outputAmount), 5e16, "!slippage too high");
+  }
+
+  function valueOf(IERC20Upgradeable token, uint256 amount) internal view returns (uint256) {
+    uint256 price = mpo.price(address(token));
+    uint256 decimalsScale = 10**ERC20Upgradeable(address(token)).decimals();
+    return (amount * price) / decimalsScale;
+  }
+
+  function testWrapSolidlyLpTokensWbnbBusd() public fork(BSC_MAINNET) {
+    IERC20Upgradeable wbnb = IERC20Upgradeable(ap.getAddress("wtoken"));
+    address WBNB_BUSD = 0x483653bcF3a10d9a1c334CE16a19471a614F4385;
+    address wbnbWhale = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
+
+    _testSolidlyLpTokenWrapper(wbnb, 1e18, wbnbWhale, IPair(WBNB_BUSD));
+  }
+
+  function testWrapSolidlyLpTokensHayBusd() public fork(BSC_MAINNET) {
+    IERC20Upgradeable busd = IERC20Upgradeable(ap.getAddress("stableToken"));
+    address HAY_BUSD = 0x93B32a8dfE10e9196403dd111974E325219aec24;
+    address busdWhale = 0xF977814e90dA44bFA03b6295A0616a897441aceC;
+
+    _testSolidlyLpTokenWrapper(busd, 1000e18, busdWhale, IPair(HAY_BUSD));
+  }
+
+  function testWrapSolidlyLpTokensjBrlBrz() public fork(BSC_MAINNET) {
+    IERC20Upgradeable jBRL = IERC20Upgradeable(0x316622977073BBC3dF32E7d2A9B3c77596a0a603);
+    address jBRL_BRZ = 0xA0695f78AF837F570bcc50f53e58Cda300798B65;
+    address jBRLWhale = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
+
+    _testSolidlyLpTokenWrapper(jBRL, 1000e18, jBRLWhale, IPair(jBRL_BRZ));
+  }
+
+  function testWrapSolidlyLpTokensBrzJBrl() public fork(BSC_MAINNET) {
+    IERC20Upgradeable brz = IERC20Upgradeable(0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb);
+    address jBRL_BRZ = 0xA0695f78AF837F570bcc50f53e58Cda300798B65;
+    address brzWhale = 0xad51e40D8f255dba1Ad08501D6B1a6ACb7C188f3;
+
+    _testSolidlyLpTokenWrapper(brz, 1000e4, brzWhale, IPair(jBRL_BRZ));
+  }
+
+  function testWrapSolidlyLpTokensUsdrUsdc() public fork(POLYGON_MAINNET) {
+    IERC20Upgradeable usdc = IERC20Upgradeable(ap.getAddress("stableToken"));
+    address USDC_USDR = 0xf6A72Bd46F53Cd5103812ea1f4B5CF38099aB797;
+    address USDCWhale = 0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245; // binance hot wallet
+
+    _testSolidlyLpTokenWrapper(usdc, 1000e6, USDCWhale, IPair(USDC_USDR));
+  }
+
+  function testWrapSolidlyLpTokensUsdrUsdr() public fork(POLYGON_MAINNET) {
+    IERC20Upgradeable usdr = IERC20Upgradeable(0xb5DFABd7fF7F83BAB83995E72A52B97ABb7bcf63);
+    address WUSDR_USDR = 0x10E1b58B3C93890D04D539b5f39Aa4Df27A362b2;
+    address USDRWhale = 0xa138341185a9D0429B0021A11FB717B225e13e1F; // curve lp token
+
+    _testSolidlyLpTokenWrapper(usdr, 1000e9, USDRWhale, IPair(WUSDR_USDR));
+  }
+
+  function testWrapSolidlyLpTokensStMaticUsdr() public fork(POLYGON_MAINNET) {
+    IERC20Upgradeable usdr = IERC20Upgradeable(0xb5DFABd7fF7F83BAB83995E72A52B97ABb7bcf63);
+    address STMATIC_USDR = 0x733eEEf37De013283da29cE9EB4758dC59CaFc87;
+    address USDRWhale = 0xa138341185a9D0429B0021A11FB717B225e13e1F; // curve lp token
+
+    _testSolidlyLpTokenWrapper(usdr, 1000e9, USDRWhale, IPair(STMATIC_USDR));
   }
 }
