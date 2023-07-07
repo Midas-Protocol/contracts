@@ -14,7 +14,7 @@ import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
 import { PatchedStorage } from "./utils/PatchedStorage.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
-import { PoolRolesAuthority } from "./midas/PoolRolesAuthority.sol";
+import { AuthoritiesRegistry } from "./midas/AuthoritiesRegistry.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -457,7 +457,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     pool._toggleAutoImplementations(enabled);
   }
 
-  mapping(address => PoolRolesAuthority) public poolAuthority;
+  AuthoritiesRegistry public authoritiesRegistry;
 
   function canCall(
     address pool,
@@ -465,10 +465,6 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     address target,
     bytes4 functionSig
   ) external view returns (bool) {
-    PoolRolesAuthority authorityForPool = poolAuthority[pool];
-    // TODO revert or allow by default?
-    if (address(authorityForPool) == address(0)) return true;
-
-    return authorityForPool.canCall(user, target, functionSig);
+    return authoritiesRegistry.canCall(pool, user, target, functionSig);
   }
 }

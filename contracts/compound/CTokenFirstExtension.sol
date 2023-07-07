@@ -23,7 +23,7 @@ contract CTokenFirstExtension is
 {
   modifier isAuthorized() {
     require(
-      IFuseFeeDistributor(fuseAdmin).canCall(address(this), msg.sender, address(this), msg.sig),
+      IFuseFeeDistributor(fuseAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
       "not authorized"
     );
     _;

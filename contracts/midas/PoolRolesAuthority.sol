@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller, ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
+import { ICErc20, CErc20Interface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
 
 import { RolesAuthority, Authority } from "solmate/auth/authorities/RolesAuthority.sol";
 
@@ -21,24 +21,51 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
   uint8 public constant SUPPLIER_ROLE = 1;
   uint8 public constant BORROWER_ROLE = 2;
   uint8 public constant LIQUIDATOR_ROLE = 3;
+  uint8 public constant LEVERED_POSITION_ROLE = 4;
 
   function configurePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
     _configurePoolSupplierCapabilities(pool, SUPPLIER_ROLE);
   }
 
+  function getSupplierMarketSelectors() public pure returns (bytes4[] memory selectors) {
+    uint8 fnsCount = 6;
+    selectors = new bytes4[](fnsCount);
+    selectors[--fnsCount] = CErc20Interface.mint.selector;
+    selectors[--fnsCount] = CErc20Interface.redeem.selector;
+    selectors[--fnsCount] = CErc20Interface.redeemUnderlying.selector;
+
+    // TODO transfer/approve fns needed at all?
+    selectors[--fnsCount] = CTokenExtensionInterface.transfer.selector;
+    selectors[--fnsCount] = CTokenExtensionInterface.transferFrom.selector;
+    selectors[--fnsCount] = CTokenExtensionInterface.approve.selector;
+
+    // selectors[--fnsCount] = ICErc20.multicall.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+    return selectors;
+  }
+
+  function isSupplierCall(address target, bytes4 selector) external pure returns (bool) {
+    if (selector == ComptrollerInterface.enterMarkets.selector) return true;
+    if (selector == ComptrollerInterface.exitMarket.selector) return true;
+
+    bytes4[] memory supplierSelectors = getSupplierMarketSelectors();
+    for (uint256 i = 0; i < supplierSelectors.length; i++) {
+      if (selector == supplierSelectors[i]) return true;
+    }
+
+    return false;
+  }
+
   function _configurePoolSupplierCapabilities(IComptroller pool, uint8 role) internal {
     setRoleCapability(role, address(pool), pool.enterMarkets.selector, true);
+    setRoleCapability(role, address(pool), pool.exitMarket.selector, true);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
-      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].mint.selector, true);
-      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].redeem.selector, true);
-      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].redeemUnderlying.selector, true);
-      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].transfer.selector, true);
-      // TODO fns needed at all?
-      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].transferFrom.selector, true);
-      setRoleCapability(role, address(allMarkets[i]), allMarkets[i].approve.selector, true);
-
-      //setRoleCapability(role, address(allMarkets[i]), allMarkets[i].multicall.selector, true);
+      bytes4[] memory selectors = getSupplierMarketSelectors();
+      for (uint256 j = 0; j < selectors.length; j++) {
+        setRoleCapability(role, address(allMarkets[i]), selectors[j], true);
+      }
     }
   }
 
@@ -60,6 +87,21 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
       setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
       // seize is called by other CTokens
       //setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].seize.selector, true);
+    }
+  }
+
+  function configureLeveredPositionCapabilities(IComptroller pool) external requiresAuth {
+    setRoleCapability(LEVERED_POSITION_ROLE, address(pool), pool.enterMarkets.selector, true);
+    setRoleCapability(LEVERED_POSITION_ROLE, address(pool), pool.exitMarket.selector, true);
+    ICErc20[] memory allMarkets = pool.getAllMarkets();
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      setRoleCapability(LEVERED_POSITION_ROLE, address(allMarkets[i]), allMarkets[i].mint.selector, true);
+      setRoleCapability(LEVERED_POSITION_ROLE, address(allMarkets[i]), allMarkets[i].redeem.selector, true);
+      setRoleCapability(LEVERED_POSITION_ROLE, address(allMarkets[i]), allMarkets[i].redeemUnderlying.selector, true);
+
+      setRoleCapability(LEVERED_POSITION_ROLE, address(allMarkets[i]), allMarkets[i].borrow.selector, true);
+      setRoleCapability(LEVERED_POSITION_ROLE, address(allMarkets[i]), allMarkets[i].repayBorrow.selector, true);
+      setRoleCapability(LEVERED_POSITION_ROLE, address(allMarkets[i]), allMarkets[i].flash.selector, true);
     }
   }
 }

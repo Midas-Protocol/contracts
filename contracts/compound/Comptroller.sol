@@ -167,7 +167,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param cTokenAddress The address of the asset to be removed
    * @return Whether or not the account successfully exited the market
    */
-  function exitMarket(address cTokenAddress) external override returns (uint256) {
+  function exitMarket(address cTokenAddress) external override isAuthorized returns (uint256) {
     // TODO
     require(markets[cTokenAddress].isListed, "!Comptroller:exitMarket");
 
