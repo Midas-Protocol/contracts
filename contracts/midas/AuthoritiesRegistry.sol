@@ -15,11 +15,9 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     poolAuthLogic = new PoolRolesAuthority();
   }
 
-
   function reinitialize() public {
     poolAuthLogic = new PoolRolesAuthority();
   }
-
 
   function createPoolAuthority(address pool) public onlyOwner {
     require(address(poolsAuthorities[pool]) == address(0), "already created");
@@ -47,5 +45,4 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
 
     return authorityForPool.canCall(user, target, functionSig);
   }
-
 }
