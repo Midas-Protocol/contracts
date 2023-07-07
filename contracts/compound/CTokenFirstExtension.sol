@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
 import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
@@ -47,15 +47,14 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this.flash.selector;
     functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
     functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
-    functionSelectors[--fnsCount] = this.asCTokenExtensionInterface.selector;
+    functionSelectors[--fnsCount] = this.getExtensionForSig.selector;
 
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
   }
 
-  // TODO remove after next deploy
-  function asCTokenExtensionInterface() external view returns (CTokenFirstExtension) {
-    return this;
+  function getExtensionForSig(bytes4 fnSig) external view returns (address) {
+    return LibDiamond.getExtensionForFunction(fnSig);
   }
 
   function getTotalUnderlyingSupplied() public view override returns (uint256) {

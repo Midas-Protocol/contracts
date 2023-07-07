@@ -77,6 +77,11 @@ contract LiquidatorsRegistryTest is BaseTest {
     return returndata;
   }
 
+  function testSwapAllowance() public debuggingOnly fork(BSC_CHAPEL) {
+    vm.prank(0xdc3d8A4ee43dDe6a4E92F0D7A749C8eBD921239b);
+    registry.amountOutAndSlippageOfSwap(chapelBomb, 1e18, chapelTUsd);
+  }
+
   function testResetStrategies() public debuggingOnly fork(BSC_CHAPEL) {
     upgradeRegistry();
 

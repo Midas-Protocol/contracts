@@ -12,8 +12,9 @@ contract FusePoolLensTest is BaseTest {
     fpl.getPoolAssetsWithData(IComptroller(0xB08A309eFBFFa41f36A06b2D0C9a4629749b17a2));
   }
 
-  function testWhitelistsFPL() public debuggingOnly fork(BSC_CHAPEL) {
-    FusePoolLens fpl = FusePoolLens(0x604805B587C939042120D2e22398f299547A130c);
-    fpl.getSupplyCapsDataForPool(IComptroller(0x307BEc9d1368A459E9168fa6296C1e69025ab30f));
+  function testChapelFPL() public debuggingOnly fork(BSC_CHAPEL) {
+    FusePoolLens fpl = FusePoolLens(0xD880d5D33221F3992E695f5C6bFBC558e9Ad31cF);
+    vm.prank(0x8982aa50bb919E42e9204f12e5b59D053Eb2A602);
+    fpl.getPoolAssetsWithData(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
   }
 }

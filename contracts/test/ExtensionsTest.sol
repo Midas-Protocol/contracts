@@ -88,6 +88,33 @@ contract ExtensionsTest is MarketsTest {
     third = new MockThirdComptrollerExtension();
   }
 
+  function testChapelAccrue() public fork(BSC_CHAPEL) {
+    address marketAddress = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15;
+    CTokenFirstExtension asExt = CTokenFirstExtension(marketAddress);
+
+    emit log_named_address("irm", address(asExt.interestRateModel()));
+
+    asExt.accrueInterest();
+  }
+
+  function testChapelExtensionFns() public fork(BSC_CHAPEL) {
+    address marketAddress = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15;
+    DiamondBase asBase = DiamondBase(marketAddress);
+    address[] memory extensions = asBase._listExtensions();
+
+    emit log_named_address("first ext", extensions[0]);
+
+    DiamondExtension firstExt = DiamondExtension(extensions[0]);
+    bytes4[] memory fns = firstExt._getExtensionFunctions();
+
+    CTokenFirstExtension asExt = CTokenFirstExtension(marketAddress);
+
+    asExt.getExtensionForSig(asExt.borrowBalanceCurrent.selector);
+    //asExt.supplyRatePerBlock();
+
+    //    emit log_named_array("fn selectors", fns);
+  }
+
   function testExtensionReplace() public debuggingOnly fork(BSC_MAINNET) {
     address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
     _upgradeExistingPool(jFiatPoolAddress);
