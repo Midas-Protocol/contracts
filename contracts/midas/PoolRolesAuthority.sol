@@ -81,12 +81,18 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configurePoolLiquidatorCapabilities(IComptroller pool) external requiresAuth {
+  function configureClosedPoolLiquidatorCapabilities(IComptroller pool) external requiresAuth {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, false);
       setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
-      // seize is called by other CTokens
-      //setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].seize.selector, true);
+    }
+  }
+
+  function configureOpenPoolLiquidatorCapabilities(IComptroller pool) external requiresAuth {
+    ICErc20[] memory allMarkets = pool.getAllMarkets();
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
     }
   }
 

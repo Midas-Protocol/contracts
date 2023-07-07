@@ -23,7 +23,7 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     require(address(poolsAuthorities[pool]) == address(0), "already created");
 
     {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(poolAuthLogic), owner(), "");
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(poolAuthLogic), _getProxyAdmin(), "");
       PoolRolesAuthority auth = PoolRolesAuthority(address(proxy));
       auth.initialize(address(this));
 
