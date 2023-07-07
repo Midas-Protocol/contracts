@@ -70,7 +70,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
   }
 
   function configurePoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
-    // TODO borrowers are supplier role by default?
+    // borrowers are of SUPPLIER_ROLE by default
     _configurePoolSupplierCapabilities(pool, BORROWER_ROLE);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
