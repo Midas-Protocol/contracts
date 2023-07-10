@@ -59,11 +59,31 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     );
   }
 
+  function openPoolSupplierCapabilities(IComptroller pool) external requiresAuth {
+    _setPublicPoolSupplierCapabilities(pool, true);
+  }
+
+  function closePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
+    _setPublicPoolSupplierCapabilities(pool, false);
+  }
+
+  function _setPublicPoolSupplierCapabilities(IComptroller pool, bool setPublic) internal {
+    setPublicCapability(address(pool), pool.enterMarkets.selector, setPublic);
+    setPublicCapability(address(pool), pool.exitMarket.selector, setPublic);
+    ICErc20[] memory allMarkets = pool.getAllMarkets();
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      bytes4[] memory selectors = getSupplierMarketSelectors();
+      for (uint256 j = 0; j < selectors.length; j++) {
+        setPublicCapability(address(allMarkets[i]), selectors[j], setPublic);
+      }
+    }
+  }
+
   function configurePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
     _configurePoolSupplierCapabilities(pool, SUPPLIER_ROLE);
   }
 
-  function getSupplierMarketSelectors() public pure returns (bytes4[] memory selectors) {
+  function getSupplierMarketSelectors() internal pure returns (bytes4[] memory selectors) {
     uint8 fnsCount = 6;
     selectors = new bytes4[](fnsCount);
     selectors[--fnsCount] = CErc20Interface.mint.selector;
@@ -105,8 +125,26 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
+  function openPoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
+    _setPublicPoolBorrowerCapabilities(pool, true);
+  }
+
+  function closePoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
+    _setPublicPoolBorrowerCapabilities(pool, false);
+  }
+
+  function _setPublicPoolBorrowerCapabilities(IComptroller pool, bool setPublic) internal {
+    ICErc20[] memory allMarkets = pool.getAllMarkets();
+    for (uint256 i = 0; i < allMarkets.length; i++) {
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].borrow.selector, setPublic);
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].repayBorrow.selector, setPublic);
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].repayBorrowBehalf.selector, setPublic);
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].flash.selector, setPublic);
+    }
+  }
+
   function configurePoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
-    // borrowers are of SUPPLIER_ROLE by default
+    // borrowers have the SUPPLIER_ROLE capabilities by default
     _configurePoolSupplierCapabilities(pool, BORROWER_ROLE);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
