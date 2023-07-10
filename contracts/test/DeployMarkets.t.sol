@@ -13,11 +13,11 @@ import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { ICErc20, ICErc20Plugin } from "../compound/CTokenInterfaces.sol";
-
 import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
@@ -26,11 +26,13 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
 import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
-import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -133,6 +135,14 @@ contract DeployMarketsTest is Test {
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
     comptroller = IComptroller(comptrollerAddress);
+
+    AuthoritiesRegistry impl = new AuthoritiesRegistry();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
+    AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
+    newAr.initialize();
+    fuseAdmin.reinitialize(newAr);
+    PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
+    poolAuth.setUserRole(address(this), poolAuth.BORROWER_ROLE(), true);
   }
 
   function setUp() public {
@@ -160,6 +170,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20 cToken = allMarkets[allMarkets.length - 1];
@@ -196,6 +207,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
@@ -244,6 +256,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
@@ -291,6 +304,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
@@ -340,6 +354,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
@@ -379,6 +394,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
@@ -462,6 +478,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20 cToken = allMarkets[allMarkets.length - 1];
@@ -516,6 +533,7 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20 cToken = allMarkets[allMarkets.length - 1];

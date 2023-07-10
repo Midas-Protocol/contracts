@@ -15,13 +15,24 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
 
   function initialize(address _owner) public initializer {
     owner = _owner;
+    authority = this;
   }
 
   // up to 256 roles
+  uint8 public constant REGISTRY_ROLE = 0;
   uint8 public constant SUPPLIER_ROLE = 1;
   uint8 public constant BORROWER_ROLE = 2;
   uint8 public constant LIQUIDATOR_ROLE = 3;
   uint8 public constant LEVERED_POSITION_ROLE = 4;
+
+  function configureRegistryCapabilities() external requiresAuth {
+    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureRegistryCapabilities.selector, true);
+    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configurePoolSupplierCapabilities.selector, true);
+    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configurePoolBorrowerCapabilities.selector, true);
+    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureClosedPoolLiquidatorCapabilities.selector, true);
+    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureOpenPoolLiquidatorCapabilities.selector, true);
+    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureLeveredPositionCapabilities.selector, true);
+  }
 
   function configurePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
     _configurePoolSupplierCapabilities(pool, SUPPLIER_ROLE);

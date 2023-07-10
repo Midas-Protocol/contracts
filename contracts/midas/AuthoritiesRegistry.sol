@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
 import { SafeOwnableUpgradeable } from "../midas/SafeOwnableUpgradeable.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -19,16 +20,28 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     poolAuthLogic = new PoolRolesAuthority();
   }
 
-  function createPoolAuthority(address pool) public onlyOwner {
+  function createPoolAuthority(address pool) public onlyOwner returns (PoolRolesAuthority auth) {
     require(address(poolsAuthorities[pool]) == address(0), "already created");
 
-    {
-      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(poolAuthLogic), _getProxyAdmin(), "");
-      PoolRolesAuthority auth = PoolRolesAuthority(address(proxy));
-      auth.initialize(address(this));
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(poolAuthLogic), _getProxyAdmin(), "");
+    auth = PoolRolesAuthority(address(proxy));
+    auth.initialize(address(this));
 
-      poolsAuthorities[pool] = auth;
-    }
+    poolsAuthorities[pool] = auth;
+
+    reconfigureAuthority(IComptroller(pool));
+    auth.setUserRole(address(this), auth.REGISTRY_ROLE(), true);
+
+    auth.setOwner(msg.sender);
+  }
+
+  function reconfigureAuthority(IComptroller pool) public onlyOwner {
+    PoolRolesAuthority auth = poolsAuthorities[address(pool)];
+    auth.configureRegistryCapabilities();
+    auth.configurePoolSupplierCapabilities(pool);
+    auth.configurePoolBorrowerCapabilities(pool);
+    auth.configureOpenPoolLiquidatorCapabilities(pool);
+    auth.configureLeveredPositionCapabilities(pool);
   }
 
   function canCall(

@@ -37,6 +37,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     maxUtilizationRate = type(uint256).max;
   }
 
+  function reinitialize(AuthoritiesRegistry _ar) public reinitializer(3) {
+    authoritiesRegistry = _ar;
+  }
+
   /**
    * @notice The proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
    */
