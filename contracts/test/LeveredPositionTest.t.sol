@@ -22,6 +22,8 @@ import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -512,6 +514,9 @@ interface TwoBrl {
 }
 
 contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
+  IComptroller pool;
+  ComptrollerFirstExtension asExtension;
+
   function setUp() public fork(BSC_MAINNET) {}
 
   function afterForkSetUp() internal override {
@@ -523,6 +528,13 @@ contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
     address jBrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a; // jbrl as borrowable
     address payable twoBrlWhale = payable(address(177)); // empty account
     address jBrlWhale = 0xA0695f78AF837F570bcc50f53e58Cda300798B65; // solidly pair BRZ-JBRL
+
+    asExtension = ComptrollerFirstExtension(address(ICErc20(twoBrlMarket).comptroller()));
+    vm.startPrank(asExtension.admin());
+    asExtension._setMintPaused(ICErc20(twoBrlMarket), false);
+    asExtension._setMintPaused(ICErc20(jBrlMarket), false);
+    asExtension._setBorrowPaused(ICErc20(jBrlMarket), false);
+    vm.stopPrank();
 
     TwoBrl twoBrl = TwoBrl(ICErc20(twoBrlMarket).underlying());
     vm.prank(twoBrl.minter());
