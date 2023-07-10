@@ -7,7 +7,6 @@ import { IUmbrellaFeeds } from "../../external/umbrella/IUmbrellaFeeds.sol";
 import { IRegistry } from "../../external/umbrella/IRegistry.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
-import { NativeUSDPriceOracle } from "../evmos/NativeUSDPriceOracle.sol";
 import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
 
 /**
@@ -74,7 +73,7 @@ contract UmbrellaPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     string memory feed = priceFeeds[underlying];
     require(bytes(feed).length != 0, "No Umbrella price feed found for this underlying ERC20 token.");
 
-    // Get the NATIVE/USD price feed from NativeUSDPriceOracle
+    // Get the NATIVE/USD price feed from Native Price Feed
     // 8 decimals are used
     IUmbrellaFeeds.PriceData memory nativeTokenUsdPriceData = UMBRELLA_FEEDS_ADDRESS.priceData(NATIVE_TOKEN_USD_KEY);
     uint256 nativeTokenUsdPrice = uint256(nativeTokenUsdPriceData.price);
