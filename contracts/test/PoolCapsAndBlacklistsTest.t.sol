@@ -136,12 +136,15 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     markets[0] = ankrBNBMkt;
     markets[1] = ankrBNBAnkrMkt;
 
-    vm.prank(pool.admin());
+    vm.startPrank(pool.admin());
     asExtension._setMarketSupplyCaps(markets, asArray(1, 1));
+    asExtension._setMintPaused(ankrBNBMkt, false);
+    asExtension._setMintPaused(ankrBNBAnkrMkt, false);
+    vm.stopPrank();
 
     (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
     assertEq(liquidityBefore, liquidityAfterCap, "should have the same liquidity after cap");
-    assertEq(shortFallBefore, shortFallAfterCap, "should have the same liquidity after cap");
+    assertEq(shortFallBefore, shortFallAfterCap, "should have the same shortfall after cap");
 
     vm.expectRevert("!supply cap");
     pool.mintAllowed(address(ankrBNBMkt), borrower, 2);
