@@ -27,11 +27,36 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
 
   function configureRegistryCapabilities() external requiresAuth {
     setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureRegistryCapabilities.selector, true);
-    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configurePoolSupplierCapabilities.selector, true);
-    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configurePoolBorrowerCapabilities.selector, true);
-    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureClosedPoolLiquidatorCapabilities.selector, true);
-    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureOpenPoolLiquidatorCapabilities.selector, true);
-    setRoleCapability(REGISTRY_ROLE, address(this), PoolRolesAuthority.configureLeveredPositionCapabilities.selector, true);
+    setRoleCapability(
+      REGISTRY_ROLE,
+      address(this),
+      PoolRolesAuthority.configurePoolSupplierCapabilities.selector,
+      true
+    );
+    setRoleCapability(
+      REGISTRY_ROLE,
+      address(this),
+      PoolRolesAuthority.configurePoolBorrowerCapabilities.selector,
+      true
+    );
+    setRoleCapability(
+      REGISTRY_ROLE,
+      address(this),
+      PoolRolesAuthority.configureClosedPoolLiquidatorCapabilities.selector,
+      true
+    );
+    setRoleCapability(
+      REGISTRY_ROLE,
+      address(this),
+      PoolRolesAuthority.configureOpenPoolLiquidatorCapabilities.selector,
+      true
+    );
+    setRoleCapability(
+      REGISTRY_ROLE,
+      address(this),
+      PoolRolesAuthority.configureLeveredPositionCapabilities.selector,
+      true
+    );
   }
 
   function configurePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
