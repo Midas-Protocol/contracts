@@ -25,6 +25,9 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
+
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
@@ -100,6 +103,14 @@ contract LiquidityMiningTest is BaseTest {
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
     comptroller = IComptroller(comptrollerAddress);
+
+    AuthoritiesRegistry impl = new AuthoritiesRegistry();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
+    AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
+    newAr.initialize();
+    fuseAdmin.reinitialize(newAr);
+    PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
+    poolAuth.setUserRole(user, poolAuth.BORROWER_ROLE(), true);
 
     newImplementation.push(address(cErc20Delegate));
     fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
