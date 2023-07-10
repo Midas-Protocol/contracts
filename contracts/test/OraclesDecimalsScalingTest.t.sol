@@ -27,10 +27,6 @@ contract OraclesDecimalsScalingTest is BaseTest {
     testOraclesDecimals();
   }
 
-  function testOracleDecimalsMoonbeam() public fork(MOONBEAM_MAINNET) {
-    testOraclesDecimals();
-  }
-
   function testOracleDecimalsPolygon() public fork(POLYGON_MAINNET) {
     testOraclesDecimals();
   }

@@ -108,23 +108,11 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testMarketsLatestImplementations();
-  }
-
   function testMarketsLatestImplementationsArbitrum() public fork(ARBITRUM_ONE) {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
-    _testMarketsLatestImplementations();
-  }
-
   function testMarketsLatestImplementationsEth() public fork(ETHEREUM_MAINNET) {
-    _testMarketsLatestImplementations();
-  }
-
-  function testMarketsLatestImplementationsFantom() public fork(FANTOM_OPERA) {
     _testMarketsLatestImplementations();
   }
 
@@ -167,10 +155,6 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testPauseGuardians();
-  }
-
-  function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
     _testPauseGuardians();
   }
 

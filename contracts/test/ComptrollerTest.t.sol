@@ -54,18 +54,6 @@ contract ComptrollerTest is BaseTest {
     _testInflationProtection();
   }
 
-  function testMoonbeamInflationProtection() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testInflationProtection();
-  }
-
-  function testEvmosInflationProtection() public debuggingOnly fork(EVMOS_MAINNET) {
-    _testInflationProtection();
-  }
-
-  function testFantomInflationProtection() public debuggingOnly fork(FANTOM_OPERA) {
-    _testInflationProtection();
-  }
-
   function _testInflationProtection() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
     FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();

@@ -180,23 +180,11 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     assertEq(dddFlywheel.rewardsAccrued(feeRecipient), 0, "feeRecipient rewardsAccrued should be 0");
   }
 
-  function testMoonbeamAllFlywheelsFeeRecipient() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testAllFlywheelsFeeRecipient();
-  }
-
   function testPolygonAllFlywheelsFeeRecipient() public debuggingOnly fork(POLYGON_MAINNET) {
     _testAllFlywheelsFeeRecipient();
   }
 
   function testBscAllFlywheelsFeeRecipient() public debuggingOnly fork(BSC_MAINNET) {
-    _testAllFlywheelsFeeRecipient();
-  }
-
-  function testFantomAllFlywheelsFeeRecipient() public debuggingOnly fork(FANTOM_OPERA) {
-    _testAllFlywheelsFeeRecipient();
-  }
-
-  function testEvmosAllFlywheelsFeeRecipient() public debuggingOnly fork(EVMOS_MAINNET) {
     _testAllFlywheelsFeeRecipient();
   }
 
