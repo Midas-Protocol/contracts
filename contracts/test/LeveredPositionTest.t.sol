@@ -197,6 +197,15 @@ abstract contract LeveredPositionTest is MarketsTest {
     _upgradeMarket(CErc20Delegate(address(stableMarket)));
   }
 
+  function _unpauseMarkets(address collat, address stable) internal {
+    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(address(ICErc20(stable).comptroller()));
+    vm.startPrank(asExtension.admin());
+    asExtension._setMintPaused(ICErc20(collat), false);
+    asExtension._setMintPaused(ICErc20(stable), false);
+    asExtension._setBorrowPaused(ICErc20(stable), false);
+    vm.stopPrank();
+  }
+
   function _configurePairAndLiquidator(
     address _collat,
     address _stable,
@@ -204,6 +213,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   ) internal {
     _configurePair(_collat, _stable);
     _configureTwoWayLiquidator(_collat, _stable, _liquidator);
+    _unpauseMarkets(_collat, _stable);
   }
 
   function _configurePair(address _collat, address _stable) internal {
@@ -389,25 +399,26 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 }
 
-contract HayAnkrLeveredPositionTest is LeveredPositionTest {
-  function setUp() public fork(BSC_MAINNET) {}
+// HAY is no longer in the pool
+// contract HayAnkrLeveredPositionTest is LeveredPositionTest {
+//   function setUp() public fork(BSC_MAINNET) {}
 
-  function afterForkSetUp() internal override {
-    super.afterForkSetUp();
+//   function afterForkSetUp() internal override {
+//     super.afterForkSetUp();
 
-    uint256 depositAmount = 10e18;
+//     uint256 depositAmount = 10e18;
 
-    address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
-    address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
-    address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
+//     address ankrBnbMarket = 0xb2b01D6f953A28ba6C8f9E22986f5bDDb7653aEa;
+//     address hayMarket = 0x10b6f851225c203eE74c369cE876BEB56379FCa3;
+//     address ankrBnbWhale = 0x366B523317Cc95B1a4D30b33f8637882825C5E23;
 
-    SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
-    _configurePairAndLiquidator(ankrBnbMarket, hayMarket, solidlyLiquidator);
-    _fundMarketAndSelf(ICErc20(ankrBnbMarket), ankrBnbWhale);
+//     SolidlySwapLiquidator solidlyLiquidator = new SolidlySwapLiquidator();
+//     _configurePairAndLiquidator(ankrBnbMarket, hayMarket, solidlyLiquidator);
+//     _fundMarketAndSelf(ICErc20(ankrBnbMarket), ankrBnbWhale);
 
-    position = _openLeveredPosition(address(this), depositAmount);
-  }
-}
+//     position = _openLeveredPosition(address(this), depositAmount);
+//   }
+// }
 
 contract WMaticStMaticLeveredPositionTest is LeveredPositionTest {
   function setUp() public fork(POLYGON_MAINNET) {}
@@ -528,13 +539,6 @@ contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
     address jBrlMarket = 0x82A3103bc306293227B756f7554AfAeE82F8ab7a; // jbrl as borrowable
     address payable twoBrlWhale = payable(address(177)); // empty account
     address jBrlWhale = 0xA0695f78AF837F570bcc50f53e58Cda300798B65; // solidly pair BRZ-JBRL
-
-    asExtension = ComptrollerFirstExtension(address(ICErc20(twoBrlMarket).comptroller()));
-    vm.startPrank(asExtension.admin());
-    asExtension._setMintPaused(ICErc20(twoBrlMarket), false);
-    asExtension._setMintPaused(ICErc20(jBrlMarket), false);
-    asExtension._setBorrowPaused(ICErc20(jBrlMarket), false);
-    vm.stopPrank();
 
     TwoBrl twoBrl = TwoBrl(ICErc20(twoBrlMarket).underlying());
     vm.prank(twoBrl.minter());
