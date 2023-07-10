@@ -1233,6 +1233,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     // Support market here in the Comptroller
     uint256 err = _supportMarket(cToken);
 
+    IFuseFeeDistributor(fuseAdmin).authoritiesRegistry().reconfigureAuthority(address(this));
+
     // Set collateral factor
     return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
   }

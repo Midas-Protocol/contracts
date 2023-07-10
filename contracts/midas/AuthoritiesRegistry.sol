@@ -29,14 +29,19 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
 
     poolsAuthorities[pool] = auth;
 
-    reconfigureAuthority(IComptroller(pool));
+    reconfigureAuthority(pool);
     auth.setUserRole(address(this), auth.REGISTRY_ROLE(), true);
 
     auth.setOwner(msg.sender);
   }
 
-  function reconfigureAuthority(IComptroller pool) public onlyOwner {
+  function reconfigureAuthority(address poolAddress) public {
+    IComptroller pool = IComptroller(poolAddress);
     PoolRolesAuthority auth = poolsAuthorities[address(pool)];
+
+    require(address(auth) != address(0), "no such authority");
+    require(msg.sender == owner() || msg.sender == poolAddress, "not owner or pool");
+
     auth.configureRegistryCapabilities();
     auth.configurePoolSupplierCapabilities(pool);
     auth.configurePoolBorrowerCapabilities(pool);

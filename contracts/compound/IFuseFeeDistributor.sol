@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import "../midas/AuthoritiesRegistry.sol";
+
 interface IFuseFeeDistributor {
   function minBorrowEth() external view returns (uint256);
 
@@ -51,6 +53,8 @@ interface IFuseFeeDistributor {
     address target,
     bytes4 functionSig
   ) external view returns (bool);
+
+  function authoritiesRegistry() external view returns (AuthoritiesRegistry);
 
   fallback() external payable;
 

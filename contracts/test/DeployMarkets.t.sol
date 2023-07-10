@@ -170,7 +170,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20 cToken = allMarkets[allMarkets.length - 1];
@@ -207,7 +206,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
@@ -256,7 +254,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
@@ -304,7 +301,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
@@ -354,7 +350,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
@@ -394,7 +389,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
@@ -478,7 +472,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20 cToken = allMarkets[allMarkets.length - 1];
@@ -533,7 +526,6 @@ contract DeployMarketsTest is Test {
       ),
       0.9e18
     );
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(IComptroller(address(comptroller)));
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     ICErc20 cToken = allMarkets[allMarkets.length - 1];
