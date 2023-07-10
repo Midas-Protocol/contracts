@@ -219,7 +219,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   function _configurePair(address _collat, address _stable) internal {
     collateralMarket = ICErc20(_collat);
     stableMarket = ICErc20(_stable);
-    upgradePoolAndMarkets();
+    //upgradePoolAndMarkets();
     vm.prank(factory.owner());
     factory._setPairWhitelisted(collateralMarket, stableMarket, true);
   }

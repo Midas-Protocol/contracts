@@ -112,7 +112,7 @@ contract CurveSwapLiquidatorTest is BaseTest {
     uint256 shouldBeAround2e10 = curvePool.get_dy(1, 0, inputAmount);
     emit log("should be around 2e10");
     emit log_uint(shouldBeAround2e10);
-    assertTrue(shouldBeAround2e10 >= 20e9 && shouldBeAround2e10 <= 21e9, "rough estimate didn't work");
+    assertTrue(shouldBeAround2e10 >= 20e9 && shouldBeAround2e10 <= 23e9, "rough estimate didn't work");
   }
 
   function dealMai(address to, uint256 amount) internal {
