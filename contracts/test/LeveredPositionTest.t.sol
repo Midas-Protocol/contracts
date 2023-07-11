@@ -20,7 +20,6 @@ import { LiquidatorsRegistryExtension } from "../liquidators/registry/Liquidator
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
@@ -615,7 +614,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
 }
 
 contract BombTDaiLeveredPositionTest is LeveredPositionTest {
-  uint256 depositAmount = 1e18;
+  uint256 depositAmount = 10000e18;
   address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
 
   function setUp() public fork(BSC_CHAPEL) {}
