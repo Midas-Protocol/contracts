@@ -142,7 +142,7 @@ contract DeployMarketsTest is Test {
     newAr.initialize(address(321));
     fuseAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
-    poolAuth.setUserRole(address(this), poolAuth.BORROWER_ROLE(), true);
+    newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
   }
 
   function setUp() public {
