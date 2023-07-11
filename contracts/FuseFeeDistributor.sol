@@ -14,6 +14,7 @@ import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
 import { PatchedStorage } from "./utils/PatchedStorage.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
+import { AuthoritiesRegistry } from "./midas/AuthoritiesRegistry.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -34,6 +35,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
+  }
+
+  function reinitialize(AuthoritiesRegistry _ar) public reinitializer(3) {
+    authoritiesRegistry = _ar;
   }
 
   /**
@@ -454,5 +459,16 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
   function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
     pool._toggleAutoImplementations(enabled);
+  }
+
+  AuthoritiesRegistry public authoritiesRegistry;
+
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool) {
+    return authoritiesRegistry.canCall(pool, user, target, functionSig);
   }
 }

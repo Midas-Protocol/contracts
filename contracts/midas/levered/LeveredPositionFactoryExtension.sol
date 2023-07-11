@@ -9,6 +9,8 @@ import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { LeveredPosition } from "./LeveredPosition.sol";
 import { IComptroller, IPriceOracle } from "../../external/compound/IComptroller.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
+import { AuthoritiesRegistry } from "../AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../PoolRolesAuthority.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -59,6 +61,12 @@ contract LeveredPositionFactoryExtension is
 
     accountsWithOpenPositions.add(msg.sender);
     positionsByAccount[msg.sender].add(address(position));
+
+    AuthoritiesRegistry authoritiesRegistry = fuseFeeDistributor.authoritiesRegistry();
+    PoolRolesAuthority poolAuth = authoritiesRegistry.poolsAuthorities(address(_collateralMarket.comptroller()));
+    if (address(poolAuth) != address(0)) {
+      poolAuth.setUserRole(address(position), poolAuth.LEVERED_POSITION_ROLE(), true);
+    }
 
     return position;
   }
