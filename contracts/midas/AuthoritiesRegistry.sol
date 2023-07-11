@@ -10,9 +10,11 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 contract AuthoritiesRegistry is SafeOwnableUpgradeable {
   mapping(address => PoolRolesAuthority) public poolsAuthorities;
   PoolRolesAuthority public poolAuthLogic;
+  address public leveredPositionsFactory;
 
-  function initialize() public initializer {
+  function initialize(address _leveredPositionsFactory) public initializer {
     __SafeOwnable_init(msg.sender);
+    leveredPositionsFactory = _leveredPositionsFactory;
     poolAuthLogic = new PoolRolesAuthority();
   }
 
@@ -31,8 +33,6 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
 
     reconfigureAuthority(pool);
     auth.setUserRole(address(this), auth.REGISTRY_ROLE(), true);
-
-    auth.setOwner(msg.sender);
   }
 
   function reconfigureAuthority(address poolAddress) public {
@@ -58,9 +58,24 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     PoolRolesAuthority authorityForPool = poolsAuthorities[pool];
     if (address(authorityForPool) == address(0)) {
       // allow everyone to be a supplier by default
-      return poolAuthLogic.isSupplierCall(target, functionSig);
+      return poolAuthLogic.isDefaultOpenCall(target, functionSig);
     }
 
     return authorityForPool.canCall(user, target, functionSig);
+  }
+
+  function setUserRole(
+    address pool,
+    address user,
+    uint8 role,
+    bool enabled
+  ) external {
+    PoolRolesAuthority poolAuth = poolsAuthorities[pool];
+
+    require(address(poolAuth) != address(0), "auth does not exist");
+    require(msg.sender == owner() || msg.sender == leveredPositionsFactory, "not owner or factory");
+    require(msg.sender != leveredPositionsFactory || role == poolAuth.LEVERED_POSITION_ROLE(), "only lev pos role");
+
+    poolAuth.setUserRole(user, role, enabled);
   }
 }

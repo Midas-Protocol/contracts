@@ -139,7 +139,7 @@ contract DeployMarketsTest is Test {
     AuthoritiesRegistry impl = new AuthoritiesRegistry();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
     AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
-    newAr.initialize();
+    newAr.initialize(address(321));
     fuseAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     poolAuth.setUserRole(address(this), poolAuth.BORROWER_ROLE(), true);

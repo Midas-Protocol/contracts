@@ -101,7 +101,13 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     return selectors;
   }
 
-  function isSupplierCall(address target, bytes4 selector) external pure returns (bool) {
+  function isDefaultOpenCall(address target, bytes4 selector) external pure returns (bool) {
+    if (selector == CErc20Interface.repayBorrow.selector) return true;
+
+    return isSupplierCall(target, selector);
+  }
+
+  function isSupplierCall(address target, bytes4 selector) public pure returns (bool) {
     if (selector == ComptrollerInterface.enterMarkets.selector) return true;
     if (selector == ComptrollerInterface.exitMarket.selector) return true;
 
