@@ -74,11 +74,7 @@ contract JumpRateModel is InterestRateModel {
    * @param reserves The amount of reserves in the market (currently unused)
    * @return The utilization rate as a mantissa between [0, 1e18]
    */
-  function utilizationRate(
-    uint256 cash,
-    uint256 borrows,
-    uint256 reserves
-  ) public pure returns (uint256) {
+  function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves) public pure returns (uint256) {
     // Utilization rate is 0 when there are no borrows
     if (borrows == 0) {
       return 0;
@@ -94,11 +90,7 @@ contract JumpRateModel is InterestRateModel {
    * @param reserves The amount of reserves in the market
    * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
    */
-  function getBorrowRate(
-    uint256 cash,
-    uint256 borrows,
-    uint256 reserves
-  ) public view override returns (uint256) {
+  function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) public view override returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
 
     if (util <= kink) {

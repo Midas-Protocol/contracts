@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./midas/SafeOwnableUpgradeable.sol";
+import "./ionic/SafeOwnableUpgradeable.sol";
 
 contract JarvisSafeLiquidator is SafeOwnableUpgradeable {
   // just in case

@@ -5,7 +5,7 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { AlpacaERC4626, IAlpacaVault } from "../midas/strategies/AlpacaERC4626.sol";
+import { AlpacaERC4626, IAlpacaVault } from "../ionic/strategies/AlpacaERC4626.sol";
 import { MockVault } from "./mocks/alpaca/MockVault.sol";
 import { IW_NATIVE } from "../utils/IW_NATIVE.sol";
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Vm.sol";
 import "forge-std/Test.sol";
 
-import { AddressesProvider } from "../../midas/AddressesProvider.sol";
+import { AddressesProvider } from "../../ionic/AddressesProvider.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
@@ -224,11 +224,7 @@ abstract contract BaseTest is Test {
     return array;
   }
 
-  function asArray(
-    address value0,
-    address value1,
-    address value2
-  ) public pure returns (address[] memory) {
+  function asArray(address value0, address value1, address value2) public pure returns (address[] memory) {
     address[] memory array = new address[](3);
     array[0] = value0;
     array[1] = value1;
@@ -268,11 +264,7 @@ abstract contract BaseTest is Test {
     return array;
   }
 
-  function asArray(
-    bytes memory value0,
-    bytes memory value1,
-    bytes memory value2
-  ) public pure returns (bytes[] memory) {
+  function asArray(bytes memory value0, bytes memory value1, bytes memory value2) public pure returns (bytes[] memory) {
     bytes[] memory array = new bytes[](3);
     array[0] = value0;
     array[1] = value1;

@@ -62,7 +62,7 @@ contract Keep3rV2PriceOracle is BasePriceOracle {
     }
     uint256 elapsedTime = block.timestamp - lastTime;
     require(elapsedTime >= MIN_TWAP_TIME, "no TWAP satisfying MIN_TWAP_TIME");
-    uint256 lastPx0Cumu = (uint256(lastPx0CumuCompressed) * (2**112)) / 1e18;
+    uint256 lastPx0Cumu = (uint256(lastPx0CumuCompressed) * (2 ** 112)) / 1e18;
     uint256 currPx0Cumu = currentPx0Cumu(pair);
     unchecked {
       return (currPx0Cumu - lastPx0Cumu) / (block.timestamp - lastTime); // overflow is desired
@@ -85,7 +85,7 @@ contract Keep3rV2PriceOracle is BasePriceOracle {
     }
     uint256 elapsedTime = block.timestamp - lastTime;
     require(elapsedTime >= MIN_TWAP_TIME, "no TWAP satisfying MIN_TWAP_TIME");
-    uint256 lastPx1Cumu = (uint256(lastPx1CumuCompressed) * (2**112)) / 1e18;
+    uint256 lastPx1Cumu = (uint256(lastPx1CumuCompressed) * (2 ** 112)) / 1e18;
     uint256 currPx1Cumu = currentPx1Cumu(pair);
     unchecked {
       return (currPx1Cumu - lastPx1Cumu) / (block.timestamp - lastTime); // overflow is desired
@@ -136,7 +136,7 @@ contract Keep3rV2PriceOracle is BasePriceOracle {
     address underlying = cToken.underlying();
 
     // Get price, format, and return
-    uint256 baseUnit = 10**uint256(ERC20Upgradeable(underlying).decimals());
+    uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
     return (_price(underlying) * 1e18) / baseUnit;
   }
 
@@ -149,8 +149,8 @@ contract Keep3rV2PriceOracle is BasePriceOracle {
 
     // Call Keep3r for ERC20/ETH price and return
     address pair = uniswapV2Factory.getPair(underlying, WETH_ADDRESS);
-    uint256 baseUnit = 10**uint256(ERC20Upgradeable(underlying).decimals());
-    return (((underlying < WETH_ADDRESS ? price0TWAP(pair) : price1TWAP(pair)) / 2**56) * baseUnit) / 2**56; // Scaled by 1e18, not 2 ** 112
+    uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
+    return (((underlying < WETH_ADDRESS ? price0TWAP(pair) : price1TWAP(pair)) / 2 ** 56) * baseUnit) / 2 ** 56; // Scaled by 1e18, not 2 ** 112
   }
 
   /**

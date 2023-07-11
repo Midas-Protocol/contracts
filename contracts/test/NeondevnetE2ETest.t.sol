@@ -17,7 +17,7 @@ import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidato
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { FusePoolLens } from "../FusePoolLens.sol";
-import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { IonicLiquidator } from "../IonicLiquidator.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
@@ -47,7 +47,7 @@ contract NeondevnetE2ETest is WithPool {
     address[] swapToken1Path;
     bytes[] abis;
     ICErc20[] allMarkets;
-    FuseSafeLiquidator liquidator;
+    IonicLiquidator liquidator;
     MockERC20 erc20;
     MockWNeon asset;
     IFundsConversionStrategy[] fundingStrategies;
@@ -136,7 +136,7 @@ contract NeondevnetE2ETest is WithPool {
     vars.cTokens = new address[](1);
 
     // setting up liquidator
-    vars.liquidator = new FuseSafeLiquidator();
+    vars.liquidator = new IonicLiquidator();
     vars.liquidator.initialize(
       wtoken, // wneon
       moraRouter, // moraswap router
@@ -203,7 +203,7 @@ contract NeondevnetE2ETest is WithPool {
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+      IonicLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
         8e13,
         ICErc20(address(cToken)),

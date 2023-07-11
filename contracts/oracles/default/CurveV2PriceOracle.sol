@@ -5,7 +5,7 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
 import "../../external/curve/ICurveV2Pool.sol";
 
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 
 /**
@@ -46,15 +46,7 @@ contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     return tokens;
   }
 
-  function getPoolForSwap(address inputToken, address outputToken)
-    public
-    view
-    returns (
-      ICurvePool,
-      int128,
-      int128
-    )
-  {
+  function getPoolForSwap(address inputToken, address outputToken) public view returns (ICurvePool, int128, int128) {
     for (uint256 i = 0; i < tokens.length; i++) {
       ICurvePool pool = ICurvePool(poolFor[tokens[i]]);
       int128 inputIndex = -1;
@@ -96,7 +88,7 @@ contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10 ** uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
@@ -116,14 +108,14 @@ contract CurveV2PriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
       // USDC / ETH
       uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseToken);
       // USDC / ETH * eUSDC / USDC = eUSDC / ETH
-      return (baseTokenPrice * 10**18) / exchangeRate;
+      return (baseTokenPrice * 10 ** 18) / exchangeRate;
     } else {
       // if coin(1) is eUSDC, exchangeRate is USDC / eUSDC
       baseToken = ICurvePool(pool).coins(0);
       // USDC / ETH
       uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseToken);
       // (USDC / ETH) *  (1 / (USDC / eUSDC)) = eUSDC / ETH
-      return (baseTokenPrice * exchangeRate) / 10**18;
+      return (baseTokenPrice * exchangeRate) / 10 ** 18;
     }
   }
 

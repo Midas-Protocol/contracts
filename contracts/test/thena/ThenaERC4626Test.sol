@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { ThenaLpERC4626 } from "../../midas/strategies/ThenaLpERC4626.sol";
+import { ThenaLpERC4626 } from "../../ionic/strategies/ThenaLpERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { MidasFlywheel } from "../../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IonicFlywheel } from "../../ionic/strategies/flywheel/IonicFlywheel.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -21,7 +21,7 @@ contract ThenaERC4626Test is AbstractERC4626Test {
     sendUnderlyingToken(depositAmount, address(this));
     testPreFix = _testPreFix;
 
-    MidasFlywheel flywheel;
+    IonicFlywheel flywheel;
     ThenaLpERC4626 thenaErc4626;
 
     address _asset = abi.decode(data, (address));
@@ -37,9 +37,9 @@ contract ThenaERC4626Test is AbstractERC4626Test {
     }
 
     {
-      MidasFlywheel impl = new MidasFlywheel();
+      IonicFlywheel impl = new IonicFlywheel();
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), dpa, "");
-      flywheel = MidasFlywheel(address(proxy));
+      flywheel = IonicFlywheel(address(proxy));
     }
     flywheel.initialize(
       SolERC20(address(thenaToken)),

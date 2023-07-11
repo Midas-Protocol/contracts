@@ -25,14 +25,14 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
-import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
+import { AuthoritiesRegistry } from "../ionic/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../ionic/PoolRolesAuthority.sol";
 
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { IonicFlywheelLensRouter } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -47,9 +47,9 @@ contract LiquidityMiningTest is BaseTest {
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
-  MidasFlywheel flywheel;
+  IonicFlywheel flywheel;
   FlywheelStaticRewards rewards;
-  MidasFlywheelLensRouter flywheelClaimer;
+  IonicFlywheelLensRouter flywheelClaimer;
 
   address user = address(1337);
 
@@ -62,16 +62,16 @@ contract LiquidityMiningTest is BaseTest {
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   address[] newImplementation;
-  MidasFlywheelCore[] flywheelsToClaim;
+  IonicFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts(uint8 _baseDecimal, uint8 _rewardDecimal) public {
     baseDecimal = _baseDecimal;
     rewardDecimal = _rewardDecimal;
     underlyingToken = new MockERC20("UnderlyingToken", "UT", baseDecimal);
     rewardToken = new MockERC20("RewardToken", "RT", rewardDecimal);
-    interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10**baseDecimal, 1 * 10**baseDecimal);
+    interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10 ** baseDecimal, 1 * 10 ** baseDecimal);
     fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1 * 10**(baseDecimal - 2));
+    fuseAdmin.initialize(1 * 10 ** (baseDecimal - 2));
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
     cErc20Delegate = new CErc20Delegate();
@@ -137,14 +137,14 @@ contract LiquidityMiningTest is BaseTest {
   }
 
   function setUpFlywheel() public {
-    MidasFlywheel impl = new MidasFlywheel();
+    IonicFlywheel impl = new IonicFlywheel();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    flywheel = MidasFlywheel(address(proxy));
+    flywheel = IonicFlywheel(address(proxy));
     flywheel.initialize(rewardToken, FlywheelStaticRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
-    flywheelClaimer = new MidasFlywheelLensRouter(fusePoolDirectory);
+    flywheelClaimer = new IonicFlywheelLensRouter(fusePoolDirectory);
 
     flywheel.addStrategyForRewards(ERC20(address(cErc20)));
 
@@ -152,23 +152,23 @@ contract LiquidityMiningTest is BaseTest {
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
     // seed rewards to flywheel
-    rewardToken.mint(address(rewards), 100 * 10**rewardDecimal);
+    rewardToken.mint(address(rewards), 100 * 10 ** rewardDecimal);
 
     // Start reward distribution at 1 token per second
     rewards.setRewardsInfo(
       ERC20(address(cErc20)),
-      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: uint224(1 * 10**rewardDecimal), rewardsEndTimestamp: 0 })
+      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: uint224(1 * 10 ** rewardDecimal), rewardsEndTimestamp: 0 })
     );
 
     // preparation for a later call
-    flywheelsToClaim.push(MidasFlywheelCore(address(flywheel)));
+    flywheelsToClaim.push(IonicFlywheelCore(address(flywheel)));
   }
 
   function _initialize(uint8 _baseDecimal, uint8 _rewardDecimal) internal {
     setUpBaseContracts(_baseDecimal, _rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
-    deposit(1 * 10**_baseDecimal);
+    deposit(1 * 10 ** _baseDecimal);
     vm.warp(block.timestamp + 1);
   }
 
@@ -186,12 +186,12 @@ contract LiquidityMiningTest is BaseTest {
     uint224 percent100 = 100e16; //flywheel.ONE();
 
     // store expected rewards per token (1 token per second over total supply)
-    uint256 rewardsPerTokenPlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / cErc20.totalSupply();
+    uint256 rewardsPerTokenPlusFee = (1 * 10 ** rewardDecimal * 1 * 10 ** baseDecimal) / cErc20.totalSupply();
     uint256 rewardsPerTokenForFee = (rewardsPerTokenPlusFee * percentFee) / percent100;
     uint256 rewardsPerToken = rewardsPerTokenPlusFee - rewardsPerTokenForFee;
 
     // store expected user rewards (user balance times reward per second over 1 token)
-    uint256 userRewards = (rewardsPerToken * cErc20.balanceOf(user)) / (1 * 10**baseDecimal);
+    uint256 userRewards = (rewardsPerToken * cErc20.balanceOf(user)) / (1 * 10 ** baseDecimal);
 
     ERC20 asErc20 = ERC20(address(cErc20));
     // accrue rewards and check against expected
@@ -199,23 +199,23 @@ contract LiquidityMiningTest is BaseTest {
 
     // check market index
     (uint224 index, ) = flywheel.strategyState(asErc20);
-    assertEq(index, 10**rewardDecimal + rewardsPerToken, "!index");
+    assertEq(index, 10 ** rewardDecimal + rewardsPerToken, "!index");
 
     // claim and check user balance
     flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
-    deposit(1 * 10**baseDecimal);
+    deposit(1 * 10 ** baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
     vm.warp(block.timestamp + 10);
 
-    uint256 rewardsPerToken2PlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / cErc20.totalSupply();
+    uint256 rewardsPerToken2PlusFee = (1 * 10 ** rewardDecimal * 1 * 10 ** baseDecimal) / cErc20.totalSupply();
     uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
     uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
 
-    uint256 userRewards2 = (10 * (rewardsPerToken2 * cErc20.balanceOf(user))) / (1 * 10**baseDecimal);
+    uint256 userRewards2 = (10 * (rewardsPerToken2 * cErc20.balanceOf(user))) / (1 * 10 ** baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);

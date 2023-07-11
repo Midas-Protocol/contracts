@@ -85,11 +85,7 @@ contract BNum is BConst {
     return bmul(wholePow, partialResult);
   }
 
-  function bpowApprox(
-    uint256 base,
-    uint256 exp,
-    uint256 precision
-  ) internal pure returns (uint256) {
+  function bpowApprox(uint256 base, uint256 exp, uint256 precision) internal pure returns (uint256) {
     // term 0:
     uint256 a = exp;
     (uint256 x, bool xneg) = bsubSign(base, BONE);

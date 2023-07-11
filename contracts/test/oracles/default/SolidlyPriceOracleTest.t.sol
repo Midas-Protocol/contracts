@@ -147,10 +147,10 @@ contract SolidlyPriceOracleTest is BaseTest {
     }
   }
 
-  function getPriceFeed(address[] memory underlyings, SolidlyPriceOracle.AssetConfig[] memory configs)
-    internal
-    returns (uint256[] memory price)
-  {
+  function getPriceFeed(
+    address[] memory underlyings,
+    SolidlyPriceOracle.AssetConfig[] memory configs
+  ) internal returns (uint256[] memory price) {
     vm.prank(oracle.owner());
     oracle.setPoolFeeds(underlyings, configs);
     vm.roll(1);

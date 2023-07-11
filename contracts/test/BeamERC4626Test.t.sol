@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "../midas/strategies/BeamERC4626.sol";
+import "../ionic/strategies/BeamERC4626.sol";
 import "./mocks/beam/MockVault.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
@@ -15,17 +15,9 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract MockBoringERC20 is MockERC20 {
-  constructor(
-    string memory name,
-    string memory symbol,
-    uint8 decimal
-  ) MockERC20(name, symbol, decimal) {}
+  constructor(string memory name, string memory symbol, uint8 decimal) MockERC20(name, symbol, decimal) {}
 
-  function safeTransferFrom(
-    address from,
-    address to,
-    uint256 amount
-  ) public {
+  function safeTransferFrom(address from, address to, uint256 amount) public {
     transferFrom(from, to, amount);
   }
 

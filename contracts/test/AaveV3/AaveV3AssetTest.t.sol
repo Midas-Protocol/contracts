@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { AaveV3ERC4626 } from "../../midas/strategies/AaveV3ERC4626.sol";
+import { AaveV3ERC4626 } from "../../ionic/strategies/AaveV3ERC4626.sol";
 import { AaveV3TestConfigStorage } from "./AaveV3TestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";

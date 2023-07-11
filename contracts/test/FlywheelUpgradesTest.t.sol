@@ -5,10 +5,10 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplacingFlywheel.sol";
-import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
+import { IonicReplacingFlywheel } from "../ionic/strategies/flywheel/IonicReplacingFlywheel.sol";
+import { ReplacingFlywheelDynamicRewards } from "../ionic/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
+import { IonicFlywheelLensRouter } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
@@ -44,7 +44,7 @@ contract FlywheelUpgradesTest is BaseTest {
   }
 
   function _testFlywheelUpgrade() internal {
-    MidasFlywheelCore newImpl = new MidasFlywheelCore();
+    IonicFlywheelCore newImpl = new IonicFlywheelCore();
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
@@ -59,7 +59,7 @@ contract FlywheelUpgradesTest is BaseTest {
         emit log_named_address("pool", address(pool));
       }
       for (uint8 j = 0; j < flywheels.length; j++) {
-        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
+        IonicFlywheelCore flywheel = IonicFlywheelCore(flywheels[j]);
 
         // upgrade
         TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
@@ -130,7 +130,7 @@ contract FlywheelUpgradesTest is BaseTest {
       if (compareStrings(contractType, "CErc20PluginRewardsDelegate")) {
         for (uint8 i = 0; i < fws.length; i++) {
           ERC20 asStrategy = ERC20(address(markets[j]));
-          MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
+          IonicFlywheelCore flywheel = IonicFlywheelCore(fws[i]);
           (uint224 index, ) = flywheel.strategyState(asStrategy);
           ERC20 rewToken = flywheel.rewardToken();
           address rewardsContractAddress = address(flywheel.flywheelRewards());

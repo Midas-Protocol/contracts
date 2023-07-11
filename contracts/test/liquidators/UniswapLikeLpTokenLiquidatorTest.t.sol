@@ -66,11 +66,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
     }
   }
 
-  function testUniswapLpTokenRedeem(
-    address whale,
-    address lpToken,
-    UniswapLikeLpTokenPriceOracle oracle
-  ) internal {
+  function testUniswapLpTokenRedeem(address whale, address lpToken, UniswapLikeLpTokenPriceOracle oracle) internal {
     setUpOracles(lpToken, oracle);
     IERC20Upgradeable lpTokenContract = IERC20Upgradeable(lpToken);
     IUniswapV2Pair pool = IUniswapV2Pair(lpToken);
@@ -237,7 +233,7 @@ contract UniswapLikeLpTokenLiquidatorTest is BaseTest {
 
   function valueOf(IERC20Upgradeable token, uint256 amount) internal view returns (uint256) {
     uint256 price = mpo.price(address(token));
-    uint256 decimalsScale = 10**ERC20Upgradeable(address(token)).decimals();
+    uint256 decimalsScale = 10 ** ERC20Upgradeable(address(token)).decimals();
     return (amount * price) / decimalsScale;
   }
 

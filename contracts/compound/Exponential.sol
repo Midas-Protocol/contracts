@@ -152,11 +152,7 @@ contract Exponential is CarefulMath, ExponentialNoError {
   /**
    * @dev Multiplies three exponentials, returning a new exponential.
    */
-  function mulExp3(
-    Exp memory a,
-    Exp memory b,
-    Exp memory c
-  ) internal pure returns (MathError, Exp memory) {
+  function mulExp3(Exp memory a, Exp memory b, Exp memory c) internal pure returns (MathError, Exp memory) {
     (MathError err, Exp memory ab) = mulExp(a, b);
     if (err != MathError.NO_ERROR) {
       return (err, ab);

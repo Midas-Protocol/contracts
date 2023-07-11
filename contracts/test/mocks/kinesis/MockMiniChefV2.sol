@@ -72,11 +72,7 @@ contract MockMiniChefV2 is BoringOwnable, BoringBatchable {
   /// @param allocPoint AP of the new pool.
   /// @param _lpToken Address of the LP ERC-20 token.
   /// @param _rewarder Address of the rewarder delegate.
-  function add(
-    uint256 allocPoint,
-    IERC20 _lpToken,
-    IRewarder _rewarder
-  ) public onlyOwner {
+  function add(uint256 allocPoint, IERC20 _lpToken, IRewarder _rewarder) public onlyOwner {
     totalAllocPoint = totalAllocPoint.add(allocPoint);
     lpToken.push(_lpToken);
     rewarder.push(_rewarder);
@@ -92,12 +88,7 @@ contract MockMiniChefV2 is BoringOwnable, BoringBatchable {
   /// @param _allocPoint New AP of the pool.
   /// @param _rewarder Address of the rewarder delegate.
   /// @param overwrite True if _rewarder should be `set`. Otherwise `_rewarder` is ignored.
-  function set(
-    uint256 _pid,
-    uint256 _allocPoint,
-    IRewarder _rewarder,
-    bool overwrite
-  ) public onlyOwner {
+  function set(uint256 _pid, uint256 _allocPoint, IRewarder _rewarder, bool overwrite) public onlyOwner {
     totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
     poolInfo[_pid].allocPoint = uint64(_allocPoint);
     if (overwrite) {
@@ -163,11 +154,7 @@ contract MockMiniChefV2 is BoringOwnable, BoringBatchable {
   /// @param pid The index of the pool. See `poolInfo`.
   /// @param amount LP token amount to deposit.
   /// @param to The receiver of `amount` deposit benefit.
-  function deposit(
-    uint256 pid,
-    uint256 amount,
-    address to
-  ) public {
+  function deposit(uint256 pid, uint256 amount, address to) public {
     PoolInfo memory pool = updatePool(pid);
     UserInfo storage user = userInfo[pid][to];
 
@@ -190,11 +177,7 @@ contract MockMiniChefV2 is BoringOwnable, BoringBatchable {
   /// @param pid The index of the pool. See `poolInfo`.
   /// @param amount LP token amount to withdraw.
   /// @param to Receiver of the LP tokens.
-  function withdraw(
-    uint256 pid,
-    uint256 amount,
-    address to
-  ) public {
+  function withdraw(uint256 pid, uint256 amount, address to) public {
     PoolInfo memory pool = updatePool(pid);
     UserInfo storage user = userInfo[pid][msg.sender];
 
@@ -242,11 +225,7 @@ contract MockMiniChefV2 is BoringOwnable, BoringBatchable {
   /// @param pid The index of the pool. See `poolInfo`.
   /// @param amount LP token amount to withdraw.
   /// @param to Receiver of the LP tokens and SADDLE rewards.
-  function withdrawAndHarvest(
-    uint256 pid,
-    uint256 amount,
-    address to
-  ) public {
+  function withdrawAndHarvest(uint256 pid, uint256 amount, address to) public {
     PoolInfo memory pool = updatePool(pid);
     UserInfo storage user = userInfo[pid][msg.sender];
     int256 accumulatedSaddle = int256(user.amount.mul(pool.accSaddlePerShare) / ACC_SADDLE_PRECISION);

@@ -12,11 +12,7 @@ library UniswapV2Library {
     require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
   }
 
-  function pairFor(
-    address factory,
-    address tokenA,
-    address tokenB
-  ) internal view returns (address pair) {
+  function pairFor(address factory, address tokenA, address tokenB) internal view returns (address pair) {
     return IUniswapV2Factory(factory).getPair(tokenA, tokenB);
   }
 
@@ -32,11 +28,7 @@ library UniswapV2Library {
   }
 
   // given some amount of an asset and pair reserves, returns an equivalent amount of the other asset
-  function quote(
-    uint256 amountA,
-    uint256 reserveA,
-    uint256 reserveB
-  ) internal pure returns (uint256 amountB) {
+  function quote(uint256 amountA, uint256 reserveA, uint256 reserveB) internal pure returns (uint256 amountB) {
     require(amountA > 0, "UniswapV2Library: INSUFFICIENT_AMOUNT");
     require(reserveA > 0 && reserveB > 0, "UniswapV2Library: INSUFFICIENT_LIQUIDITY");
     amountB = (amountA * reserveB) / reserveA;

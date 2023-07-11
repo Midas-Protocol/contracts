@@ -204,11 +204,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
         @param _claimRewards If true, also claim rewards earned on the token.
         @return uint256 Claimed reward amount
      */
-  function deposit(
-    address _token,
-    uint256 _amount,
-    bool _claimRewards
-  ) external nonReentrant returns (uint256) {
+  function deposit(address _token, uint256 _amount, bool _claimRewards) external nonReentrant returns (uint256) {
     require(_amount > 0, "Cannot deposit zero");
 
     uint256 accRewardPerShare = _updatePool(_token);
@@ -241,11 +237,7 @@ contract MockLpTokenStaker is ReentrancyGuard {
         @param _claimRewards If true, also claim rewards earned on the token.
         @return uint256 Claimed reward amount
      */
-  function withdraw(
-    address _token,
-    uint256 _amount,
-    bool _claimRewards
-  ) external nonReentrant returns (uint256) {
+  function withdraw(address _token, uint256 _amount, bool _claimRewards) external nonReentrant returns (uint256) {
     require(_amount > 0, "Cannot withdraw zero");
     uint256 accRewardPerShare = _updatePool(_token);
     UserInfo storage user = userInfo[_token][msg.sender];

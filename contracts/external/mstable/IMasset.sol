@@ -27,10 +27,10 @@ interface IMasset is MassetStructs {
 
   function getMintOutput(address _input, uint256 _inputQuantity) external view returns (uint256 mintOutput);
 
-  function getMintMultiOutput(address[] calldata _inputs, uint256[] calldata _inputQuantities)
-    external
-    view
-    returns (uint256 mintOutput);
+  function getMintMultiOutput(
+    address[] calldata _inputs,
+    uint256[] calldata _inputQuantities
+  ) external view returns (uint256 mintOutput);
 
   // Swaps
   function swap(
@@ -70,10 +70,10 @@ interface IMasset is MassetStructs {
 
   function getRedeemOutput(address _output, uint256 _mAssetQuantity) external view returns (uint256 bAssetOutput);
 
-  function getRedeemExactBassetsOutput(address[] calldata _outputs, uint256[] calldata _outputQuantities)
-    external
-    view
-    returns (uint256 mAssetAmount);
+  function getRedeemExactBassetsOutput(
+    address[] calldata _outputs,
+    uint256[] calldata _outputQuantities
+  ) external view returns (uint256 mAssetAmount);
 
   // Views
   function getBasket() external view returns (bool, bool);

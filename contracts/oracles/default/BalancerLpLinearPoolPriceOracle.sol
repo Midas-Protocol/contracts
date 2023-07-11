@@ -6,7 +6,7 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 
 import { IBalancerLinearPool } from "../../external/balancer/IBalancerLinearPool.sol";
 import { IBalancerVault } from "../../external/balancer/IBalancerVault.sol";
-import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
 
 import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 
@@ -47,7 +47,7 @@ contract BalancerLpLinearPoolPriceOracle is SafeOwnableUpgradeable, BasePriceOra
     address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
   }
 
   /**

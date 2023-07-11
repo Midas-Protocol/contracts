@@ -26,13 +26,13 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
-import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { AuthoritiesRegistry } from "../ionic/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../ionic/PoolRolesAuthority.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
-import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
-import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
+import { MockERC4626 } from "../ionic/strategies/MockERC4626.sol";
+import { MockERC4626Dynamic } from "../ionic/strategies/MockERC4626Dynamic.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
@@ -63,7 +63,7 @@ contract DeployMarketsTest is Test {
   bool[] f;
   address[] oldCErC20Implementations;
   address[] newCErc20Implementations;
-  MidasFlywheelCore[] flywheelsToClaim;
+  IonicFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
@@ -225,9 +225,9 @@ contract DeployMarketsTest is Test {
   }
 
   function testDeployCErc20PluginRewardsDelegate() public {
-    MidasFlywheelCore impl = new MidasFlywheelCore();
+    IonicFlywheelCore impl = new IonicFlywheelCore();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
-    MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
+    IonicFlywheelCore flywheel = IonicFlywheelCore(address(proxy));
     flywheel.initialize(underlyingToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     FlywheelCore asFlywheelCore = FlywheelCore(address(flywheel));
     rewards = new FuseFlywheelDynamicRewardsPlugin(asFlywheelCore, 1);

@@ -42,11 +42,7 @@ contract ExponentialNoError {
   /**
    * @dev Multiply an Exp by a scalar, truncate, then add an to an unsigned integer, returning an unsigned integer.
    */
-  function mul_ScalarTruncateAddUInt(
-    Exp memory a,
-    uint256 scalar,
-    uint256 addend
-  ) internal pure returns (uint256) {
+  function mul_ScalarTruncateAddUInt(Exp memory a, uint256 scalar, uint256 addend) internal pure returns (uint256) {
     Exp memory product = mul_(a, scalar);
     return add_(truncate(product), addend);
   }
@@ -80,12 +76,12 @@ contract ExponentialNoError {
   }
 
   function safe224(uint256 n, string memory errorMessage) internal pure returns (uint224) {
-    require(n < 2**224, errorMessage);
+    require(n < 2 ** 224, errorMessage);
     return uint224(n);
   }
 
   function safe32(uint256 n, string memory errorMessage) internal pure returns (uint32) {
-    require(n < 2**32, errorMessage);
+    require(n < 2 ** 32, errorMessage);
     return uint32(n);
   }
 
@@ -101,11 +97,7 @@ contract ExponentialNoError {
     return add_(a, b, "addition overflow");
   }
 
-  function add_(
-    uint256 a,
-    uint256 b,
-    string memory errorMessage
-  ) internal pure returns (uint256) {
+  function add_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
     uint256 c = a + b;
     require(c >= a, errorMessage);
     return c;
@@ -123,11 +115,7 @@ contract ExponentialNoError {
     return sub_(a, b, "subtraction underflow");
   }
 
-  function sub_(
-    uint256 a,
-    uint256 b,
-    string memory errorMessage
-  ) internal pure returns (uint256) {
+  function sub_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
     require(b <= a, errorMessage);
     return a - b;
   }
@@ -160,11 +148,7 @@ contract ExponentialNoError {
     return mul_(a, b, "multiplication overflow");
   }
 
-  function mul_(
-    uint256 a,
-    uint256 b,
-    string memory errorMessage
-  ) internal pure returns (uint256) {
+  function mul_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
     if (a == 0 || b == 0) {
       return 0;
     }
@@ -201,11 +185,7 @@ contract ExponentialNoError {
     return div_(a, b, "divide by zero");
   }
 
-  function div_(
-    uint256 a,
-    uint256 b,
-    string memory errorMessage
-  ) internal pure returns (uint256) {
+  function div_(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
     require(b > 0, errorMessage);
     return a / b;
   }

@@ -9,12 +9,7 @@ interface IStakeManager {
   function getContracts()
     external
     view
-    returns (
-      address _manager,
-      address _bnbX,
-      address _tokenHub,
-      address _bcDepositWallet
-    );
+    returns (address _manager, address _bnbX, address _tokenHub, address _bcDepositWallet);
 
   function getExtraBnbInContract() external view returns (uint256 _extraBnb);
 

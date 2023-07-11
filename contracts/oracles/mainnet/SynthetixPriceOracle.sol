@@ -26,7 +26,7 @@ contract SynthetixPriceOracle is IPriceOracle {
    */
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
     address underlying = ICErc20(address(cToken)).underlying();
-    uint256 baseUnit = 10**uint256(ERC20Upgradeable(underlying).decimals());
+    uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
     underlying = Proxy(underlying).target(); // For some reason we have to use the logic contract instead of the proxy contract to get `resolver` and `currencyKey`
     ExchangeRates exchangeRates = ExchangeRates(
       MixinResolver(underlying).resolver().requireAndGetAddress(

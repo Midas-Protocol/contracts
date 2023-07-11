@@ -8,7 +8,7 @@ import { IRegistry } from "../../external/umbrella/IRegistry.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 import { NativeUSDPriceOracle } from "../evmos/NativeUSDPriceOracle.sol";
-import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
 
 /**
  * @title UmbrellaPriceOracle
@@ -109,7 +109,7 @@ contract UmbrellaPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
     return
       underlyingDecimals <= 18
-        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
-        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
+        ? uint256(oraclePrice) * (10 ** (18 - underlyingDecimals))
+        : uint256(oraclePrice) / (10 ** (underlyingDecimals - 18));
   }
 }

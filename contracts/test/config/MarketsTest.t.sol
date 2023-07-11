@@ -5,7 +5,7 @@ import { BaseTest } from "./BaseTest.t.sol";
 import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { DiamondExtension } from "../../midas/DiamondExtension.sol";
+import { DiamondExtension } from "../../ionic/DiamondExtension.sol";
 import { CTokenFirstExtension } from "../../compound/CTokenFirstExtension.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";

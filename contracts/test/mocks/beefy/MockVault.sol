@@ -8,11 +8,7 @@ import { IStrategy } from "./IStrategy.sol";
 contract MockVault is ERC20 {
   IStrategy public strategy;
 
-  constructor(
-    address _strategy,
-    string memory _name,
-    string memory _symbol
-  ) ERC20(_name, _symbol, 18) {
+  constructor(address _strategy, string memory _name, string memory _symbol) ERC20(_name, _symbol, 18) {
     strategy = IStrategy(_strategy);
   }
 

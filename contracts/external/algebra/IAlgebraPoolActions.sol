@@ -34,13 +34,7 @@ interface IAlgebraPoolActions {
     int24 topTick,
     uint128 amount,
     bytes calldata data
-  )
-    external
-    returns (
-      uint256 amount0,
-      uint256 amount1,
-      uint128 liquidityActual
-    );
+  ) external returns (uint256 amount0, uint256 amount1, uint128 liquidityActual);
 
   /**
    * @notice Collects tokens owed to a position
@@ -74,11 +68,7 @@ interface IAlgebraPoolActions {
    * @return amount0 The amount of token0 sent to the recipient
    * @return amount1 The amount of token1 sent to the recipient
    */
-  function burn(
-    int24 bottomTick,
-    int24 topTick,
-    uint128 amount
-  ) external returns (uint256 amount0, uint256 amount1);
+  function burn(int24 bottomTick, int24 topTick, uint128 amount) external returns (uint256 amount0, uint256 amount1);
 
   /**
    * @notice Swap token0 for token1, or token1 for token0
@@ -135,10 +125,5 @@ interface IAlgebraPoolActions {
    * @param amount1 The amount of token1 to send
    * @param data Any data to be passed through to the callback
    */
-  function flash(
-    address recipient,
-    uint256 amount0,
-    uint256 amount1,
-    bytes calldata data
-  ) external;
+  function flash(address recipient, uint256 amount0, uint256 amount1, bytes calldata data) external;
 }

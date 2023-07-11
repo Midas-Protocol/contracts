@@ -16,21 +16,13 @@ interface IBoringERC20 {
 
   function approve(address spender, uint256 amount) external returns (bool);
 
-  function safeTransferFrom(
-    address sender,
-    address receiver,
-    uint256 amount
-  ) external;
+  function safeTransferFrom(address sender, address receiver, uint256 amount) external;
 
   function safeTransfer(address receiver, uint256 amount) external;
 
   function transfer(address to, uint256 value) external returns (bool);
 
-  function transferFrom(
-    address from,
-    address to,
-    uint256 value
-  ) external returns (bool);
+  function transferFrom(address from, address to, uint256 value) external returns (bool);
 
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -48,11 +40,7 @@ interface IBoringERC20 {
 }
 
 interface IMultipleRewards {
-  function onBeamReward(
-    uint256 pid,
-    address user,
-    uint256 newLpAmount
-  ) external;
+  function onBeamReward(uint256 pid, address user, uint256 newLpAmount) external;
 
   function pendingTokens(uint256 pid, address user) external view returns (uint256 pending);
 

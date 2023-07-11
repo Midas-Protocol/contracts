@@ -3,9 +3,9 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { AnkrFTMInterestRateModel, IAnkrRateProvider as IAnkrFTMRateProvider } from "../../midas/irms/AnkrFTMInterestRateModel.sol";
-import { AnkrBNBInterestRateModel, IAnkrRateProvider as IAnkrBNBRateProvider } from "../../midas/irms/AnkrBNBInterestRateModel.sol";
-import { AnkrCertificateInterestRateModel } from "../../midas/irms/AnkrCertificateInterestRateModel.sol";
+import { AnkrFTMInterestRateModel, IAnkrRateProvider as IAnkrFTMRateProvider } from "../../ionic/irms/AnkrFTMInterestRateModel.sol";
+import { AnkrBNBInterestRateModel, IAnkrRateProvider as IAnkrBNBRateProvider } from "../../ionic/irms/AnkrBNBInterestRateModel.sol";
+import { AnkrCertificateInterestRateModel } from "../../ionic/irms/AnkrCertificateInterestRateModel.sol";
 
 import { JumpRateModel } from "../../compound/JumpRateModel.sol";
 import { WhitePaperInterestRateModel } from "../../compound/WhitePaperInterestRateModel.sol";

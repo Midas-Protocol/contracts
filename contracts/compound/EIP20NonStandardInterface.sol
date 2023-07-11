@@ -45,11 +45,7 @@ interface EIP20NonStandardInterface {
    * @param dst The address of the destination account
    * @param amount The number of tokens to transfer
    */
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 amount
-  ) external;
+  function transferFrom(address src, address dst, uint256 amount) external;
 
   /**
    * @notice Approve `spender` to transfer up to `amount` from `src`

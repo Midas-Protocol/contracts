@@ -16,32 +16,27 @@ import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
 import { CErc20 } from "../compound/CErc20.sol";
-import { MidasFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IonicFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 contract FLRTest is BaseTest {
   address rewardToken;
 
-  MidasFlywheel flywheel;
+  IonicFlywheel flywheel;
   FlywheelStaticRewards rewards;
-  MidasFlywheelLensRouter lensRouter;
+  IonicFlywheelLensRouter lensRouter;
 
   FusePoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
     fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    lensRouter = new MidasFlywheelLensRouter(fpd);
+    lensRouter = new IonicFlywheelLensRouter(fpd);
   }
 
-  function setUpFlywheel(
-    address _rewardToken,
-    address mkt,
-    IComptroller comptroller,
-    address admin
-  ) public {
-    flywheel = new MidasFlywheel();
+  function setUpFlywheel(address _rewardToken, address mkt, IComptroller comptroller, address admin) public {
+    flywheel = new IonicFlywheel();
     flywheel.initialize(
       ERC20(_rewardToken),
       FlywheelStaticRewards(address(0)),
@@ -59,13 +54,13 @@ contract FLRTest is BaseTest {
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
     // seed rewards to flywheel
-    deal(_rewardToken, address(rewards), 1_000_000 * (10**ERC20(_rewardToken).decimals()));
+    deal(_rewardToken, address(rewards), 1_000_000 * (10 ** ERC20(_rewardToken).decimals()));
 
     // Start reward distribution at 1 token per second
     rewards.setRewardsInfo(
       ERC20(mkt),
       FlywheelStaticRewards.RewardsInfo({
-        rewardsPerSecond: uint224(789 * 10**ERC20(_rewardToken).decimals()),
+        rewardsPerSecond: uint224(789 * 10 ** ERC20(_rewardToken).decimals()),
         rewardsEndTimestamp: 0
       })
     );
@@ -102,7 +97,7 @@ contract FLRTest is BaseTest {
     emit log_named_uint("rewardsEndTimestamp", rewardsEndTimestamp);
     emit log_named_uint("mkt ts", ERC20(mkt).totalSupply());
 
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
+    IonicFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
       IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
     );
     for (uint256 i = 0; i < marketRewardsInfos.length; i++) {
@@ -147,7 +142,7 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getPoolMarketRewardsInfo(comptroller);
+    IonicFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getPoolMarketRewardsInfo(comptroller);
     for (uint8 i = 0; i < info.length; i++) {
       for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
         if (info[i].rewardsInfo[j].formattedAPR != 0) {
@@ -166,13 +161,13 @@ contract FLRTest is BaseTest {
   function testBscLensRouter() public fork(BSC_MAINNET) {
     IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
     address user = 0x927d81b91c41D1961e3A7d24847b95484e60C626;
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
+    IonicFlywheelLensRouter router = IonicFlywheelLensRouter(ap.getAddress("IonicFlywheelLensRouter"));
 
     router.claimRewardsForPool(user, pool);
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
+    IonicFlywheelLensRouter router = IonicFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
     router.getPoolMarketRewardsInfo(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
   }
 
@@ -193,7 +188,7 @@ contract FLRTest is BaseTest {
       abi.encode(10)
     );
 
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
+    IonicFlywheelLensRouter router = IonicFlywheelLensRouter(ap.getAddress("IonicFlywheelLensRouter"));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 

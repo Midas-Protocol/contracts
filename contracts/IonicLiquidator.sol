@@ -14,12 +14,12 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
 /**
- * @title FuseSafeLiquidator
+ * @title IonicLiquidator
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
+ * @notice IonicLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is OwnableUpgradeable {
+contract IonicLiquidator is OwnableUpgradeable {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -206,7 +206,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
 
   /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
-   * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
+   * Public visibility because we have to call this function externally if called from a payable IonicLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
    */
   function redeemCustomCollateral(
     IERC20Upgradeable underlyingCollateral,

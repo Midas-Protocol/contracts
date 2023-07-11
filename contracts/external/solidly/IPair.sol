@@ -29,15 +29,7 @@ interface IPair {
   function metadata()
     external
     view
-    returns (
-      uint256 dec0,
-      uint256 dec1,
-      uint256 r0,
-      uint256 r1,
-      bool st,
-      address t0,
-      address t1
-    );
+    returns (uint256 dec0, uint256 dec1, uint256 r0, uint256 r1, bool st, address t0, address t1);
 
   function claimFees() external returns (uint256, uint256);
 
@@ -54,17 +46,9 @@ interface IPair {
   function currentCumulativePrices()
     external
     view
-    returns (
-      uint256 reserve0Cumulative,
-      uint256 reserve1Cumulative,
-      uint256 blockTimestamp
-    );
+    returns (uint256 reserve0Cumulative, uint256 reserve1Cumulative, uint256 blockTimestamp);
 
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 amount
-  ) external returns (bool);
+  function transferFrom(address src, address dst, uint256 amount) external returns (bool);
 
   function permit(
     address owner,
@@ -76,12 +60,7 @@ interface IPair {
     bytes32 s
   ) external;
 
-  function swap(
-    uint256 amount0Out,
-    uint256 amount1Out,
-    address to,
-    bytes calldata data
-  ) external;
+  function swap(uint256 amount0Out, uint256 amount1Out, address to, bytes calldata data) external;
 
   function burn(address to) external returns (uint256 amount0, uint256 amount1);
 
@@ -91,14 +70,7 @@ interface IPair {
 
   function transfer(address dst, uint256 amount) external returns (bool);
 
-  function getReserves()
-    external
-    view
-    returns (
-      uint256 _reserve0,
-      uint256 _reserve1,
-      uint256 _blockTimestampLast
-    );
+  function getReserves() external view returns (uint256 _reserve0, uint256 _reserve1, uint256 _blockTimestampLast);
 
   function getAmountOut(uint256, address) external view returns (uint256);
 }

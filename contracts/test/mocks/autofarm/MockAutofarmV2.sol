@@ -39,11 +39,7 @@ contract MockAutofarmV2 {
     return poolInfo.length;
   }
 
-  function add(
-    ERC20 _want,
-    uint256 _allocPoint,
-    address _strat
-  ) public {
+  function add(ERC20 _want, uint256 _allocPoint, address _strat) public {
     totalAllocPoint = _allocPoint;
     poolInfo.push(
       PoolInfo({

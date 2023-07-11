@@ -7,7 +7,7 @@ import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
-import { DiamondBase, DiamondExtension, LibDiamond } from "../midas/DiamondExtension.sol";
+import { DiamondBase, DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 
@@ -263,11 +263,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @param redeemAmountIn The number of underlying tokens to receive from redeeming cTokens (only one of redeemTokensIn or redeemAmountIn may be non-zero)
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function redeemFresh(
-    address redeemer,
-    uint256 redeemTokensIn,
-    uint256 redeemAmountIn
-  ) internal returns (uint256) {
+  function redeemFresh(address redeemer, uint256 redeemTokensIn, uint256 redeemAmountIn) internal returns (uint256) {
     require(redeemTokensIn == 0 || redeemAmountIn == 0, "!redeem tokens or amount");
 
     RedeemLocalVars memory vars;
@@ -492,11 +488,10 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @param repayAmount The amount to repay
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
    */
-  function repayBorrowBehalfInternal(address borrower, uint256 repayAmount)
-    internal
-    nonReentrant(false)
-    returns (uint256, uint256)
-  {
+  function repayBorrowBehalfInternal(
+    address borrower,
+    uint256 repayAmount
+  ) internal nonReentrant(false) returns (uint256, uint256) {
     asCTokenExtension().accrueInterest();
     // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
     return repayBorrowFresh(msg.sender, borrower, repayAmount);
@@ -520,11 +515,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    * @param repayAmount the amount of undelrying tokens being returned
    * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
    */
-  function repayBorrowFresh(
-    address payer,
-    address borrower,
-    uint256 repayAmount
-  ) internal returns (uint256, uint256) {
+  function repayBorrowFresh(address payer, address borrower, uint256 repayAmount) internal returns (uint256, uint256) {
     /* Fail if repayBorrow not allowed */
     uint256 allowed = comptroller.repayBorrowAllowed(address(this), payer, borrower, repayAmount);
     if (allowed != 0) {

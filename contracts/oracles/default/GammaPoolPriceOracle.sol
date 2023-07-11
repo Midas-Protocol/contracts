@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 import { LiquidityAmounts } from "../../external/uniswap/LiquidityAmounts.sol";
 import { TickMath } from "../../external/uniswap/TickMath.sol";
@@ -51,7 +51,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
   }
 
   /**
@@ -69,7 +69,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     uint256 p1 = BasePriceOracle(msg.sender).price(address(token1)); // * 10**uint256(18 - token1.decimals());
 
     uint160 sqrtPriceX96 = toUint160(
-      sqrt((p0 * (10**token0.decimals()) * (1 << 96)) / (p1 * (10**token1.decimals()))) << 48
+      sqrt((p0 * (10 ** token0.decimals()) * (1 << 96)) / (p1 * (10 ** token1.decimals()))) << 48
     );
 
     // Get balances of the tokens in the pool given fair underlying token prices
@@ -86,8 +86,8 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     uint256 r0 = token0.balanceOf(address(token)) + basePlusLimit0;
     uint256 r1 = token1.balanceOf(address(token)) + basePlusLimit1;
 
-    r0 = r0 * 10**(18 - uint256(token0.decimals()));
-    r1 = r1 * 10**(18 - uint256(token1.decimals()));
+    r0 = r0 * 10 ** (18 - uint256(token0.decimals()));
+    r1 = r1 * 10 ** (18 - uint256(token1.decimals()));
 
     require(r0 > 0 || r1 > 0, "Gamma underlying token balances not both greater than 0.");
 
@@ -147,15 +147,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     address token,
     int24 lowerTick,
     int24 upperTick
-  )
-    internal
-    view
-    returns (
-      uint128 liquidity,
-      uint128 tokensOwed0,
-      uint128 tokensOwed1
-    )
-  {
+  ) internal view returns (uint128 liquidity, uint128 tokensOwed0, uint128 tokensOwed1) {
     bytes32 positionKey;
     assembly {
       positionKey := or(shl(24, or(shl(24, token), and(lowerTick, 0xFFFFFF))), and(upperTick, 0xFFFFFF))

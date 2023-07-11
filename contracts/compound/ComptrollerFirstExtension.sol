@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { ICErc20 } from "./CTokenInterfaces.sol";
 import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
@@ -311,11 +311,7 @@ contract ComptrollerFirstExtension is
     return uint256(Error.NO_ERROR);
   }
 
-  function _setBorrowCapForCollateral(
-    address cTokenBorrow,
-    address cTokenCollateral,
-    uint256 borrowCap
-  ) public {
+  function _setBorrowCapForCollateral(address cTokenBorrow, address cTokenCollateral, uint256 borrowCap) public {
     require(hasAdminRights(), "!admin");
     borrowCapForCollateral[cTokenBorrow][cTokenCollateral] = borrowCap;
   }
@@ -369,11 +365,7 @@ contract ComptrollerFirstExtension is
     return borrowingAgainstCollateralBlacklistWhitelist[cTokenBorrow][cTokenCollateral].contains(account);
   }
 
-  function _supplyCapWhitelist(
-    address cToken,
-    address account,
-    bool whitelisted
-  ) public {
+  function _supplyCapWhitelist(address cToken, address account, bool whitelisted) public {
     require(hasAdminRights(), "!admin");
 
     if (whitelisted) supplyCapWhitelist[cToken].add(account);
@@ -391,11 +383,7 @@ contract ComptrollerFirstExtension is
     }
   }
 
-  function _borrowCapWhitelist(
-    address cToken,
-    address account,
-    bool whitelisted
-  ) public {
+  function _borrowCapWhitelist(address cToken, address account, bool whitelisted) public {
     require(hasAdminRights(), "!admin");
 
     if (whitelisted) borrowCapWhitelist[cToken].add(account);

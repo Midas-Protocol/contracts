@@ -5,7 +5,7 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 
 import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
-import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
 import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPriceOracle.sol";
 
 /**
@@ -40,6 +40,6 @@ contract NativeUSDPriceOracle is SafeOwnableUpgradeable {
     uint8 nativeTokenPriceFeedDecimals = oracle.quoteTokenDecimals();
 
     if (nativeTokenUsdPrice <= 0) return 0;
-    return uint256(nativeTokenUsdPrice) * 10**(18 - nativeTokenPriceFeedDecimals);
+    return uint256(nativeTokenUsdPrice) * 10 ** (18 - nativeTokenPriceFeedDecimals);
   }
 }

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import "../../midas/irms/AdjustableAnkrBNBIrm.sol";
+import "../../ionic/irms/AdjustableAnkrBNBIrm.sol";
 
 contract AdjustableAnkrIrmTest is BaseTest {
   AdjustableAnkrBNBIrm adjustableAnkrBNBIrm;

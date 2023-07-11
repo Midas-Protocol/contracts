@@ -33,7 +33,7 @@ contract YVaultV1PriceOracle is IPriceOracle {
     // `getPricePerFullShare` = yVault/token scaled by 1e18
     // `underlyingPrice` = token/ETH scaled by 1e18
     // Return value = `pricePerShare` * `underlyingPrice` / 1e(yVault decimals)
-    uint256 baseUnit = 10**uint256(yVault.decimals());
+    uint256 baseUnit = 10 ** uint256(yVault.decimals());
     return (yVault.getPricePerFullShare() * underlyingPrice) / baseUnit; // getPricePerFullShare is scaled by 1e18
   }
 }

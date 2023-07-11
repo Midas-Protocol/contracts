@@ -21,24 +21,19 @@ interface IUniswapV3Pool {
 
   function liquidity() external view returns (uint128);
 
-  function observe(uint32[] calldata secondsAgos)
-    external
-    view
-    returns (int56[] memory tickCumulatives, uint160[] memory liquidityCumulatives);
+  function observe(
+    uint32[] calldata secondsAgos
+  ) external view returns (int56[] memory tickCumulatives, uint160[] memory liquidityCumulatives);
 
-  function observations(uint256 index)
-    external
-    view
-    returns (
-      uint32 blockTimestamp,
-      int56 tickCumulative,
-      uint160 liquidityCumulative,
-      bool initialized
-    );
+  function observations(
+    uint256 index
+  ) external view returns (uint32 blockTimestamp, int56 tickCumulative, uint160 liquidityCumulative, bool initialized);
 
   function tickBitmap(int16 wordPosition) external view returns (uint256);
 
-  function ticks(int24 tick)
+  function ticks(
+    int24 tick
+  )
     external
     view
     returns (
@@ -54,7 +49,9 @@ interface IUniswapV3Pool {
 
   function increaseObservationCardinalityNext(uint16 observationCardinalityNext) external;
 
-  function positions(bytes32 key)
+  function positions(
+    bytes32 key
+  )
     external
     view
     returns (

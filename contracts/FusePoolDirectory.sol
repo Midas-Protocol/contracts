@@ -6,7 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.so
 import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { Unitroller } from "./compound/Unitroller.sol";
-import "./midas/SafeOwnableUpgradeable.sol";
+import "./ionic/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 
 /**
@@ -378,11 +378,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    * @notice Returns arrays of all Fuse pool indexes and data with whitelisted admins.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getPublicPoolsByVerification(bool whitelistedAdmin)
-    external
-    view
-    returns (uint256[] memory, FusePool[] memory)
-  {
+  function getPublicPoolsByVerification(
+    bool whitelistedAdmin
+  ) external view returns (uint256[] memory, FusePool[] memory) {
     uint256 arrayLength = 0;
 
     (, FusePool[] memory activePools) = getActivePools();
@@ -420,11 +418,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    * @param account who is whitelisted in the returned verified whitelist-enabled pools.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getVerifiedPoolsOfWhitelistedAccount(address account)
-    external
-    view
-    returns (uint256[] memory, FusePool[] memory)
-  {
+  function getVerifiedPoolsOfWhitelistedAccount(
+    address account
+  ) external view returns (uint256[] memory, FusePool[] memory) {
     uint256 arrayLength = 0;
     (, FusePool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {

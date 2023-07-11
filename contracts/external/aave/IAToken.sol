@@ -17,12 +17,7 @@ interface IAToken {
    * @param index The next liquidity index of the reserve
    * @return `true` if the the previous balance of the user was 0
    */
-  function mint(
-    address caller,
-    address onBehalfOf,
-    uint256 amount,
-    uint256 index
-  ) external returns (bool);
+  function mint(address caller, address onBehalfOf, uint256 amount, uint256 index) external returns (bool);
 
   /**
    * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
@@ -33,12 +28,7 @@ interface IAToken {
    * @param amount The amount being burned
    * @param index The next liquidity index of the reserve
    */
-  function burn(
-    address from,
-    address receiverOfUnderlying,
-    uint256 amount,
-    uint256 index
-  ) external;
+  function burn(address from, address receiverOfUnderlying, uint256 amount, uint256 index) external;
 
   /**
    * @notice Mints aTokens to the reserve treasury
@@ -55,11 +45,7 @@ interface IAToken {
    * @param to The recipient
    * @param value The amount of tokens getting transferred
    */
-  function transferOnLiquidation(
-    address from,
-    address to,
-    uint256 value
-  ) external;
+  function transferOnLiquidation(address from, address to, uint256 value) external;
 
   /**
    * @notice Transfers the underlying asset to `target`.
@@ -78,11 +64,7 @@ interface IAToken {
    * @param onBehalfOf The address of the user who will get his debt reduced/removed
    * @param amount The amount getting repaid
    */
-  function handleRepayment(
-    address user,
-    address onBehalfOf,
-    uint256 amount
-  ) external;
+  function handleRepayment(address user, address onBehalfOf, uint256 amount) external;
 
   /**
    * @notice Returns the address of the underlying asset of this aToken (E.g. WETH for aWETH)

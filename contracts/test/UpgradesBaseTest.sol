@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { Unitroller } from "../compound/Unitroller.sol";

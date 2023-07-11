@@ -10,11 +10,11 @@ import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
 import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";
-import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "./ionic/SafeOwnableUpgradeable.sol";
 import { PatchedStorage } from "./utils/PatchedStorage.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
-import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
-import { AuthoritiesRegistry } from "./midas/AuthoritiesRegistry.sol";
+import { DiamondExtension, DiamondBase } from "./ionic/DiamondExtension.sol";
+import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -113,7 +113,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     BasePriceOracle oracle = comptroller.oracle();
     uint256 underlyingPriceEth = oracle.price(ICErc20(address(_ctoken)).underlying());
     uint256 underlyingDecimals = _ctoken.decimals();
-    uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10**underlyingDecimals;
+    uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10 ** underlyingDecimals;
     if (borrowBalanceEth > minBorrowEth) {
       return 0;
     }
@@ -244,10 +244,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    * @param oldImplementation The old `Comptroller` implementation address to upgrade from.
    * @param newImplementation Latest `Comptroller` implementation address.
    */
-  function _setLatestComptrollerImplementation(address oldImplementation, address newImplementation)
-    external
-    onlyOwner
-  {
+  function _setLatestComptrollerImplementation(
+    address oldImplementation,
+    address newImplementation
+  ) external onlyOwner {
     _latestComptrollerImplementation[oldImplementation] = newImplementation;
   }
 
@@ -271,15 +271,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
-  function latestCErc20Delegate(address oldImplementation)
-    external
-    view
-    returns (
-      address,
-      bool,
-      bytes memory
-    )
-  {
+  function latestCErc20Delegate(address oldImplementation) external view returns (address, bool, bytes memory) {
     CDelegateUpgradeData memory data = _latestCErc20Delegate[oldImplementation];
     bytes memory emptyBytes;
     return
@@ -434,10 +426,10 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     return cErc20DelegateExtensions[cErc20Delegate];
   }
 
-  function _setCErc20DelegateExtensions(address cErc20Delegate, DiamondExtension[] calldata extensions)
-    external
-    onlyOwner
-  {
+  function _setCErc20DelegateExtensions(
+    address cErc20Delegate,
+    DiamondExtension[] calldata extensions
+  ) external onlyOwner {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
 
@@ -463,12 +455,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
 
   AuthoritiesRegistry public authoritiesRegistry;
 
-  function canCall(
-    address pool,
-    address user,
-    address target,
-    bytes4 functionSig
-  ) external view returns (bool) {
+  function canCall(address pool, address user, address target, bytes4 functionSig) external view returns (bool) {
     return authoritiesRegistry.canCall(pool, user, target, functionSig);
   }
 }

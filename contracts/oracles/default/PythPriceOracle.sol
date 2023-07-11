@@ -8,7 +8,7 @@ import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 import { IPyth } from "@pythnetwork/pyth-sdk-solidity/IPyth.sol";
 import { PythStructs } from "@pythnetwork/pyth-sdk-solidity/PythStructs.sol";
 import { Pyth } from "pyth-neon/PythOracle.sol";
-import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
 
 /**
  * @title PythPriceOracle
@@ -143,7 +143,7 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
     return
       underlyingDecimals <= 18
-        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
-        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
+        ? uint256(oraclePrice) * (10 ** (18 - underlyingDecimals))
+        : uint256(oraclePrice) / (10 ** (underlyingDecimals - 18));
   }
 }

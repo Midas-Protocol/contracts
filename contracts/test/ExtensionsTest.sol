@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { MarketsTest } from "./config/MarketsTest.t.sol";
 
-import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";

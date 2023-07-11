@@ -172,7 +172,7 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
     uint256 redeemValue = (mpo.price(address(erc4626Vault)) * balance) / 1e18;
     // get the redeemed value of the output token
     uint256 redeemOutputTokenValue = (mpo.price(address(_outputToken)) * liquidatorBalance) /
-      10**ERC20Upgradeable(address(_outputToken)).decimals();
+      10 ** ERC20Upgradeable(address(_outputToken)).decimals();
     // ensure they are approximately equal
     assertApproxEqRel(redeemValue, redeemOutputTokenValue, 3e16, "!diff > 3%");
 

@@ -6,10 +6,10 @@ import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { IonicLiquidator } from "../IonicLiquidator.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
-import { AddressesProvider } from "../midas/AddressesProvider.sol";
+import { AddressesProvider } from "../ionic/AddressesProvider.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
@@ -22,7 +22,7 @@ import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 
 contract AnyLiquidationTest is BaseTest {
-  FuseSafeLiquidator fsl;
+  IonicLiquidator fsl;
   address uniswapRouter;
   mapping(address => address) assetSpecificRouters;
 
@@ -58,8 +58,8 @@ contract AnyLiquidationTest is BaseTest {
     if (block.chainid == BSC_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
+      fsl = IonicLiquidator(payable(ap.getAddress("IonicLiquidator")));
+      //      fsl = new IonicLiquidator();
       //      fsl.initialize(
       //        ap.getAddress("wtoken"),
       //        uniswapRouter,
@@ -76,8 +76,8 @@ contract AnyLiquidationTest is BaseTest {
     } else if (block.chainid == POLYGON_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
+      fsl = IonicLiquidator(payable(ap.getAddress("IonicLiquidator")));
+      //      fsl = new IonicLiquidator();
       //      fsl.initialize(
       //        ap.getAddress("wtoken"),
       //        uniswapRouter,
@@ -90,8 +90,8 @@ contract AnyLiquidationTest is BaseTest {
       // TODO figure out how to mock all xcDOT calls
       mostLiquidPair1 = IUniswapV2Pair(0xa927E1e1E044CA1D9fe1854585003477331fE2Af); // GLMR/xcDOT
       mostLiquidPair2 = IUniswapV2Pair(0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79); // GLMR/USDC
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
+      fsl = IonicLiquidator(payable(ap.getAddress("IonicLiquidator")));
+      //      fsl = new IonicLiquidator();
       //      fsl.initialize(
       //        ap.getAddress("wtoken"),
       //        uniswapRouter,
@@ -128,7 +128,7 @@ contract AnyLiquidationTest is BaseTest {
     bytes[] redemptionDatas;
     ICErc20[] markets;
     address[] borrowers;
-    FuseSafeLiquidator liquidator;
+    IonicLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] fundingDatas;
     ICErc20 debtMarket;
@@ -140,11 +140,10 @@ contract AnyLiquidationTest is BaseTest {
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(uint256 random, FusePoolDirectory.FusePool[] memory pools)
-    internal
-    view
-    returns (IComptroller, address)
-  {
+  function getPoolAndBorrower(
+    uint256 random,
+    FusePoolDirectory.FusePool[] memory pools
+  ) internal view returns (IComptroller, address) {
     if (pools.length == 0) revert("no pools to pick from");
 
     uint256 i = random % pools.length; // random pool
@@ -168,14 +167,10 @@ contract AnyLiquidationTest is BaseTest {
     }
   }
 
-  function setUpDebtAndCollateralMarkets(uint256 random, LiquidationData memory vars)
-    internal
-    returns (
-      ICErc20 debtMarket,
-      ICErc20 collateralMarket,
-      uint256 borrowAmount
-    )
-  {
+  function setUpDebtAndCollateralMarkets(
+    uint256 random,
+    LiquidationData memory vars
+  ) internal returns (ICErc20 debtMarket, ICErc20 collateralMarket, uint256 borrowAmount) {
     // find a debt market in which the borrower has borrowed
     for (uint256 m = 0; m < vars.markets.length; m++) {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
@@ -343,7 +338,7 @@ contract AnyLiquidationTest is BaseTest {
     vm.prank(ap.owner());
     try
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+        IonicLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
           vars.repayAmount,
           ICErc20(address(vars.debtMarket)),
@@ -513,11 +508,10 @@ contract AnyLiquidationTest is BaseTest {
   //    return tokens;
   //  }
 
-  function pickPreferredToken(address[] memory tokens, address strategyOutputToken)
-    internal
-    view
-    returns (address, uint8)
-  {
+  function pickPreferredToken(
+    address[] memory tokens,
+    address strategyOutputToken
+  ) internal view returns (address, uint8) {
     address wtoken = ap.getAddress("wtoken");
     address stable = ap.getAddress("stableToken");
     address wbtc = ap.getAddress("wBTCToken");

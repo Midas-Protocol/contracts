@@ -40,11 +40,7 @@ interface EIP20Interface {
    * @param amount The number of tokens to transfer
    * @return success bool Whether or not the transfer succeeded
    */
-  function transferFrom(
-    address src,
-    address dst,
-    uint256 amount
-  ) external returns (bool success);
+  function transferFrom(address src, address dst, uint256 amount) external returns (bool success);
 
   /**
    * @notice Approve `spender` to transfer up to `amount` from `src`

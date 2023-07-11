@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "../helpers/WithPool.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { MidasERC4626 } from "../../midas/strategies/MidasERC4626.sol";
+import { IonicERC4626 } from "../../ionic/strategies/IonicERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
@@ -12,7 +12,7 @@ import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 abstract contract AbstractERC4626Test is WithPool {
   using FixedPointMathLib for uint256;
 
-  MidasERC4626 plugin;
+  IonicERC4626 plugin;
 
   string testPreFix;
 

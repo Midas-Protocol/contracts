@@ -24,11 +24,10 @@ contract UniswapV3LiquidatorFunder is UniswapV3Liquidator, IFundsConversionStrat
    * @param outputAmount the desired output amount
    * @param strategyData the input token
    */
-  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
-    external
-    view
-    returns (IERC20Upgradeable inputToken, uint256 inputAmount)
-  {
+  function estimateInputAmount(
+    uint256 outputAmount,
+    bytes memory strategyData
+  ) external view returns (IERC20Upgradeable inputToken, uint256 inputAmount) {
     (address _inputToken, address _outputToken, uint24 fee, , Quoter quoter) = abi.decode(
       strategyData,
       (address, address, uint24, ISwapRouter, Quoter)
