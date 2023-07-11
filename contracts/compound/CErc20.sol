@@ -59,7 +59,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param mintAmount The amount of the underlying asset to supply
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function mint(uint256 mintAmount) external override returns (uint256) {
+  function mint(uint256 mintAmount) external override isAuthorized returns (uint256) {
     (uint256 err, ) = mintInternal(mintAmount);
     return err;
   }
@@ -70,7 +70,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param redeemTokens The number of cTokens to redeem into underlying
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function redeem(uint256 redeemTokens) external override returns (uint256) {
+  function redeem(uint256 redeemTokens) external override isAuthorized returns (uint256) {
     return redeemInternal(redeemTokens);
   }
 
@@ -80,7 +80,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param redeemAmount The amount of underlying to redeem
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function redeemUnderlying(uint256 redeemAmount) external override returns (uint256) {
+  function redeemUnderlying(uint256 redeemAmount) external override isAuthorized returns (uint256) {
     return redeemUnderlyingInternal(redeemAmount);
   }
 
@@ -89,7 +89,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param borrowAmount The amount of the underlying asset to borrow
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function borrow(uint256 borrowAmount) external override returns (uint256) {
+  function borrow(uint256 borrowAmount) external override isAuthorized returns (uint256) {
     return borrowInternal(borrowAmount);
   }
 
@@ -98,7 +98,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param repayAmount The amount to repay
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function repayBorrow(uint256 repayAmount) external override returns (uint256) {
+  function repayBorrow(uint256 repayAmount) external override isAuthorized returns (uint256) {
     (uint256 err, ) = repayBorrowInternal(repayAmount);
     return err;
   }
@@ -109,7 +109,7 @@ contract CErc20 is CToken, CErc20Base {
    * @param repayAmount The amount to repay
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function repayBorrowBehalf(address borrower, uint256 repayAmount) external override returns (uint256) {
+  function repayBorrowBehalf(address borrower, uint256 repayAmount) external override isAuthorized returns (uint256) {
     (uint256 err, ) = repayBorrowBehalfInternal(borrower, repayAmount);
     return err;
   }
@@ -126,7 +126,7 @@ contract CErc20 is CToken, CErc20Base {
     address borrower,
     uint256 repayAmount,
     address cTokenCollateral
-  ) external override returns (uint256) {
+  ) external override isAuthorized returns (uint256) {
     (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
     return err;
   }

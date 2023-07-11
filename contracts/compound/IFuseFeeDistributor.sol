@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
+import "../midas/AuthoritiesRegistry.sol";
+
 interface IFuseFeeDistributor {
   function minBorrowEth() external view returns (uint256);
 
@@ -44,6 +46,15 @@ interface IFuseFeeDistributor {
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (address[] memory);
 
   function deployCErc20(bytes calldata constructorData) external returns (address);
+
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool);
+
+  function authoritiesRegistry() external view returns (AuthoritiesRegistry);
 
   fallback() external payable;
 

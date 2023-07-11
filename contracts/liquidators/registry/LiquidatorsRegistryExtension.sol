@@ -677,7 +677,7 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       // throw an error
       revert("No balancer pool found for the given tokens");
     }
-    strategyData = abi.encode(poolAddress, outputToken);
+    strategyData = abi.encode(outputToken, poolAddress);
   }
 
   function solidlyLpTokenWrapperData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
