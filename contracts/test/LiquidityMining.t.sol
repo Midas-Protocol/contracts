@@ -110,7 +110,7 @@ contract LiquidityMiningTest is BaseTest {
     newAr.initialize(address(321));
     fuseAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
-    poolAuth.setUserRole(user, poolAuth.BORROWER_ROLE(), true);
+    newAr.setUserRole(comptrollerAddress, user, poolAuth.BORROWER_ROLE(), true);
 
     newImplementation.push(address(cErc20Delegate));
     fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
