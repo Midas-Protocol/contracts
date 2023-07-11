@@ -72,6 +72,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     fuseAdmin = _fuseAdmin;
   }
 
+  modifier isAuthorized() {
+    require(
+      IFuseFeeDistributor(fuseAdmin).canCall(address(this), msg.sender, address(this), msg.sig),
+      "not authorized"
+    );
+    _;
+  }
+
   /*** Assets You Are In ***/
 
   /**
@@ -100,7 +108,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param cTokens The list of addresses of the cToken markets to be enabled
    * @return Success indicator for whether each corresponding market was entered
    */
-  function enterMarkets(address[] memory cTokens) public override returns (uint256[] memory) {
+  function enterMarkets(address[] memory cTokens) public override isAuthorized returns (uint256[] memory) {
     uint256 len = cTokens.length;
 
     uint256[] memory results = new uint256[](len);
@@ -159,7 +167,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param cTokenAddress The address of the asset to be removed
    * @return Whether or not the account successfully exited the market
    */
-  function exitMarket(address cTokenAddress) external override returns (uint256) {
+  function exitMarket(address cTokenAddress) external override isAuthorized returns (uint256) {
     // TODO
     require(markets[cTokenAddress].isListed, "!Comptroller:exitMarket");
 
@@ -1224,6 +1232,8 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     fuseAdminHasRights = oldFuseAdminHasRights;
     // Support market here in the Comptroller
     uint256 err = _supportMarket(cToken);
+
+    IFuseFeeDistributor(fuseAdmin).authoritiesRegistry().reconfigureAuthority(address(this));
 
     // Set collateral factor
     return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;

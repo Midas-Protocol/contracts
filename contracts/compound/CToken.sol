@@ -17,6 +17,14 @@ import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
  * @author Compound
  */
 abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, DiamondBase {
+  modifier isAuthorized() {
+    require(
+      IFuseFeeDistributor(fuseAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
+      "not authorized"
+    );
+    _;
+  }
+
   /**
    * @notice Returns a boolean indicating if the sender has admin rights
    */
