@@ -214,15 +214,13 @@ contract LiquidatorsRegistryTest is BaseTest {
     address lpTokenWhale = 0xBA12222222228d8Ba445958a75a0704d566BF2C8; // balancer gauge
 
     // maticx-wmatic aave boosted
-    IERC20Upgradeable inputToken = maticxBbaBalancerStableLpToken;
     uint256 inputAmount = 1e18;
     IERC20Upgradeable outputToken = wtoken;
 
-    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
+    _swap(lpTokenWhale, maticxBbaBalancerStableLpToken, inputAmount, outputToken, 1e16);
 
     // stmatic-wmatic aave boosted
-    inputToken = stMaticBbaBalancerStableLpToken;
-    _swap(lpTokenWhale, inputToken, inputAmount, outputToken, 1e16);
+    _swap(lpTokenWhale, stMaticBbaBalancerStableLpToken, inputAmount, outputToken, 1e16);
   }
 
   function testSwappingBalancerWeightedLpPolygon() public fork(POLYGON_MAINNET) {
