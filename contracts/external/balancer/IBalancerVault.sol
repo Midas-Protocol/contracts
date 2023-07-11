@@ -64,9 +64,19 @@ interface IBalancerVault {
 
   function manageUserBalance(UserBalanceOp[] memory ops) external payable;
 
-  function getPoolTokens(
-    bytes32 poolId
-  ) external view returns (IERC20Upgradeable[] memory tokens, uint256[] memory balances, uint256 lastChangeBlock);
+  function getPoolTokens(bytes32 poolId)
+    external
+    view
+    returns (
+      IERC20Upgradeable[] memory tokens,
+      uint256[] memory balances,
+      uint256 lastChangeBlock
+    );
 
-  function exitPool(bytes32 poolId, address sender, address payable recipient, ExitPoolRequest memory request) external;
+  function exitPool(
+    bytes32 poolId,
+    address sender,
+    address payable recipient,
+    ExitPoolRequest memory request
+  ) external;
 }

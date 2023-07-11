@@ -31,8 +31,8 @@ contract WombatLpTokenPriceOracle is BasePriceOracle {
 
     return
       assetDecimals <= 18
-        ? uint256(oraclePrice) * (10 ** (18 - assetDecimals))
-        : uint256(oraclePrice) / (10 ** (assetDecimals - 18));
+        ? uint256(oraclePrice) * (10**(18 - assetDecimals))
+        : uint256(oraclePrice) / (10**(assetDecimals - 18));
   }
 
   function _price(address asset) internal view returns (uint256) {

@@ -24,7 +24,16 @@ interface IAutofarmV2 {
 
   function want() external view returns (address);
 
-  function poolInfo(uint256) external view returns (address, uint256, uint256, uint256, address);
+  function poolInfo(uint256)
+    external
+    view
+    returns (
+      address,
+      uint256,
+      uint256,
+      uint256,
+      address
+    );
 }
 
 interface IAutoStrat {

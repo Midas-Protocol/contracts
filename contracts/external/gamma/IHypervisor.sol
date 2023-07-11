@@ -20,7 +20,14 @@ interface IHypervisor is IERC20Upgradeable {
 
   function directDeposit() external view returns (bool);
 
-  function getBasePosition() external view returns (uint256 liquidity, uint256 total0, uint256 total1);
+  function getBasePosition()
+    external
+    view
+    returns (
+      uint256 liquidity,
+      uint256 total0,
+      uint256 total1
+    );
 
   function getTotalAmounts() external view returns (uint256 total0, uint256 total1);
 

@@ -27,13 +27,21 @@ contract MockLpDepositor is Ownable {
     uint256 dddAmount
   );
 
-  constructor(MockERC20 _EPX, MockERC20 _DDD, MockERC20 _lpToken) {
+  constructor(
+    MockERC20 _EPX,
+    MockERC20 _DDD,
+    MockERC20 _lpToken
+  ) {
     EPX = _EPX;
     DDD = _DDD;
     lpToken = _lpToken;
   }
 
-  function deposit(address _user, address _token, uint256 _amount) external {
+  function deposit(
+    address _user,
+    address _token,
+    uint256 _amount
+  ) external {
     IERC20(_token).safeTransferFrom(msg.sender, address(this), _amount);
 
     uint256 balance = userBalances[_user][_token];
@@ -46,7 +54,11 @@ contract MockLpDepositor is Ownable {
     emit Deposit(msg.sender, _user, _token, _amount);
   }
 
-  function withdraw(address _receiver, address _token, uint256 _amount) external {
+  function withdraw(
+    address _receiver,
+    address _token,
+    uint256 _amount
+  ) external {
     uint256 balance = userBalances[msg.sender][_token];
     uint256 total = totalBalances[_token];
     require(balance >= _amount, "Insufficient balance");
@@ -67,7 +79,11 @@ contract MockLpDepositor is Ownable {
         @param _maxBondAmount Maximum amount of claimed EPX to convert to bonded dEPX.
                               Converting to bonded dEPX earns a multiplier on DDD rewards.
      */
-  function claim(address _receiver, address[] calldata _tokens, uint256 _maxBondAmount) external {
+  function claim(
+    address _receiver,
+    address[] calldata _tokens,
+    uint256 _maxBondAmount
+  ) external {
     _maxBondAmount;
 
     EPX.mint(_receiver, 1e18);

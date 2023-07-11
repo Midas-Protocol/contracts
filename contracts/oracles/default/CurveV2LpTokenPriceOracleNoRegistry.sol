@@ -43,7 +43,15 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     return lpTokens;
   }
 
-  function getPoolForSwap(address inputToken, address outputToken) public view returns (ICurvePool, int128, int128) {
+  function getPoolForSwap(address inputToken, address outputToken)
+    public
+    view
+    returns (
+      ICurvePool,
+      int128,
+      int128
+    )
+  {
     for (uint256 i = 0; i < lpTokens.length; i++) {
       ICurvePool pool = ICurvePool(poolOf[lpTokens[i]]);
       int128 inputIndex = -1;
@@ -85,7 +93,7 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10 ** uint256(EIP20Interface(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
@@ -99,7 +107,7 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
     address baseToken = ICurvePool(pool).coins(0);
     uint256 lpPrice = ICurveV2Pool(pool).lp_price();
     uint256 baseTokenPrice = BasePriceOracle(msg.sender).price(baseToken);
-    return (lpPrice * baseTokenPrice) / 10 ** 18;
+    return (lpPrice * baseTokenPrice) / 10**18;
   }
 
   /**

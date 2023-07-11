@@ -66,7 +66,7 @@ contract DiaPriceOracleTest is BaseTest {
   }
 
   function testDiaPriceOracleWithNativeFeedMoonbeam() public forkAtBlock(MOONBEAM_MAINNET, 1824921) {
-    MockDiaPriceFeed mock = new MockDiaPriceFeed(5 * 10 ** 8); // 5 USD in 8 decimals
+    MockDiaPriceFeed mock = new MockDiaPriceFeed(5 * 10**8); // 5 USD in 8 decimals
     oracle = new DiaPriceOracle(
       address(this),
       true,

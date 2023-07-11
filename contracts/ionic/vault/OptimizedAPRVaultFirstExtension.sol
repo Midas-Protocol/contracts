@@ -159,7 +159,11 @@ contract OptimizedAPRVaultFirstExtension is OptimizedAPRVaultExtension {
     }
   }
 
-  function _afterTokenTransfer(address from, address to, uint256 amount) internal override {
+  function _afterTokenTransfer(
+    address from,
+    address to,
+    uint256 amount
+  ) internal override {
     super._afterTokenTransfer(from, to, amount);
     for (uint256 i; i < rewardTokens.length; ++i) {
       flywheelForRewardToken[rewardTokens[i]].accrue(ERC20(address(this)), from, to);

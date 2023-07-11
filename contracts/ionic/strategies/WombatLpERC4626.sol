@@ -9,7 +9,11 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 interface IWmxVault {
   function deposit(uint256 assets, address receiver) external returns (uint256);
 
-  function withdraw(uint256 assets, address receiver, address owner) external returns (uint256);
+  function withdraw(
+    uint256 assets,
+    address receiver,
+    address owner
+  ) external returns (uint256);
 
   function balanceOf(address account) external view returns (uint256);
 
@@ -19,11 +23,22 @@ interface IWmxVault {
 }
 
 interface IBooster {
-  function deposit(uint256 _pid, uint256 _amount, bool _stake) external;
+  function deposit(
+    uint256 _pid,
+    uint256 _amount,
+    bool _stake
+  ) external;
 
-  function poolInfo(
-    uint256 _pid
-  ) external view returns (address lptoken, address token, address gauge, address crvRewards, bool shutdown);
+  function poolInfo(uint256 _pid)
+    external
+    view
+    returns (
+      address lptoken,
+      address token,
+      address gauge,
+      address crvRewards,
+      bool shutdown
+    );
 }
 
 interface IVoterProxy {

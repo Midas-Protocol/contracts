@@ -65,7 +65,11 @@ abstract contract AnkrCertificateInterestRateModel is InterestRateModel {
    * @param reserves The amount of reserves in the market (currently unused)
    * @return The utilization rate as a mantissa between [0, 1e18]
    */
-  function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves) public pure returns (uint256) {
+  function utilizationRate(
+    uint256 cash,
+    uint256 borrows,
+    uint256 reserves
+  ) public pure returns (uint256) {
     // Utilization rate is 0 when there are no borrows
     if (borrows == 0) {
       return 0;
@@ -84,13 +88,21 @@ abstract contract AnkrCertificateInterestRateModel is InterestRateModel {
     return (getAnkrRate() * baseRateMultiplier) / 1e18;
   }
 
-  function getBorrowRatePostKink(uint256 cash, uint256 borrows, uint256 reserves) public view returns (uint256) {
+  function getBorrowRatePostKink(
+    uint256 cash,
+    uint256 borrows,
+    uint256 reserves
+  ) public view returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
     uint256 excessUtil = util - kink;
     return (excessUtil * jumpMultiplierPerBlock) / 1e18;
   }
 
-  function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) public view override returns (uint256) {
+  function getBorrowRate(
+    uint256 cash,
+    uint256 borrows,
+    uint256 reserves
+  ) public view override returns (uint256) {
     uint256 util = utilizationRate(cash, borrows, reserves);
     uint256 baseRatePerBlock = getBaseRatePerBlock();
     uint256 multiplierPerBlock = getMultiplierPerBlock();

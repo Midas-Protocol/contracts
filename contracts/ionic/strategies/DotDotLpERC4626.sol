@@ -12,11 +12,23 @@ interface ILpDepositor {
   // user -> pool -> deposit amount
   function userBalances(address _user, ERC20Upgradeable _token) external view returns (uint256);
 
-  function deposit(address _user, ERC20Upgradeable _token, uint256 _amount) external;
+  function deposit(
+    address _user,
+    ERC20Upgradeable _token,
+    uint256 _amount
+  ) external;
 
-  function withdraw(address _receiver, ERC20Upgradeable _token, uint256 _amount) external;
+  function withdraw(
+    address _receiver,
+    ERC20Upgradeable _token,
+    uint256 _amount
+  ) external;
 
-  function claim(address _receiver, ERC20Upgradeable[] calldata _tokens, uint256 _maxBondAmount) external;
+  function claim(
+    address _receiver,
+    ERC20Upgradeable[] calldata _tokens,
+    uint256 _maxBondAmount
+  ) external;
 
   function depositTokens(ERC20Upgradeable lpToken) external view returns (ERC20Upgradeable);
 }

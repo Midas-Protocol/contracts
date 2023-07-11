@@ -25,7 +25,16 @@ library SwapMath {
     int256 amountRemaining,
     uint24 feePips,
     bool zeroForOne
-  ) internal pure returns (uint160 sqrtRatioNextX96, uint256 amountIn, uint256 amountOut, uint256 feeAmount) {
+  )
+    internal
+    pure
+    returns (
+      uint160 sqrtRatioNextX96,
+      uint256 amountIn,
+      uint256 amountOut,
+      uint256 feeAmount
+    )
+  {
     require(zeroForOne == sqrtRatioCurrentX96 >= sqrtRatioTargetX96, "SPD");
     bool exactIn = amountRemaining >= 0;
 

@@ -26,7 +26,11 @@ contract BalancerLpTokenLiquidatorTest is BaseTest {
     wtoken = ap.getAddress("wtoken");
   }
 
-  function testRedeemLpToken(address whaleAddress, address inputTokenAddress, address outputTokenAddress) internal {
+  function testRedeemLpToken(
+    address whaleAddress,
+    address inputTokenAddress,
+    address outputTokenAddress
+  ) internal {
     return testBalancerLpTokenLiquidator(lpTokenLiquidator, 1e18, whaleAddress, inputTokenAddress, outputTokenAddress);
   }
 

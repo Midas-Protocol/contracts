@@ -124,25 +124,29 @@ contract LeveredPositionFactoryExtension is
     return fuseFeeDistributor.minBorrowEth();
   }
 
-  function getRedemptionStrategies(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) external view returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData) {
+  function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    view
+    returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
+  {
     return liquidatorsRegistry.getRedemptionStrategies(inputToken, outputToken);
   }
 
-  function getSlippage(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) external view returns (uint256 slippage) {
+  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    view
+    returns (uint256 slippage)
+  {
     slippage = conversionSlippage[inputToken][outputToken];
     // TODO slippage == 0 should be allowed
     if (slippage == 0) return MAX_SLIPPAGE;
   }
 
-  function getPositionsByAccount(
-    address account
-  ) external view returns (address[] memory positions, bool[] memory closed) {
+  function getPositionsByAccount(address account)
+    external
+    view
+    returns (address[] memory positions, bool[] memory closed)
+  {
     positions = positionsByAccount[account].values();
     closed = new bool[](positions.length);
     for (uint256 i = 0; i < positions.length; i++) {

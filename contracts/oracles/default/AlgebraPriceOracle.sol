@@ -45,9 +45,9 @@ contract AlgebraPriceOracle is ConcentratedLiquidityBasePriceOracle {
       uint256 tokenPriceScaled;
 
       if (baseTokenDecimals > tokenDecimals) {
-        tokenPriceScaled = tokenPrice / (10 ** (baseTokenDecimals - tokenDecimals));
+        tokenPriceScaled = tokenPrice / (10**(baseTokenDecimals - tokenDecimals));
       } else if (baseTokenDecimals < tokenDecimals) {
-        tokenPriceScaled = tokenPrice * (10 ** (tokenDecimals - baseTokenDecimals));
+        tokenPriceScaled = tokenPrice * (10**(tokenDecimals - baseTokenDecimals));
       } else {
         tokenPriceScaled = tokenPrice;
       }

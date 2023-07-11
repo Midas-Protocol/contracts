@@ -32,7 +32,11 @@ contract FixedEurPriceOracle is BasePriceOracle {
   /**
    * @dev Constructor to set `maxSecondsBeforePriceIsStale`.
    */
-  constructor(uint256 _maxSecondsBeforePriceIsStale, address nativeTokenUsdPriceFeed, address eurUsdPriceFeed) {
+  constructor(
+    uint256 _maxSecondsBeforePriceIsStale,
+    address nativeTokenUsdPriceFeed,
+    address eurUsdPriceFeed
+  ) {
     maxSecondsBeforePriceIsStale = _maxSecondsBeforePriceIsStale;
     NATIVE_TOKEN_USD_PRICE_FEED = AggregatorV3Interface(nativeTokenUsdPriceFeed);
     EUR_USD_PRICE_FEED = AggregatorV3Interface(eurUsdPriceFeed);
@@ -79,6 +83,6 @@ contract FixedEurPriceOracle is BasePriceOracle {
     // Format and return price
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10 ** uint256(ERC20Upgradeable(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
   }
 }

@@ -67,7 +67,7 @@ contract SaddleLpPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
     address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10 ** uint256(EIP20Interface(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
@@ -98,7 +98,11 @@ contract SaddleLpPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
    * @param _pool Pool address.
    * @param _underlyings Underlying addresses.
    */
-  function registerPool(address _lpToken, address _pool, address[] memory _underlyings) external onlyOwner {
+  function registerPool(
+    address _lpToken,
+    address _pool,
+    address[] memory _underlyings
+  ) external onlyOwner {
     // require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;

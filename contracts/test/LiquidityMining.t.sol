@@ -69,9 +69,9 @@ contract LiquidityMiningTest is BaseTest {
     rewardDecimal = _rewardDecimal;
     underlyingToken = new MockERC20("UnderlyingToken", "UT", baseDecimal);
     rewardToken = new MockERC20("RewardToken", "RT", rewardDecimal);
-    interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10 ** baseDecimal, 1 * 10 ** baseDecimal);
+    interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10**baseDecimal, 1 * 10**baseDecimal);
     fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1 * 10 ** (baseDecimal - 2));
+    fuseAdmin.initialize(1 * 10**(baseDecimal - 2));
     fusePoolDirectory = new FusePoolDirectory();
     fusePoolDirectory.initialize(false, emptyAddresses);
     cErc20Delegate = new CErc20Delegate();
@@ -152,12 +152,12 @@ contract LiquidityMiningTest is BaseTest {
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
     // seed rewards to flywheel
-    rewardToken.mint(address(rewards), 100 * 10 ** rewardDecimal);
+    rewardToken.mint(address(rewards), 100 * 10**rewardDecimal);
 
     // Start reward distribution at 1 token per second
     rewards.setRewardsInfo(
       ERC20(address(cErc20)),
-      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: uint224(1 * 10 ** rewardDecimal), rewardsEndTimestamp: 0 })
+      FlywheelStaticRewards.RewardsInfo({ rewardsPerSecond: uint224(1 * 10**rewardDecimal), rewardsEndTimestamp: 0 })
     );
 
     // preparation for a later call
@@ -168,7 +168,7 @@ contract LiquidityMiningTest is BaseTest {
     setUpBaseContracts(_baseDecimal, _rewardDecimal);
     setUpPoolAndMarket();
     setUpFlywheel();
-    deposit(1 * 10 ** _baseDecimal);
+    deposit(1 * 10**_baseDecimal);
     vm.warp(block.timestamp + 1);
   }
 
@@ -186,12 +186,12 @@ contract LiquidityMiningTest is BaseTest {
     uint224 percent100 = 100e16; //flywheel.ONE();
 
     // store expected rewards per token (1 token per second over total supply)
-    uint256 rewardsPerTokenPlusFee = (1 * 10 ** rewardDecimal * 1 * 10 ** baseDecimal) / cErc20.totalSupply();
+    uint256 rewardsPerTokenPlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / cErc20.totalSupply();
     uint256 rewardsPerTokenForFee = (rewardsPerTokenPlusFee * percentFee) / percent100;
     uint256 rewardsPerToken = rewardsPerTokenPlusFee - rewardsPerTokenForFee;
 
     // store expected user rewards (user balance times reward per second over 1 token)
-    uint256 userRewards = (rewardsPerToken * cErc20.balanceOf(user)) / (1 * 10 ** baseDecimal);
+    uint256 userRewards = (rewardsPerToken * cErc20.balanceOf(user)) / (1 * 10**baseDecimal);
 
     ERC20 asErc20 = ERC20(address(cErc20));
     // accrue rewards and check against expected
@@ -199,23 +199,23 @@ contract LiquidityMiningTest is BaseTest {
 
     // check market index
     (uint224 index, ) = flywheel.strategyState(asErc20);
-    assertEq(index, 10 ** rewardDecimal + rewardsPerToken, "!index");
+    assertEq(index, 10**rewardDecimal + rewardsPerToken, "!index");
 
     // claim and check user balance
     flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
-    deposit(1 * 10 ** baseDecimal);
+    deposit(1 * 10**baseDecimal);
 
     // for next test, advance 10 seconds instead of 1 (multiply expectations by 10)
     vm.warp(block.timestamp + 10);
 
-    uint256 rewardsPerToken2PlusFee = (1 * 10 ** rewardDecimal * 1 * 10 ** baseDecimal) / cErc20.totalSupply();
+    uint256 rewardsPerToken2PlusFee = (1 * 10**rewardDecimal * 1 * 10**baseDecimal) / cErc20.totalSupply();
     uint256 rewardsPerToken2ForFee = (rewardsPerToken2PlusFee * percentFee) / percent100;
     uint256 rewardsPerToken2 = rewardsPerToken2PlusFee - rewardsPerToken2ForFee;
 
-    uint256 userRewards2 = (10 * (rewardsPerToken2 * cErc20.balanceOf(user))) / (1 * 10 ** baseDecimal);
+    uint256 userRewards2 = (10 * (rewardsPerToken2 * cErc20.balanceOf(user))) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
     flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);

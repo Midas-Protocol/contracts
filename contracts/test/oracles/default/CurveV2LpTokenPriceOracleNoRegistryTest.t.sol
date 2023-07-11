@@ -43,7 +43,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
   function testCurveV2LpTokenPriceOracleCHFBUSD() public forkAtBlock(BSC_MAINNET, 21675481) {
     ICurveV2Pool pool = ICurveV2Pool(epsJCHFBUSD_pool);
     vm.prank(address(mpo));
-    uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10 ** 18;
+    uint256 lp_price = (pool.lp_price() * mpo.price(busd)) / 10**18;
     vm.startPrank(address(mpo));
     uint256 price = oracle.price(epsJCHFBUSD_lp);
     uint256 ulPrice = oracle.getUnderlyingPrice(epsJCHFBUSD_c);
@@ -57,7 +57,7 @@ contract CurveLpTokenPriceOracleNoRegistryTest is BaseTest {
     ICurveV2Pool pool = ICurveV2Pool(epsBnbxBnb_pool);
     vm.startPrank(address(mpo));
     // coins(0) is BNBx
-    uint256 lp_price = (pool.lp_price() * mpo.price(0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275)) / 10 ** 18;
+    uint256 lp_price = (pool.lp_price() * mpo.price(0x1bdd3Cf7F79cfB8EdbB955f20ad99211551BA275)) / 10**18;
     uint256 price = oracle.price(epsBnbxBnb_lp);
 
     // TODO: add these when the oracle is added

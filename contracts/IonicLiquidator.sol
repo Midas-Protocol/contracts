@@ -46,7 +46,11 @@ contract IonicLiquidator is OwnableUpgradeable {
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
    */
-  function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+  function safeApprove(
+    IERC20Upgradeable token,
+    address to,
+    uint256 minAmount
+  ) private {
     uint256 allowance = token.allowance(address(this), to);
 
     if (allowance < minAmount) {
@@ -58,7 +62,11 @@ contract IonicLiquidator is OwnableUpgradeable {
   /**
    * @dev Internal function to approve
    */
-  function justApprove(IERC20Upgradeable token, address to, uint256 amount) private {
+  function justApprove(
+    IERC20Upgradeable token,
+    address to,
+    uint256 amount
+  ) private {
     token.approve(to, amount);
   }
 
@@ -127,9 +135,10 @@ contract IonicLiquidator is OwnableUpgradeable {
    * @notice Safely liquidate an unhealthy loan, confirming that at least `minProfitAmount` in NATIVE profit is seized.
    * @param vars @see LiquidateToTokensWithFlashSwapVars.
    */
-  function safeLiquidateToTokensWithFlashLoan(
-    LiquidateToTokensWithFlashSwapVars calldata vars
-  ) external returns (uint256) {
+  function safeLiquidateToTokensWithFlashLoan(LiquidateToTokensWithFlashSwapVars calldata vars)
+    external
+    returns (uint256)
+  {
     // Input validation
     require(vars.repayAmount > 0, "Repay amount must be greater than 0.");
 
@@ -190,10 +199,10 @@ contract IonicLiquidator is OwnableUpgradeable {
    * Each whitelisted redemption strategy has to be checked to not be able to
    * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
    */
-  function _whitelistRedemptionStrategies(
-    IRedemptionStrategy[] calldata strategies,
-    bool[] calldata whitelisted
-  ) external onlyOwner {
+  function _whitelistRedemptionStrategies(IRedemptionStrategy[] calldata strategies, bool[] calldata whitelisted)
+    external
+    onlyOwner
+  {
     require(
       strategies.length > 0 && strategies.length == whitelisted.length,
       "list of strategies empty or whitelist does not match its length"
@@ -293,7 +302,11 @@ contract IonicLiquidator is OwnableUpgradeable {
   /**
    * @dev Returns an array containing the parameters supplied.
    */
-  function array(address a, address b, address c) private pure returns (address[] memory) {
+  function array(
+    address a,
+    address b,
+    address c
+  ) private pure returns (address[] memory) {
     address[] memory arr = new address[](3);
     arr[0] = a;
     arr[1] = b;

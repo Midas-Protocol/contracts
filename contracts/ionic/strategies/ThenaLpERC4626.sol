@@ -41,7 +41,11 @@ contract ThenaLpERC4626 is IonicERC4626, RewardsClaimer {
     _disableInitializers();
   }
 
-  function initialize(ERC20 _asset, address _rewardsDestination, IonicFlywheel _flywheel) public initializer {
+  function initialize(
+    ERC20 _asset,
+    address _rewardsDestination,
+    IonicFlywheel _flywheel
+  ) public initializer {
     __MidasER4626_init(_asset);
     gauge = GAUGES_FACTORY_VOTER.gauges(_asset);
     ERC20[] memory _rewardTokens = new ERC20[](1);

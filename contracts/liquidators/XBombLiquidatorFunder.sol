@@ -69,10 +69,11 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
    * @param outputAmount the desired output amount
    * @param strategyData the input token
    */
-  function estimateInputAmount(
-    uint256 outputAmount,
-    bytes memory strategyData
-  ) external view returns (IERC20Upgradeable, uint256) {
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
+    external
+    view
+    returns (IERC20Upgradeable, uint256)
+  {
     (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb, ) = abi.decode(
       strategyData,
       (address, address, IERC20Upgradeable, IERC20Upgradeable)
@@ -98,7 +99,11 @@ contract XBombSwap {
   IERC20Upgradeable public testingStable;
   MasterPriceOracle public oracle;
 
-  constructor(IERC20Upgradeable _testingBomb, IERC20Upgradeable _testingStable, MasterPriceOracle _oracle) {
+  constructor(
+    IERC20Upgradeable _testingBomb,
+    IERC20Upgradeable _testingStable,
+    MasterPriceOracle _oracle
+  ) {
     testingBomb = _testingBomb;
     testingStable = _testingStable;
     oracle = _oracle;

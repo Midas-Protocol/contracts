@@ -189,7 +189,11 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
    * @param owner Owner of burned vault shares.
    * @return shares Quantity of vault shares burned in exchange for `assets`.
    */
-  function withdraw(uint256 assets, address receiver, address owner) public override returns (uint256) {
+  function withdraw(
+    uint256 assets,
+    address receiver,
+    address owner
+  ) public override returns (uint256) {
     if (receiver == address(0)) revert InvalidReceiver();
     require(assets > 0, "too little assets");
 
@@ -217,7 +221,11 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
    * @param owner Owner of burned vault shares.
    * @return assets Quantity of `asset` sent to `receiver`.
    */
-  function redeem(uint256 shares, address receiver, address owner) public override returns (uint256 assets) {
+  function redeem(
+    uint256 shares,
+    address receiver,
+    address owner
+  ) public override returns (uint256 assets) {
     if (receiver == address(0)) revert InvalidReceiver();
 
     uint256 withdrawalFee = uint256(fees.withdrawal);
@@ -334,7 +342,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   function _convertToShares(uint256 assets, Math.Rounding rounding) internal view virtual override returns (uint256) {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
-      return assets * 10 ** DECIMAL_OFFSET;
+      return assets * 10**DECIMAL_OFFSET;
     } else {
       return (assets + 1).mulDiv(totalSupply_, totalAssets(), rounding);
     }
@@ -348,7 +356,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
   function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view virtual override returns (uint256) {
     uint256 totalSupply_ = totalSupply();
     if (totalSupply_ == 0) {
-      return shares / 10 ** DECIMAL_OFFSET;
+      return shares / 10**DECIMAL_OFFSET;
     } else {
       return totalAssets().mulDiv(shares, totalSupply_, rounding);
     }
@@ -387,7 +395,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     uint256 depositLimit_ = depositLimit;
     if (paused() || assets >= depositLimit_) return 0;
 
-    uint256 maxMint_ = depositLimit > type(uint256).max / (totalSupply() + 10 ** DECIMAL_OFFSET)
+    uint256 maxMint_ = depositLimit > type(uint256).max / (totalSupply() + 10**DECIMAL_OFFSET)
       ? type(uint256).max
       : _convertToShares(depositLimit_);
 
@@ -489,7 +497,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     }
 
     uint8 decimals_ = IERC20Metadata(asset()).decimals();
-    return (weightedAPR * (10 ** decimals_)) / (bal + amount);
+    return (weightedAPR * (10**decimals_)) / (bal + amount);
   }
 
   /// @notice Returns the weighted apr of all adapters
@@ -506,7 +514,7 @@ contract OptimizedAPRVaultSecondExtension is OptimizedAPRVaultExtension {
     }
 
     uint8 decimals_ = IERC20Metadata(asset()).decimals();
-    return (weightedAPR * (10 ** decimals_)) / bal;
+    return (weightedAPR * (10**decimals_)) / bal;
   }
 
   /// @notice Returns the weighted apr in an hypothetical world where the strategy splits its nav

@@ -26,10 +26,7 @@ contract MockERC4626Dynamic is ERC4626 {
      @param _asset The ERC20 compliant token the Vault should accept.
      @param _flywheel Flywheel to pull in rewardsToken
     */
-  constructor(
-    ERC20 _asset,
-    FlywheelCore _flywheel
-  )
+  constructor(ERC20 _asset, FlywheelCore _flywheel)
     ERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),

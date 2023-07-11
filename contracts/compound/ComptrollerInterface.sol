@@ -40,9 +40,20 @@ interface ComptrollerInterface {
     address cTokenModify,
     uint256 redeemTokens,
     uint256 borrowAmount
-  ) external view returns (uint256, uint256, uint256);
+  )
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
-  function getMaxRedeemOrBorrow(address account, ICErc20 cToken, bool isBorrow) external view returns (uint256);
+  function getMaxRedeemOrBorrow(
+    address account,
+    ICErc20 cToken,
+    bool isBorrow
+  ) external view returns (uint256);
 
   /*** Assets You Are In ***/
 
@@ -52,13 +63,30 @@ interface ComptrollerInterface {
 
   /*** Policy Hooks ***/
 
-  function mintAllowed(address cToken, address minter, uint256 mintAmount) external returns (uint256);
+  function mintAllowed(
+    address cToken,
+    address minter,
+    uint256 mintAmount
+  ) external returns (uint256);
 
-  function redeemAllowed(address cToken, address redeemer, uint256 redeemTokens) external returns (uint256);
+  function redeemAllowed(
+    address cToken,
+    address redeemer,
+    uint256 redeemTokens
+  ) external returns (uint256);
 
-  function redeemVerify(address cToken, address redeemer, uint256 redeemAmount, uint256 redeemTokens) external;
+  function redeemVerify(
+    address cToken,
+    address redeemer,
+    uint256 redeemAmount,
+    uint256 redeemTokens
+  ) external;
 
-  function borrowAllowed(address cToken, address borrower, uint256 borrowAmount) external returns (uint256);
+  function borrowAllowed(
+    address cToken,
+    address borrower,
+    uint256 borrowAmount
+  ) external returns (uint256);
 
   function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external view returns (uint256);
 
@@ -85,11 +113,23 @@ interface ComptrollerInterface {
     uint256 seizeTokens
   ) external returns (uint256);
 
-  function transferAllowed(address cToken, address src, address dst, uint256 transferTokens) external returns (uint256);
+  function transferAllowed(
+    address cToken,
+    address src,
+    address dst,
+    uint256 transferTokens
+  ) external returns (uint256);
 
   /*** Liquidity/Liquidation Calculations ***/
 
-  function getAccountLiquidity(address account) external view returns (uint256, uint256, uint256);
+  function getAccountLiquidity(address account)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
   function liquidateCalculateSeizeTokens(
     address cTokenBorrowed,
@@ -165,9 +205,17 @@ interface ComptrollerExtensionInterface {
 
   function getAccruingFlywheels() external view returns (address[] memory);
 
-  function _supplyCapWhitelist(address cToken, address account, bool whitelisted) external;
+  function _supplyCapWhitelist(
+    address cToken,
+    address account,
+    bool whitelisted
+  ) external;
 
-  function _setBorrowCapForCollateral(address cTokenBorrow, address cTokenCollateral, uint256 borrowCap) external;
+  function _setBorrowCapForCollateral(
+    address cTokenBorrow,
+    address cTokenCollateral,
+    uint256 borrowCap
+  ) external;
 
   function _setBorrowCapForCollateralWhitelist(
     address cTokenBorrow,
@@ -203,7 +251,11 @@ interface ComptrollerExtensionInterface {
 
   function isSupplyCapWhitelisted(address cToken, address account) external view returns (bool);
 
-  function _borrowCapWhitelist(address cToken, address account, bool whitelisted) external;
+  function _borrowCapWhitelist(
+    address cToken,
+    address account,
+    bool whitelisted
+  ) external;
 
   function isBorrowCapWhitelisted(address cToken, address account) external view returns (bool);
 

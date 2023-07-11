@@ -267,10 +267,10 @@ contract UniswapV3PriceOracleTest is BaseTest {
     mpo.initialize(assets, oracles, BasePriceOracle(address(0)), address(this), true, address(wtoken));
   }
 
-  function getPriceFeed(
-    address[] memory underlyings,
-    UniswapV3PriceOracle.AssetConfig[] memory configs
-  ) internal returns (uint256[] memory price) {
+  function getPriceFeed(address[] memory underlyings, UniswapV3PriceOracle.AssetConfig[] memory configs)
+    internal
+    returns (uint256[] memory price)
+  {
     vm.prank(oracle.owner());
     oracle.setPoolFeeds(underlyings, configs);
     vm.roll(1);

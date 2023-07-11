@@ -10,7 +10,11 @@ contract BalancerReentrancyAttacker {
   MasterPriceOracle private _mpo;
   address private _lpToken;
 
-  constructor(IBalancerVault vault, MasterPriceOracle mpo, address lpToken) {
+  constructor(
+    IBalancerVault vault,
+    MasterPriceOracle mpo,
+    address lpToken
+  ) {
     _vault = vault;
     _mpo = mpo;
     _lpToken = lpToken;

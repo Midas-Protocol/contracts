@@ -15,10 +15,11 @@ contract UniswapV2LiquidatorFunder is UniswapV2Liquidator, IFundsConversionStrat
     return _convert(inputToken, inputAmount, strategyData);
   }
 
-  function estimateInputAmount(
-    uint256 outputAmount,
-    bytes memory strategyData
-  ) external view returns (IERC20Upgradeable inputToken, uint256 inputAmount) {
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
+    external
+    view
+    returns (IERC20Upgradeable inputToken, uint256 inputAmount)
+  {
     (IUniswapV2Router02 uniswapV2Router, address[] memory swapPath) = abi.decode(
       strategyData,
       (IUniswapV2Router02, address[])

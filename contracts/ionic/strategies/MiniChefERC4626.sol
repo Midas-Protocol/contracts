@@ -16,17 +16,33 @@ struct UserInfo {
 }
 
 interface IRewarder {
-  function pendingTokens(uint256, address, uint256) external view returns (address[] memory, uint256[] memory);
+  function pendingTokens(
+    uint256,
+    address,
+    uint256
+  ) external view returns (address[] memory, uint256[] memory);
 }
 
 interface IMiniChefV2 {
   function userInfo(uint256 pid, address user) external view returns (UserInfo memory);
 
-  function deposit(uint256 pid, uint256 amount, address to) external;
+  function deposit(
+    uint256 pid,
+    uint256 amount,
+    address to
+  ) external;
 
-  function withdraw(uint256 pid, uint256 amount, address to) external;
+  function withdraw(
+    uint256 pid,
+    uint256 amount,
+    address to
+  ) external;
 
-  function withdrawAndHarvest(uint256 pid, uint256 amount, address to) external;
+  function withdrawAndHarvest(
+    uint256 pid,
+    uint256 amount,
+    address to
+  ) external;
 
   function rewarder(uint256) external view returns (IRewarder);
 

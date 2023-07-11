@@ -15,7 +15,11 @@ interface IRouter {
     bool stable
   ) external view returns (uint256 reserveA, uint256 reserveB);
 
-  function pairFor(address tokenA, address tokenB, bool stable) external view returns (address pair);
+  function pairFor(
+    address tokenA,
+    address tokenB,
+    bool stable
+  ) external view returns (address pair);
 
   function removeLiquidity(
     address tokenA,
@@ -38,7 +42,13 @@ interface IRouter {
     uint256 amountBMin,
     address to,
     uint256 deadline
-  ) external returns (uint256 amountA, uint256 amountB, uint256 liquidity);
+  )
+    external
+    returns (
+      uint256 amountA,
+      uint256 amountB,
+      uint256 liquidity
+    );
 
   function swapExactTokensForTokensSimple(
     uint256 amountIn,
@@ -66,5 +76,12 @@ interface IRouter {
     bool stable,
     uint256 amountADesired,
     uint256 amountBDesired
-  ) external view returns (uint256 amountA, uint256 amountB, uint256 liquidity);
+  )
+    external
+    view
+    returns (
+      uint256 amountA,
+      uint256 amountB,
+      uint256 liquidity
+    );
 }

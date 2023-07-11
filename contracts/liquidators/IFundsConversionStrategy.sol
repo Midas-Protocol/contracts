@@ -11,8 +11,8 @@ interface IFundsConversionStrategy is IRedemptionStrategy {
     bytes memory strategyData
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount);
 
-  function estimateInputAmount(
-    uint256 outputAmount,
-    bytes memory strategyData
-  ) external view returns (IERC20Upgradeable inputToken, uint256 inputAmount);
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
+    external
+    view
+    returns (IERC20Upgradeable inputToken, uint256 inputAmount);
 }

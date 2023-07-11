@@ -55,10 +55,10 @@ contract IonicFlywheelLensRouter {
     return _getMarketRewardsInfo(markets, pool);
   }
 
-  function _getMarketRewardsInfo(
-    ICErc20[] memory markets,
-    IComptroller comptroller
-  ) internal returns (MarketRewardsInfo[] memory) {
+  function _getMarketRewardsInfo(ICErc20[] memory markets, IComptroller comptroller)
+    internal
+    returns (MarketRewardsInfo[] memory)
+  {
     if (address(comptroller) == address(0) || markets.length == 0) return new MarketRewardsInfo[](0);
 
     address[] memory flywheels = comptroller.getAccruingFlywheels();
@@ -109,7 +109,7 @@ contract IonicFlywheelLensRouter {
   }
 
   function scaleIndexDiff(uint256 indexDiff, uint256 decimals) internal pure returns (uint256) {
-    return decimals <= 18 ? uint256(indexDiff) * (10 ** (18 - decimals)) : uint256(indexDiff) / (10 ** (decimals - 18));
+    return decimals <= 18 ? uint256(indexDiff) * (10**(18 - decimals)) : uint256(indexDiff) / (10**(decimals - 18));
   }
 
   function getRewardSpeedPerSecondPerToken(
@@ -228,7 +228,14 @@ contract IonicFlywheelLensRouter {
     ERC20 market,
     IonicFlywheelCore[] calldata flywheels,
     bool[] calldata accrue
-  ) external returns (IonicFlywheelCore[] memory, address[] memory rewardTokens, uint256[] memory rewards) {
+  )
+    external
+    returns (
+      IonicFlywheelCore[] memory,
+      address[] memory rewardTokens,
+      uint256[] memory rewards
+    )
+  {
     uint256 size = flywheels.length;
     rewards = new uint256[](size);
     rewardTokens = new address[](size);
@@ -251,10 +258,14 @@ contract IonicFlywheelLensRouter {
     return (flywheels, rewardTokens, rewards);
   }
 
-  function claimRewardsForPool(
-    address user,
-    IComptroller comptroller
-  ) public returns (IonicFlywheelCore[] memory, address[] memory, uint256[] memory) {
+  function claimRewardsForPool(address user, IComptroller comptroller)
+    public
+    returns (
+      IonicFlywheelCore[] memory,
+      address[] memory,
+      uint256[] memory
+    )
+  {
     ICErc20[] memory cerc20s = comptroller.getAllMarkets();
     ERC20[] memory markets = new ERC20[](cerc20s.length);
     address[] memory flywheelAddresses = comptroller.getAccruingFlywheels();
@@ -278,7 +289,14 @@ contract IonicFlywheelLensRouter {
     ERC20[] memory markets,
     IonicFlywheelCore[] memory flywheels,
     bool[] memory accrue
-  ) public returns (IonicFlywheelCore[] memory, address[] memory rewardTokens, uint256[] memory rewards) {
+  )
+    public
+    returns (
+      IonicFlywheelCore[] memory,
+      address[] memory rewardTokens,
+      uint256[] memory rewards
+    )
+  {
     rewards = new uint256[](flywheels.length);
     rewardTokens = new address[](flywheels.length);
 

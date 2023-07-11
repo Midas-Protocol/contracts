@@ -15,7 +15,11 @@ contract IonicFlywheel is IonicFlywheelCore, IIonicFlywheel {
 
   function flywheelPreBorrowerAction(address market, address borrower) external {}
 
-  function flywheelPreTransferAction(address market, address src, address dst) external {
+  function flywheelPreTransferAction(
+    address market,
+    address src,
+    address dst
+  ) external {
     accrue(ERC20(market), src, dst);
   }
 

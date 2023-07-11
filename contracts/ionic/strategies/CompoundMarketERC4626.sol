@@ -36,7 +36,11 @@ contract CompoundMarketERC4626 is IonicERC4626, IGenericLender {
     _disableInitializers();
   }
 
-  function initialize(ICErc20 market_, uint256 blocksPerYear_, OptimizedVaultsRegistry registry_) public initializer {
+  function initialize(
+    ICErc20 market_,
+    uint256 blocksPerYear_,
+    OptimizedVaultsRegistry registry_
+  ) public initializer {
     __MidasER4626_init(ERC20Upgradeable(market_.underlying()));
     market = market_;
     blocksPerYear = blocksPerYear_;

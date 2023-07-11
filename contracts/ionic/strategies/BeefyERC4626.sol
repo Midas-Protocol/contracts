@@ -64,7 +64,11 @@ contract BeefyERC4626 is IonicERC4626 {
      @param _beefyVault The Beefy Vault contract.
      @param _withdrawalFee of the beefyVault in BPS
     */
-  function initialize(ERC20Upgradeable asset, IBeefyVault _beefyVault, uint256 _withdrawalFee) public initializer {
+  function initialize(
+    ERC20Upgradeable asset,
+    IBeefyVault _beefyVault,
+    uint256 _withdrawalFee
+  ) public initializer {
     __MidasER4626_init(asset);
 
     BPS_DENOMINATOR = 10_000;

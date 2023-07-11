@@ -14,10 +14,7 @@ interface IStellaDistributorV2 {
 
   function withdraw(uint256 _pid, uint256 _amount) external;
 
-  function userInfo(
-    uint256 _pid,
-    address _owner
-  )
+  function userInfo(uint256 _pid, address _owner)
     external
     view
     returns (
@@ -27,13 +24,15 @@ interface IStellaDistributorV2 {
       uint256 nextHarvestUntil // When can the user harvest again.
     );
 
-  function pendingTokens(
-    uint256 _pid,
-    address _user
-  )
+  function pendingTokens(uint256 _pid, address _user)
     external
     view
-    returns (address[] memory addresses, string[] memory symbols, uint256[] memory decimals, uint256[] memory amounts);
+    returns (
+      address[] memory addresses,
+      string[] memory symbols,
+      uint256[] memory decimals,
+      uint256[] memory amounts
+    );
 
   function poolTotalLp(uint256 _pid) external view returns (uint256);
 }

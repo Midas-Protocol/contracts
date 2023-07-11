@@ -18,10 +18,10 @@ contract RewardsClaimer is Initializable {
   /// @notice the array of reward tokens to send to
   ERC20Upgradeable[] public rewardTokens;
 
-  function __RewardsClaimer_init(
-    address _rewardDestination,
-    ERC20Upgradeable[] memory _rewardTokens
-  ) internal onlyInitializing {
+  function __RewardsClaimer_init(address _rewardDestination, ERC20Upgradeable[] memory _rewardTokens)
+    internal
+    onlyInitializing
+  {
     rewardDestination = _rewardDestination;
     rewardTokens = _rewardTokens;
   }

@@ -67,9 +67,7 @@ interface IAlgebraPoolState {
    * In addition, these values are only relative and must be used only in comparison to previous snapshots for
    * a specific position.
    */
-  function ticks(
-    int24 tick
-  )
+  function ticks(int24 tick)
     external
     view
     returns (
@@ -97,9 +95,7 @@ interface IAlgebraPoolState {
    * Returns fees0 The computed amount of token0 owed to the position as of the last mint/burn/poke;
    * Returns fees1 The computed amount of token1 owed to the position as of the last mint/burn/poke
    */
-  function positions(
-    bytes32 key
-  )
+  function positions(bytes32 key)
     external
     view
     returns (
@@ -125,9 +121,7 @@ interface IAlgebraPoolState {
    * Returns averageTick Time-weighted average tick;
    * Returns volumePerLiquidityCumulative Cumulative swap volume per liquidity for the life of the pool as of the timepoint timestamp;
    */
-  function timepoints(
-    uint256 index
-  )
+  function timepoints(uint256 index)
     external
     view
     returns (

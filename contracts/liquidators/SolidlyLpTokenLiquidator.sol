@@ -19,7 +19,11 @@ contract SolidlyLpTokenLiquidator is IRedemptionStrategy {
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
    */
-  function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) internal {
+  function safeApprove(
+    IERC20Upgradeable token,
+    address to,
+    uint256 minAmount
+  ) internal {
     uint256 allowance = token.allowance(address(this), to);
 
     if (allowance < minAmount) {

@@ -101,7 +101,11 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     return getCurrentLeverageRatio();
   }
 
-  function receiveFlashLoan(address assetAddress, uint256 borrowedAmount, bytes calldata data) external override {
+  function receiveFlashLoan(
+    address assetAddress,
+    uint256 borrowedAmount,
+    bytes calldata data
+  ) external override {
     if (msg.sender == address(collateralMarket)) {
       // increasing the leverage ratio
       uint256 borrowAmount = abi.decode(data, (uint256));
@@ -362,10 +366,10 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     convertAllTo(collateralAsset, stableAsset);
   }
 
-  function convertAllTo(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) private returns (uint256 outputAmount) {
+  function convertAllTo(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    private
+    returns (uint256 outputAmount)
+  {
     uint256 inputAmount = inputToken.balanceOf(address(this));
     (IRedemptionStrategy[] memory redemptionStrategies, bytes[] memory strategiesData) = factory
       .getRedemptionStrategies(inputToken, outputToken);

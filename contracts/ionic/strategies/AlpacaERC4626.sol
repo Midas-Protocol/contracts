@@ -46,7 +46,11 @@ contract AlpacaERC4626 is IonicERC4626 {
      @param _alpacaVault The Alpaca Vault contract.
      @param _wtoken the wrapped native asset token contract address.
     */
-  function initialize(ERC20Upgradeable asset, IAlpacaVault _alpacaVault, IW_NATIVE _wtoken) public initializer {
+  function initialize(
+    ERC20Upgradeable asset,
+    IAlpacaVault _alpacaVault,
+    IW_NATIVE _wtoken
+  ) public initializer {
     __MidasER4626_init(asset);
 
     performanceFee = 5e16;

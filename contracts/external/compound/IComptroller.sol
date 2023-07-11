@@ -36,9 +36,23 @@ interface IComptroller {
     address cTokenModify,
     uint256 redeemTokens,
     uint256 borrowAmount
-  ) external view returns (uint256, uint256, uint256);
+  )
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
-  function getAccountLiquidity(address account) external view returns (uint256, uint256, uint256);
+  function getAccountLiquidity(address account)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
 
   function _setPriceOracle(IPriceOracle newOracle) external returns (uint256);
 
@@ -90,7 +104,11 @@ interface IComptroller {
     uint256 collateralFactorMantissa
   ) external returns (uint256);
 
-  function getMaxRedeemOrBorrow(address account, ICToken cTokenModify, bool isBorrow) external view returns (uint256);
+  function getMaxRedeemOrBorrow(
+    address account,
+    ICToken cTokenModify,
+    bool isBorrow
+  ) external view returns (uint256);
 
   function borrowCapForCollateral(address borrowed, address collateral) external view returns (uint256);
 

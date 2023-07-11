@@ -94,10 +94,10 @@ contract AlgebraPriceOracleTest is BaseTest {
     assertApproxEqRel(prices[1], expPrices[1], 1e17, "!Price Error");
   }
 
-  function getPriceFeed(
-    address[] memory underlyings,
-    ConcentratedLiquidityBasePriceOracle.AssetConfig[] memory configs
-  ) internal returns (uint256[] memory price) {
+  function getPriceFeed(address[] memory underlyings, ConcentratedLiquidityBasePriceOracle.AssetConfig[] memory configs)
+    internal
+    returns (uint256[] memory price)
+  {
     vm.prank(oracle.owner());
     oracle.setPoolFeeds(underlyings, configs);
     vm.roll(1);

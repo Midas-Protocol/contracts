@@ -12,17 +12,33 @@ interface ILpTokenStaker {
 
   function userInfo(address _token, address _user) external view returns (uint256, uint256);
 
-  function poolInfo(address) external view returns (uint256, uint256, uint256, uint256);
+  function poolInfo(address)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
 
   function balanceOf(address) external returns (uint256);
 
   function claimableReward(address, address[] memory) external view returns (uint256[] memory);
 
   // Deposit LP tokens into the contract. Also triggers a claim.
-  function deposit(ERC20Upgradeable _token, uint256 _amount, bool _claimRewards) external returns (uint256);
+  function deposit(
+    ERC20Upgradeable _token,
+    uint256 _amount,
+    bool _claimRewards
+  ) external returns (uint256);
 
   // Withdraw LP tokens. Also triggers a claim.
-  function withdraw(ERC20Upgradeable _token, uint256 _amount, bool _claimRewards) external returns (uint256);
+  function withdraw(
+    ERC20Upgradeable _token,
+    uint256 _amount,
+    bool _claimRewards
+  ) external returns (uint256);
 }
 
 /**

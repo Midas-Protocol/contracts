@@ -84,7 +84,11 @@ contract AddressesProvider is OwnableUpgradeable {
    * @param plugin the ERC4626 plugin address
    * @param contractInterface a string that uniquely identifies the contract's interface
    */
-  function setPlugin(address asset, address plugin, string calldata contractInterface) public onlyOwner {
+  function setPlugin(
+    address asset,
+    address plugin,
+    string calldata contractInterface
+  ) public onlyOwner {
     plugins[asset] = Contract(plugin, contractInterface);
   }
 
@@ -171,7 +175,11 @@ contract AddressesProvider is OwnableUpgradeable {
     return jarvisPoolsConfig;
   }
 
-  function setBalancerPoolForTokens(address inputToken, address outputToken, address pool) external onlyOwner {
+  function setBalancerPoolForTokens(
+    address inputToken,
+    address outputToken,
+    address pool
+  ) external onlyOwner {
     balancerPoolForTokens[inputToken][outputToken] = pool;
   }
 

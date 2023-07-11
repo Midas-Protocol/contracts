@@ -65,7 +65,7 @@ contract UniswapTwapPriceOracleV2 is Initializable, BasePriceOracle {
     address underlying = cToken.underlying();
 
     // Get price, format, and return
-    uint256 baseUnit = 10 ** uint256(ERC20Upgradeable(underlying).decimals());
+    uint256 baseUnit = 10**uint256(ERC20Upgradeable(underlying).decimals());
     return (_price(underlying) * 1e18) / baseUnit;
   }
 
@@ -81,8 +81,7 @@ contract UniswapTwapPriceOracleV2 is Initializable, BasePriceOracle {
     return
       baseToken == address(wtoken)
         ? twap
-        : (twap * BasePriceOracle(msg.sender).price(baseToken)) /
-          (10 ** uint256(ERC20Upgradeable(baseToken).decimals()));
+        : (twap * BasePriceOracle(msg.sender).price(baseToken)) / (10**uint256(ERC20Upgradeable(baseToken).decimals()));
   }
 
   /**

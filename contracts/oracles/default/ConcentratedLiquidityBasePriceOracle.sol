@@ -83,7 +83,7 @@ abstract contract ConcentratedLiquidityBasePriceOracle is BasePriceOracle, SafeO
     address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
-    return (_price(underlying) * 1e18) / (10 ** uint256(EIP20Interface(underlying).decimals()));
+    return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
   }
 
   /**
@@ -96,7 +96,7 @@ abstract contract ConcentratedLiquidityBasePriceOracle is BasePriceOracle, SafeO
     address priceToken,
     uint160 sqrtPriceX96
   ) public pure returns (uint256 price_) {
-    price_ = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2 ** (96 * 2)) / 1e18);
+    price_ = FullMath.mulDiv(sqrtPriceX96, sqrtPriceX96, uint256(2**(96 * 2)) / 1e18);
     if (token0 != priceToken) price_ = 1e36 / price_;
   }
 

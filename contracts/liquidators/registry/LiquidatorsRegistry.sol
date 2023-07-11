@@ -17,10 +17,11 @@ contract LiquidatorsRegistry is LiquidatorsRegistryStorage, DiamondBase {
    * @param extensionToAdd the extension whose functions are to be added
    * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
-  function _registerExtension(
-    DiamondExtension extensionToAdd,
-    DiamondExtension extensionToReplace
-  ) public override onlyOwner {
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace)
+    public
+    override
+    onlyOwner
+  {
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 

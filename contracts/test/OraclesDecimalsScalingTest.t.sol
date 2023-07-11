@@ -60,8 +60,8 @@ contract OraclesDecimalsScalingTest is BaseTest {
 
           uint8 decimals = IERC20MetadataUpgradeable(underlying).decimals();
           uint256 expectedScaledPrice = decimals <= 18
-            ? uint256(oraclePrice) * (10 ** (18 - decimals))
-            : uint256(oraclePrice) / (10 ** (decimals - 18));
+            ? uint256(oraclePrice) * (10**(18 - decimals))
+            : uint256(oraclePrice) / (10**(decimals - 18));
 
           assertEq(scaledPrice, expectedScaledPrice, "the comptroller expects prices to be scaled by 1e(36-decimals)");
         }

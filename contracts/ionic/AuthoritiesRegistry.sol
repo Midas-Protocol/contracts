@@ -49,7 +49,12 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     auth.configureLeveredPositionCapabilities(pool);
   }
 
-  function canCall(address pool, address user, address target, bytes4 functionSig) external view returns (bool) {
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool) {
     PoolRolesAuthority authorityForPool = poolsAuthorities[pool];
     if (address(authorityForPool) == address(0)) {
       // allow everyone to be a supplier by default
@@ -59,7 +64,12 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     return authorityForPool.canCall(user, target, functionSig);
   }
 
-  function setUserRole(address pool, address user, uint8 role, bool enabled) external {
+  function setUserRole(
+    address pool,
+    address user,
+    uint8 role,
+    bool enabled
+  ) external {
     PoolRolesAuthority poolAuth = poolsAuthorities[pool];
 
     require(address(poolAuth) != address(0), "auth does not exist");

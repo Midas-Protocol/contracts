@@ -11,7 +11,11 @@ import "./ICToken.sol";
 interface ICErc20 is ICToken {
   function underlying() external view returns (address);
 
-  function liquidateBorrow(address borrower, uint256 repayAmount, ICToken cTokenCollateral) external returns (uint256);
+  function liquidateBorrow(
+    address borrower,
+    uint256 repayAmount,
+    ICToken cTokenCollateral
+  ) external returns (uint256);
 
   function getTotalUnderlyingSupplied() external view returns (uint256);
 }

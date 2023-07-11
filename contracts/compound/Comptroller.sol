@@ -240,7 +240,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param mintAmount The amount of underlying being supplied to the market in exchange for tokens
    * @return 0 if the mint is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
    */
-  function mintAllowed(address cTokenAddress, address minter, uint256 mintAmount) external override returns (uint256) {
+  function mintAllowed(
+    address cTokenAddress,
+    address minter,
+    uint256 mintAmount
+  ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!mintGuardianPaused[cTokenAddress], "!mint:paused");
 
@@ -280,7 +284,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param redeemTokens The number of cTokens to exchange for the underlying asset in the market
    * @return 0 if the redeem is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
    */
-  function redeemAllowed(address cToken, address redeemer, uint256 redeemTokens) external override returns (uint256) {
+  function redeemAllowed(
+    address cToken,
+    address redeemer,
+    uint256 redeemTokens
+  ) external override returns (uint256) {
     uint256 allowed = redeemAllowedInternal(cToken, redeemer, redeemTokens);
     if (allowed != uint256(Error.NO_ERROR)) {
       return allowed;
@@ -419,7 +427,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param borrowAmount The amount of underlying the account would borrow
    * @return 0 if the borrow is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
    */
-  function borrowAllowed(address cToken, address borrower, uint256 borrowAmount) external override returns (uint256) {
+  function borrowAllowed(
+    address cToken,
+    address borrower,
+    uint256 borrowAmount
+  ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!borrowGuardianPaused[cToken], "!borrow:paused");
 
@@ -689,7 +701,11 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param src The account which sources the tokens
    * @param dst The account which receives the tokens
    */
-  function flywheelPreTransferAction(address cToken, address src, address dst) internal {
+  function flywheelPreTransferAction(
+    address cToken,
+    address src,
+    address dst
+  ) internal {
     for (uint256 i = 0; i < rewardsDistributors.length; i++)
       IIonicFlywheel(rewardsDistributors[i]).flywheelPreTransferAction(cToken, src, dst);
   }
@@ -716,7 +732,16 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     uint256 borrowedAssetPrice;
   }
 
-  function getAccountLiquidity(address account) public view override returns (uint256, uint256, uint256) {
+  function getAccountLiquidity(address account)
+    public
+    view
+    override
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,
       ICErc20(address(0)),
@@ -741,7 +766,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     address cTokenModify,
     uint256 redeemTokens,
     uint256 borrowAmount
-  ) public view returns (uint256, uint256, uint256) {
+  )
+    public
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     (Error err, uint256 liquidity, uint256 shortfall) = getHypotheticalAccountLiquidityInternal(
       account,
       ICErc20(cTokenModify),
@@ -766,7 +799,15 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     ICErc20 cTokenModify,
     uint256 redeemTokens,
     uint256 borrowAmount
-  ) internal view returns (Error, uint256, uint256) {
+  )
+    internal
+    view
+    returns (
+      Error,
+      uint256,
+      uint256
+    )
+  {
     AccountLiquidityLocalVars memory vars; // Holds all our calculation results
 
     if (address(cTokenModify) != address(0)) {

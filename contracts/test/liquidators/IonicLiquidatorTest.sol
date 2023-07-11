@@ -15,7 +15,11 @@ import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract MockRedemptionStrategy is IRedemptionStrategy {
-  function redeem(IERC20Upgradeable, uint256, bytes memory) external returns (IERC20Upgradeable, uint256) {
+  function redeem(
+    IERC20Upgradeable,
+    uint256,
+    bytes memory
+  ) external returns (IERC20Upgradeable, uint256) {
     return (IERC20Upgradeable(address(0)), 1);
   }
 
@@ -103,8 +107,8 @@ contract IonicLiquidatorTest is BaseTest {
 
     vars.debtFundingStrategies[0] = IFundsConversionStrategy(0x98110E8482E4e286716AC0671438BDd84C4D838c);
     vars.debtFundingStrategiesData[
-      0
-    ] = hex"0000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960";
+        0
+      ] = hex"0000000000000000000000002791bca1f2de4661ed88a30c99a7a9449aa84174000000000000000000000000aec757bf73cc1f4609a1459205835dd40b4e3f290000000000000000000000000000000000000000000000000000000000000960";
 
     // fsl.safeLiquidateToTokensWithFlashLoan(vars);
 

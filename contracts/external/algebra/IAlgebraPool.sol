@@ -22,9 +22,7 @@ interface IAlgebraPool is IAlgebraPoolState, IAlgebraPoolActions {
    * @return volatilityCumulatives Cumulative standard deviation as of each `secondsAgos`
    * @return volumePerAvgLiquiditys Cumulative swap volume per liquidity as of each `secondsAgos`
    */
-  function getTimepoints(
-    uint32[] calldata secondsAgos
-  )
+  function getTimepoints(uint32[] calldata secondsAgos)
     external
     view
     returns (

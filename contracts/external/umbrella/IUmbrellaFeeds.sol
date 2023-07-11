@@ -54,9 +54,14 @@ interface IUmbrellaFeeds {
   /// @return price
   /// @return timestamp
   /// @return heartbeat
-  function getPriceTimestampHeartbeat(
-    bytes32 _key
-  ) external view returns (uint128 price, uint32 timestamp, uint24 heartbeat);
+  function getPriceTimestampHeartbeat(bytes32 _key)
+    external
+    view
+    returns (
+      uint128 price,
+      uint32 timestamp,
+      uint24 heartbeat
+    );
 
   /// @dev This method should be used only for Layer2 as it is more gas consuming than others views.
   /// @notice It does not revert on empty data.

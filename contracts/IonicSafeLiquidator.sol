@@ -117,18 +117,33 @@ contract IonicSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
   /**
    * @dev Callback function for PCS flashloans.
    */
-  function pancakeCall(address sender, uint256 amount0, uint256 amount1, bytes calldata data) external {
+  function pancakeCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
   /**
    * @dev Callback function for BeamSwap flashloans.
    */
-  function BeamSwapCall(address sender, uint256 amount0, uint256 amount1, bytes calldata data) external {
+  function BeamSwapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
-  function moraswapCall(address sender, uint256 amount0, uint256 amount1, bytes calldata data) external {
+  function moraswapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
     uniswapV2Call(sender, amount0, amount1, data);
   }
 
@@ -269,7 +284,11 @@ contract IonicSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
    * @param outputAmount The output amount of NATIVE.
    * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
    */
-  function exchangeToExactEth(address from, uint256 outputAmount, IUniswapV2Router02 uniswapV2Router) private {
+  function exchangeToExactEth(
+    address from,
+    uint256 outputAmount,
+    IUniswapV2Router02 uniswapV2Router
+  ) private {
     if (from == address(0)) return;
 
     // From W_NATIVE something else?
@@ -310,7 +329,12 @@ contract IonicSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
   /**
    * @dev Callback function for Uniswap flashloans.
    */
-  function uniswapV2Call(address sender, uint256 amount0, uint256 amount1, bytes calldata data) public override {
+  function uniswapV2Call(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) public override {
     // Decode params
     LiquidateAndTakeDebtPositionVars memory vars = abi.decode(data[4:], (LiquidateAndTakeDebtPositionVars));
 
@@ -543,7 +567,11 @@ contract IonicSafeLiquidator is SafeOwnableUpgradeable, IUniswapV2Callee {
   /**
    * @dev Returns an array containing the parameters supplied.
    */
-  function array(address a, address b, address c) private pure returns (address[] memory) {
+  function array(
+    address a,
+    address b,
+    address c
+  ) private pure returns (address[] memory) {
     address[] memory arr = new address[](3);
     arr[0] = a;
     arr[1] = b;

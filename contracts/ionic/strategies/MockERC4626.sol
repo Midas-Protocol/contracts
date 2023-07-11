@@ -21,9 +21,7 @@ contract MockERC4626 is ERC4626 {
     @notice Creates a new Vault that accepts a specific underlying token.
      @param _asset The ERC20 compliant token the Vault should accept.
     */
-  constructor(
-    ERC20 _asset
-  )
+  constructor(ERC20 _asset)
     ERC4626(
       _asset,
       string(abi.encodePacked("Midas ", _asset.name(), " Vault")),

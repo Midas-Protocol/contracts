@@ -93,7 +93,7 @@ contract MaxBorrowTest is WithPool {
 
       uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
       uint256 maxDaiBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cDaiToken)));
-      assertApproxEqAbs((maxBorrow * 1e18) / 10 ** cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
+      assertApproxEqAbs((maxBorrow * 1e18) / 10**cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
     }
 
     // borrow cap for collateral test

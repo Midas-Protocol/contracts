@@ -35,7 +35,12 @@ contract FLRTest is BaseTest {
     lensRouter = new IonicFlywheelLensRouter(fpd);
   }
 
-  function setUpFlywheel(address _rewardToken, address mkt, IComptroller comptroller, address admin) public {
+  function setUpFlywheel(
+    address _rewardToken,
+    address mkt,
+    IComptroller comptroller,
+    address admin
+  ) public {
     flywheel = new IonicFlywheel();
     flywheel.initialize(
       ERC20(_rewardToken),
@@ -54,13 +59,13 @@ contract FLRTest is BaseTest {
     require(comptroller._addRewardsDistributor(address(flywheel)) == 0);
 
     // seed rewards to flywheel
-    deal(_rewardToken, address(rewards), 1_000_000 * (10 ** ERC20(_rewardToken).decimals()));
+    deal(_rewardToken, address(rewards), 1_000_000 * (10**ERC20(_rewardToken).decimals()));
 
     // Start reward distribution at 1 token per second
     rewards.setRewardsInfo(
       ERC20(mkt),
       FlywheelStaticRewards.RewardsInfo({
-        rewardsPerSecond: uint224(789 * 10 ** ERC20(_rewardToken).decimals()),
+        rewardsPerSecond: uint224(789 * 10**ERC20(_rewardToken).decimals()),
         rewardsEndTimestamp: 0
       })
     );

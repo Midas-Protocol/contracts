@@ -7,9 +7,17 @@ import { RewardsClaimer } from "../RewardsClaimer.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 interface IChildGauge {
-  function deposit(uint256 amount, address user, bool claim_rewards) external;
+  function deposit(
+    uint256 amount,
+    address user,
+    bool claim_rewards
+  ) external;
 
-  function withdraw(uint256 amount, address user, bool claim_rewards) external;
+  function withdraw(
+    uint256 amount,
+    address user,
+    bool claim_rewards
+  ) external;
 
   function claim_rewards() external;
 

@@ -93,13 +93,13 @@ contract GammaLpTokenWrapper is IRedemptionStrategy {
         uint256 ratio;
         uint256 price;
         {
-          uint256 token0Decimals = 10 ** ERC20Upgradeable(token0).decimals();
-          uint256 token1Decimals = 10 ** ERC20Upgradeable(token1).decimals();
+          uint256 token0Decimals = 10**ERC20Upgradeable(token0).decimals();
+          uint256 token1Decimals = 10**ERC20Upgradeable(token1).decimals();
           {
             uint256 decimalsDiff = (1e18 * token0Decimals) / token1Decimals;
             uint256 decimalsDenominator = decimalsDiff > 1e12 ? 1e6 : 1;
             (uint256 sqrtPriceX96, , , , , , ) = IAlgebraPool(vault.pool()).globalState();
-            price = ((sqrtPriceX96 ** 2 * (decimalsDiff / decimalsDenominator)) / (2 ** 192)) * decimalsDenominator;
+            price = ((sqrtPriceX96**2 * (decimalsDiff / decimalsDenominator)) / (2**192)) * decimalsDenominator;
           }
           (uint256 amountStart, uint256 amountEnd) = proxy.getDepositAmount(address(vault), token0, token0Decimals);
           uint256 amount1 = (((amountStart + amountEnd) / 2) * 1e18) / token1Decimals;

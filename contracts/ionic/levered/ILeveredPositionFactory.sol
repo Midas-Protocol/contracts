@@ -28,14 +28,18 @@ interface ILeveredPositionFactoryBase {
 
   function _setLiquidatorsRegistry(ILiquidatorsRegistry _liquidatorsRegistry) external;
 
-  function _setPairWhitelisted(ICErc20 _collateralMarket, ICErc20 _stableMarket, bool _whitelisted) external;
+  function _setPairWhitelisted(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    bool _whitelisted
+  ) external;
 }
 
 interface ILeveredPositionFactoryExtension {
-  function getRedemptionStrategies(
-    IERC20Upgradeable inputToken,
-    IERC20Upgradeable outputToken
-  ) external view returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
+  function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    view
+    returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData);
 
   function getMinBorrowNative() external view returns (uint256);
 

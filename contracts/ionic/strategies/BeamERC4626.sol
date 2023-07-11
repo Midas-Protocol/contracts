@@ -10,11 +10,28 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 interface IVault {
   // Info of each user.
 
-  function userInfo(uint256 _pid, address _address) external view returns (uint256, uint256, uint256, uint256);
+  function userInfo(uint256 _pid, address _address)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    );
 
-  function poolInfo(
-    uint256 _pid
-  ) external view returns (ERC20Upgradeable, uint256, uint256, uint256, uint16, uint256, uint256);
+  function poolInfo(uint256 _pid)
+    external
+    view
+    returns (
+      ERC20Upgradeable,
+      uint256,
+      uint256,
+      uint256,
+      uint16,
+      uint256,
+      uint256
+    );
 
   function balanceOf(address) external returns (uint256);
 

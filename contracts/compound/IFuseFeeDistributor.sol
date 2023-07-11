@@ -12,15 +12,15 @@ interface IFuseFeeDistributor {
 
   function interestFeeRate() external view returns (uint256);
 
-  function comptrollerImplementationWhitelist(
-    address oldImplementation,
-    address newImplementation
-  ) external view returns (bool);
+  function comptrollerImplementationWhitelist(address oldImplementation, address newImplementation)
+    external
+    view
+    returns (bool);
 
-  function pluginImplementationWhitelist(
-    address oldImplementation,
-    address newImplementation
-  ) external view returns (bool);
+  function pluginImplementationWhitelist(address oldImplementation, address newImplementation)
+    external
+    view
+    returns (bool);
 
   function cErc20DelegateWhitelist(
     address oldImplementation,
@@ -30,9 +30,14 @@ interface IFuseFeeDistributor {
 
   function latestComptrollerImplementation(address oldImplementation) external view returns (address);
 
-  function latestCErc20Delegate(
-    address oldImplementation
-  ) external view returns (address cErc20Delegate, bool allowResign, bytes memory becomeImplementationData);
+  function latestCErc20Delegate(address oldImplementation)
+    external
+    view
+    returns (
+      address cErc20Delegate,
+      bool allowResign,
+      bytes memory becomeImplementationData
+    );
 
   function latestPluginImplementation(address oldImplementation) external view returns (address);
 
@@ -42,7 +47,12 @@ interface IFuseFeeDistributor {
 
   function deployCErc20(bytes calldata constructorData) external returns (address);
 
-  function canCall(address pool, address user, address target, bytes4 functionSig) external view returns (bool);
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool);
 
   function authoritiesRegistry() external view returns (AuthoritiesRegistry);
 

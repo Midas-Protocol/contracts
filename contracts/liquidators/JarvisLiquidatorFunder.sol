@@ -92,10 +92,11 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
    * @param outputAmount the desired output amount
    * @param strategyData the input token
    */
-  function estimateInputAmount(
-    uint256 outputAmount,
-    bytes memory strategyData
-  ) external view returns (IERC20Upgradeable inputToken, uint256 inputAmount) {
+  function estimateInputAmount(uint256 outputAmount, bytes memory strategyData)
+    external
+    view
+    returns (IERC20Upgradeable inputToken, uint256 inputAmount)
+  {
     (address inputTokenAddress, address poolAddress, ) = abi.decode(strategyData, (address, address, uint256));
 
     inputToken = IERC20Upgradeable(inputTokenAddress);
@@ -104,7 +105,7 @@ contract JarvisLiquidatorFunder is IFundsConversionStrategy {
     try IERC20MetadataUpgradeable(inputTokenAddress).decimals() returns (uint8 dec) {
       decimals = dec;
     } catch {}
-    uint256 ONE = 10 ** decimals;
+    uint256 ONE = 10**decimals;
 
     ISynthereumLiquidityPool pool = ISynthereumLiquidityPool(poolAddress);
     if (inputToken == pool.syntheticToken()) {

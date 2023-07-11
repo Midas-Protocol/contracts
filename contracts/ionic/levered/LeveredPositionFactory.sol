@@ -20,7 +20,11 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
                             Constructor
   ----------------------------------------------------------------*/
 
-  constructor(IFuseFeeDistributor _fuseFeeDistributor, ILiquidatorsRegistry _registry, uint256 _blocksPerYear) {
+  constructor(
+    IFuseFeeDistributor _fuseFeeDistributor,
+    ILiquidatorsRegistry _registry,
+    uint256 _blocksPerYear
+  ) {
     fuseFeeDistributor = _fuseFeeDistributor;
     liquidatorsRegistry = _registry;
     blocksPerYear = _blocksPerYear;
@@ -30,7 +34,11 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
                             Admin Functions
   ----------------------------------------------------------------*/
 
-  function _setPairWhitelisted(ICErc20 _collateralMarket, ICErc20 _stableMarket, bool _whitelisted) external onlyOwner {
+  function _setPairWhitelisted(
+    ICErc20 _collateralMarket,
+    ICErc20 _stableMarket,
+    bool _whitelisted
+  ) external onlyOwner {
     require(_collateralMarket.comptroller() == _stableMarket.comptroller(), "markets not of the same pool");
 
     if (_whitelisted) {
@@ -59,10 +67,11 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
     }
   }
 
-  function _registerExtension(
-    DiamondExtension extensionToAdd,
-    DiamondExtension extensionToReplace
-  ) public override onlyOwner {
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace)
+    public
+    override
+    onlyOwner
+  {
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 }
