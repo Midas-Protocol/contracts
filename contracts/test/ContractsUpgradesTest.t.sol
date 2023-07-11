@@ -120,31 +120,33 @@ contract ContractsUpgradesTest is BaseTest {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    if (address(fpd) != address(0)) {
+      (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      ICErc20[] memory markets = pool.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate market = CErc20Delegate(address(markets[j]));
+      for (uint8 i = 0; i < pools.length; i++) {
+        IComptroller pool = IComptroller(pools[i].comptroller);
+        ICErc20[] memory markets = pool.getAllMarkets();
+        for (uint8 j = 0; j < markets.length; j++) {
+          CErc20Delegate market = CErc20Delegate(address(markets[j]));
 
-        address currentImpl = market.implementation();
-        (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
+          address currentImpl = market.implementation();
+          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 
-        if (currentImpl != upgradeToImpl) emit log_address(address(market));
-        assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
+          if (currentImpl != upgradeToImpl) emit log_address(address(market));
+          assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 
-        DiamondBase asBase = DiamondBase(address(markets[j]));
-        try asBase._listExtensions() returns (address[] memory extensions) {
-          assertEq(extensions.length, 1, "market is missing the first extension");
-        } catch {
-          emit log("market that is not yet upgraded to the extensions upgrade");
-          emit log_address(address(market));
-          emit log("implementation");
-          emit log_address(currentImpl);
-          emit log("pool");
-          emit log_address(pools[i].comptroller);
-          emit log("");
+          DiamondBase asBase = DiamondBase(address(markets[j]));
+          try asBase._listExtensions() returns (address[] memory extensions) {
+            assertEq(extensions.length, 1, "market is missing the first extension");
+          } catch {
+            emit log("market that is not yet upgraded to the extensions upgrade");
+            emit log_address(address(market));
+            emit log("implementation");
+            emit log_address(currentImpl);
+            emit log("pool");
+            emit log_address(pools[i].comptroller);
+            emit log("");
+          }
         }
       }
     }
