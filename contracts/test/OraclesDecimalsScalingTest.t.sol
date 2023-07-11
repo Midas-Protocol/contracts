@@ -32,6 +32,12 @@ contract OraclesDecimalsScalingTest is BaseTest {
   }
 
   function testOracleDecimalsNeonDev() public fork(NEON_DEVNET) {
+    vm.mockCall(
+      0x4F6B3c357c439E15FB61c1187cc5E28eC72bBc55,
+      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
+      abi.encode(6)
+    );
+
     testOraclesDecimals();
   }
 
