@@ -28,11 +28,8 @@ contract LeveredPositionFactoryExtension is
   error NoSuchPosition();
   error PositionNotClosed();
 
-  // @notice maximum slippage in swaps, in bps
-  uint256 public constant MAX_SLIPPAGE = 900; // 9%
-
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
+    uint8 fnsCount = 11;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.createPosition.selector;
     functionSelectors[--fnsCount] = this.createAndFundPosition.selector;
@@ -40,7 +37,6 @@ contract LeveredPositionFactoryExtension is
     functionSelectors[--fnsCount] = this.removeClosedPosition.selector;
     functionSelectors[--fnsCount] = this.getMinBorrowNative.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
-    functionSelectors[--fnsCount] = this.getSlippage.selector;
     functionSelectors[--fnsCount] = this.getBorrowableMarketsByCollateral.selector;
     functionSelectors[--fnsCount] = this.getWhitelistedCollateralMarkets.selector;
     functionSelectors[--fnsCount] = this.getAccountsWithOpenPositions.selector;
@@ -130,16 +126,6 @@ contract LeveredPositionFactoryExtension is
     returns (IRedemptionStrategy[] memory strategies, bytes[] memory strategiesData)
   {
     return liquidatorsRegistry.getRedemptionStrategies(inputToken, outputToken);
-  }
-
-  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-    external
-    view
-    returns (uint256 slippage)
-  {
-    slippage = conversionSlippage[inputToken][outputToken];
-    // TODO slippage == 0 should be allowed
-    if (slippage == 0) return MAX_SLIPPAGE;
   }
 
   function getPositionsByAccount(address account)

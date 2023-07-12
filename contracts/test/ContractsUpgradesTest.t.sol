@@ -100,6 +100,10 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
+  function testMarketsLatestImplementationsChapel() public fork(BSC_CHAPEL) {
+    _testMarketsLatestImplementations();
+  }
+
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
     _testMarketsLatestImplementations();
   }

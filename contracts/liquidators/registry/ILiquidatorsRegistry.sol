@@ -14,6 +14,8 @@ interface ILiquidatorsRegistryStorage {
     returns (IRedemptionStrategy);
 
   function defaultOutputToken(IERC20Upgradeable inputToken) external view returns (IERC20Upgradeable);
+
+  function owner() external view returns (address);
 }
 
 interface ILiquidatorsRegistryExtension {
@@ -39,6 +41,11 @@ interface ILiquidatorsRegistryExtension {
       IERC20Upgradeable[] memory inputTokens,
       IERC20Upgradeable[] memory outputTokens
     );
+
+  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+  external
+  view
+  returns (uint256 slippage);
 
   function pairsStrategiesMatch(
     IRedemptionStrategy[] calldata configStrategies,

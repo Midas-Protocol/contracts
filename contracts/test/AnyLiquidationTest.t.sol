@@ -306,6 +306,7 @@ contract AnyLiquidationTest is BaseTest {
     if (exchangeCollateralTo != address(0)) {
       address collateralTokenToRedeem = vars.collateralMarket.underlying();
       while (collateralTokenToRedeem != exchangeCollateralTo) {
+        // TODO
         AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
         if (strategy.addr == address(0)) break;
         collateralTokenToRedeem = addRedemptionStrategy(
