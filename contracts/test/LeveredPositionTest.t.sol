@@ -179,7 +179,7 @@ abstract contract LeveredPositionTest is MarketsTest {
       // create and initialize the levered positions factory
       LeveredPositionFactoryExtension factoryExt = new LeveredPositionFactoryExtension();
       LeveredPositionFactory factoryBase = new LeveredPositionFactory(
-        IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
+        IFuseFeeDistributor(payable(address(ffd))),
         ILiquidatorsRegistry(address(registry)),
         blocksPerYear
       );

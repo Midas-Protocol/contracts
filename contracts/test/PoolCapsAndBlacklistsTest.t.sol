@@ -5,7 +5,6 @@ import "./config/MarketsTest.t.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract PoolCapsAndBlacklistsTest is MarketsTest {
-  address payable ankrBnbPool = payable(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
   Comptroller pool;
   ComptrollerFirstExtension asExtension;
   address borrower = 0x28C0208b7144B511C73586Bb07dE2100495e92f3; // ANKR account
@@ -16,7 +15,8 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    pool = Comptroller(ankrBnbPool);
+    // ankr pool
+    pool = Comptroller(payable(0x1851e32F34565cb95754310b031C5a2Fc0a8a905));
     asExtension = ComptrollerFirstExtension(address(pool));
     _upgradeExistingPool(address(pool));
 
