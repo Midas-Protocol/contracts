@@ -8,7 +8,7 @@ import { IonicERC4626, DotDotLpERC4626, ILpDepositor } from "../../ionic/strateg
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { IonicFlywheelCore } from "../../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
+import { PoolDirectory } from "../../PoolDirectory.sol";
 
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -205,8 +205,8 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   }
 
   function _testAllFlywheelsFeeRecipient() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);

@@ -4,13 +4,13 @@ pragma solidity >=0.8.0;
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { LeveredPosition } from "./LeveredPosition.sol";
-import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
+import { IFeeDistributor } from "../../compound/IFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 interface ILeveredPositionFactoryStorage {
-  function fuseFeeDistributor() external view returns (IFuseFeeDistributor);
+  function feeDistributor() external view returns (IFeeDistributor);
 
   function liquidatorsRegistry() external view returns (ILiquidatorsRegistry);
 

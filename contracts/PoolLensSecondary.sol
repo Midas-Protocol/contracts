@@ -8,7 +8,7 @@ import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { IUniswapV2Pair } from "./external/uniswap/IUniswapV2Pair.sol";
 
-import { FusePoolDirectory } from "./FusePoolDirectory.sol";
+import { PoolDirectory } from "./PoolDirectory.sol";
 
 interface IRewardsDistributor {
   function rewardToken() external view returns (address);
@@ -27,23 +27,23 @@ interface IRewardsDistributor {
 }
 
 /**
- * @title FusePoolLensSecondary
+ * @title PoolLensSecondary
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice FusePoolLensSecondary returns data on Fuse interest rate pools in mass for viewing by dApps, bots, etc.
+ * @notice PoolLensSecondary returns data on Ionic interest rate pools in mass for viewing by dApps, bots, etc.
  */
-contract FusePoolLensSecondary is Initializable {
+contract PoolLensSecondary is Initializable {
   /**
-   * @notice Constructor to set the `FusePoolDirectory` contract object.
+   * @notice Constructor to set the `PoolDirectory` contract object.
    */
-  function initialize(FusePoolDirectory _directory) public initializer {
-    require(address(_directory) != address(0), "FusePoolDirectory instance cannot be the zero address.");
+  function initialize(PoolDirectory _directory) public initializer {
+    require(address(_directory) != address(0), "PoolDirectory instance cannot be the zero address.");
     directory = _directory;
   }
 
   /**
-   * @notice `FusePoolDirectory` contract object.
+   * @notice `PoolDirectory` contract object.
    */
-  FusePoolDirectory public directory;
+  PoolDirectory public directory;
 
   /**
    * @notice Struct for ownership over a CToken.
@@ -52,11 +52,11 @@ contract FusePoolLensSecondary is Initializable {
     address cToken;
     address admin;
     bool adminHasRights;
-    bool fuseAdminHasRights;
+    bool ionicAdminHasRights;
   }
 
   /**
-   * @notice Returns the admin, admin rights, Fuse admin (constant), Fuse admin rights, and an array of cTokens with differing properties.
+   * @notice Returns the admin, admin rights, Ionic admin (constant), Ionic admin rights, and an array of cTokens with differing properties.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
@@ -73,7 +73,7 @@ contract FusePoolLensSecondary is Initializable {
     // Get pool ownership
     address comptrollerAdmin = comptroller.admin();
     bool comptrollerAdminHasRights = comptroller.adminHasRights();
-    bool comptrollerFuseAdminHasRights = comptroller.fuseAdminHasRights();
+    bool comptrollerFuseAdminHasRights = comptroller.ionicAdminHasRights();
 
     // Get cToken ownership
     ICErc20[] memory cTokens = comptroller.getAllMarkets();
@@ -91,7 +91,7 @@ contract FusePoolLensSecondary is Initializable {
         continue;
       }
       bool cTokenAdminHasRights = cToken.adminHasRights();
-      bool cTokenFuseAdminHasRights = cToken.fuseAdminHasRights();
+      bool cTokenFuseAdminHasRights = cToken.ionicAdminHasRights();
 
       // If outlier, push to array
       if (
@@ -116,7 +116,7 @@ contract FusePoolLensSecondary is Initializable {
         continue;
       }
       bool cTokenAdminHasRights = cToken.adminHasRights();
-      bool cTokenFuseAdminHasRights = cToken.fuseAdminHasRights();
+      bool cTokenFuseAdminHasRights = cToken.ionicAdminHasRights();
 
       // If outlier, push to array and increment array index
       if (
@@ -174,7 +174,7 @@ contract FusePoolLensSecondary is Initializable {
 
   /**
    * @notice Returns an array of all markets, an array of all `RewardsDistributor` contracts, an array of reward token addresses for each `RewardsDistributor`, an array of supply speeds for each distributor for each, and their borrow speeds.
-   * @param comptroller The Fuse pool Comptroller to check.
+   * @param comptroller The Ionic pool Comptroller to check.
    */
   function getRewardSpeedsByPool(IComptroller comptroller)
     public
@@ -223,7 +223,7 @@ contract FusePoolLensSecondary is Initializable {
 
   /**
    * @notice For each `Comptroller`, returns an array of all markets, an array of all `RewardsDistributor` contracts, an array of reward token addresses for each `RewardsDistributor`, an array of supply speeds for each distributor for each, and their borrow speeds.
-   * @param comptrollers The Fuse pool Comptrollers to check.
+   * @param comptrollers The Ionic pool Comptrollers to check.
    */
   function getRewardSpeedsByPools(IComptroller[] memory comptrollers)
     external
@@ -315,7 +315,7 @@ contract FusePoolLensSecondary is Initializable {
   }
 
   /**
-   * @notice Returns arrays of indexes, `Comptroller` proxy contracts, and `RewardsDistributor` contracts for Fuse pools supplied to by `account`.
+   * @notice Returns arrays of indexes, `Comptroller` proxy contracts, and `RewardsDistributor` contracts for Ionic pools supplied to by `account`.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getRewardsDistributorsBySupplier(address supplier)
@@ -328,7 +328,7 @@ contract FusePoolLensSecondary is Initializable {
     )
   {
     // Get array length
-    (, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = directory.getActivePools();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
@@ -377,7 +377,7 @@ contract FusePoolLensSecondary is Initializable {
       address[][] memory
     )
   {
-    (uint256[] memory poolIds, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
+    (uint256[] memory poolIds, PoolDirectory.Pool[] memory pools) = directory.getActivePools();
 
     IComptroller[] memory comptrollers = new IComptroller[](pools.length);
     address[][] memory distributors = new address[][](pools.length);

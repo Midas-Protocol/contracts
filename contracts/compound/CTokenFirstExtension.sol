@@ -9,7 +9,7 @@ import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
-import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
+import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -23,7 +23,7 @@ contract CTokenFirstExtension is
 {
   modifier isAuthorized() {
     require(
-      IFuseFeeDistributor(fuseAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
+      IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
       "not authorized"
     );
     _;
@@ -61,8 +61,8 @@ contract CTokenFirstExtension is
   }
 
   function getTotalUnderlyingSupplied() public view override returns (uint256) {
-    // (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees))
-    return asCToken().getCash() + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees);
+    // (totalCash + totalBorrows - (totalReserves + totalIonicFees + totalAdminFees))
+    return asCToken().getCash() + totalBorrows - (totalReserves + totalIonicFees + totalAdminFees);
   }
 
   /* ERC20 fns */
@@ -237,7 +237,7 @@ contract CTokenFirstExtension is
     }
 
     // Check newReserveFactor ≤ maxReserveFactor
-    if (newReserveFactorMantissa + adminFeeMantissa + fuseFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
+    if (newReserveFactorMantissa + adminFeeMantissa + ionicFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
       return fail(Error.BAD_INPUT, FailureInfo.SET_RESERVE_FACTOR_BOUNDS_CHECK);
     }
 
@@ -264,8 +264,8 @@ contract CTokenFirstExtension is
     // Sanitize newAdminFeeMantissa
     if (newAdminFeeMantissa == type(uint256).max) newAdminFeeMantissa = adminFeeMantissa;
 
-    // Get latest Fuse fee
-    uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
+    // Get latest Ionic fee
+    uint256 newFuseFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
 
     // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
     if (reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
@@ -287,11 +287,11 @@ contract CTokenFirstExtension is
       emit NewAdminFee(oldAdminFeeMantissa, newAdminFeeMantissa);
     }
 
-    // If setting Fuse fee
-    if (fuseFeeMantissa != newFuseFeeMantissa) {
-      // Set Fuse fee
-      uint256 oldFuseFeeMantissa = fuseFeeMantissa;
-      fuseFeeMantissa = newFuseFeeMantissa;
+    // If setting Ionic fee
+    if (ionicFeeMantissa != newFuseFeeMantissa) {
+      // Set Ionic fee
+      uint256 oldFuseFeeMantissa = ionicFeeMantissa;
+      ionicFeeMantissa = newFuseFeeMantissa;
 
       // Emit event
       emit NewFuseFee(oldFuseFeeMantissa, newFuseFeeMantissa);
@@ -339,7 +339,7 @@ contract CTokenFirstExtension is
       interestRateModel.getBorrowRate(
         asCToken().getCash(),
         totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees
+        totalReserves + totalAdminFees + totalIonicFees
       );
   }
 
@@ -352,7 +352,7 @@ contract CTokenFirstExtension is
       interestRateModel.getBorrowRate(
         cash - borrowAmount,
         totalBorrows + borrowAmount,
-        totalReserves + totalAdminFees + totalFuseFees
+        totalReserves + totalAdminFees + totalIonicFees
       );
   }
 
@@ -365,8 +365,8 @@ contract CTokenFirstExtension is
       interestRateModel.getSupplyRate(
         asCToken().getCash(),
         totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees,
-        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+        totalReserves + totalAdminFees + totalIonicFees,
+        reserveFactorMantissa + ionicFeeMantissa + adminFeeMantissa
       );
   }
 
@@ -375,8 +375,8 @@ contract CTokenFirstExtension is
       interestRateModel.getSupplyRate(
         asCToken().getCash() + mintAmount,
         totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees,
-        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+        totalReserves + totalAdminFees + totalIonicFees,
+        reserveFactorMantissa + ionicFeeMantissa + adminFeeMantissa
       );
   }
 
@@ -387,8 +387,8 @@ contract CTokenFirstExtension is
       interestRateModel.getSupplyRate(
         cash - withdrawAmount,
         totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees,
-        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+        totalReserves + totalAdminFees + totalIonicFees,
+        reserveFactorMantissa + ionicFeeMantissa + adminFeeMantissa
       );
   }
 
@@ -406,7 +406,7 @@ contract CTokenFirstExtension is
           totalBorrows,
           totalReserves,
           totalAdminFees,
-          totalFuseFees
+          totalIonicFees
         );
     } else {
       uint256 cashPrior = asCToken().getCash();
@@ -420,7 +420,7 @@ contract CTokenFirstExtension is
           accrual.totalBorrows,
           accrual.totalReserves,
           accrual.totalAdminFees,
-          accrual.totalFuseFees
+          accrual.totalIonicFees
         );
     }
   }
@@ -432,7 +432,7 @@ contract CTokenFirstExtension is
     uint256 _totalBorrows,
     uint256 _totalReserves,
     uint256 _totalAdminFees,
-    uint256 _totalFuseFees
+    uint256 _totalIonicFees
   ) internal pure returns (uint256) {
     if (_totalSupply == 0) {
       /*
@@ -443,7 +443,7 @@ contract CTokenFirstExtension is
     } else {
       /*
        * Otherwise:
-       *  exchangeRate = (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)) / totalSupply
+       *  exchangeRate = (totalCash + totalBorrows - (totalReserves + totalIonicFees + totalAdminFees)) / totalSupply
        */
       uint256 cashPlusBorrowsMinusReserves;
       Exp memory exchangeRate;
@@ -452,7 +452,7 @@ contract CTokenFirstExtension is
       (mathErr, cashPlusBorrowsMinusReserves) = addThenSubUInt(
         _totalCash,
         _totalBorrows,
-        _totalReserves + _totalAdminFees + _totalFuseFees
+        _totalReserves + _totalAdminFees + _totalIonicFees
       );
       require(mathErr == MathError.NO_ERROR, "!addThenSubUInt overflow check failed");
 
@@ -469,7 +469,7 @@ contract CTokenFirstExtension is
     uint256 totalSupply;
     uint256 totalBorrows;
     uint256 totalReserves;
-    uint256 totalFuseFees;
+    uint256 totalIonicFees;
     uint256 totalAdminFees;
     uint256 interestAccumulated;
   }
@@ -479,7 +479,7 @@ contract CTokenFirstExtension is
     view
     returns (InterestAccrual memory accrual)
   {
-    uint256 totalFees = totalAdminFees + totalFuseFees;
+    uint256 totalFees = totalAdminFees + totalIonicFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
     if (borrowRateMantissa > borrowRateMaxMantissa) {
       if (cashPrior > totalFees) revert("!borrowRate");
@@ -494,7 +494,7 @@ contract CTokenFirstExtension is
      *  interestAccumulated = simpleInterestFactor * totalBorrows
      *  totalBorrowsNew = interestAccumulated + totalBorrows
      *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
-     *  totalFuseFeesNew = interestAccumulated * fuseFee + totalFuseFees
+     *  totalIonicFeesNew = interestAccumulated * ionicFee + totalIonicFees
      *  totalAdminFeesNew = interestAccumulated * adminFee + totalAdminFees
      *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
      */
@@ -509,10 +509,10 @@ contract CTokenFirstExtension is
       accrual.interestAccumulated,
       totalReserves
     );
-    accrual.totalFuseFees = mul_ScalarTruncateAddUInt(
-      Exp({ mantissa: fuseFeeMantissa }),
+    accrual.totalIonicFees = mul_ScalarTruncateAddUInt(
+      Exp({ mantissa: ionicFeeMantissa }),
       accrual.interestAccumulated,
-      totalFuseFees
+      totalIonicFees
     );
     accrual.totalAdminFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: adminFeeMantissa }),
@@ -546,7 +546,7 @@ contract CTokenFirstExtension is
     borrowIndex = accrual.borrowIndex;
     totalBorrows = accrual.totalBorrows;
     totalReserves = accrual.totalReserves;
-    totalFuseFees = accrual.totalFuseFees;
+    totalIonicFees = accrual.totalIonicFees;
     totalAdminFees = accrual.totalAdminFees;
     emit AccrueInterest(cashPrior, accrual.interestAccumulated, borrowIndex, totalBorrows);
     return uint256(Error.NO_ERROR);
@@ -669,7 +669,7 @@ contract CTokenFirstExtension is
     ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
     return
       (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
-      (msg.sender == address(fuseAdmin) && comptrollerStorage.fuseAdminHasRights());
+      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
   }
 
   /*** Reentrancy Guard ***/

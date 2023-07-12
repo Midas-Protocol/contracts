@@ -5,16 +5,16 @@ import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IERC4626 } from "../compound/IERC4626.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract LatestImplementationWhitelisted is BaseTest {
-  FuseFeeDistributor fuseAdmin;
-  FusePoolDirectory fusePoolDirectory;
+  FeeDistributor ionicAdmin;
+  PoolDirectory poolDirectory;
 
   address[] implementationsSet;
   address[] pluginsSet;
@@ -32,12 +32,12 @@ contract LatestImplementationWhitelisted is BaseTest {
   }
 
   function afterForkSetUp() internal override {
-    fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    poolDirectory = PoolDirectory(ap.getAddress("PoolDirectory"));
+    ionicAdmin = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
   }
 
   function testPoolImplementations() internal {
-    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
@@ -57,8 +57,8 @@ contract LatestImplementationWhitelisted is BaseTest {
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
 
-      address latestImpl = fuseAdmin.latestComptrollerImplementation(implementationsSet[k]);
-      bool whitelisted = fuseAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
+      address latestImpl = ionicAdmin.latestComptrollerImplementation(implementationsSet[k]);
+      bool whitelisted = ionicAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
       assertTrue(
         whitelisted || implementationsSet[k] == latestImpl,
         "latest implementation for old implementation not whitelisted"
@@ -67,7 +67,7 @@ contract LatestImplementationWhitelisted is BaseTest {
   }
 
   function testMarketImplementations() internal {
-    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
@@ -90,10 +90,10 @@ contract LatestImplementationWhitelisted is BaseTest {
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = fuseAdmin
+      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = ionicAdmin
         .latestCErc20Delegate(implementationsSet[k]);
 
-      bool whitelisted = fuseAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
+      bool whitelisted = ionicAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
 
       assertTrue(
         whitelisted || implementationsSet[k] == latestCErc20Delegate,
@@ -103,7 +103,7 @@ contract LatestImplementationWhitelisted is BaseTest {
   }
 
   function testPluginImplementations() internal {
-    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
@@ -131,9 +131,9 @@ contract LatestImplementationWhitelisted is BaseTest {
 
     emit log("listing the set");
     for (uint8 k = 0; k < pluginsSet.length; k++) {
-      address latestPluginImpl = fuseAdmin.latestPluginImplementation(pluginsSet[k]);
+      address latestPluginImpl = ionicAdmin.latestPluginImplementation(pluginsSet[k]);
 
-      bool whitelisted = fuseAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
+      bool whitelisted = ionicAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
       emit log_address(pluginsSet[k]);
 
       assertTrue(

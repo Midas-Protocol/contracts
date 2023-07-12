@@ -6,8 +6,8 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
@@ -67,8 +67,8 @@ contract ComptrollerTest is BaseTest {
   }
 
   function _testInflationProtection() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    PoolDirectory.Pool[] memory pools = fpd.getAllPools();
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
       ICErc20[] memory markets = pool.getAllMarkets();

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import { SafeOwnable } from "../../ionic/SafeOwnable.sol";
-import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
+import { IFeeDistributor } from "../../compound/IFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
@@ -19,7 +19,7 @@ abstract contract LeveredPositionFactoryStorage is SafeOwnable {
 
   mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
 
-  IFuseFeeDistributor public fuseFeeDistributor;
+  IFeeDistributor public feeDistributor;
   ILiquidatorsRegistry public liquidatorsRegistry;
   uint256 public blocksPerYear;
 }

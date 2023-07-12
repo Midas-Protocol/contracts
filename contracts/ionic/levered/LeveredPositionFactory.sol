@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import { IFuseFeeDistributor } from "../../compound/IFuseFeeDistributor.sol";
+import { IFeeDistributor } from "../../compound/IFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IComptroller } from "../../compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
@@ -21,11 +21,11 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
   ----------------------------------------------------------------*/
 
   constructor(
-    IFuseFeeDistributor _fuseFeeDistributor,
+    IFeeDistributor _feeDistributor,
     ILiquidatorsRegistry _registry,
     uint256 _blocksPerYear
   ) {
-    fuseFeeDistributor = _fuseFeeDistributor;
+    feeDistributor = _feeDistributor;
     liquidatorsRegistry = _registry;
     blocksPerYear = _blocksPerYear;
   }

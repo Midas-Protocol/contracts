@@ -7,7 +7,7 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { IonicLiquidator } from "../IonicLiquidator.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { AddressesProvider } from "../ionic/AddressesProvider.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
@@ -140,7 +140,7 @@ contract AnyLiquidationTest is BaseTest {
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(uint256 random, FusePoolDirectory.FusePool[] memory pools)
+  function getPoolAndBorrower(uint256 random, PoolDirectory.Pool[] memory pools)
     internal
     view
     returns (IComptroller, address)
@@ -239,8 +239,7 @@ contract AnyLiquidationTest is BaseTest {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    (, FusePoolDirectory.FusePool[] memory pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory"))
-      .getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = PoolDirectory(ap.getAddress("PoolDirectory")).getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it

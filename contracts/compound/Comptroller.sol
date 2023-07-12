@@ -8,7 +8,7 @@ import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 import { ComptrollerBase } from "./ComptrollerInterface.sol";
 import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
-import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
+import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { IIonicFlywheel } from "../ionic/strategies/flywheel/IIonicFlywheel.sol";
 import { DiamondExtension, DiamondBase, LibDiamond } from "../ionic/DiamondExtension.sol";
 import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
@@ -68,15 +68,12 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   // liquidationIncentiveMantissa must be no greater than this value
   uint256 internal constant liquidationIncentiveMaxMantissa = 1.5e18; // 1.5
 
-  constructor(address payable _fuseAdmin) {
-    fuseAdmin = _fuseAdmin;
+  constructor(address payable _ionicAdmin) {
+    ionicAdmin = _ionicAdmin;
   }
 
   modifier isAuthorized() {
-    require(
-      IFuseFeeDistributor(fuseAdmin).canCall(address(this), msg.sender, address(this), msg.sig),
-      "not authorized"
-    );
+    require(IFeeDistributor(ionicAdmin).canCall(address(this), msg.sender, address(this), msg.sig), "not authorized");
     _;
   }
 
@@ -504,7 +501,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    */
   function borrowWithinLimits(address cToken, uint256 accountBorrowsNew) external view override returns (uint256) {
     // Check if min borrow exists
-    uint256 minBorrowEth = IFuseFeeDistributor(fuseAdmin).minBorrowEth();
+    uint256 minBorrowEth = IFeeDistributor(ionicAdmin).minBorrowEth();
 
     if (minBorrowEth > 0) {
       // Get new underlying borrow balance of account for this cToken
@@ -930,7 +927,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     /*
      * The liquidation penalty includes
      * - the liquidator incentive
-     * - the protocol fees (fuse admin fees)
+     * - the protocol fees (Ionic admin fees)
      * - the market fee
      */
     Exp memory totalPenaltyMantissa = add_(
@@ -1222,18 +1219,18 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       return fail(Error.UNAUTHORIZED, FailureInfo.SUPPORT_MARKET_OWNER_CHECK);
     }
 
-    // Temporarily enable Fuse admin rights for asset deployment (storing the original value)
-    bool oldFuseAdminHasRights = fuseAdminHasRights;
-    fuseAdminHasRights = true;
+    // Temporarily enable Ionic admin rights for asset deployment (storing the original value)
+    bool oldFuseAdminHasRights = ionicAdminHasRights;
+    ionicAdminHasRights = true;
 
-    // Deploy via Fuse admin
-    ICErc20 cToken = ICErc20(IFuseFeeDistributor(fuseAdmin).deployCErc20(constructorData));
-    // Reset Fuse admin rights to the original value
-    fuseAdminHasRights = oldFuseAdminHasRights;
+    // Deploy via Ionic admin
+    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(constructorData));
+    // Reset Ionic admin rights to the original value
+    ionicAdminHasRights = oldFuseAdminHasRights;
     // Support market here in the Comptroller
     uint256 err = _supportMarket(cToken);
 
-    IFuseFeeDistributor(fuseAdmin).authoritiesRegistry().reconfigureAuthority(address(this));
+    IFeeDistributor(ionicAdmin).authoritiesRegistry().reconfigureAuthority(address(this));
 
     // Set collateral factor
     return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
@@ -1264,7 +1261,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   function _become(address _unitroller) public {
     Unitroller unitroller = Unitroller(payable(_unitroller));
     require(
-      (msg.sender == address(fuseAdmin) && unitroller.fuseAdminHasRights()) ||
+      (msg.sender == address(ionicAdmin) && unitroller.ionicAdminHasRights()) ||
         (msg.sender == unitroller.admin() && unitroller.adminHasRights()),
       "!admin"
     );
@@ -1283,9 +1280,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
       LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
     }
 
-    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getComptrollerExtensions(
-      comptrollerImplementation
-    );
+    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getComptrollerExtensions(comptrollerImplementation);
     for (uint256 i = 0; i < latestExtensions.length; i++) {
       LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
     }
@@ -1302,7 +1297,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    require(msg.sender == address(fuseAdmin) && fuseAdminHasRights, "!unauthorized - no admin rights");
+    require(msg.sender == address(ionicAdmin) && ionicAdminHasRights, "!unauthorized - no admin rights");
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
@@ -1317,7 +1312,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     return
       markets[address(cToken)].collateralFactorMantissa == 0 &&
       borrowGuardianPaused[address(cToken)] == true &&
-      add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.fuseFeeMantissa()) == 1e18;
+      add_(add_(cToken.reserveFactorMantissa(), cToken.adminFeeMantissa()), cToken.ionicFeeMantissa()) == 1e18;
   }
 
   function asComptrollerExtension() internal view returns (ComptrollerExtensionInterface) {

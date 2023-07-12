@@ -149,9 +149,9 @@ interface ComptrollerStorageInterface {
 
   function adminHasRights() external view returns (bool);
 
-  function fuseAdmin() external view returns (address);
+  function ionicAdmin() external view returns (address);
 
-  function fuseAdminHasRights() external view returns (bool);
+  function ionicAdminHasRights() external view returns (bool);
 
   function oracle() external view returns (BasePriceOracle);
 

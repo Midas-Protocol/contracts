@@ -10,11 +10,11 @@ import "./ionic/SafeOwnableUpgradeable.sol";
 import "./utils/PatchedStorage.sol";
 
 /**
- * @title FusePoolDirectory
+ * @title PoolDirectory
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice FusePoolDirectory is a directory for Fuse interest rate pools.
+ * @notice PoolDirectory is a directory for Ionic interest rate pools.
  */
-contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
+contract PoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   /**
    * @dev Initializes a deployer whitelist if desired.
    * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.
@@ -27,9 +27,9 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Struct for a Fuse interest rate pool.
+   * @dev Struct for a Ionic interest rate pool.
    */
-  struct FusePool {
+  struct Pool {
     string name;
     address creator;
     address comptroller;
@@ -38,24 +38,24 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Array of Fuse interest rate pools.
+   * @dev Array of Ionic interest rate pools.
    */
-  FusePool[] public pools;
+  Pool[] public pools;
 
   /**
-   * @dev Maps Ethereum accounts to arrays of Fuse pool indexes.
+   * @dev Maps Ethereum accounts to arrays of Ionic pool indexes.
    */
   mapping(address => uint256[]) private _poolsByAccount;
 
   /**
-   * @dev Maps Fuse pool Comptroller addresses to bools indicating if they have been registered via the directory.
+   * @dev Maps Ionic pool Comptroller addresses to bools indicating if they have been registered via the directory.
    */
   mapping(address => bool) public poolExists;
 
   /**
-   * @dev Emitted when a new Fuse pool is added to the directory.
+   * @dev Emitted when a new Ionic pool is added to the directory.
    */
-  event PoolRegistered(uint256 index, FusePool pool);
+  event PoolRegistered(uint256 index, Pool pool);
 
   /**
    * @dev Booleans indicating if the deployer whitelist is enforced.
@@ -86,16 +86,16 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Adds a new Fuse pool to the directory (without checking msg.sender).
+   * @dev Adds a new Ionic pool to the directory (without checking msg.sender).
    * @param name The name of the pool.
    * @param comptroller The pool's Comptroller proxy contract address.
-   * @return The index of the registered Fuse pool.
+   * @return The index of the registered Ionic pool.
    */
   function _registerPool(string memory name, address comptroller) internal returns (uint256) {
     require(!poolExists[comptroller], "Pool already exists in the directory.");
     require(!enforceDeployerWhitelist || deployerWhitelist[msg.sender], "Sender is not on deployer whitelist.");
     require(bytes(name).length <= 100, "No pool name supplied.");
-    FusePool memory pool = FusePool(name, msg.sender, comptroller, block.number, block.timestamp);
+    Pool memory pool = Pool(name, msg.sender, comptroller, block.number, block.timestamp);
     pools.push(pool);
     _poolsByAccount[msg.sender].push(pools.length - 1);
     poolExists[comptroller] = true;
@@ -113,12 +113,12 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   function _deprecatePool(uint256 index) public onlyOwner {
-    FusePool storage fusePool = pools[index];
+    Pool storage ionicPool = pools[index];
 
-    require(fusePool.comptroller != address(0), "pool already deprecated");
+    require(ionicPool.comptroller != address(0), "pool already deprecated");
 
     // swap with the last pool of the creator and delete
-    uint256[] storage creatorPools = _poolsByAccount[fusePool.creator];
+    uint256[] storage creatorPools = _poolsByAccount[ionicPool.creator];
     for (uint256 i = 0; i < creatorPools.length; i++) {
       if (creatorPools[i] == index) {
         creatorPools[i] = creatorPools[creatorPools.length - 1];
@@ -128,18 +128,18 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     // leave it to true to deny the re-registering of the same pool
-    poolExists[fusePool.comptroller] = true;
+    poolExists[ionicPool.comptroller] = true;
 
     // nullify the storage
-    fusePool.comptroller = address(0);
-    fusePool.creator = address(0);
-    fusePool.name = "";
-    fusePool.blockPosted = 0;
-    fusePool.timestampPosted = 0;
+    ionicPool.comptroller = address(0);
+    ionicPool.creator = address(0);
+    ionicPool.name = "";
+    ionicPool.blockPosted = 0;
+    ionicPool.timestampPosted = 0;
   }
 
   /**
-   * @dev Deploys a new Fuse pool and adds to the directory.
+   * @dev Deploys a new Ionic pool and adds to the directory.
    * @param name The name of the pool.
    * @param implementation The Comptroller implementation contract address.
    * @param constructorData Encoded construction data for `Unitroller constructor()`
@@ -147,7 +147,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
    * @param closeFactor The pool's close factor (scaled by 1e18).
    * @param liquidationIncentive The pool's liquidation incentive (scaled by 1e18).
    * @param priceOracle The pool's PriceOracle contract address.
-   * @return Index of the registered Fuse pool and the Unitroller proxy address.
+   * @return Index of the registered Ionic pool and the Unitroller proxy address.
    */
   function deployPool(
     string memory name,
@@ -198,21 +198,21 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     // Make msg.sender the admin
     require(unitroller._setPendingAdmin(msg.sender) == 0, "Failed to set pending admin on Unitroller.");
 
-    // Register the pool with this FusePoolDirectory
+    // Register the pool with this PoolDirectory
     return (_registerPool(name, proxy), proxy);
   }
 
   /**
-   * @notice Returns `ids` and directory information of all non-deprecated Fuse pools.
+   * @notice Returns `ids` and directory information of all non-deprecated Ionic pools.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getActivePools() public view returns (uint256[] memory, FusePool[] memory) {
+  function getActivePools() public view returns (uint256[] memory, Pool[] memory) {
     uint256 count = 0;
     for (uint256 i = 0; i < pools.length; i++) {
       if (pools[i].comptroller != address(0)) count++;
     }
 
-    FusePool[] memory activePools = new FusePool[](count);
+    Pool[] memory activePools = new Pool[](count);
     uint256[] memory poolIds = new uint256[](count);
 
     uint256 index = 0;
@@ -228,16 +228,16 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of all Fuse pools' data.
+   * @notice Returns arrays of all Ionic pools' data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getAllPools() public view returns (FusePool[] memory) {
+  function getAllPools() public view returns (Pool[] memory) {
     uint256 count = 0;
     for (uint256 i = 0; i < pools.length; i++) {
       if (pools[i].comptroller != address(0)) count++;
     }
 
-    FusePool[] memory result = new FusePool[](count);
+    Pool[] memory result = new Pool[](count);
 
     uint256 index = 0;
     for (uint256 i = 0; i < pools.length; i++) {
@@ -250,13 +250,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of all public Fuse pool indexes and data.
+   * @notice Returns arrays of all public Ionic pool indexes and data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getPublicPools() external view returns (uint256[] memory, FusePool[] memory) {
+  function getPublicPools() external view returns (uint256[] memory, Pool[] memory) {
     uint256 arrayLength = 0;
 
-    (, FusePool[] memory activePools) = getActivePools();
+    (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       try IComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
         if (enforceWhitelist) continue;
@@ -266,7 +266,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     uint256[] memory indexes = new uint256[](arrayLength);
-    FusePool[] memory publicPools = new FusePool[](arrayLength);
+    Pool[] memory publicPools = new Pool[](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
@@ -283,13 +283,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of all public Fuse pool indexes and data.
+   * @notice Returns arrays of all public Ionic pool indexes and data.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getPoolsOfUser(address user) external view returns (uint256[] memory, FusePool[] memory) {
+  function getPoolsOfUser(address user) external view returns (uint256[] memory, Pool[] memory) {
     uint256 arrayLength = 0;
 
-    (, FusePool[] memory activePools) = getActivePools();
+    (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       try IComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
         if (!isUsing) continue;
@@ -299,7 +299,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     uint256[] memory indexes = new uint256[](arrayLength);
-    FusePool[] memory poolsOfUser = new FusePool[](arrayLength);
+    Pool[] memory poolsOfUser = new Pool[](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
@@ -316,12 +316,12 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of Fuse pool indexes and data created by `account`.
+   * @notice Returns arrays of Ionic pool indexes and data created by `account`.
    */
-  function getPoolsByAccount(address account) external view returns (uint256[] memory, FusePool[] memory) {
+  function getPoolsByAccount(address account) external view returns (uint256[] memory, Pool[] memory) {
     uint256[] memory indexes = new uint256[](_poolsByAccount[account].length);
-    FusePool[] memory accountPools = new FusePool[](_poolsByAccount[account].length);
-    (, FusePool[] memory activePools) = getActivePools();
+    Pool[] memory accountPools = new Pool[](_poolsByAccount[account].length);
+    (, Pool[] memory activePools) = getActivePools();
 
     for (uint256 i = 0; i < _poolsByAccount[account].length; i++) {
       indexes[i] = _poolsByAccount[account][i];
@@ -337,7 +337,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   mapping(address => address[]) private placeholder;
 
   /**
-   * @notice Modify existing Fuse pool name.
+   * @notice Modify existing Ionic pool name.
    */
   function setPoolName(uint256 index, string calldata name) external {
     IComptroller _comptroller = IComptroller(pools[index].comptroller);
@@ -375,17 +375,13 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of all Fuse pool indexes and data with whitelisted admins.
+   * @notice Returns arrays of all Ionic pool indexes and data with whitelisted admins.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getPublicPoolsByVerification(bool whitelistedAdmin)
-    external
-    view
-    returns (uint256[] memory, FusePool[] memory)
-  {
+  function getPublicPoolsByVerification(bool whitelistedAdmin) external view returns (uint256[] memory, Pool[] memory) {
     uint256 arrayLength = 0;
 
-    (, FusePool[] memory activePools) = getActivePools();
+    (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
@@ -397,7 +393,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     uint256[] memory indexes = new uint256[](arrayLength);
-    FusePool[] memory publicPools = new FusePool[](arrayLength);
+    Pool[] memory publicPools = new Pool[](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
@@ -416,17 +412,17 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns arrays of all verified Fuse pool indexes and data for which the account is whitelisted
+   * @notice Returns arrays of all verified Ionic pool indexes and data for which the account is whitelisted
    * @param account who is whitelisted in the returned verified whitelist-enabled pools.
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
   function getVerifiedPoolsOfWhitelistedAccount(address account)
     external
     view
-    returns (uint256[] memory, FusePool[] memory)
+    returns (uint256[] memory, Pool[] memory)
   {
     uint256 arrayLength = 0;
-    (, FusePool[] memory activePools) = getActivePools();
+    (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
       IComptroller comptroller = IComptroller(activePools[i].comptroller);
 
@@ -438,7 +434,7 @@ contract FusePoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
     }
 
     uint256[] memory indexes = new uint256[](arrayLength);
-    FusePool[] memory accountWhitelistedPools = new FusePool[](arrayLength);
+    Pool[] memory accountWhitelistedPools = new Pool[](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {

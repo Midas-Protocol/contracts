@@ -13,7 +13,7 @@ import "../../ionic/SafeOwnableUpgradeable.sol";
  * @title ConcentratedLiquidityBasePriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice ConcentratedLiquidityBasePriceOracle is an abstract price oracle for concentrated liquidty (UniV3-like) pairs.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 abstract contract ConcentratedLiquidityBasePriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   /**
@@ -76,7 +76,7 @@ abstract contract ConcentratedLiquidityBasePriceOracle is BasePriceOracle, SafeO
 
   /**
    * @notice Returns the price in NATIVE of the token underlying `cToken`.
-   * @dev Implements the `BasePriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `BasePriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in NATIVE of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) public view override returns (uint256) {

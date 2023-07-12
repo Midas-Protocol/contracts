@@ -5,7 +5,7 @@ import { MarketsTest, BaseTest, CErc20Delegate } from "./config/MarketsTest.t.so
 import { DiamondBase, DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 import { LeveredPosition } from "../ionic/levered/LeveredPosition.sol";
-import { LeveredPositionFactory, IFuseFeeDistributor } from "../ionic/levered/LeveredPositionFactory.sol";
+import { LeveredPositionFactory, IFeeDistributor } from "../ionic/levered/LeveredPositionFactory.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
 import { SolidlySwapLiquidator } from "../liquidators/SolidlySwapLiquidator.sol";
 import { BalancerSwapLiquidator } from "../liquidators/BalancerSwapLiquidator.sol";
@@ -177,7 +177,7 @@ abstract contract LeveredPositionTest is MarketsTest {
       // create and initialize the levered positions factory
       LeveredPositionFactoryExtension factoryExt = new LeveredPositionFactoryExtension();
       LeveredPositionFactory factoryBase = new LeveredPositionFactory(
-        IFuseFeeDistributor(payable(address(ap.getAddress("FuseFeeDistributor")))),
+        IFeeDistributor(payable(address(ap.getAddress("FeeDistributor")))),
         ILiquidatorsRegistry(address(registry)),
         blocksPerYear
       );

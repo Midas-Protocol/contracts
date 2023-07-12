@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "../ionic/AuthoritiesRegistry.sol";
 
-interface IFuseFeeDistributor {
+interface IFeeDistributor {
   function minBorrowEth() external view returns (uint256);
 
   function maxSupplyEth() external view returns (uint256);

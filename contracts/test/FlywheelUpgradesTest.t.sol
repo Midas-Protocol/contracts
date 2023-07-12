@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { IonicReplacingFlywheel } from "../ionic/strategies/flywheel/IonicReplacingFlywheel.sol";
@@ -21,10 +21,10 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 
 contract FlywheelUpgradesTest is BaseTest {
-  FusePoolDirectory internal fpd;
+  PoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
   }
 
   function testFlywheelUpgradeBsc() public fork(BSC_MAINNET) {
@@ -46,7 +46,7 @@ contract FlywheelUpgradesTest is BaseTest {
   function _testFlywheelUpgrade() internal {
     IonicFlywheelCore newImpl = new IonicFlywheelCore();
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
@@ -111,7 +111,7 @@ contract FlywheelUpgradesTest is BaseTest {
   }
 
   function _testAllPoolsMarketsAllowance() internal {
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       _testMarketsAllowance(pools[i].comptroller);

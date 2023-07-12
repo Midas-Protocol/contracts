@@ -11,7 +11,7 @@ import "../BasePriceOracle.sol";
  * @title UniswapLpTokenPriceOracle
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice UniswapLpTokenPriceOracle is a price oracle for Uniswap (and SushiSwap) LP tokens.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 abstract contract UniswapLikeLpTokenPriceOracle is BasePriceOracle {
   /**

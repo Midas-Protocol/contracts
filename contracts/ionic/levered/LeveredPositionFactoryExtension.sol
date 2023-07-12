@@ -62,7 +62,7 @@ contract LeveredPositionFactoryExtension is
     accountsWithOpenPositions.add(msg.sender);
     positionsByAccount[msg.sender].add(address(position));
 
-    AuthoritiesRegistry authoritiesRegistry = fuseFeeDistributor.authoritiesRegistry();
+    AuthoritiesRegistry authoritiesRegistry = feeDistributor.authoritiesRegistry();
     PoolRolesAuthority poolAuth = authoritiesRegistry.poolsAuthorities(address(_collateralMarket.comptroller()));
     if (address(poolAuth) != address(0)) {
       poolAuth.setUserRole(address(position), poolAuth.LEVERED_POSITION_ROLE(), true);
@@ -121,7 +121,7 @@ contract LeveredPositionFactoryExtension is
   ----------------------------------------------------------------*/
 
   function getMinBorrowNative() external view returns (uint256) {
-    return fuseFeeDistributor.minBorrowEth();
+    return feeDistributor.minBorrowEth();
   }
 
   function getRedemptionStrategies(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

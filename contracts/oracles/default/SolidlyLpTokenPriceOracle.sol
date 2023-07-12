@@ -11,7 +11,7 @@ import { UniswapLikeLpTokenPriceOracle } from "./UniswapLikeLpTokenPriceOracle.s
  * @title SolidlyLpTokenPriceOracle
  * @author Carlo Mazzaferro, David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice SolidlyLpTokenPriceOracle is a price oracle for Solidly LP tokens.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 contract SolidlyLpTokenPriceOracle is UniswapLikeLpTokenPriceOracle {
   /**

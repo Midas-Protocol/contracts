@@ -18,7 +18,7 @@ import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { IonicFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 contract FLRTest is BaseTest {
@@ -28,10 +28,10 @@ contract FLRTest is BaseTest {
   FlywheelStaticRewards rewards;
   IonicFlywheelLensRouter lensRouter;
 
-  FusePoolDirectory internal fpd;
+  PoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
     lensRouter = new IonicFlywheelLensRouter(fpd);
   }
 
@@ -195,7 +195,7 @@ contract FLRTest is BaseTest {
 
     IonicFlywheelLensRouter router = IonicFlywheelLensRouter(ap.getAddress("IonicFlywheelLensRouter"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));

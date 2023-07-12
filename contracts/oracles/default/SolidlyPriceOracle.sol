@@ -12,7 +12,7 @@ import "../../ionic/SafeOwnableUpgradeable.sol";
  * @title SolidlyOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice SolidlyOracle is a price oracle for Solidly-style pairs.
- * @dev Implements the `BasePriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `BasePriceOracle` interface used by Ionic pools (and Compound v2).
  */
 contract SolidlyPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   /**
@@ -74,7 +74,7 @@ contract SolidlyPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
 
   /**
    * @notice Returns the price in NATIVE of the token underlying `cToken`.
-   * @dev Implements the `BasePriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `BasePriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in NATIVE of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) public view override returns (uint256) {

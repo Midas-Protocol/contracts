@@ -3,17 +3,17 @@ pragma solidity >=0.8.0;
 
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract MinBorrowTest is BaseTest {
-  FuseFeeDistributor ffd;
+  FeeDistributor ffd;
 
   function afterForkSetUp() internal override {
-    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
   }
 
   function testMinBorrow() public fork(BSC_MAINNET) {

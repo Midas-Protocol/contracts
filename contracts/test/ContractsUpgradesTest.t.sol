@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
@@ -20,11 +20,11 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract ContractsUpgradesTest is BaseTest {
   function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
-    address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
+    address contractToTest = ap.getAddress("PoolDirectory"); // PoolDirectory proxy
 
     // before upgrade
-    FusePoolDirectory fpdBefore = FusePoolDirectory(contractToTest);
-    FusePoolDirectory.FusePool[] memory poolsBefore = fpdBefore.getAllPools();
+    PoolDirectory fpdBefore = PoolDirectory(contractToTest);
+    PoolDirectory.Pool[] memory poolsBefore = fpdBefore.getAllPools();
     address ownerBefore = fpdBefore.owner();
     emit log_address(ownerBefore);
 
@@ -33,7 +33,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     // upgrade
     {
-      FusePoolDirectory newImpl = new FusePoolDirectory();
+      PoolDirectory newImpl = new PoolDirectory();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
@@ -42,11 +42,11 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FusePoolDirectory fpd = FusePoolDirectory(contractToTest);
+    PoolDirectory fpd = PoolDirectory(contractToTest);
     address ownerAfter = fpd.owner();
     emit log_address(ownerAfter);
 
-    (, FusePoolDirectory.FusePool[] memory poolsAfter) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory poolsAfter) = fpd.getActivePools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 
@@ -58,7 +58,7 @@ contract ContractsUpgradesTest is BaseTest {
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
     // before upgrade
-    FuseFeeDistributor ffdProxy = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    FeeDistributor ffdProxy = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
@@ -72,7 +72,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     // upgrade
     {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      FeeDistributor newImpl = new FeeDistributor();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffdProxy)));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
@@ -81,7 +81,7 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(address(ffdProxy)));
+    FeeDistributor ffd = FeeDistributor(payable(address(ffdProxy)));
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
@@ -129,10 +129,10 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function _testMarketsLatestImplementations() internal {
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FeeDistributor ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
@@ -175,10 +175,10 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function _testPauseGuardians() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
     address deployer = ap.getAddress("deployer");
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);

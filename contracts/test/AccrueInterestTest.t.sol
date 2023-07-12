@@ -9,7 +9,7 @@ struct AccrualDiff {
   uint256 borrowIndex;
   uint256 totalBorrows;
   uint256 totalReserves;
-  uint256 totalFuseFees;
+  uint256 totalIonicFees;
   uint256 totalAdminFees;
 }
 
@@ -27,7 +27,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
     CTokenFirstExtension marketAsExt = CTokenFirstExtension(marketAddress);
 
     uint256 adminFeeMantissa = market.adminFeeMantissa();
-    uint256 fuseFeeMantissa = market.fuseFeeMantissa();
+    uint256 ionicFeeMantissa = market.ionicFeeMantissa();
     uint256 reserveFactorMantissa = market.reserveFactorMantissa();
 
     // test with the logic before the refactoring
@@ -43,7 +43,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
       accrualDataBefore.borrowIndex = marketAsExt.borrowIndex();
       accrualDataBefore.totalBorrows = marketAsExt.totalBorrows();
       accrualDataBefore.totalReserves = marketAsExt.totalReserves();
-      accrualDataBefore.totalFuseFees = marketAsExt.totalFuseFees();
+      accrualDataBefore.totalIonicFees = marketAsExt.totalIonicFees();
       accrualDataBefore.totalAdminFees = marketAsExt.totalAdminFees();
       accrualDataBefore.totalSupply = marketAsExt.totalSupply();
 
@@ -54,7 +54,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
       accrualDataAfter.borrowIndex = marketAsExt.borrowIndex();
       accrualDataAfter.totalBorrows = marketAsExt.totalBorrows();
       accrualDataAfter.totalReserves = marketAsExt.totalReserves();
-      accrualDataAfter.totalFuseFees = marketAsExt.totalFuseFees();
+      accrualDataAfter.totalIonicFees = marketAsExt.totalIonicFees();
       accrualDataAfter.totalAdminFees = marketAsExt.totalAdminFees();
       accrualDataAfter.totalSupply = marketAsExt.totalSupply();
 
@@ -68,8 +68,8 @@ contract AccrueInterestTest is UpgradesBaseTest {
       if (reserveFactorMantissa > 0) {
         assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves old impl");
       }
-      if (fuseFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalFuseFees, accrualDataAfter.totalFuseFees, "!total fuse fees old impl");
+      if (ionicFeeMantissa > 0) {
+        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total fuse fees old impl");
       }
       if (adminFeeMantissa > 0) {
         assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees old impl");
@@ -79,7 +79,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
       diffBefore.borrowIndex = accrualDataAfter.borrowIndex - accrualDataBefore.borrowIndex;
       diffBefore.totalBorrows = accrualDataAfter.totalBorrows - accrualDataBefore.totalBorrows;
       diffBefore.totalReserves = accrualDataAfter.totalReserves - accrualDataBefore.totalReserves;
-      diffBefore.totalFuseFees = accrualDataAfter.totalFuseFees - accrualDataBefore.totalFuseFees;
+      diffBefore.totalIonicFees = accrualDataAfter.totalIonicFees - accrualDataBefore.totalIonicFees;
       diffBefore.totalAdminFees = accrualDataAfter.totalAdminFees - accrualDataBefore.totalAdminFees;
     }
 
@@ -99,7 +99,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
       accrualDataBefore.borrowIndex = marketAsExt.borrowIndex();
       accrualDataBefore.totalBorrows = marketAsExt.totalBorrows();
       accrualDataBefore.totalReserves = marketAsExt.totalReserves();
-      accrualDataBefore.totalFuseFees = marketAsExt.totalFuseFees();
+      accrualDataBefore.totalIonicFees = marketAsExt.totalIonicFees();
       accrualDataBefore.totalAdminFees = marketAsExt.totalAdminFees();
       accrualDataBefore.totalSupply = marketAsExt.totalSupply();
 
@@ -110,7 +110,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
       accrualDataAfter.borrowIndex = marketAsExt.borrowIndex();
       accrualDataAfter.totalBorrows = marketAsExt.totalBorrows();
       accrualDataAfter.totalReserves = marketAsExt.totalReserves();
-      accrualDataAfter.totalFuseFees = marketAsExt.totalFuseFees();
+      accrualDataAfter.totalIonicFees = marketAsExt.totalIonicFees();
       accrualDataAfter.totalAdminFees = marketAsExt.totalAdminFees();
       accrualDataAfter.totalSupply = marketAsExt.totalSupply();
 
@@ -124,8 +124,8 @@ contract AccrueInterestTest is UpgradesBaseTest {
       if (reserveFactorMantissa > 0) {
         assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves new impl");
       }
-      if (fuseFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalFuseFees, accrualDataAfter.totalFuseFees, "!total fuse fees new impl");
+      if (ionicFeeMantissa > 0) {
+        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total fuse fees new impl");
       }
       if (adminFeeMantissa > 0) {
         assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees new impl");
@@ -135,14 +135,14 @@ contract AccrueInterestTest is UpgradesBaseTest {
       diffAfter.borrowIndex = accrualDataAfter.borrowIndex - accrualDataBefore.borrowIndex;
       diffAfter.totalBorrows = accrualDataAfter.totalBorrows - accrualDataBefore.totalBorrows;
       diffAfter.totalReserves = accrualDataAfter.totalReserves - accrualDataBefore.totalReserves;
-      diffAfter.totalFuseFees = accrualDataAfter.totalFuseFees - accrualDataBefore.totalFuseFees;
+      diffAfter.totalIonicFees = accrualDataAfter.totalIonicFees - accrualDataBefore.totalIonicFees;
       diffAfter.totalAdminFees = accrualDataAfter.totalAdminFees - accrualDataBefore.totalAdminFees;
     }
 
     assertEq(diffBefore.borrowIndex, diffAfter.borrowIndex, "!borrowIndexDiff");
     assertEq(diffBefore.totalBorrows, diffAfter.totalBorrows, "!totalBorrowsDiff");
     assertEq(diffBefore.totalReserves, diffAfter.totalReserves, "!totalReservesDiff");
-    assertEq(diffBefore.totalFuseFees, diffAfter.totalFuseFees, "!totalFuseFeesDiff");
+    assertEq(diffBefore.totalIonicFees, diffAfter.totalIonicFees, "!totalIonicFeesDiff");
     assertEq(diffBefore.totalAdminFees, diffAfter.totalAdminFees, "!totalAdminFeesDiff");
   }
 

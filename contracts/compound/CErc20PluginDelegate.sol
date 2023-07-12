@@ -33,7 +33,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     if (_plugin == address(0) && address(plugin) != address(0)) {
       // if no new plugin address is given, use the latest implementation
-      _plugin = IFuseFeeDistributor(fuseAdmin).latestPluginImplementation(address(plugin));
+      _plugin = IFeeDistributor(ionicAdmin).latestPluginImplementation(address(plugin));
     }
 
     if (_plugin != address(0) && _plugin != address(plugin)) {
@@ -51,7 +51,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
     address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
 
     require(
-      IFuseFeeDistributor(fuseAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
+      IFeeDistributor(ionicAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
       "plugin implementation not whitelisted"
     );
 

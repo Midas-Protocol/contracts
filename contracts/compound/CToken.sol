@@ -9,7 +9,7 @@ import { EIP20Interface } from "./EIP20Interface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { DiamondBase, DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
-import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
+import { IFeeDistributor } from "./IFeeDistributor.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -19,7 +19,7 @@ import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
 abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, DiamondBase {
   modifier isAuthorized() {
     require(
-      IFuseFeeDistributor(fuseAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
+      IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
       "not authorized"
     );
     _;
@@ -32,13 +32,13 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
     return
       (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
-      (msg.sender == address(fuseAdmin) && comptrollerStorage.fuseAdminHasRights());
+      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
   }
 
   /**
    * @notice Initialize the money market
    * @param comptroller_ The address of the Comptroller
-   * @param fuseAdmin_ The FuseFeeDistributor contract address.
+   * @param ionicAdmin_ The FeeDistributor contract address.
    * @param interestRateModel_ The address of the interest rate model
    * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18
    * @param name_ EIP-20 name of this token
@@ -47,7 +47,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
    */
   function initialize(
     IComptroller comptroller_,
-    address payable fuseAdmin_,
+    address payable ionicAdmin_,
     InterestRateModel interestRateModel_,
     uint256 initialExchangeRateMantissa_,
     string memory name_,
@@ -56,10 +56,10 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     uint256 reserveFactorMantissa_,
     uint256 adminFeeMantissa_
   ) public {
-    require(msg.sender == fuseAdmin_, "!admin");
+    require(msg.sender == ionicAdmin_, "!admin");
     require(accrualBlockNumber == 0 && borrowIndex == 0, "!initialized");
 
-    fuseAdmin = fuseAdmin_;
+    ionicAdmin = ionicAdmin_;
 
     // Set initial exchange rate
     initialExchangeRateMantissa = initialExchangeRateMantissa_;
@@ -83,22 +83,25 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
 
     // Set reserve factor
     // Check newReserveFactor ≤ maxReserveFactor
-    require(reserveFactorMantissa_ + adminFeeMantissa + fuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa, "!rf:set");
+    require(
+      reserveFactorMantissa_ + adminFeeMantissa + ionicFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
+      "!rf:set"
+    );
     reserveFactorMantissa = reserveFactorMantissa_;
     emit NewReserveFactor(0, reserveFactorMantissa_);
 
     // Set admin fee
     // Sanitize adminFeeMantissa_
     if (adminFeeMantissa_ == type(uint256).max) adminFeeMantissa_ = adminFeeMantissa;
-    // Get latest Fuse fee
-    uint256 newFuseFeeMantissa = IFuseFeeDistributor(fuseAdmin).interestFeeRate();
+    // Get latest Ionic fee
+    uint256 newFuseFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
     require(
       reserveFactorMantissa + adminFeeMantissa_ + newFuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
       "!adminFee:set"
     );
     adminFeeMantissa = adminFeeMantissa_;
     emit NewAdminFee(0, adminFeeMantissa_);
-    fuseFeeMantissa = newFuseFeeMantissa;
+    ionicFeeMantissa = newFuseFeeMantissa;
     emit NewFuseFee(0, newFuseFeeMantissa);
 
     // The counter starts true to prevent changing it from zero to non-zero (i.e. smaller cost/refund)
@@ -729,7 +732,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     uint256 protocolSeizeAmount;
     uint256 exchangeRateMantissa;
     uint256 totalReservesNew;
-    uint256 totalFuseFeeNew;
+    uint256 totalIonicFeeNew;
     uint256 totalSupplyNew;
     uint256 feeSeizeTokens;
     uint256 feeSeizeAmount;
@@ -788,7 +791,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
 
     vars.totalReservesNew = totalReserves + vars.protocolSeizeAmount;
     vars.totalSupplyNew = totalSupply - vars.protocolSeizeTokens - vars.feeSeizeTokens;
-    vars.totalFuseFeeNew = totalFuseFees + vars.feeSeizeAmount;
+    vars.totalIonicFeeNew = totalIonicFees + vars.feeSeizeAmount;
 
     (vars.mathErr, vars.liquidatorTokensNew) = addUInt(accountTokens[liquidator], vars.liquidatorSeizeTokens);
     if (vars.mathErr != MathError.NO_ERROR) {
@@ -802,7 +805,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     /* We write the previously calculated values into storage */
     totalReserves = vars.totalReservesNew;
     totalSupply = vars.totalSupplyNew;
-    totalFuseFees = vars.totalFuseFeeNew;
+    totalIonicFees = vars.totalIonicFeeNew;
 
     accountTokens[borrower] = vars.borrowerTokensNew;
     accountTokens[liquidator] = vars.liquidatorTokensNew;
@@ -856,7 +859,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
   }
 
   /**
-   * @notice Accrues interest and reduces Fuse fees by transferring to Fuse
+   * @notice Accrues interest and reduces Ionic fees by transferring to Ionic
    * @param withdrawAmount Amount of fees to withdraw
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
@@ -871,7 +874,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
       return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE);
     }
 
-    if (withdrawAmount > totalFuseFees) {
+    if (withdrawAmount > totalIonicFees) {
       return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_FUSE_FEES_VALIDATION);
     }
 
@@ -879,11 +882,11 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     // EFFECTS & INTERACTIONS
     // (No safe failures beyond this point)
 
-    uint256 totalFuseFeesNew = totalFuseFees - withdrawAmount;
-    totalFuseFees = totalFuseFeesNew;
+    uint256 totalIonicFeesNew = totalIonicFees - withdrawAmount;
+    totalIonicFees = totalIonicFeesNew;
 
     // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(address(fuseAdmin), withdrawAmount);
+    doTransferOut(address(ionicAdmin), withdrawAmount);
 
     return uint256(Error.NO_ERROR);
   }
@@ -928,7 +931,7 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
     ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
     require(
-      msg.sender == address(fuseAdmin) && comptrollerStorage.fuseAdminHasRights(),
+      msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights(),
       "!unauthorized - no admin rights"
     );
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);

@@ -43,7 +43,7 @@ contract BalancerLpTokenPriceOracleNTokens is SafeOwnableUpgradeable, BasePriceO
 
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {

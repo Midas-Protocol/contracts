@@ -24,7 +24,7 @@ contract CErc20Delegator is CDelegationStorage {
   constructor(
     address underlying_,
     IComptroller comptroller_,
-    address payable fuseAdmin_,
+    address payable ionicAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,
     string memory symbol_,
@@ -40,7 +40,7 @@ contract CErc20Delegator is CDelegationStorage {
         "initialize(address,address,address,address,string,string,uint256,uint256)",
         underlying_,
         comptroller_,
-        fuseAdmin_,
+        ionicAdmin_,
         interestRateModel_,
         name_,
         symbol_,

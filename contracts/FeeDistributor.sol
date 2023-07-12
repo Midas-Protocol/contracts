@@ -17,17 +17,17 @@ import { DiamondExtension, DiamondBase } from "./ionic/DiamondExtension.sol";
 import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
 
 /**
- * @title FuseFeeDistributor
+ * @title FeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice FuseFeeDistributor controls and receives protocol fees from Fuse pools and relays admin actions to Fuse pools.
+ * @notice FeeDistributor controls and receives protocol fees from Ionic pools and relays admin actions to Ionic pools.
  */
-contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
+contract FeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
   /**
    * @dev Initializer that sets initial values of state variables.
-   * @param _defaultInterestFeeRate The default proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @param _defaultInterestFeeRate The default proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
@@ -42,13 +42,13 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice The proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @notice The proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
    */
   uint256 public defaultInterestFeeRate;
 
   /**
-   * @dev Sets the default proportion of Fuse pool interest taken as a protocol fee.
-   * @param _defaultInterestFeeRate The default proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @dev Sets the default proportion of Ionic pool interest taken as a protocol fee.
+   * @param _defaultInterestFeeRate The default proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
    */
   function _setDefaultInterestFeeRate(uint256 _defaultInterestFeeRate) external onlyOwner {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
@@ -74,27 +74,27 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Minimum borrow balance (in ETH) per user per Fuse pool asset (only checked on new borrows, not redemptions).
+   * @dev Minimum borrow balance (in ETH) per user per Ionic pool asset (only checked on new borrows, not redemptions).
    */
   uint256 public minBorrowEth;
 
   /**
-   * @dev Maximum supply balance (in ETH) per user per Fuse pool asset.
+   * @dev Maximum supply balance (in ETH) per user per Ionic pool asset.
    * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
    */
   uint256 public maxSupplyEth;
 
   /**
-   * @dev Maximum utilization rate (scaled by 1e18) for Fuse pool assets (only checked on new borrows, not redemptions).
+   * @dev Maximum utilization rate (scaled by 1e18) for Ionic pool assets (only checked on new borrows, not redemptions).
    * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
    */
   uint256 public maxUtilizationRate;
 
   /**
-   * @dev Sets the proportion of Fuse pool interest taken as a protocol fee.
-   * @param _minBorrowEth Minimum borrow balance (in ETH) per user per Fuse pool asset (only checked on new borrows, not redemptions).
-   * @param _maxSupplyEth Maximum supply balance (in ETH) per user per Fuse pool asset.
-   * @param _maxUtilizationRate Maximum utilization rate (scaled by 1e18) for Fuse pool assets (only checked on new borrows, not redemptions).
+   * @dev Sets the proportion of Ionic pool interest taken as a protocol fee.
+   * @param _minBorrowEth Minimum borrow balance (in ETH) per user per Ionic pool asset (only checked on new borrows, not redemptions).
+   * @param _maxSupplyEth Maximum supply balance (in ETH) per user per Ionic pool asset.
+   * @param _maxUtilizationRate Maximum utilization rate (scaled by 1e18) for Ionic pool assets (only checked on new borrows, not redemptions).
    */
   function _setPoolLimits(
     uint256 _minBorrowEth,
@@ -309,7 +309,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
    * @dev A value of 0 means unset whereas a negative value means 0.
    */
   mapping(address => int256) public customInterestFeeRates;
@@ -385,7 +385,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @notice Returns the proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @notice Returns the proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
    */
   function interestFeeRate() external view returns (uint256) {
     (bool success, bytes memory data) = msg.sender.staticcall(abi.encodeWithSignature("comptroller()"));
@@ -401,9 +401,9 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
   }
 
   /**
-   * @dev Sets the proportion of Fuse pool interest taken as a protocol fee.
+   * @dev Sets the proportion of Ionic pool interest taken as a protocol fee.
    * @param comptroller The Unitroller (Comptroller proxy) address.
-   * @param rate The proportion of Fuse pool interest taken as a protocol fee (scaled by 1e18).
+   * @param rate The proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
    */
   function _setCustomInterestFeeRate(address comptroller, int256 rate) external onlyOwner {
     require(rate <= 1e18, "Interest fee rate cannot be more than 100%.");

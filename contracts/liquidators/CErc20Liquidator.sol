@@ -9,7 +9,7 @@ import "./IRedemptionStrategy.sol";
 
 /**
  * @title CErc20Liquidator
- * @notice Redeems seized Compound/Cream/Fuse CErc20 cTokens for underlying tokens for use as a step in a liquidation.
+ * @notice Redeems seized Compound/Cream/Ionic CErc20 cTokens for underlying tokens for use as a step in a liquidation.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract CErc20Liquidator is IRedemptionStrategy {

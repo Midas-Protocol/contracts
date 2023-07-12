@@ -7,7 +7,7 @@ import { IonicFlywheelCore } from "./IonicFlywheelCore.sol";
 import { IComptroller } from "../../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
-import { FusePoolDirectory } from "../../../FusePoolDirectory.sol";
+import { PoolDirectory } from "../../../PoolDirectory.sol";
 
 interface IPriceOracle {
   function getUnderlyingPrice(ERC20 cToken) external view returns (uint256);
@@ -16,9 +16,9 @@ interface IPriceOracle {
 }
 
 contract IonicFlywheelLensRouter {
-  FusePoolDirectory public fpd;
+  PoolDirectory public fpd;
 
-  constructor(FusePoolDirectory _fpd) {
+  constructor(PoolDirectory _fpd) {
     fpd = _fpd;
   }
 
@@ -144,7 +144,7 @@ contract IonicFlywheelLensRouter {
   }
 
   function getAllRewardTokens() public view returns (address[] memory uniqueRewardTokens) {
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     uint256 rewardTokensCounter;
     for (uint256 i = 0; i < pools.length; i++) {
@@ -195,7 +195,7 @@ contract IonicFlywheelLensRouter {
 
   function claimRewardsOfRewardToken(address user, address rewardToken) public returns (uint256 rewardsClaimed) {
     uint256 balanceBefore = ERC20(rewardToken).balanceOf(user);
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
       ERC20[] memory markets;
