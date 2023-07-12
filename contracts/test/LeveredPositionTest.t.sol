@@ -661,7 +661,12 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
   }
 
   function testOpenLeveredPosition() public override whenForking {
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), ratioOnCreation, 1e15, "initial leverage ratio should be 1.2");
+    assertApproxEqAbs(
+      position.getCurrentLeverageRatio(),
+      ratioOnCreation,
+      1e15,
+      "initial leverage ratio should be 1.2"
+    );
   }
 }
 

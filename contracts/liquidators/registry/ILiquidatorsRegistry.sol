@@ -43,9 +43,9 @@ interface ILiquidatorsRegistryExtension {
     );
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (uint256 slippage);
+    external
+    view
+    returns (uint256 slippage);
 
   function pairsStrategiesMatch(
     IRedemptionStrategy[] calldata configStrategies,

@@ -56,9 +56,9 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   }
 
   function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
-  external
-  view
-  returns (uint256 slippage)
+    external
+    view
+    returns (uint256 slippage)
   {
     slippage = conversionSlippage[inputToken][outputToken];
     // TODO slippage == 0 should be allowed
@@ -104,8 +104,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
     // cache the slippage
     if (
-      conversionSlippage[inputToken][outputToken] == 0
-      || block.timestamp - conversionSlippageUpdated[inputToken][outputToken] > 5000
+      conversionSlippage[inputToken][outputToken] == 0 ||
+      block.timestamp - conversionSlippageUpdated[inputToken][outputToken] > 5000
     ) {
       conversionSlippage[inputToken][outputToken] = slippage;
       conversionSlippageUpdated[inputToken][outputToken] = block.timestamp;
