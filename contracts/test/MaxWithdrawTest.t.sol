@@ -166,6 +166,15 @@ contract MaxWithdrawTest is WithPool {
     address accountTwo = address(2);
     address accountThree = address(3);
 
+    {
+      address comptrollerAddress = address(comptroller);
+      AuthoritiesRegistry ar = fuseAdmin.authoritiesRegistry();
+      PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
+      ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountThree, poolAuth.BORROWER_ROLE(), true);
+    }
+
     FusePoolLensSecondary secondary = new FusePoolLensSecondary();
     secondary.initialize(fusePoolDirectory);
 
