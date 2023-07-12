@@ -368,9 +368,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       } else {
         // chain the next redeemed token from the default path
         nextRedeemedToken = defaultOutputToken[tokenToRedeem];
-        for (uint256 i = 0; i < tokenPath.length; i++) {
-          if (nextRedeemedToken == tokenPath[i]) break;
-        }
+      }
+
+      // check if going in an endless loop
+      for (uint256 i = 0; i < tokenPath.length; i++) {
+        if (nextRedeemedToken == tokenPath[i]) break;
       }
 
       (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(

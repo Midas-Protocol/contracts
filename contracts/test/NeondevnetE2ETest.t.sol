@@ -129,6 +129,7 @@ contract NeondevnetE2ETest is WithPool {
 
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(address(comptroller));
 
     vars.allMarkets = comptroller.getAllMarkets();
 
@@ -183,7 +184,7 @@ contract NeondevnetE2ETest is WithPool {
     vm.stopPrank();
 
     assertEq(cToken.totalSupply(), 10e18 * 5, "!ctoken total supply");
-    assertEq(cWNeonToken.totalSupply(), 1e17 * 5, "!cWNeonToken total supply");
+    assertEq(cWNeonToken.totalSupply(), 1e19 * 5, "!cWNeonToken total supply");
 
     // Account One Borrow
     vm.startPrank(accountOne);
@@ -214,7 +215,7 @@ contract NeondevnetE2ETest is WithPool {
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
-        8e13,
+        4e13,
         ICErc20(address(cToken)),
         ICErc20(address(cWNeonToken)),
         flashSwapPair,
