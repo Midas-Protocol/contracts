@@ -12,19 +12,20 @@ import "./liquidators/IFundsConversionStrategy.sol";
 import "./utils/IW_NATIVE.sol";
 
 import "./external/uniswap/IUniswapV2Router02.sol";
-import "./external/uniswap/IUniswapV2Pair.sol";
 import "./external/uniswap/IUniswapV2Callee.sol";
+import "./external/uniswap/IUniswapV2Pair.sol";
+import "./external/uniswap/IUniswapV2Factory.sol";
 import "./external/uniswap/UniswapV2Library.sol";
 
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
 /**
- * @title IonicLiquidator
+ * @title FuseSafeLiquidator
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice IonicLiquidator safely liquidates unhealthy borrowers (with flashloan support).
+ * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
+contract FuseSafeLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -32,6 +33,31 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev W_NATIVE contract address.
    */
   address public W_NATIVE_ADDRESS;
+
+  /**
+   * @dev W_NATIVE contract object.
+   */
+  IW_NATIVE public W_NATIVE;
+
+  /**
+   * @dev UniswapV2Router02 contract address.
+   */
+  address public UNISWAP_V2_ROUTER_02_ADDRESS;
+
+  /**
+   * @dev Stable token to use for flash loans
+   */
+  address public STABLE_TOKEN;
+
+  /**
+   * @dev Wrapped BTC token to use for flash loans
+   */
+  address public BTC_TOKEN;
+
+  /**
+   * @dev Hash code of the pair used by `UNISWAP_V2_ROUTER_02`
+   */
+  bytes PAIR_INIT_HASH_CODE;
 
   /**
    * @dev UniswapV2Router02 contract object. (Is interchangable with any UniV2 forks)
@@ -58,6 +84,7 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * For use in `repayTokenFlashLoan` after it is set by `safeLiquidateToTokensWithFlashLoan`.
    */
   address private _flashSwapToken;
+
   /**
    * @dev Percentage of the flash swap fee, measured in basis points.
    */
@@ -66,16 +93,32 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   function initialize(
     address _wtoken,
     address _uniswapV2router,
+    address _stableToken,
+    address _btcToken,
+    bytes memory _uniswapPairInitHashCode,
     uint8 _flashSwapFee
   ) external initializer {
     __Ownable_init();
+
     require(_uniswapV2router != address(0), "UniswapV2Factory not defined.");
     W_NATIVE_ADDRESS = _wtoken;
-    UNISWAP_V2_ROUTER_02 = IUniswapV2Router02(_uniswapV2router);
+    UNISWAP_V2_ROUTER_02_ADDRESS = _uniswapV2router;
+    STABLE_TOKEN = _stableToken;
+    BTC_TOKEN = _btcToken;
+    W_NATIVE = IW_NATIVE(W_NATIVE_ADDRESS);
+    UNISWAP_V2_ROUTER_02 = IUniswapV2Router02(UNISWAP_V2_ROUTER_02_ADDRESS);
+    PAIR_INIT_HASH_CODE = _uniswapPairInitHashCode;
     flashSwapFee = _flashSwapFee;
   }
 
-  function _becomeImplementation(bytes calldata data) external {}
+  function _becomeImplementation(bytes calldata data) external {
+    uint8 _flashSwapFee = abi.decode(data, (uint8));
+    if (_flashSwapFee != 0) {
+      flashSwapFee = _flashSwapFee;
+    } else {
+      flashSwapFee = 30;
+    }
+  }
 
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
@@ -105,19 +148,109 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
   }
 
   /**
+   * @dev Internal function to exchange the entire balance of `from` to at least `minOutputAmount` of `to`.
+   * @param from The input ERC20 token address (or the zero address if NATIVE) to exchange from.
+   * @param to The output ERC20 token address (or the zero address if NATIVE) to exchange to.
+   * @param minOutputAmount The minimum output amount of `to` necessary to complete the exchange without reversion.
+   * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
+   */
+  function exchangeAllWethOrTokens(
+    address from,
+    address to,
+    uint256 minOutputAmount,
+    IUniswapV2Router02 uniswapV2Router
+  ) private {
+    if (to == address(0)) to = W_NATIVE_ADDRESS; // we want W_NATIVE instead of NATIVE
+    if (to == from) return;
+
+    // From NATIVE, W_NATIVE, or something else?
+    if (from == address(0)) {
+      if (to == W_NATIVE_ADDRESS) {
+        // Deposit all NATIVE to W_NATIVE
+        W_NATIVE.deposit{ value: address(this).balance }();
+      } else {
+        // Exchange from NATIVE to tokens
+        uniswapV2Router.swapExactETHForTokens{ value: address(this).balance }(
+          minOutputAmount,
+          array(W_NATIVE_ADDRESS, to),
+          address(this),
+          block.timestamp
+        );
+      }
+    } else {
+      // Approve input tokens
+      IERC20Upgradeable fromToken = IERC20Upgradeable(from);
+      uint256 inputBalance = fromToken.balanceOf(address(this));
+      justApprove(fromToken, address(uniswapV2Router), inputBalance);
+
+      // TODO check if redemption strategies make this obsolete
+      // Exchange from tokens to tokens
+      uniswapV2Router.swapExactTokensForTokens(
+        inputBalance,
+        minOutputAmount,
+        from == W_NATIVE_ADDRESS || to == W_NATIVE_ADDRESS ? array(from, to) : array(from, W_NATIVE_ADDRESS, to),
+        address(this),
+        block.timestamp
+      ); // Put W_NATIVE in the middle of the path if not already a part of the path
+    }
+  }
+
+  /**
+   * @dev Internal function to exchange the entire balance of `from` to at least `minOutputAmount` of `to`.
+   * @param from The input ERC20 token address (or the zero address if NATIVE) to exchange from.
+   * @param outputAmount The output amount of NATIVE.
+   * @param uniswapV2Router The UniswapV2Router02 to use. (Is interchangable with any UniV2 forks)
+   */
+  function exchangeToExactEth(
+    address from,
+    uint256 outputAmount,
+    IUniswapV2Router02 uniswapV2Router
+  ) private {
+    if (from == address(0)) return;
+
+    // From W_NATIVE something else?
+    if (from == W_NATIVE_ADDRESS) {
+      // Withdraw W_NATIVE to NATIVE
+      W_NATIVE.withdraw(outputAmount);
+    } else {
+      // Approve input tokens
+      IERC20Upgradeable fromToken = IERC20Upgradeable(from);
+      uint256 inputBalance = fromToken.balanceOf(address(this));
+      justApprove(fromToken, address(uniswapV2Router), inputBalance);
+
+      // Exchange from tokens to NATIVE
+      uniswapV2Router.swapTokensForExactETH(
+        outputAmount,
+        inputBalance,
+        array(from, W_NATIVE_ADDRESS),
+        address(this),
+        block.timestamp
+      );
+    }
+  }
+
+  /**
    * @notice Safely liquidate an unhealthy loan (using capital from the sender), confirming that at least `minOutputAmount` in collateral is seized (or outputted by exchange if applicable).
    * @param borrower The borrower's Ethereum address.
    * @param repayAmount The amount to repay to liquidate the unhealthy loan.
    * @param cErc20 The borrowed cErc20 to repay.
    * @param cTokenCollateral The cToken collateral to be liquidated.
    * @param minOutputAmount The minimum amount of collateral to seize (or the minimum exchange output if applicable) required for execution. Reverts if this condition is not met.
+   * @param exchangeSeizedTo If set to an address other than `cTokenCollateral`, exchange seized collateral to this ERC20 token contract address (or the zero address for NATIVE).
+   * @param uniswapV2Router The UniswapV2Router to use to convert the seized underlying collateral. (Is interchangable with any UniV2 forks)
+   * @param redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
+   * @param strategyData The data for the chosen IRedemptionStrategy contracts, if any.
    */
   function safeLiquidate(
     address borrower,
     uint256 repayAmount,
     ICErc20 cErc20,
     ICErc20 cTokenCollateral,
-    uint256 minOutputAmount
+    uint256 minOutputAmount,
+    address exchangeSeizedTo,
+    IUniswapV2Router02 uniswapV2Router,
+    IRedemptionStrategy[] memory redemptionStrategies,
+    bytes[] memory strategyData
   ) external returns (uint256) {
     // Transfer tokens in, approve to cErc20, and liquidate borrow
     require(repayAmount > 0, "Repay amount (transaction value) must be greater than 0.");
@@ -125,8 +258,53 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     underlying.safeTransferFrom(msg.sender, address(this), repayAmount);
     justApprove(underlying, address(cErc20), repayAmount);
     require(cErc20.liquidateBorrow(borrower, repayAmount, address(cTokenCollateral)) == 0, "Liquidation failed.");
+
+    // Redeem seized cToken collateral if necessary
+    if (exchangeSeizedTo != address(cTokenCollateral)) {
+      uint256 seizedCTokenAmount = cTokenCollateral.balanceOf(address(this));
+
+      if (seizedCTokenAmount > 0) {
+        uint256 redeemResult = cTokenCollateral.redeem(seizedCTokenAmount);
+        require(redeemResult == 0, "Error calling redeeming seized cToken: error code not equal to 0");
+
+        // Redeem custom collateral if liquidation strategy is set
+        IERC20Upgradeable underlyingCollateral = IERC20Upgradeable(ICErc20(address(cTokenCollateral)).underlying());
+
+        if (redemptionStrategies.length > 0) {
+          require(
+            redemptionStrategies.length == strategyData.length,
+            "IRedemptionStrategy contract array and strategy data bytes array must be the same length."
+          );
+          uint256 underlyingCollateralSeized = underlyingCollateral.balanceOf(address(this));
+          for (uint256 i = 0; i < redemptionStrategies.length; i++)
+            (underlyingCollateral, underlyingCollateralSeized) = redeemCustomCollateral(
+              underlyingCollateral,
+              underlyingCollateralSeized,
+              redemptionStrategies[i],
+              strategyData[i]
+            );
+        }
+
+        // Exchange redeemed token collateral if necessary
+        exchangeAllWethOrTokens(address(underlyingCollateral), exchangeSeizedTo, minOutputAmount, uniswapV2Router);
+      }
+    }
+
     // Transfer seized amount to sender
-    return transferSeizedFunds(address(cTokenCollateral), minOutputAmount);
+    return transferSeizedFunds(exchangeSeizedTo, minOutputAmount);
+  }
+
+  function safeLiquidate(
+    address,
+    address,
+    ICErc20,
+    uint256,
+    address,
+    IUniswapV2Router02,
+    IRedemptionStrategy[] memory,
+    bytes[] memory
+  ) external payable returns (uint256) {
+    revert("not used anymore");
   }
 
   /**
@@ -149,6 +327,9 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * cErc20 The borrowed CErc20 contract to repay.
    * cTokenCollateral The cToken collateral contract to be liquidated.
    * minProfitAmount The minimum amount of profit required for execution (in terms of `exchangeProfitTo`). Reverts if this condition is not met.
+   * exchangeProfitTo If set to an address other than `cTokenCollateral`, exchange seized collateral to this ERC20 token contract address (or the zero address for NATIVE).
+   * uniswapV2RouterForBorrow The UniswapV2Router to use to convert the NATIVE to the underlying borrow (and flashloan the underlying borrow for NATIVE). (Is interchangable with any UniV2 forks)
+   * uniswapV2RouterForCollateral The UniswapV2Router to use to convert the underlying collateral to NATIVE. (Is interchangable with any UniV2 forks)
    * redemptionStrategies The IRedemptionStrategy contracts to use, if any, to redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
    * strategyData The data for the chosen IRedemptionStrategy contracts, if any.
    */
@@ -159,10 +340,12 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     ICErc20 cTokenCollateral;
     IUniswapV2Pair flashSwapPair;
     uint256 minProfitAmount;
+    address exchangeProfitTo;
     IUniswapV2Router02 uniswapV2RouterForBorrow;
     IUniswapV2Router02 uniswapV2RouterForCollateral;
     IRedemptionStrategy[] redemptionStrategies;
     bytes[] strategyData;
+    uint256 ethToCoinbase;
     IFundsConversionStrategy[] debtFundingStrategies;
     bytes[] debtFundingStrategiesData;
   }
@@ -210,7 +393,34 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
       msg.data
     );
 
-    return transferSeizedFunds(address(vars.cTokenCollateral), vars.minProfitAmount);
+    // Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds
+    return distributeProfit(vars.exchangeProfitTo, vars.minProfitAmount, vars.ethToCoinbase);
+  }
+
+  /**
+   * Exchange profit, send NATIVE to coinbase if necessary, and transfer seized funds to sender.
+   */
+  function distributeProfit(
+    address exchangeProfitTo,
+    uint256 minProfitAmount,
+    uint256 ethToCoinbase
+  ) private returns (uint256) {
+    if (exchangeProfitTo == address(0)) exchangeProfitTo = W_NATIVE_ADDRESS;
+
+    // Transfer NATIVE to block.coinbase if requested
+    if (ethToCoinbase > 0) {
+      uint256 currentBalance = address(this).balance;
+      if (ethToCoinbase > currentBalance) {
+        exchangeToExactEth(_liquidatorProfitExchangeSource, ethToCoinbase - currentBalance, UNISWAP_V2_ROUTER_02);
+      }
+      block.coinbase.call{ value: ethToCoinbase }("");
+    }
+
+    // Exchange profit if necessary
+    exchangeAllWethOrTokens(_liquidatorProfitExchangeSource, exchangeProfitTo, minProfitAmount, UNISWAP_V2_ROUTER_02);
+
+    // Transfer profit to msg.sender
+    return transferSeizedFunds(exchangeProfitTo, minProfitAmount);
   }
 
   /**
@@ -243,6 +453,24 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    * @dev Callback function for PCS flashloans.
    */
   function pancakeCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  function BeamSwapCall(
+    address sender,
+    uint256 amount0,
+    uint256 amount1,
+    bytes calldata data
+  ) external {
+    uniswapV2Call(sender, amount0, amount1, data);
+  }
+
+  function stellaswapV2Call(
     address sender,
     uint256 amount0,
     uint256 amount1,
@@ -307,6 +535,7 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
     return
       repayTokenFlashLoan(
         vars.cTokenCollateral,
+        vars.exchangeProfitTo,
         vars.uniswapV2RouterForBorrow,
         vars.uniswapV2RouterForCollateral,
         vars.redemptionStrategies,
@@ -319,6 +548,7 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
    */
   function repayTokenFlashLoan(
     ICErc20 cTokenCollateral,
+    address exchangeProfitTo,
     IUniswapV2Router02 uniswapV2RouterForBorrow,
     IUniswapV2Router02 uniswapV2RouterForCollateral,
     IRedemptionStrategy[] memory redemptionStrategies,
@@ -398,13 +628,22 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         justApprove(underlyingCollateral, address(uniswapV2RouterForCollateral), underlyingCollateralSeized);
 
         // Swap collateral tokens for W_NATIVE to be repaid via Uniswap router
-        uniswapV2RouterForCollateral.swapTokensForExactTokens(
-          wethRequired,
-          underlyingCollateralSeized,
-          array(address(underlyingCollateral), W_NATIVE_ADDRESS),
-          address(this),
-          block.timestamp
-        );
+        if (exchangeProfitTo == address(underlyingCollateral))
+          uniswapV2RouterForCollateral.swapTokensForExactTokens(
+            wethRequired,
+            underlyingCollateralSeized,
+            array(address(underlyingCollateral), W_NATIVE_ADDRESS),
+            address(this),
+            block.timestamp
+          );
+        else
+          uniswapV2RouterForCollateral.swapExactTokensForTokens(
+            underlyingCollateralSeized,
+            wethRequired,
+            array(address(underlyingCollateral), W_NATIVE_ADDRESS),
+            address(this),
+            block.timestamp
+          );
       }
 
       // Repay flashloan
@@ -413,12 +652,12 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
         "Not enough W_NATIVE exchanged from seized collateral to repay flashloan."
       );
       require(
-        IW_NATIVE(W_NATIVE_ADDRESS).transfer(msg.sender, wethRequired),
+        W_NATIVE.transfer(msg.sender, wethRequired),
         "Failed to repay Uniswap flashloan with W_NATIVE exchanged from seized collateral."
       );
 
       // Return the profited token (underlying collateral if same as exchangeProfitTo; otherwise, W_NATIVE)
-      return address(underlyingCollateral);
+      return exchangeProfitTo == address(underlyingCollateral) ? address(underlyingCollateral) : W_NATIVE_ADDRESS;
     }
   }
 
@@ -452,7 +691,7 @@ contract IonicLiquidator is OwnableUpgradeable, IUniswapV2Callee {
 
   /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
-   * Public visibility because we have to call this function externally if called from a payable IonicLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
+   * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
    */
   function redeemCustomCollateral(
     IERC20Upgradeable underlyingCollateral,

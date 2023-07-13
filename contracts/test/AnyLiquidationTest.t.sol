@@ -349,12 +349,10 @@ contract AnyLiquidationTest is BaseTest {
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
           0,
-          exchangeCollateralTo,
           IUniswapV2Router02(uniswapRouter), // TODO ASSET_SPECIFIC_ROUTER
           IUniswapV2Router02(uniswapRouter), // TODO ASSET_SPECIFIC_ROUTER
           vars.strategies,
           vars.redemptionDatas,
-          0,
           vars.fundingStrategies,
           vars.fundingDatas
         )

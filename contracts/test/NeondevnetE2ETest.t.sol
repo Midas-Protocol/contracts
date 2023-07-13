@@ -140,9 +140,6 @@ contract NeondevnetE2ETest is WithPool {
     vars.liquidator.initialize(
       wtoken, // wneon
       moraRouter, // moraswap router
-      moraUsdc, // MoraSwap USDC
-      wWbtc, // wWBTC
-      "0x1f475d88284b09799561ca05d87dc757c1ff4a9f48983cdb84d1dd6e209d3ae2",
       30
     );
 
@@ -210,12 +207,10 @@ contract NeondevnetE2ETest is WithPool {
         ICErc20(address(cWNeonToken)),
         flashSwapPair,
         0,
-        address(0),
         uniswapRouter,
         uniswapRouter,
         vars.strategies,
         vars.abis,
-        0,
         vars.fundingStrategies,
         vars.data
       )

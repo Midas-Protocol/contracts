@@ -92,14 +92,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     // setting up a new liquidator
     //    vars.liquidator = IonicLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
     vars.liquidator = new IonicLiquidator();
-    vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
-      address(uniswapRouter),
-      ap.getAddress("bUSD"),
-      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
-      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-      25
-    );
+    vars.liquidator.initialize(ap.getAddress("wtoken"), address(uniswapRouter), 25);
 
     IComptroller comptroller = IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
@@ -173,12 +166,10 @@ contract JarvisLiquidatorFunderTest is BaseTest {
         ICErc20(address(cTokenBUSD)),
         flashSwapPair,
         0,
-        address(0),
         uniswapRouter,
         uniswapRouter,
         vars.strategies,
         vars.abis,
-        0,
         vars.fundingStrategies,
         vars.data
       )
