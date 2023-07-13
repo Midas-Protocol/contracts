@@ -11,7 +11,7 @@ on:
       - development
 
 env:
-  EXCLUDE_TESTS: "Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test"
+  EXCLUDE_TESTS: "Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test"
   FLAKY_TESTS: "AnyLiquidationTest|LiquidityMiningTest"
   SLOW_TESTS: "MaxBorrowTest|OraclesDecimalsScalingTest|MinBorrowTest|LeveredPositionTest|OraclesDecimalsScalingTest"
 
@@ -38,7 +38,7 @@ jobs:
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
       BSC_MAINNET_RPC_URL: https://bsc-dataseed.binance.org
-      BSC_MAINNET_ARCHIVE_RPC_URL: "${{ secrets.BSC_MAINNET_ARCHIVE_RPC_URL }}"
+      BSC_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/bsc
       TEST_RUN_CHAINID: 56
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -77,8 +77,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      POLYGON_MAINNET_RPC_URL: https://poly-rpc.gateway.pokt.network
-      POLYGON_MAINNET_ARCHIVE_RPC_URL: https://polygon-rpc.com/
+      POLYGON_MAINNET_RPC_URL: https://polygon.llamarpc.com
+      POLYGON_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/polygon
       TEST_RUN_CHAINID: 137
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -112,47 +112,6 @@ jobs:
         if: always()
         run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
         
-
-  build-and-test-moonbeam:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      MOONBEAM_MAINNET_RPC_URL: https://rpc.ankr.com/moonbeam
-      MOONBEAM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/moonbeam
-      TEST_RUN_CHAINID: 1284
-      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Forge RPC cache
-        uses: actions/cache@v3
-        with:
-          path: "~/.foundry/cache"
-          key: rpc-cache-moonbeam-${{ hashFiles('rpc-cache-keyfile') }}
-
-      - name: Run base tests for Moonbeam mainnet
-        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
-
-      - name: Run slow tests for Moonbeam mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
-        env:
-          MOONBEAM_MAINNET_RPC_URL: https://rpc.api.moonbeam.network
-
-      - name: Run flaky tests for Moonbeam mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
   build-and-test-arbitrum:
     needs: [lint]
@@ -197,8 +156,8 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      NEON_DEVNET_RPC_URL: https://proxy.devnet.neonlabs.org/solana
-      NEON_DEVNET_ARCHIVE_RPC_URL: https://proxy.devnet.neonlabs.org/solana
+      NEON_DEVNET_RPC_URL: https://devnet.neonevm.org
+      NEON_DEVNET_ARCHIVE_RPC_URL: https://devnet.neonevm.org
       TEST_RUN_CHAINID: 245022926
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
@@ -222,85 +181,7 @@ jobs:
           key: rpc-cache-neon-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests for Neon devnet
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
-
-  build-and-test-evmos:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      EVMOS_MAINNET_RPC_URL: https://eth.bd.evmos.org:8545
-      EVMOS_MAINNET_ARCHIVE_RPC_URL: https://eth.bd.evmos.org:8545
-      TEST_RUN_CHAINID: 9001
-      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Forge RPC cache
-        uses: actions/cache@v3
-        with:
-          path: "~/.foundry/cache"
-          key: rpc-cache-evmos-${{ hashFiles('rpc-cache-keyfile') }}
-
-      - name: Run base tests for Evmos mainnet
-        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
-
-      - name: Run slow tests for Evmos mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
-
-      - name: Run flaky tests for Evmos mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
-
-  build-and-test-fantom:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      FANTOM_MAINNET_RPC_URL: https://rpc.ankr.com/fantom
-      FANTOM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/fantom
-      TEST_RUN_CHAINID: 250
-      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
-
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Forge RPC cache
-        uses: actions/cache@v3
-        with:
-          path: "~/.foundry/cache"
-          key: rpc-cache-fantom-${{ hashFiles('rpc-cache-keyfile') }}
-
-      - name: Run base tests for Fantom mainnet
-        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
-
-      - name: Run slow tests for Fantom mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
-
-      - name: Run flaky tests for Fantom mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
   
   build-and-test-chapel:
     needs: [lint]
@@ -407,4 +288,4 @@ jobs:
           key: rpc-cache-local-${{ hashFiles('rpc-cache-keyfile') }}
 
       - name: Run forge tests locally
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|StellaERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|MiniChefERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
+        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
