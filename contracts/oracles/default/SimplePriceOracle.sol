@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "../../compound/PriceOracle.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
+import "../BasePriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "../../midas/SafeOwnableUpgradeable.sol";
 
-contract SimplePriceOracle is PriceOracle {
+contract SimplePriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   mapping(address => uint256) prices;
   event PricePosted(
     address asset,
@@ -14,7 +14,11 @@ contract SimplePriceOracle is PriceOracle {
     uint256 newPriceMantissa
   );
 
-  function getUnderlyingPrice(CTokenInterface cToken) public view override returns (uint256) {
+  function initialize() public initializer {
+    __SafeOwnable_init(msg.sender);
+  }
+
+  function getUnderlyingPrice(ICErc20 cToken) public view override returns (uint256) {
     if (compareStrings(cToken.symbol(), "cETH")) {
       return 1e18;
     } else {
@@ -29,15 +33,15 @@ contract SimplePriceOracle is PriceOracle {
     }
   }
 
-  function setUnderlyingPrice(CTokenInterface cToken, uint256 underlyingPriceMantissa) public {
+  function setUnderlyingPrice(ICErc20 cToken, uint256 underlyingPriceMantissa) public onlyOwner {
     address asset = ICErc20(address(cToken)).underlying();
     emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
     prices[asset] = underlyingPriceMantissa;
   }
 
-  function setDirectPrice(address asset, uint256 price) public {
-    emit PricePosted(asset, prices[asset], price, price);
-    prices[asset] = price;
+  function setDirectPrice(address asset, uint256 _price) public onlyOwner {
+    emit PricePosted(asset, prices[asset], _price, _price);
+    prices[asset] = _price;
   }
 
   function price(address underlying) external view returns (uint256) {

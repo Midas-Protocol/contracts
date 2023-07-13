@@ -6,14 +6,15 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import "./compound/ErrorReporter.sol";
-import "./external/compound/IComptroller.sol";
-import "./compound/CErc20Delegator.sol";
-import "./compound/CErc20PluginDelegate.sol";
-import "./midas/SafeOwnableUpgradeable.sol";
-import "./utils/PatchedStorage.sol";
-import "./oracles/BasePriceOracle.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
+import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
+import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";
+import { SafeOwnableUpgradeable } from "./midas/SafeOwnableUpgradeable.sol";
+import { PatchedStorage } from "./utils/PatchedStorage.sol";
+import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./midas/DiamondExtension.sol";
+import { AuthoritiesRegistry } from "./midas/AuthoritiesRegistry.sol";
 
 /**
  * @title FuseFeeDistributor
@@ -30,10 +31,14 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
    */
   function initialize(uint256 _defaultInterestFeeRate) public initializer {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     defaultInterestFeeRate = _defaultInterestFeeRate;
     maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
+  }
+
+  function reinitialize(AuthoritiesRegistry _ar) public onlyOwnerOrAdmin {
+    authoritiesRegistry = _ar;
   }
 
   /**
@@ -101,12 +106,12 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     maxUtilizationRate = _maxUtilizationRate;
   }
 
-  function getMinBorrowEth(CTokenInterface _ctoken) public view returns (uint256) {
+  function getMinBorrowEth(ICErc20 _ctoken) public view returns (uint256) {
     (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
     if (borrowBalance == 0) return minBorrowEth;
     IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
-    BasePriceOracle oracle = BasePriceOracle(address(comptroller.oracle()));
-    uint256 underlyingPriceEth = oracle.price(CErc20Interface(address(_ctoken)).underlying());
+    BasePriceOracle oracle = comptroller.oracle();
+    uint256 underlyingPriceEth = oracle.price(ICErc20(address(_ctoken)).underlying());
     uint256 underlyingDecimals = _ctoken.decimals();
     uint256 borrowBalanceEth = (underlyingPriceEth * borrowBalance) / 10**underlyingDecimals;
     if (borrowBalanceEth > minBorrowEth) {
@@ -434,5 +439,36 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     onlyOwner
   {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
+  }
+
+  function autoUpgradePool(IComptroller pool) external onlyOwner {
+    ICErc20[] memory markets = pool.getAllMarkets();
+    bool autoImplOnBefore = pool.autoImplementation();
+    pool._toggleAutoImplementations(true);
+
+    // auto upgrade the pool
+    pool.enterMarkets(new address[](0));
+
+    for (uint8 i = 0; i < markets.length; i++) {
+      // auto upgrade the market
+      markets[i].accrueInterest();
+    }
+
+    if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
+  }
+
+  function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
+    pool._toggleAutoImplementations(enabled);
+  }
+
+  AuthoritiesRegistry public authoritiesRegistry;
+
+  function canCall(
+    address pool,
+    address user,
+    address target,
+    bytes4 functionSig
+  ) external view returns (bool) {
+    return authoritiesRegistry.canCall(pool, user, target, functionSig);
   }
 }

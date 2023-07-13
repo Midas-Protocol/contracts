@@ -2,15 +2,12 @@
 pragma solidity >=0.8.0;
 
 import "./helpers/WithPool.sol";
-import { BaseTest } from "./config/BaseTest.t.sol";
-import "forge-std/Test.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
-import "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
   constructor() MockERC20("test", "test", 8) {}
@@ -18,24 +15,31 @@ contract MockAsset is MockERC20 {
   function deposit() external payable {}
 }
 
-contract MaxWithdrawTestPolygon is WithPool, BaseTest {
-  address wmaticAddress = 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270;
-  address usdcWhale = 0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245;
+contract MaxBorrowTest is WithPool {
+  address usdcWhale = 0x625E7708f30cA75bfd92586e17077590C60eb4cD;
   address daiWhale = 0x06959153B974D0D5fDfd87D561db6d8d4FA0bb0B;
 
   struct LiquidationData {
     address[] cTokens;
-    CTokenInterface[] allMarkets;
+    ICErc20[] allMarkets;
     MockAsset usdc;
     MockAsset dai;
   }
 
   function afterForkSetUp() internal override {
-    super.setUpWithPool(MasterPriceOracle(ap.getAddress("MasterPriceOracle")), ERC20Upgradeable(wmaticAddress));
+    super.setUpWithPool(
+      MasterPriceOracle(ap.getAddress("MasterPriceOracle")),
+      ERC20Upgradeable(ap.getAddress("wtoken"))
+    );
 
-    vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F);
-    MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
-    setUpPool("polygon-test", false, 0.1e18, 1.1e18);
+    if (block.chainid == POLYGON_MAINNET) {
+      vm.prank(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
+      MockERC20(address(underlyingToken)).transfer(address(this), 100e18);
+      setUpPool("polygon-test", false, 0.1e18, 1.1e18);
+    } else if (block.chainid == BSC_MAINNET) {
+      deal(address(underlyingToken), address(this), 100e18);
+      setUpPool("bsc-test", false, 0.1e18, 1.1e18);
+    }
   }
 
   function testMaxBorrow() public fork(POLYGON_MAINNET) {
@@ -49,6 +53,9 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
 
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
     deployCErc20Delegate(address(vars.dai), "DAI", "dai", 0.9e18);
+
+    // TODO no need to upgrade after the next deploy
+    upgradePool(address(comptroller));
 
     vars.allMarkets = comptroller.getAllMarkets();
 
@@ -84,9 +91,106 @@ contract MaxWithdrawTestPolygon is WithPool, BaseTest {
       assertEq(cToken.totalSupply(), 1e6 * 5);
       assertEq(cDaiToken.totalSupply(), 1e18 * 5);
 
-      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cToken)));
-      uint256 maxDaiBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICToken(address(cDaiToken)));
+      uint256 maxBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
+      uint256 maxDaiBorrow = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cDaiToken)));
       assertApproxEqAbs((maxBorrow * 1e18) / 10**cToken.decimals(), maxDaiBorrow, uint256(1e16), "!max borrow");
     }
+
+    // borrow cap for collateral test
+    {
+      vm.prank(comptroller.admin());
+      comptroller._setBorrowCapForCollateral(address(cToken), address(cDaiToken), 0.5e6);
+    }
+
+    uint256 maxBorrowAfterBorrowCap = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
+    assertApproxEqAbs(maxBorrowAfterBorrowCap, 0.5e6, uint256(1e5), "!max borrow");
+
+    // blacklist
+    {
+      vm.prank(comptroller.admin());
+      comptroller._blacklistBorrowingAgainstCollateral(address(cToken), address(cDaiToken), true);
+    }
+
+    uint256 maxBorrowAfterBlacklist = poolLensSecondary.getMaxBorrow(accountOne, ICErc20(address(cToken)));
+    assertEq(maxBorrowAfterBlacklist, 0, "!blacklist");
+  }
+
+  // TODO test with the latest block and contracts and/or without the FSL
+  function testBorrowCapPerCollateral() public debuggingOnly forkAtBlock(BSC_MAINNET, 23761190) {
+    address payable jFiatPoolAddress = payable(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
+
+    address poolAddress = jFiatPoolAddress;
+    Comptroller pool = Comptroller(poolAddress);
+
+    // TODO no need to upgrade after the next deploy
+    upgradePool(address(pool));
+
+    ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
+    address[] memory borrowers = asExtension.getAllBorrowers();
+    address someBorrower = borrowers[1];
+
+    ICErc20[] memory markets = asExtension.getAllMarkets();
+    for (uint256 i = 0; i < markets.length; i++) {
+      ICErc20 market = markets[i];
+      uint256 borrowed = market.borrowBalanceCurrent(someBorrower);
+      if (borrowed > 0) {
+        emit log("borrower has borrowed");
+        emit log_uint(borrowed);
+        emit log("from market");
+        emit log_address(address(market));
+        emit log_uint(i);
+        emit log("");
+      }
+
+      uint256 collateral = market.balanceOf(someBorrower);
+      if (collateral > 0) {
+        emit log("has collateral");
+        emit log_uint(collateral);
+        emit log("in market");
+        emit log_address(address(market));
+        emit log_uint(i);
+        emit log("");
+      }
+    }
+
+    ICErc20 marketToBorrow = markets[0];
+    ICErc20 cappedCollateralMarket = markets[6];
+    uint256 borrowAmount = marketToBorrow.borrowBalanceCurrent(someBorrower);
+
+    {
+      (uint256 errBefore, uint256 liquidityBefore, uint256 shortfallBefore) = pool.getHypotheticalAccountLiquidity(
+        someBorrower,
+        address(marketToBorrow),
+        0,
+        borrowAmount
+      );
+      emit log("errBefore");
+      emit log_uint(errBefore);
+      emit log("liquidityBefore");
+      emit log_uint(liquidityBefore);
+      emit log("shortfallBefore");
+      emit log_uint(shortfallBefore);
+
+      assertGt(liquidityBefore, 0, "expected positive liquidity");
+    }
+
+    vm.prank(pool.admin());
+    asExtension._setBorrowCapForCollateral(address(marketToBorrow), address(cappedCollateralMarket), 1);
+    emit log("");
+
+    (uint256 errAfter, uint256 liquidityAfter, uint256 shortfallAfter) = pool.getHypotheticalAccountLiquidity(
+      someBorrower,
+      address(marketToBorrow),
+      0,
+      borrowAmount
+    );
+    emit log("errAfter");
+    emit log_uint(errAfter);
+    emit log("liquidityAfter");
+    emit log_uint(liquidityAfter);
+    emit log("shortfallAfter");
+    emit log_uint(shortfallAfter);
+
+    assertGt(shortfallAfter, 0, "expected some shortfall");
   }
 }

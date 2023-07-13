@@ -19,6 +19,8 @@ interface IComptroller {
 
   function oracle() external view returns (IPriceOracle);
 
+  function pauseGuardian() external view returns (address);
+
   function closeFactorMantissa() external view returns (uint256);
 
   function liquidationIncentiveMantissa() external view returns (uint256);
@@ -43,9 +45,20 @@ interface IComptroller {
       uint256
     );
 
+  function getAccountLiquidity(address account)
+    external
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    );
+
   function _setPriceOracle(IPriceOracle newOracle) external returns (uint256);
 
   function _setCloseFactor(uint256 newCloseFactorMantissa) external returns (uint256);
+
+  function _setCollateralFactor(ICToken market, uint256 newCollateralFactorMantissa) external returns (uint256);
 
   function _setLiquidationIncentive(uint256 newLiquidationIncentiveMantissa) external returns (uint256);
 
@@ -63,9 +76,17 @@ interface IComptroller {
 
   function suppliers(address account) external view returns (bool);
 
+  function supplyCaps(address cToken) external view returns (uint256);
+
+  function borrowCaps(address cToken) external view returns (uint256);
+
   function enforceWhitelist() external view returns (bool);
 
   function enterMarkets(address[] memory cTokens) external returns (uint256[] memory);
+
+  function exitMarket(address cTokenAddress) external returns (uint256);
+
+  function autoImplementation() external view returns (bool);
 
   function isUserOfPool(address user) external view returns (bool);
 
@@ -87,5 +108,15 @@ interface IComptroller {
     address account,
     ICToken cTokenModify,
     bool isBorrow
-  ) external returns (uint256);
+  ) external view returns (uint256);
+
+  function borrowCapForCollateral(address borrowed, address collateral) external view returns (uint256);
+
+  function borrowingAgainstCollateralBlacklist(address borrowed, address collateral) external view returns (bool);
+
+  function isDeprecated(ICToken cToken) external view returns (bool);
+
+  function getWhitelistedSuppliersSupply(address cToken) external view returns (uint256 supplied);
+
+  function getWhitelistedBorrowersBorrows(address cToken) external view returns (uint256 borrowed);
 }

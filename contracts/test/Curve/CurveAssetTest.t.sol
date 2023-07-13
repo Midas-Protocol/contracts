@@ -1,20 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { CurveTestConfigStorage } from "./CurveTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
-import { MockPriceOracle, IPriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
+import { MockPriceOracle, BasePriceOracle } from "../../oracles/1337/MockPriceOracle.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./CurveERC4626Test.sol";
 
+// TODO adapt test to run for the latest block
 contract CurveAssetTest is AbstractAssetTest {
   MasterPriceOracle masterPriceOracle;
   address[] underlyingsForOracle;
-  IPriceOracle[] oracles;
+  BasePriceOracle[] oracles;
+
+  function setUp() public forkAtBlock(POLYGON_MAINNET, 33063212) {}
 
   function afterForkSetUp() internal override {
     test = AbstractERC4626Test(address(new CurveERC4626Test()));
@@ -29,25 +31,27 @@ contract CurveAssetTest is AbstractAssetTest {
     MockPriceOracle curveOracle = new MockPriceOracle(60);
 
     underlyingsForOracle.push(asset);
-    oracles.push(IPriceOracle(address(curveOracle)));
+    oracles.push(BasePriceOracle(address(curveOracle)));
 
     vm.prank(masterPriceOracle.admin());
     masterPriceOracle.add(underlyingsForOracle, oracles);
 
     test.setUpWithPool(masterPriceOracle, ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override forkAtBlock(POLYGON_MAINNET, 33063212) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (, address asset) = abi.decode(testConfig, (address, address));
+        (, address asset) = abi.decode(testConfig, (address, address));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 
@@ -71,15 +75,15 @@ contract CurveAssetTest is AbstractAssetTest {
     assertTrue(true);
   }
 
-  function testAccumulatingRewardsOnDeposit() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(CurveERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public forkAtBlock(POLYGON_MAINNET, 33063212) {
+  function testClaimRewards() public {
     this.runTest(CurveERC4626Test(address(test)).testClaimRewards);
   }
 }

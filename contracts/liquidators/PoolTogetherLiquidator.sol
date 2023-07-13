@@ -34,4 +34,8 @@ contract PoolTogetherLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(controller.token());
     outputAmount = inputAmount;
   }
+
+  function name() public pure returns (string memory) {
+    return "PoolTogetherLiquidator";
+  }
 }

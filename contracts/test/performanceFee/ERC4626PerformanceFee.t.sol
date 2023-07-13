@@ -4,7 +4,12 @@ pragma solidity ^0.8.0;
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { IBeefyVault, BeefyERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
+import { IBeefyVault, BeefyERC4626, MidasERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
+import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { IERC4626 } from "../../compound/IERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
@@ -23,12 +28,14 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   address newFeeRecipient = address(5);
 
   function afterForkSetUp() internal override {
-    underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
-    plugin = new BeefyERC4626();
-    plugin.initialize(underlyingToken, beefyVault, 10);
+    if (block.chainid == BSC_MAINNET) {
+      underlyingToken = ERC20Upgradeable(address(beefyVault.want()));
+      plugin = new BeefyERC4626();
+      plugin.initialize(underlyingToken, beefyVault, 10);
 
-    uint256 currentPerformanceFee = plugin.performanceFee();
-    plugin.updateFeeSettings(currentPerformanceFee, newFeeRecipient);
+      uint256 currentPerformanceFee = plugin.performanceFee();
+      plugin.updateFeeSettings(currentPerformanceFee, newFeeRecipient);
+    }
   }
 
   /* --------------------- HELPER FUNCTIONS --------------------- */
@@ -131,5 +138,40 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     vm.startPrank(address(10));
     vm.expectRevert("Ownable: caller is not the owner");
     plugin.withdrawAccruedFees();
+  }
+
+  function testPolygonAllPluginsFeeRecipient() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testAllPluginsFeeRecipient();
+  }
+
+  function testBscAllPluginsFeeRecipient() public debuggingOnly fork(BSC_MAINNET) {
+    _testAllPluginsFeeRecipient();
+  }
+
+  function testArbitrumAllPluginsFeeRecipient() public debuggingOnly fork(ARBITRUM_ONE) {
+    _testAllPluginsFeeRecipient();
+  }
+
+  function _testAllPluginsFeeRecipient() internal {
+    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+
+    for (uint8 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      ICErc20[] memory markets = comptroller.getAllMarkets();
+      for (uint8 j = 0; j < markets.length; j++) {
+        CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
+
+        try delegate.plugin() returns (IERC4626 _plugin) {
+          MidasERC4626 plugin = MidasERC4626(address(_plugin));
+
+          address fr = plugin.feeRecipient();
+          if (fr != ap.getAddress("deployer")) emit log_named_address("plugin fr", address(plugin));
+          assertEq(fr, ap.getAddress("deployer"), "fee recipient not correct");
+        } catch {
+          continue;
+        }
+      }
+    }
   }
 }

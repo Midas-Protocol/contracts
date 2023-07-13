@@ -1,45 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "ds-test/test.sol";
-import "forge-std/Vm.sol";
-import "../helpers/WithPool.sol";
-import "../config/BaseTest.t.sol";
-
-import { MidasERC4626, HelioERC4626, IJAR } from "../../midas/strategies/HelioERC4626.sol";
-import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
-import { Authority } from "solmate/auth/Auth.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { HelioERC4626, IJAR } from "../../midas/strategies/HelioERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
-import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
-
-import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-
-struct RewardsCycle {
-  uint32 start;
-  uint32 end;
-  uint192 reward;
-}
 
 contract HelioERC4626Test is AbstractERC4626Test {
-  using FixedPointMathLib for uint256;
-
   IJAR jar;
   address jarAdmin = 0x8d388136d578dCD791D081c6042284CED6d9B0c6;
 
-  constructor() WithPool() {}
-
-  function setUp(string memory _testPreFix, bytes calldata data) public override {
+  function _setUp(string memory _testPreFix, bytes calldata data) public override {
     setUpPool("Helio-test ", false, 0.1e18, 1.1e18);
     sendUnderlyingToken(depositAmount, address(this));
 
     testPreFix = _testPreFix;
 
-    (address _asset, address _jar) = abi.decode(data, (address, address));
+    (, address _jar) = abi.decode(data, (address, address));
 
     jar = IJAR(_jar);
 
@@ -93,8 +68,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testWithdraw() public override {
-    uint256 depositShares = this.getExpectedDepositShares();
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -163,8 +136,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testWithdrawWithIncreasedVaultValue() public override {
-    uint256 depositShareBal = this.getExpectedDepositShares();
-
     deposit(address(this), depositAmount);
 
     uint256 withdrawalAmount = 10e18;
@@ -199,8 +170,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testMultipleRedeem() public override {
-    uint256 depositShares = this.getExpectedDepositShares() * 2;
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -294,8 +263,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testMultipleWithdraw() public override {
-    uint256 depositShares = this.getExpectedDepositShares() * 2;
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);
@@ -336,7 +303,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
       string(abi.encodePacked("1.DotDot erc4626 locked amount checking ", testPreFix))
     );
 
-    uint256 totalSupplyBefore = depositAmount * 2 - expectedErc4626SharesNeeded;
     assetBalBefore = underlyingToken.balanceOf(address(1));
     erc4626BalBefore = plugin.balanceOf(address(1));
 
@@ -370,8 +336,6 @@ contract HelioERC4626Test is AbstractERC4626Test {
   }
 
   function testRedeem() public override {
-    uint256 depositShares = this.getExpectedDepositShares();
-
     uint256 withdrawalAmount = 10e18;
 
     deposit(address(this), depositAmount);

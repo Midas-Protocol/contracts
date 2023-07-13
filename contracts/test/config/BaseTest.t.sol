@@ -10,15 +10,16 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 abstract contract BaseTest is Test {
+  uint128 constant ETHEREUM_MAINNET = 1;
   uint128 constant BSC_MAINNET = 56;
-  uint128 constant MOONBEAM_MAINNET = 1284;
   uint128 constant POLYGON_MAINNET = 137;
   uint128 constant ARBITRUM_ONE = 42161;
-  uint128 constant FANTOM_OPERA = 250;
-  uint128 constant EVMOS_MAINNET = 9001;
 
   uint128 constant BSC_CHAPEL = 97;
   uint128 constant NEON_DEVNET = 245022926;
+
+  // taken from ERC1967Upgrade
+  bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
 
   AddressesProvider public ap;
   ProxyAdmin public dpa;
@@ -49,6 +50,14 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier debuggingOnly() {
+    try vm.envBool("LOCAL_FORGE_ENV") returns (bool run) {
+      if (run) _;
+    } catch {
+      emit log("skipping this test in the CI/CD - add LOCAL_FORGE_ENV=true to your .env file to run locally");
+    }
+  }
+
   modifier fork(uint128 chainid) {
     if (shouldRunForChain(chainid)) {
       _forkAtBlock(chainid, 0);
@@ -63,6 +72,12 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier whenForking() {
+    try vm.activeFork() returns (uint256) {
+      _;
+    } catch {}
+  }
+
   function shouldRunForChain(uint256 chainid) internal returns (bool) {
     bool run = true;
     try vm.envUint("TEST_RUN_CHAINID") returns (uint256 envChainId) {
@@ -73,7 +88,7 @@ abstract contract BaseTest is Test {
     return run;
   }
 
-  function _forkAtBlock(uint128 chainid, uint256 blockNumber) private {
+  function _forkAtBlock(uint128 chainid, uint256 blockNumber) internal {
     if (block.chainid != chainid) {
       if (blockNumber != 0) {
         vm.selectFork(getArchiveForkId(chainid));
@@ -96,18 +111,14 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc")) + 100;
       } else if (chainid == BSC_CHAPEL) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
-      } else if (chainid == MOONBEAM_MAINNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam")) + 100;
-      } else if (chainid == EVMOS_MAINNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
       } else if (chainid == NEON_DEVNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
-      } else if (chainid == FANTOM_OPERA) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom")) + 100;
+      } else if (chainid == ETHEREUM_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum")) + 100;
       }
     }
     return forkIds[chainid] - 100;
@@ -121,18 +132,14 @@ abstract contract BaseTest is Test {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_archive")) + 100;
       } else if (chainid == BSC_CHAPEL) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 100;
-      } else if (chainid == MOONBEAM_MAINNET) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("moonbeam_archive")) + 100;
-      } else if (chainid == EVMOS_MAINNET) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("evmos_archive")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("polygon_archive")) + 100;
       } else if (chainid == NEON_DEVNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
-      } else if (chainid == FANTOM_OPERA) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
+      } else if (chainid == ETHEREUM_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
       }
     }
     return forkIds[chainidWithOffset] - 100;
@@ -145,18 +152,13 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
     } else if (chainid == BSC_CHAPEL) {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
-    } else if (chainid == MOONBEAM_MAINNET) {
-      ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (block.chainid == EVMOS_MAINNET) {
-      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
+      dpa = ProxyAdmin(0x9b30a238A94c5a456a02ceC01e41f1c91d54e915);
     } else if (chainid == NEON_DEVNET) {
-      ap = AddressesProvider(0x3B0B043f5c459F9f5dC39ECb04AA39D1E675565B);
+      ap = AddressesProvider(0x3F56f8571988D03Cdc7E51fdaB19ADb032CCbe21);
     } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
-    } else if (chainid == FANTOM_OPERA) {
-      ap = AddressesProvider(0xC1B6152d3977E994F5a4E0dead9d0a11a0D229Ef);
     } else {
       dpa = new ProxyAdmin();
       AddressesProvider logic = new AddressesProvider();
@@ -169,6 +171,10 @@ abstract contract BaseTest is Test {
     }
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
+    }
+    if (ap.getAddress("deployer") == address(0)) {
+      vm.prank(ap.owner());
+      ap.setAddress("deployer", 0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
     }
   }
 
@@ -197,9 +203,28 @@ abstract contract BaseTest is Test {
     return array;
   }
 
+  function asArray(
+    address value0,
+    address value1,
+    address value2
+  ) public pure returns (address[] memory) {
+    address[] memory array = new address[](3);
+    array[0] = value0;
+    array[1] = value1;
+    array[2] = value2;
+    return array;
+  }
+
   function asArray(bool value) public pure returns (bool[] memory) {
     bool[] memory array = new bool[](1);
     array[0] = value;
+    return array;
+  }
+
+  function asArray(uint256 value0, uint256 value1) public pure returns (uint256[] memory) {
+    uint256[] memory array = new uint256[](2);
+    array[0] = value0;
+    array[1] = value1;
     return array;
   }
 
@@ -207,5 +232,74 @@ abstract contract BaseTest is Test {
     uint256[] memory array = new uint256[](1);
     array[0] = value;
     return array;
+  }
+
+  function asArray(bytes memory value) public pure returns (bytes[] memory) {
+    bytes[] memory array = new bytes[](1);
+    array[0] = value;
+    return array;
+  }
+
+  function asArray(bytes memory value0, bytes memory value1) public pure returns (bytes[] memory) {
+    bytes[] memory array = new bytes[](2);
+    array[0] = value0;
+    array[1] = value1;
+    return array;
+  }
+
+  function asArray(
+    bytes memory value0,
+    bytes memory value1,
+    bytes memory value2
+  ) public pure returns (bytes[] memory) {
+    bytes[] memory array = new bytes[](3);
+    array[0] = value0;
+    array[1] = value1;
+    array[2] = value2;
+    return array;
+  }
+
+  function sqrt(uint256 x) public pure returns (uint256) {
+    if (x == 0) return 0;
+    uint256 xx = x;
+    uint256 r = 1;
+
+    if (xx >= 0x100000000000000000000000000000000) {
+      xx >>= 128;
+      r <<= 64;
+    }
+    if (xx >= 0x10000000000000000) {
+      xx >>= 64;
+      r <<= 32;
+    }
+    if (xx >= 0x100000000) {
+      xx >>= 32;
+      r <<= 16;
+    }
+    if (xx >= 0x10000) {
+      xx >>= 16;
+      r <<= 8;
+    }
+    if (xx >= 0x100) {
+      xx >>= 8;
+      r <<= 4;
+    }
+    if (xx >= 0x10) {
+      xx >>= 4;
+      r <<= 2;
+    }
+    if (xx >= 0x8) {
+      r <<= 1;
+    }
+
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1;
+    r = (r + x / r) >> 1; // Seven iterations should be enough
+    uint256 r1 = x / r;
+    return (r < r1 ? r : r1);
   }
 }

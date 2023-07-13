@@ -18,7 +18,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
   uint256 public vaultShareHWM;
   uint256 public performanceFee;
-  address public feeRecipient; // TODO whats the default address?
+  address public feeRecipient;
 
   /* ========== EVENTS ========== */
 
@@ -31,17 +31,18 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
   /* ========== INITIALIZER ========== */
 
-  function __MidasER4626_init(ERC20Upgradeable _asset) internal onlyInitializing {
-    __SafeOwnable_init();
+  function __MidasER4626_init(ERC20Upgradeable asset_) internal onlyInitializing {
+    __SafeOwnable_init(msg.sender);
     __Pausable_init();
     __Context_init();
     __ERC20_init(
-      string(abi.encodePacked("Midas ", _asset.name(), " Vault")),
-      string(abi.encodePacked("mv", _asset.symbol()))
+      string(abi.encodePacked("Midas ", asset_.name(), " Vault")),
+      string(abi.encodePacked("mv", asset_.symbol()))
     );
-    __ERC4626_init(_asset);
+    __ERC4626_init(asset_);
 
-    vaultShareHWM = 10**_asset.decimals();
+    vaultShareHWM = 10**asset_.decimals();
+    feeRecipient = msg.sender;
   }
 
   function _asset() internal view returns (ERC20Upgradeable) {
@@ -148,7 +149,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
     uint256 shareValue = convertToAssets(10**_asset().decimals());
 
     require(shareValue > vaultShareHWM, "shareValue !> vaultShareHWM");
-    // chache value
+    // cache value
     uint256 supply = totalSupply();
 
     uint256 accruedPerformanceFee = (performanceFee * (shareValue - vaultShareHWM) * supply) / 1e36;
@@ -191,21 +192,9 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
   /* ========== EMERGENCY FUNCTIONS ========== */
 
   // Should withdraw all funds from the strategy and pause the contract
-  function emergencyWithdrawAndPause() external virtual onlyOwner {
-    revert("!implementation");
+  function emergencyWithdrawAndPause() external virtual;
 
-    // Withdraw all assets from underlying strategy
-
-    // _pause();
-  }
-
-  function unpause() external virtual onlyOwner {
-    revert("!implementation");
-
-    // _unpause();
-
-    // Deposit all assets to underlying strategy
-  }
+  function unpause() external virtual;
 
   function shutdown(address market) external onlyOwner whenPaused returns (uint256) {
     ERC20Upgradeable theAsset = _asset();
@@ -216,7 +205,7 @@ abstract contract MidasERC4626 is SafeOwnableUpgradeable, PausableUpgradeable, E
 
   /* ========== INTERNAL HOOKS LOGIC ========== */
 
-  function beforeWithdraw(uint256 assets, uint256 shares) internal virtual {}
+  function beforeWithdraw(uint256 assets, uint256 shares) internal virtual;
 
-  function afterDeposit(uint256 assets, uint256 shares) internal virtual {}
+  function afterDeposit(uint256 assets, uint256 shares) internal virtual;
 }

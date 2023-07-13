@@ -5,9 +5,8 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
@@ -28,29 +27,29 @@ contract OraclesDecimalsScalingTest is BaseTest {
     testOraclesDecimals();
   }
 
-  function testOracleDecimalsMoonbeam() public fork(MOONBEAM_MAINNET) {
-    testOraclesDecimals();
-  }
-
   function testOracleDecimalsPolygon() public fork(POLYGON_MAINNET) {
     testOraclesDecimals();
   }
 
   function testOracleDecimalsNeonDev() public fork(NEON_DEVNET) {
+    vm.mockCall(
+      0x4F6B3c357c439E15FB61c1187cc5E28eC72bBc55,
+      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
+      abi.encode(6)
+    );
+
     testOraclesDecimals();
   }
 
   function testOraclesDecimals() internal {
     if (address(fusePoolDirectory) != address(0)) {
-      FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+      (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
       for (uint8 i = 0; i < pools.length; i++) {
         IComptroller comptroller = IComptroller(pools[i].comptroller);
-        ICToken[] memory markets = comptroller.getAllMarkets();
+        ICErc20[] memory markets = comptroller.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
-          address marketAddress = address(markets[j]);
-          CErc20Delegate market = CErc20Delegate(marketAddress);
-          address underlying = market.underlying();
+          address underlying = markets[j].underlying();
 
           if (isSkipped(underlying)) {
             emit log("the oracle for this underlying cannot be tested");
@@ -75,7 +74,8 @@ contract OraclesDecimalsScalingTest is BaseTest {
   function isSkipped(address token) internal pure returns (bool) {
     return
       token == 0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080 || // xcDOT
-      token == 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685 || // xcDOT-stDOT LP token
+      token == 0x61BF1b38930e37850D459f3CB926Cd197F5F88c0 || // xcDOT-stDOT stella LP token
+      token == 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685 || // xcDOT-stDOT curve LP token
       token == 0xa927E1e1E044CA1D9fe1854585003477331fE2Af; // WGLMR_xcDOT stella LP token
   }
 }

@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import { MidasERC4626 } from "./MidasERC4626.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 

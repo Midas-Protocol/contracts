@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BaseTest } from "../config/BaseTest.t.sol";
-
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { ArrakisTestConfig, ArrakisTestConfigStorage } from "./ArrakisTestConfig.sol";
+import { ArrakisTestConfigStorage } from "./ArrakisTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ITestConfigStorage } from "../abstracts/ITestConfigStorage.sol";
+import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import "./ArrakisERC4626Test.sol";
 
 contract ArrakisAssetTest is AbstractAssetTest {
   MasterPriceOracle masterPriceOracle;
+
+  function setUp() public fork(POLYGON_MAINNET) {}
 
   function afterForkSetUp() internal override {
     masterPriceOracle = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
@@ -24,46 +25,48 @@ contract ArrakisAssetTest is AbstractAssetTest {
 
     test.setUpWithPool(masterPriceOracle, ERC20Upgradeable(asset));
 
-    test.setUp(MockERC20(asset).symbol(), testConfig);
+    test._setUp(MockERC20(asset).symbol(), testConfig);
   }
 
-  function testInitializedValues() public override fork(POLYGON_MAINNET) {
-    for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
-      bytes memory testConfig = testConfigStorage.getTestConfig(i);
+  function testInitializedValues() public override {
+    if (shouldRunForChain(block.chainid)) {
+      for (uint8 i; i < testConfigStorage.getTestConfigLength(); i++) {
+        bytes memory testConfig = testConfigStorage.getTestConfig(i);
 
-      this.setUpTestContract(testConfig);
+        this.setUpTestContract(testConfig);
 
-      (address asset, ) = abi.decode(testConfig, (address, address));
+        (address asset, ) = abi.decode(testConfig, (address, address));
 
-      test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+        test.testInitializedValues(MockERC20(asset).name(), MockERC20(asset).symbol());
+      }
     }
   }
 
-  function testDepositWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithIncreasedVaultValue() public override {
     this.runTest(test.testDepositWithIncreasedVaultValue);
   }
 
-  function testDepositWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testDepositWithDecreasedVaultValue() public override {
     this.runTest(test.testDepositWithDecreasedVaultValue);
   }
 
-  function testWithdrawWithIncreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithIncreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithIncreasedVaultValue);
   }
 
-  function testWithdrawWithDecreasedVaultValue() public override fork(POLYGON_MAINNET) {
+  function testWithdrawWithDecreasedVaultValue() public override {
     this.runTest(test.testWithdrawWithDecreasedVaultValue);
   }
 
-  function testAccumulatingRewardsOnDeposit() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnDeposit() public {
     this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnDeposit);
   }
 
-  function testAccumulatingRewardsOnWithdrawal() public fork(POLYGON_MAINNET) {
+  function testAccumulatingRewardsOnWithdrawal() public {
     this.runTest(ArrakisERC4626Test(address(test)).testAccumulatingRewardsOnWithdrawal);
   }
 
-  function testClaimRewards() public fork(POLYGON_MAINNET) {
+  function testClaimRewards() public {
     this.runTest(ArrakisERC4626Test(address(test)).testClaimRewards);
   }
 }

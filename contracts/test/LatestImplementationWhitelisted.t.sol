@@ -2,16 +2,17 @@ pragma solidity ^0.8.0;
 
 import { CErc20 } from "../compound/CErc20.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
+import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IERC4626 } from "../compound/IERC4626.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-contract CErc20DelegateTest is BaseTest {
+contract LatestImplementationWhitelisted is BaseTest {
   FuseFeeDistributor fuseAdmin;
   FusePoolDirectory fusePoolDirectory;
 
@@ -36,7 +37,7 @@ contract CErc20DelegateTest is BaseTest {
   }
 
   function testPoolImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
@@ -66,11 +67,11 @@ contract CErc20DelegateTest is BaseTest {
   }
 
   function testMarketImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
+      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
+      ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
         address implementation = delegate.implementation();
@@ -102,11 +103,11 @@ contract CErc20DelegateTest is BaseTest {
   }
 
   function testPluginImplementations() internal {
-    FusePoolDirectory.FusePool[] memory pools = fusePoolDirectory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
-      CTokenInterface[] memory markets = comptroller.getAllMarkets();
+      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
+      ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
 

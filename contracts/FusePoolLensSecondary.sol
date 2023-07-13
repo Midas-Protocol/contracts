@@ -4,13 +4,27 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "./external/compound/IComptroller.sol";
-import "./external/compound/IPriceOracle.sol";
-import "./external/compound/ICToken.sol";
-import "./external/compound/IRewardsDistributor.sol";
-import "./external/uniswap/IUniswapV2Pair.sol";
+import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { ICErc20 } from "./compound/CTokenInterfaces.sol";
+import { IUniswapV2Pair } from "./external/uniswap/IUniswapV2Pair.sol";
 
-import "./FusePoolDirectory.sol";
+import { FusePoolDirectory } from "./FusePoolDirectory.sol";
+
+interface IRewardsDistributor {
+  function rewardToken() external view returns (address);
+
+  function compSupplySpeeds(address) external view returns (uint256);
+
+  function compBorrowSpeeds(address) external view returns (uint256);
+
+  function compAccrued(address) external view returns (uint256);
+
+  function flywheelPreSupplierAction(address cToken, address supplier) external;
+
+  function flywheelPreBorrowerAction(address cToken, address borrower) external;
+
+  function getAllMarkets() external view returns (ICErc20[] memory);
+}
 
 /**
  * @title FusePoolLensSecondary
@@ -62,11 +76,11 @@ contract FusePoolLensSecondary is Initializable {
     bool comptrollerFuseAdminHasRights = comptroller.fuseAdminHasRights();
 
     // Get cToken ownership
-    ICToken[] memory cTokens = comptroller.getAllMarkets();
+    ICErc20[] memory cTokens = comptroller.getAllMarkets();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < cTokens.length; i++) {
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
 
@@ -91,7 +105,7 @@ contract FusePoolLensSecondary is Initializable {
     uint256 arrayIndex = 0;
 
     for (uint256 i = 0; i < cTokens.length; i++) {
-      ICToken cToken = cTokens[i];
+      ICErc20 cToken = cTokens[i];
       (bool isListed, ) = comptroller.markets(address(cToken));
       if (!isListed) continue;
 
@@ -129,7 +143,7 @@ contract FusePoolLensSecondary is Initializable {
    * @param account The account to determine liquidity for.
    * @return Maximum redeem amount.
    */
-  function getMaxRedeem(address account, ICToken cTokenModify) external returns (uint256) {
+  function getMaxRedeem(address account, ICErc20 cTokenModify) external returns (uint256) {
     return getMaxRedeemOrBorrow(account, cTokenModify, false);
   }
 
@@ -139,7 +153,7 @@ contract FusePoolLensSecondary is Initializable {
    * @param account The account to determine liquidity for.
    * @return Maximum borrow amount.
    */
-  function getMaxBorrow(address account, ICToken cTokenModify) external returns (uint256) {
+  function getMaxBorrow(address account, ICErc20 cTokenModify) external returns (uint256) {
     return getMaxRedeemOrBorrow(account, cTokenModify, true);
   }
 
@@ -151,7 +165,7 @@ contract FusePoolLensSecondary is Initializable {
    */
   function getMaxRedeemOrBorrow(
     address account,
-    ICToken cTokenModify,
+    ICErc20 cTokenModify,
     bool isBorrow
   ) internal returns (uint256) {
     IComptroller comptroller = IComptroller(cTokenModify.comptroller());
@@ -166,14 +180,14 @@ contract FusePoolLensSecondary is Initializable {
     public
     view
     returns (
-      ICToken[] memory,
+      ICErc20[] memory,
       address[] memory,
       address[] memory,
       uint256[][] memory,
       uint256[][] memory
     )
   {
-    ICToken[] memory allMarkets = comptroller.getAllMarkets();
+    ICErc20[] memory allMarkets = comptroller.getAllMarkets();
     address[] memory distributors;
 
     try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
@@ -215,14 +229,14 @@ contract FusePoolLensSecondary is Initializable {
     external
     view
     returns (
-      ICToken[][] memory,
+      ICErc20[][] memory,
       address[][] memory,
       address[][] memory,
       uint256[][][] memory,
       uint256[][][] memory
     )
   {
-    ICToken[][] memory allMarkets = new ICToken[][](comptrollers.length);
+    ICErc20[][] memory allMarkets = new ICErc20[][](comptrollers.length);
     address[][] memory distributors = new address[][](comptrollers.length);
     address[][] memory rewardTokens = new address[][](comptrollers.length);
     uint256[][][] memory supplySpeeds = new uint256[][][](comptrollers.length);
@@ -244,7 +258,7 @@ contract FusePoolLensSecondary is Initializable {
   function getUnaccruedRewards(
     address holder,
     IRewardsDistributor distributor,
-    ICToken cToken
+    ICErc20 cToken
   ) internal returns (uint256, uint256) {
     // Get unaccrued supply rewards
     uint256 compAccruedPrior = distributor.compAccrued(holder);
@@ -271,14 +285,14 @@ contract FusePoolLensSecondary is Initializable {
     returns (
       address[] memory,
       uint256[] memory,
-      ICToken[][] memory,
+      ICErc20[][] memory,
       uint256[2][][] memory,
       uint256[] memory
     )
   {
     address[] memory rewardTokens = new address[](distributors.length);
     uint256[] memory compUnclaimedTotal = new uint256[](distributors.length);
-    ICToken[][] memory allMarkets = new ICToken[][](distributors.length);
+    ICErc20[][] memory allMarkets = new ICErc20[][](distributors.length);
     uint256[2][][] memory rewardsUnaccrued = new uint256[2][][](distributors.length);
     uint256[] memory distributorFunds = new uint256[](distributors.length);
 
@@ -314,7 +328,7 @@ contract FusePoolLensSecondary is Initializable {
     )
   {
     // Get array length
-    FusePoolDirectory.FusePool[] memory pools = directory.getAllPools();
+    (, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
@@ -348,5 +362,49 @@ contract FusePoolLensSecondary is Initializable {
 
     // Return distributors
     return (indexes, comptrollers, distributors);
+  }
+
+  /**
+   * @notice The returned list of flywheels contains address(0) for flywheels for which the user has no rewards to claim
+   * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
+   */
+  function getFlywheelsToClaim(address user)
+    external
+    view
+    returns (
+      uint256[] memory,
+      IComptroller[] memory,
+      address[][] memory
+    )
+  {
+    (uint256[] memory poolIds, FusePoolDirectory.FusePool[] memory pools) = directory.getActivePools();
+
+    IComptroller[] memory comptrollers = new IComptroller[](pools.length);
+    address[][] memory distributors = new address[][](pools.length);
+
+    for (uint256 i = 0; i < pools.length; i++) {
+      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
+        comptrollers[i] = comptroller;
+        distributors[i] = flywheelsWithRewardsForPoolUser(user, _distributors);
+      } catch {}
+    }
+
+    return (poolIds, comptrollers, distributors);
+  }
+
+  function flywheelsWithRewardsForPoolUser(address user, address[] memory _distributors)
+    internal
+    view
+    returns (address[] memory)
+  {
+    address[] memory distributors = new address[](_distributors.length);
+    for (uint256 j = 0; j < _distributors.length; j++) {
+      if (IRewardsDistributor(_distributors[j]).compAccrued(user) > 0) {
+        distributors[j] = _distributors[j];
+      }
+    }
+
+    return distributors;
   }
 }

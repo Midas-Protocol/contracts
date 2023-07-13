@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
@@ -118,13 +118,13 @@ contract AutofarmERC4626 is MidasERC4626 {
    * Todo: needs test for verification
    */
 
-  // function emergencyWithdrawAndPause() external override onlyOwner {
-  //   autofarm.withdraw(poolId, autofarm.balanceOf(address(this)));
-  //   _pause();
-  // }
+  function emergencyWithdrawAndPause() external override onlyOwner {
+    autofarm.withdraw(poolId, autofarm.balanceOf(address(this)));
+    _pause();
+  }
 
-  // function unpause() external override onlyOwner {
-  //   _unpause();
-  //   autofarm.deposit(poolId, asset.balanceOf(address(this)));
-  // }
+  function unpause() external override onlyOwner {
+    _unpause();
+    autofarm.deposit(poolId, _asset().balanceOf(address(this)));
+  }
 }

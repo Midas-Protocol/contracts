@@ -32,4 +32,8 @@ contract AlphaHomoraV2SafeBoxLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(safeBox.uToken());
     outputAmount = outputToken.balanceOf(address(this));
   }
+
+  function name() public pure returns (string memory) {
+    return "AlphaHomoraV2SafeBoxLiquidator";
+  }
 }

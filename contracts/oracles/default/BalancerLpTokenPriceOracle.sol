@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/balancer/IBalancerPool.sol";
 import "../../external/balancer/IBalancerVault.sol";
 import "../../external/balancer/BNum.sol";
@@ -29,7 +25,7 @@ contract BalancerLpTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOracle, 
   MasterPriceOracle public masterPriceOracle;
 
   function initialize(MasterPriceOracle _masterPriceOracle) public initializer {
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     masterPriceOracle = _masterPriceOracle;
   }
 
@@ -48,8 +44,8 @@ contract BalancerLpTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOracle, 
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
@@ -62,8 +58,8 @@ contract BalancerLpTokenPriceOracle is SafeOwnableUpgradeable, BasePriceOracle, 
   function _price(address underlying) internal view virtual returns (uint256) {
     IBalancerPool pool = IBalancerPool(underlying);
     bytes32 poolId = pool.getPoolId();
-    IBalancerVault vault = IBalancerVault(address(pool.getVault()));
-    (IERC20[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(poolId);
+    IBalancerVault vault = pool.getVault();
+    (IERC20Upgradeable[] memory tokens, uint256[] memory balances, ) = vault.getPoolTokens(poolId);
 
     require(tokens.length == 2, "Oracle suitable only for Balancer Pools of 2 tokens");
 

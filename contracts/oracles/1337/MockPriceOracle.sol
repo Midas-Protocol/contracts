@@ -3,10 +3,6 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/chainlink/AggregatorV3Interface.sol";
 
 import "../BasePriceOracle.sol";
@@ -17,9 +13,9 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author Carlo Mazzaferro <carlo.mazzaferro@gmail.com> (https://github.com/carlomazzaferro)
  */
-contract MockPriceOracle is IPriceOracle, BasePriceOracle {
+contract MockPriceOracle is BasePriceOracle {
   /**
-   * @notice The maxmimum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
+   * @notice The maximum number of seconds elapsed since the round was last updated before the price is considered stale. If set to 0, no limit is enforced.
    */
   uint256 public maxSecondsBeforePriceIsStale;
 
@@ -71,7 +67,7 @@ contract MockPriceOracle is IPriceOracle, BasePriceOracle {
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
     return 1e18;
   }
 }

@@ -2,22 +2,35 @@
 pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
-import { CTokenExtensionInterface, ComptrollerV3Storage, UnitrollerAdminStorage } from "./CTokenInterfaces.sol";
+import { IFlashLoanReceiver } from "../midas/IFlashLoanReceiver.sol";
+import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
+import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFuseFeeDistributor } from "./IFuseFeeDistributor.sol";
+import { Multicall } from "../utils/Multicall.sol";
+import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CTokenFirstExtension is
   CDelegationStorage,
-  CTokenExtensionInterface,
+  CTokenExtensionBase,
   TokenErrorReporter,
   Exponential,
-  DiamondExtension
+  DiamondExtension,
+  Multicall
 {
-  function _getExtensionFunctions() external view virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 16;
+  modifier isAuthorized() {
+    require(
+      IFuseFeeDistributor(fuseAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
+      "not authorized"
+    );
+    _;
+  }
+
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 23;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.transfer.selector;
     functionSelectors[--fnsCount] = this.transferFrom.selector;
@@ -30,13 +43,26 @@ contract CTokenFirstExtension is
     functionSelectors[--fnsCount] = this._setReserveFactor.selector;
     functionSelectors[--fnsCount] = this.supplyRatePerBlock.selector;
     functionSelectors[--fnsCount] = this.borrowRatePerBlock.selector;
-    functionSelectors[--fnsCount] = this.exchangeRateStored.selector;
     functionSelectors[--fnsCount] = this.exchangeRateCurrent.selector;
     functionSelectors[--fnsCount] = this.accrueInterest.selector;
     functionSelectors[--fnsCount] = this.totalBorrowsCurrent.selector;
     functionSelectors[--fnsCount] = this.balanceOfUnderlying.selector;
+    functionSelectors[--fnsCount] = this.multicall.selector;
+    functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterDeposit.selector;
+    functionSelectors[--fnsCount] = this.supplyRatePerBlockAfterWithdraw.selector;
+    functionSelectors[--fnsCount] = this.borrowRatePerBlockAfterBorrow.selector;
+    functionSelectors[--fnsCount] = this.getTotalUnderlyingSupplied.selector;
+    functionSelectors[--fnsCount] = this.flash.selector;
+    functionSelectors[--fnsCount] = this.getAccountSnapshot.selector;
+    functionSelectors[--fnsCount] = this.borrowBalanceCurrent.selector;
+
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function getTotalUnderlyingSupplied() public view override returns (uint256) {
+    // (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees))
+    return asCToken().getCash() + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees);
   }
 
   /* ERC20 fns */
@@ -123,7 +149,7 @@ contract CTokenFirstExtension is
    * @param amount The number of tokens to transfer
    * @return Whether or not the transfer succeeded
    */
-  function transfer(address dst, uint256 amount) external override nonReentrant(false) returns (bool) {
+  function transfer(address dst, uint256 amount) public override nonReentrant(false) isAuthorized returns (bool) {
     return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
   }
 
@@ -138,7 +164,7 @@ contract CTokenFirstExtension is
     address src,
     address dst,
     uint256 amount
-  ) external override nonReentrant(false) returns (bool) {
+  ) public override nonReentrant(false) isAuthorized returns (bool) {
     return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
   }
 
@@ -150,7 +176,7 @@ contract CTokenFirstExtension is
    * @param amount The number of tokens that are approved (-1 means infinite)
    * @return Whether or not the approval succeeded
    */
-  function approve(address spender, uint256 amount) external override returns (bool) {
+  function approve(address spender, uint256 amount) public override isAuthorized returns (bool) {
     address src = msg.sender;
     transferAllowances[src][spender] = amount;
     emit Approval(src, spender, amount);
@@ -163,7 +189,7 @@ contract CTokenFirstExtension is
    * @param spender The address of the account which may transfer tokens
    * @return The number of tokens allowed to be spent (-1 means infinite)
    */
-  function allowance(address owner, address spender) external view override returns (uint256) {
+  function allowance(address owner, address spender) public view override returns (uint256) {
     return transferAllowances[owner][spender];
   }
 
@@ -172,7 +198,7 @@ contract CTokenFirstExtension is
    * @param owner The address of the account to query
    * @return The number of tokens owned by `owner`
    */
-  function balanceOf(address owner) external view override returns (uint256) {
+  function balanceOf(address owner) public view override returns (uint256) {
     return accountTokens[owner];
   }
 
@@ -198,13 +224,8 @@ contract CTokenFirstExtension is
    * @dev Admin function to accrue interest and set a new reserve factor
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setReserveFactor(uint256 newReserveFactorMantissa) external override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted reserve factor change failed.
-      return fail(Error(error), FailureInfo.SET_RESERVE_FACTOR_ACCRUE_INTEREST_FAILED);
-    }
-
+  function _setReserveFactor(uint256 newReserveFactorMantissa) public override nonReentrant(false) returns (uint256) {
+    accrueInterest();
     // Check caller is admin
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
@@ -233,13 +254,8 @@ contract CTokenFirstExtension is
    * @dev Admin function to accrue interest and set a new admin fee
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _setAdminFee(uint256 newAdminFeeMantissa) external override nonReentrant(false) returns (uint256) {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted admin fee change failed.
-      return fail(Error(error), FailureInfo.SET_ADMIN_FEE_ACCRUE_INTEREST_FAILED);
-    }
-
+  function _setAdminFee(uint256 newAdminFeeMantissa) public override nonReentrant(false) returns (uint256) {
+    accrueInterest();
     // Verify market's block number equals current block number
     if (accrualBlockNumber != block.number) {
       return fail(Error.MARKET_NOT_FRESH, FailureInfo.SET_ADMIN_FEE_FRESH_CHECK);
@@ -291,16 +307,12 @@ contract CTokenFirstExtension is
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _setInterestRateModel(InterestRateModel newInterestRateModel)
-    external
+    public
     override
     nonReentrant(false)
     returns (uint256)
   {
-    uint256 error = accrueInterest();
-    if (error != uint256(Error.NO_ERROR)) {
-      return fail(Error(error), FailureInfo.SET_INTEREST_RATE_MODEL_ACCRUE_INTEREST_FAILED);
-    }
-
+    accrueInterest();
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK);
     }
@@ -322,11 +334,24 @@ contract CTokenFirstExtension is
    * @notice Returns the current per-block borrow interest rate for this cToken
    * @return The borrow interest rate per block, scaled by 1e18
    */
-  function borrowRatePerBlock() external view override returns (uint256) {
+  function borrowRatePerBlock() public view override returns (uint256) {
     return
       interestRateModel.getBorrowRate(
-        asCTokenInterface().getCash(),
+        asCToken().getCash(),
         totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees
+      );
+  }
+
+  function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) public view returns (uint256) {
+    uint256 cash = asCToken().getCash();
+    require(cash >= borrowAmount, "market cash not enough");
+    //if (cash < borrowAmount) revert ;
+
+    return
+      interestRateModel.getBorrowRate(
+        cash - borrowAmount,
+        totalBorrows + borrowAmount,
         totalReserves + totalAdminFees + totalFuseFees
       );
   }
@@ -335,10 +360,32 @@ contract CTokenFirstExtension is
    * @notice Returns the current per-block supply interest rate for this cToken
    * @return The supply interest rate per block, scaled by 1e18
    */
-  function supplyRatePerBlock() external view override returns (uint256) {
+  function supplyRatePerBlock() public view override returns (uint256) {
     return
       interestRateModel.getSupplyRate(
-        asCTokenInterface().getCash(),
+        asCToken().getCash(),
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees,
+        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+      );
+  }
+
+  function supplyRatePerBlockAfterDeposit(uint256 mintAmount) external view returns (uint256) {
+    return
+      interestRateModel.getSupplyRate(
+        asCToken().getCash() + mintAmount,
+        totalBorrows,
+        totalReserves + totalAdminFees + totalFuseFees,
+        reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
+      );
+  }
+
+  function supplyRatePerBlockAfterWithdraw(uint256 withdrawAmount) external view returns (uint256) {
+    uint256 cash = asCToken().getCash();
+    require(cash >= withdrawAmount, "market cash not enough");
+    return
+      interestRateModel.getSupplyRate(
+        cash - withdrawAmount,
         totalBorrows,
         totalReserves + totalAdminFees + totalFuseFees,
         reserveFactorMantissa + fuseFeeMantissa + adminFeeMantissa
@@ -349,38 +396,63 @@ contract CTokenFirstExtension is
    * @notice Accrue interest then return the up-to-date exchange rate
    * @return Calculated exchange rate scaled by 1e18
    */
-  function exchangeRateCurrent() public override returns (uint256) {
-    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return exchangeRateStored();
+  function exchangeRateCurrent() public view override returns (uint256) {
+    if (block.number == accrualBlockNumber) {
+      return
+        _exchangeRateHypothetical(
+          totalSupply,
+          initialExchangeRateMantissa,
+          asCToken().getCash(),
+          totalBorrows,
+          totalReserves,
+          totalAdminFees,
+          totalFuseFees
+        );
+    } else {
+      uint256 cashPrior = asCToken().getCash();
+      InterestAccrual memory accrual = _accrueInterestHypothetical(block.number, cashPrior);
+
+      return
+        _exchangeRateHypothetical(
+          accrual.totalSupply,
+          initialExchangeRateMantissa,
+          cashPrior,
+          accrual.totalBorrows,
+          accrual.totalReserves,
+          accrual.totalAdminFees,
+          accrual.totalFuseFees
+        );
+    }
   }
 
-  /**
-   * @notice Calculates the exchange rate from the underlying to the CToken
-   * @dev This function does not accrue interest before calculating the exchange rate
-   * @return Calculated exchange rate scaled by 1e18
-   */
-  function exchangeRateStored() public view override returns (uint256) {
-    uint256 _totalSupply = totalSupply;
+  function _exchangeRateHypothetical(
+    uint256 _totalSupply,
+    uint256 _initialExchangeRateMantissa,
+    uint256 _totalCash,
+    uint256 _totalBorrows,
+    uint256 _totalReserves,
+    uint256 _totalAdminFees,
+    uint256 _totalFuseFees
+  ) internal pure returns (uint256) {
     if (_totalSupply == 0) {
       /*
        * If there are no tokens minted:
        *  exchangeRate = initialExchangeRate
        */
-      return initialExchangeRateMantissa;
+      return _initialExchangeRateMantissa;
     } else {
       /*
        * Otherwise:
        *  exchangeRate = (totalCash + totalBorrows - (totalReserves + totalFuseFees + totalAdminFees)) / totalSupply
        */
-      uint256 totalCash = asCTokenInterface().getCash();
       uint256 cashPlusBorrowsMinusReserves;
       Exp memory exchangeRate;
       MathError mathErr;
 
       (mathErr, cashPlusBorrowsMinusReserves) = addThenSubUInt(
-        totalCash,
-        totalBorrows,
-        totalReserves + totalAdminFees + totalFuseFees
+        _totalCash,
+        _totalBorrows,
+        _totalReserves + _totalAdminFees + _totalFuseFees
       );
       require(mathErr == MathError.NO_ERROR, "!addThenSubUInt overflow check failed");
 
@@ -391,47 +463,31 @@ contract CTokenFirstExtension is
     }
   }
 
-  /**
-   * @notice Applies accrued interest to total borrows and reserves
-   * @dev This calculates interest accrued from the last checkpointed block
-   *   up to the current block and writes new checkpoint to storage.
-   */
-  function accrueInterest() public virtual override returns (uint256) {
-    /* Remember the initial block number */
-    uint256 currentBlockNumber = block.number;
+  struct InterestAccrual {
+    uint256 accrualBlockNumber;
+    uint256 borrowIndex;
+    uint256 totalSupply;
+    uint256 totalBorrows;
+    uint256 totalReserves;
+    uint256 totalFuseFees;
+    uint256 totalAdminFees;
+    uint256 interestAccumulated;
+  }
 
-    /* Short-circuit accumulating 0 interest */
-    if (accrualBlockNumber == currentBlockNumber) {
-      return uint256(Error.NO_ERROR);
-    }
-
-    /* Read the previous values out of storage */
-    uint256 cashPrior = asCTokenInterface().getCash();
-
-    /* Calculate the current borrow interest rate */
+  function _accrueInterestHypothetical(uint256 blockNumber, uint256 cashPrior)
+    internal
+    view
+    returns (InterestAccrual memory accrual)
+  {
     uint256 totalFees = totalAdminFees + totalFuseFees;
     uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, totalBorrows, totalReserves + totalFees);
     if (borrowRateMantissa > borrowRateMaxMantissa) {
       if (cashPrior > totalFees) revert("!borrowRate");
       else borrowRateMantissa = borrowRateMaxMantissa;
     }
-
-    /* Calculate the number of blocks elapsed since the last accrual */
-    (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumber);
+    (MathError mathErr, uint256 blockDelta) = subUInt(blockNumber, accrualBlockNumber);
     require(mathErr == MathError.NO_ERROR, "!blockDelta");
 
-    return finishInterestAccrual(currentBlockNumber, cashPrior, borrowRateMantissa, blockDelta);
-  }
-
-  /**
-   * @dev Split off from `accrueInterest` to avoid "stack too deep" error".
-   */
-  function finishInterestAccrual(
-    uint256 currentBlockNumber,
-    uint256 cashPrior,
-    uint256 borrowRateMantissa,
-    uint256 blockDelta
-  ) private returns (uint256) {
     /*
      * Calculate the interest accumulated into borrows and reserves and the new index:
      *  simpleInterestFactor = borrowRate * blockDelta
@@ -443,40 +499,56 @@ contract CTokenFirstExtension is
      *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
      */
 
+    accrual.accrualBlockNumber = blockNumber;
+    accrual.totalSupply = totalSupply;
     Exp memory simpleInterestFactor = mul_(Exp({ mantissa: borrowRateMantissa }), blockDelta);
-    uint256 interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
-    uint256 totalBorrowsNew = interestAccumulated + totalBorrows;
-    uint256 totalReservesNew = mul_ScalarTruncateAddUInt(
+    accrual.interestAccumulated = mul_ScalarTruncate(simpleInterestFactor, totalBorrows);
+    accrual.totalBorrows = accrual.interestAccumulated + totalBorrows;
+    accrual.totalReserves = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: reserveFactorMantissa }),
-      interestAccumulated,
+      accrual.interestAccumulated,
       totalReserves
     );
-    uint256 totalFuseFeesNew = mul_ScalarTruncateAddUInt(
+    accrual.totalFuseFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: fuseFeeMantissa }),
-      interestAccumulated,
+      accrual.interestAccumulated,
       totalFuseFees
     );
-    uint256 totalAdminFeesNew = mul_ScalarTruncateAddUInt(
+    accrual.totalAdminFees = mul_ScalarTruncateAddUInt(
       Exp({ mantissa: adminFeeMantissa }),
-      interestAccumulated,
+      accrual.interestAccumulated,
       totalAdminFees
     );
-    uint256 borrowIndexNew = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
+    accrual.borrowIndex = mul_ScalarTruncateAddUInt(simpleInterestFactor, borrowIndex, borrowIndex);
+  }
+
+  /**
+   * @notice Applies accrued interest to total borrows and reserves
+   * @dev This calculates interest accrued from the last checkpointed block
+   *   up to the current block and writes new checkpoint to storage.
+   */
+  function accrueInterest() public override returns (uint256) {
+    /* Remember the initial block number */
+    uint256 currentBlockNumber = block.number;
+
+    /* Short-circuit accumulating 0 interest */
+    if (accrualBlockNumber == currentBlockNumber) {
+      return uint256(Error.NO_ERROR);
+    }
+
+    uint256 cashPrior = asCToken().getCash();
+    InterestAccrual memory accrual = _accrueInterestHypothetical(currentBlockNumber, cashPrior);
 
     /////////////////////////
     // EFFECTS & INTERACTIONS
     // (No safe failures beyond this point)
-
-    /* We write the previously calculated values into storage */
     accrualBlockNumber = currentBlockNumber;
-    borrowIndex = borrowIndexNew;
-    totalBorrows = totalBorrowsNew;
-    totalReserves = totalReservesNew;
-    totalFuseFees = totalFuseFeesNew;
-    totalAdminFees = totalAdminFeesNew;
-
-    /* We emit an AccrueInterest event */
-    emit AccrueInterest(cashPrior, interestAccumulated, borrowIndexNew, totalBorrowsNew);
+    borrowIndex = accrual.borrowIndex;
+    totalBorrows = accrual.totalBorrows;
+    totalReserves = accrual.totalReserves;
+    totalFuseFees = accrual.totalFuseFees;
+    totalAdminFees = accrual.totalAdminFees;
+    emit AccrueInterest(cashPrior, accrual.interestAccumulated, borrowIndex, totalBorrows);
     return uint256(Error.NO_ERROR);
   }
 
@@ -484,23 +556,110 @@ contract CTokenFirstExtension is
    * @notice Returns the current total borrows plus accrued interest
    * @return The total borrows with interest
    */
-  function totalBorrowsCurrent() external override returns (uint256) {
-    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    return totalBorrows;
+  function totalBorrowsCurrent() external view override returns (uint256) {
+    if (accrualBlockNumber == block.number) {
+      return totalBorrows;
+    } else {
+      uint256 cashPrior = asCToken().getCash();
+      InterestAccrual memory accrual = _accrueInterestHypothetical(block.number, cashPrior);
+      return accrual.totalBorrows;
+    }
+  }
+
+  /**
+   * @notice Get a snapshot of the account's balances, and the cached exchange rate
+   * @dev This is used by comptroller to more efficiently perform liquidity checks.
+   * @param account Address of the account to snapshot
+   * @return (possible error, token balance, borrow balance, exchange rate mantissa)
+   */
+  function getAccountSnapshot(address account)
+    external
+    view
+    override
+    returns (
+      uint256,
+      uint256,
+      uint256,
+      uint256
+    )
+  {
+    uint256 cTokenBalance = accountTokens[account];
+    uint256 borrowBalance;
+    uint256 exchangeRateMantissa;
+
+    borrowBalance = borrowBalanceCurrent(account);
+
+    exchangeRateMantissa = exchangeRateCurrent();
+
+    return (uint256(Error.NO_ERROR), cTokenBalance, borrowBalance, exchangeRateMantissa);
+  }
+
+  /**
+   * @notice calculate the borrowIndex and the account's borrow balance using the fresh borrowIndex
+   * @param account The address whose balance should be calculated after recalculating the borrowIndex
+   * @return The calculated balance
+   */
+  function borrowBalanceCurrent(address account) public view override returns (uint256) {
+    uint256 _borrowIndex;
+    if (accrualBlockNumber == block.number) {
+      _borrowIndex = borrowIndex;
+    } else {
+      uint256 cashPrior = asCToken().getCash();
+      InterestAccrual memory accrual = _accrueInterestHypothetical(block.number, cashPrior);
+      _borrowIndex = accrual.borrowIndex;
+    }
+
+    /* Note: we do not assert that the market is up to date */
+    MathError mathErr;
+    uint256 principalTimesIndex;
+    uint256 result;
+
+    /* Get borrowBalance and borrowIndex */
+    BorrowSnapshot storage borrowSnapshot = accountBorrows[account];
+
+    /* If borrowBalance = 0 then borrowIndex is likely also 0.
+     * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
+     */
+    if (borrowSnapshot.principal == 0) {
+      return 0;
+    }
+
+    /* Calculate new borrow balance using the interest index:
+     *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
+     */
+    (mathErr, principalTimesIndex) = mulUInt(borrowSnapshot.principal, _borrowIndex);
+    require(mathErr == MathError.NO_ERROR, "!mulUInt overflow check failed");
+
+    (mathErr, result) = divUInt(principalTimesIndex, borrowSnapshot.interestIndex);
+    require(mathErr == MathError.NO_ERROR, "!divUInt overflow check failed");
+
+    return result;
   }
 
   /**
    * @notice Get the underlying balance of the `owner`
-   * @dev This also accrues interest in a transaction
    * @param owner The address of the account to query
    * @return The amount of underlying owned by `owner`
    */
-  function balanceOfUnderlying(address owner) public override returns (uint256) {
-    require(accrueInterest() == uint256(Error.NO_ERROR), "!accrueInterest");
-    Exp memory exchangeRate = Exp({ mantissa: exchangeRateStored() });
+  function balanceOfUnderlying(address owner) external view override returns (uint256) {
+    Exp memory exchangeRate = Exp({ mantissa: exchangeRateCurrent() });
     (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
     require(mErr == MathError.NO_ERROR, "!balance");
     return balance;
+  }
+
+  function flash(uint256 amount, bytes calldata data) public override isAuthorized {
+    accrueInterest();
+
+    totalBorrows += amount;
+    asCToken().selfTransferOut(msg.sender, amount);
+
+    IFlashLoanReceiver(msg.sender).receiveFlashLoan(underlying, amount, data);
+
+    asCToken().selfTransferIn(msg.sender, amount);
+    totalBorrows -= amount;
+
+    emit Flash(msg.sender, amount);
   }
 
   /**
@@ -543,5 +702,18 @@ contract CTokenFirstExtension is
   function _afterNonReentrant(bool localOnly) private {
     _notEntered = true; // get a gas-refund post-Istanbul
     if (!localOnly) comptroller._afterNonReentrant();
+  }
+
+  function asCToken() internal view returns (CTokenInterface) {
+    return CTokenInterface(address(this));
+  }
+
+  function multicall(bytes[] calldata data)
+    public
+    payable
+    override(CTokenExtensionInterface, Multicall)
+    returns (bytes[] memory results)
+  {
+    return Multicall.multicall(data);
   }
 }

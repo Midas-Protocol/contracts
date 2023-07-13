@@ -6,7 +6,7 @@ import "../../external/compound/ICErc20.sol";
 
 import "../../external/yearn/IVault.sol";
 
-import "../BasePriceOracle.sol";
+import { BasePriceOracle } from "../BasePriceOracle.sol";
 
 /**
  * @title YVaultV1PriceOracle

@@ -4,17 +4,17 @@ pragma experimental ABIEncoderV2;
 import { EIP20Interface } from "./EIP20Interface.sol";
 
 interface IERC4626 is EIP20Interface {
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                                 Events
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   event Deposit(address indexed from, address indexed to, uint256 value);
 
   event Withdraw(address indexed from, address indexed to, uint256 value);
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                             Mutable Functions
-    //////////////////////////////////////////////////////////////*/
+    ----------------------------------------------------------------*/
 
   /**
       @notice Deposit a specific amount of underlying tokens.
@@ -58,15 +58,14 @@ interface IERC4626 is EIP20Interface {
     address from
   ) external returns (uint256 value);
 
-  /*///////////////////////////////////////////////////////////////
+  /*----------------------------------------------------------------
                             View Functions
-    //////////////////////////////////////////////////////////////*/
-
+    ----------------------------------------------------------------*/
   /** 
-      @notice The underlying token the Vault accepts.
-      @return the ERC20 underlying implementation address.
+      @dev Returns the address of the underlying token used for the Vault for accounting, depositing, and withdrawing.
+      @return the address of the asset
     */
-  function underlying() external view returns (EIP20Interface);
+  function asset() external view returns (address);
 
   /** 
       @notice Returns a user's Vault balance in underlying tokens.

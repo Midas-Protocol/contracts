@@ -3,8 +3,6 @@ pragma solidity >=0.8.0;
 
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
 import "../../external/curve/ICurvePool.sol";
 import "../../midas/SafeOwnableUpgradeable.sol";
 import "../../utils/PatchedStorage.sol";
@@ -12,9 +10,9 @@ import "../../utils/PatchedStorage.sol";
 import "../BasePriceOracle.sol";
 
 /**
- * @title CurveLpTokenPriceOracle
+ * @title CurveLpTokenPriceOracleNoRegistry
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice CurveLpTokenPriceOracle is a price oracle for Curve LP tokens (using the sender as a root oracle).
+ * @notice CurveLpTokenPriceOracleNoRegistry is a price oracle for Curve LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
  */
 contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
@@ -27,6 +25,8 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
    * @dev Maps Curve LP token addresses to pool addresses.
    */
   mapping(address => address) public poolOf;
+
+  address[] public lpTokens;
 
   /**
    * @dev Initializes an array of LP tokens and pools if desired.
@@ -44,11 +44,47 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
       "No LP tokens supplied or array lengths not equal."
     );
 
-    __SafeOwnable_init();
+    __SafeOwnable_init(msg.sender);
     for (uint256 i = 0; i < _lpTokens.length; i++) {
       poolOf[_lpTokens[i]] = _pools[i];
       underlyingTokens[_lpTokens[i]] = _poolUnderlyings[i];
     }
+  }
+
+  function getAllLPTokens() public view returns (address[] memory) {
+    return lpTokens;
+  }
+
+  function getPoolForSwap(address inputToken, address outputToken)
+    public
+    view
+    returns (
+      ICurvePool,
+      int128,
+      int128
+    )
+  {
+    for (uint256 i = 0; i < lpTokens.length; i++) {
+      ICurvePool pool = ICurvePool(poolOf[lpTokens[i]]);
+      int128 inputIndex = -1;
+      int128 outputIndex = -1;
+      int128 j = 0;
+      while (true) {
+        try pool.coins(uint256(uint128(j))) returns (address coin) {
+          if (coin == inputToken) inputIndex = j;
+          else if (coin == outputToken) outputIndex = j;
+          j++;
+        } catch {
+          break;
+        }
+
+        if (outputIndex > -1 && inputIndex > -1) {
+          return (pool, inputIndex, outputIndex);
+        }
+      }
+    }
+
+    return (ICurvePool(address(0)), 0, 0);
   }
 
   /**
@@ -65,8 +101,8 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(EIP20Interface(underlying).decimals()));
@@ -105,9 +141,17 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
     address _pool,
     address[] memory _underlyings
   ) external onlyOwner {
-    // require(pool == address(0), "This LP token is already registered.");
     poolOf[_lpToken] = _pool;
     underlyingTokens[_lpToken] = _underlyings;
+
+    bool skip = false;
+    for (uint256 j = 0; j < lpTokens.length; j++) {
+      if (lpTokens[j] == _lpToken) {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) lpTokens.push(_lpToken);
   }
 
   /**

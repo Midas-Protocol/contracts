@@ -32,4 +32,8 @@ contract WSTEthLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(token.stETH());
     outputAmount = inputAmount;
   }
+
+  function name() public pure returns (string memory) {
+    return "WSTEthLiquidator";
+  }
 }

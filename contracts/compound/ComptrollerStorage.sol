@@ -2,7 +2,9 @@
 pragma solidity >=0.8.0;
 
 import "./IFuseFeeDistributor.sol";
-import "./PriceOracle.sol";
+import "../oracles/BasePriceOracle.sol";
+
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract UnitrollerAdminStorage {
   /*
@@ -52,7 +54,7 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
   /**
    * @notice Oracle which gives the price of any given asset
    */
-  PriceOracle public oracle;
+  BasePriceOracle public oracle;
 
   /**
    * @notice Multiplier used to calculate the maximum repayAmount when liquidating a borrow
@@ -72,7 +74,7 @@ contract ComptrollerV1Storage is UnitrollerAdminStorage {
   /**
    * @notice Per-account mapping of "assets you are in", capped by maxAssets
    */
-  mapping(address => CTokenInterface[]) public accountAssets;
+  mapping(address => ICErc20[]) public accountAssets;
 }
 
 contract ComptrollerV2Storage is ComptrollerV1Storage {
@@ -94,7 +96,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
   mapping(address => Market) public markets;
 
   /// @notice A list of all markets
-  CTokenInterface[] public allMarkets;
+  ICErc20[] public allMarkets;
 
   /**
    * @dev Maps borrowers to booleans indicating if they have entered any markets
@@ -113,7 +115,7 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
   mapping(address => bool) public suppliers;
 
   /// @notice All cTokens addresses mapped by their underlying token addresses
-  mapping(address => CTokenInterface) public cTokensByUnderlying;
+  mapping(address => ICErc20) public cTokensByUnderlying;
 
   /// @notice Whether or not the supplier whitelist is enforced
   bool public enforceWhitelist;
@@ -167,4 +169,23 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
 
   /// @notice RewardsDistributor to list for claiming, but not to notify of flywheel changes.
   address[] public nonAccruingRewardsDistributors;
+
+  /// @dev cap for each user's borrows against specific assets - denominated in the borrowed asset
+  mapping(address => mapping(address => uint256)) public borrowCapForCollateral;
+
+  /// @dev blacklist to disallow the borrowing of an asset against specific collateral
+  mapping(address => mapping(address => bool)) public borrowingAgainstCollateralBlacklist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the borrowing against specific collateral cap
+  mapping(address => mapping(address => EnumerableSet.AddressSet)) internal borrowCapForCollateralWhitelist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the borrow cap
+  mapping(address => mapping(address => EnumerableSet.AddressSet))
+    internal borrowingAgainstCollateralBlacklistWhitelist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the supply cap
+  mapping(address => EnumerableSet.AddressSet) internal supplyCapWhitelist;
+
+  /// @dev set of whitelisted accounts that are allowed to bypass the borrow cap
+  mapping(address => EnumerableSet.AddressSet) internal borrowCapWhitelist;
 }

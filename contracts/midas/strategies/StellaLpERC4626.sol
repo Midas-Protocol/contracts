@@ -3,10 +3,11 @@ pragma solidity ^0.8.10;
 
 import { SafeTransferLib } from "solmate/utils/SafeTransferLib.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";
-import { FixedPointMathLib } from "../../utils/FixedPointMathLib.sol";
+import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { RewardsClaimer } from "../RewardsClaimer.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
 
 interface IStellaDistributorV2 {
   function deposit(uint256 _pid, uint256 _amount) external;
@@ -42,6 +43,7 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
   IStellaDistributorV2 public distributor;
   uint256 public poolId;
   address[] public assetsAsArray;
+  WETH public wNative;
 
   function initialize(
     ERC20Upgradeable _asset,
@@ -60,6 +62,17 @@ contract StellaLpERC4626 is MidasERC4626, RewardsClaimer {
     assetsAsArray.push(address(_asset));
 
     _asset.approve(address(distributor), type(uint256).max);
+  }
+
+  function reinitialize(WETH _wNative) public onlyOwnerOrAdmin {
+    wNative = _wNative;
+  }
+
+  /**
+   * @dev Receives ETH fees.
+   */
+  receive() external payable {
+    wNative.deposit{ value: msg.value }();
   }
 
   function totalAssets() public view override returns (uint256) {
