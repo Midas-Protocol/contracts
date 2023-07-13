@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { ICErc20 } from "./CTokenInterfaces.sol";
 import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { HelioERC4626, IJAR } from "../../midas/strategies/HelioERC4626.sol";
+import { HelioERC4626, IJAR } from "../../ionic/strategies/HelioERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 
 contract HelioERC4626Test is AbstractERC4626Test {

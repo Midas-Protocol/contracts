@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
-import { DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
@@ -16,12 +16,12 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 abstract contract UpgradesBaseTest is BaseTest {
-  FuseFeeDistributor internal ffd;
+  FeeDistributor internal ffd;
   ComptrollerFirstExtension internal poolExt;
   CTokenFirstExtension internal marketExt;
 
   function afterForkSetUp() internal virtual override {
-    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     poolExt = new ComptrollerFirstExtension();
     marketExt = new CTokenFirstExtension();
   }

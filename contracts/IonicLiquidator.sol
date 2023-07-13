@@ -14,12 +14,12 @@ import "./external/uniswap/IUniswapV2Pair.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
 /**
- * @title FuseSafeLiquidator
+ * @title IonicLiquidator
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice FuseSafeLiquidator safely liquidates unhealthy borrowers (with flashloan support).
+ * @notice IonicLiquidator safely liquidates unhealthy borrowers (with flashloan support).
  * @dev Do not transfer NATIVE or tokens directly to this address. Only send NATIVE here when using a method, and only approve tokens for transfer to here when using a method. Direct NATIVE transfers will be rejected and direct token transfers will be lost.
  */
-contract FuseSafeLiquidator is OwnableUpgradeable {
+contract IonicLiquidator is OwnableUpgradeable {
   using AddressUpgradeable for address payable;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -46,7 +46,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
   /**
    * @dev Internal function to approve unlimited tokens of `erc20Contract` to `to`.
    */
-  function safeApprove(IERC20Upgradeable token, address to, uint256 minAmount) private {
+  function safeApprove(
+    IERC20Upgradeable token,
+    address to,
+    uint256 minAmount
+  ) private {
     uint256 allowance = token.allowance(address(this), to);
 
     if (allowance < minAmount) {
@@ -58,7 +62,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
   /**
    * @dev Internal function to approve
    */
-  function justApprove(IERC20Upgradeable token, address to, uint256 amount) private {
+  function justApprove(
+    IERC20Upgradeable token,
+    address to,
+    uint256 amount
+  ) private {
     token.approve(to, amount);
   }
 
@@ -127,9 +135,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
    * @notice Safely liquidate an unhealthy loan, confirming that at least `minProfitAmount` in NATIVE profit is seized.
    * @param vars @see LiquidateToTokensWithFlashSwapVars.
    */
-  function safeLiquidateToTokensWithFlashLoan(
-    LiquidateToTokensWithFlashSwapVars calldata vars
-  ) external returns (uint256) {
+  function safeLiquidateToTokensWithFlashLoan(LiquidateToTokensWithFlashSwapVars calldata vars)
+    external
+    returns (uint256)
+  {
     // Input validation
     require(vars.repayAmount > 0, "Repay amount must be greater than 0.");
 
@@ -190,10 +199,10 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
    * Each whitelisted redemption strategy has to be checked to not be able to
    * call `selfdestruct` with the `delegatecall` call in `redeemCustomCollateral`
    */
-  function _whitelistRedemptionStrategies(
-    IRedemptionStrategy[] calldata strategies,
-    bool[] calldata whitelisted
-  ) external onlyOwner {
+  function _whitelistRedemptionStrategies(IRedemptionStrategy[] calldata strategies, bool[] calldata whitelisted)
+    external
+    onlyOwner
+  {
     require(
       strategies.length > 0 && strategies.length == whitelisted.length,
       "list of strategies empty or whitelist does not match its length"
@@ -206,7 +215,7 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
 
   /**
    * @dev Redeem "special" collateral tokens (before swapping the output for borrowed tokens to be repaid via Uniswap).
-   * Public visibility because we have to call this function externally if called from a payable FuseSafeLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
+   * Public visibility because we have to call this function externally if called from a payable IonicLiquidator function (for some reason delegatecall fails when called with msg.value > 0).
    */
   function redeemCustomCollateral(
     IERC20Upgradeable underlyingCollateral,
@@ -293,7 +302,11 @@ contract FuseSafeLiquidator is OwnableUpgradeable {
   /**
    * @dev Returns an array containing the parameters supplied.
    */
-  function array(address a, address b, address c) private pure returns (address[] memory) {
+  function array(
+    address a,
+    address b,
+    address c
+  ) private pure returns (address[] memory) {
     address[] memory arr = new address[](3);
     arr[0] = a;
     arr[1] = b;

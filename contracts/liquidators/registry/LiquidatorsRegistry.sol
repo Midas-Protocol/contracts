@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import "../../midas/DiamondExtension.sol";
+import "../../ionic/DiamondExtension.sol";
 import "./LiquidatorsRegistryStorage.sol";
 import "./LiquidatorsRegistryExtension.sol";
 

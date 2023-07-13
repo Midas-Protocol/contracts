@@ -10,8 +10,8 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
-import "../midas/DiamondExtension.sol";
-import { SafeOwnable } from "../midas/SafeOwnable.sol";
+import "../ionic/DiamondExtension.sol";
+import { SafeOwnable } from "../ionic/SafeOwnable.sol";
 
 contract LiquidatorsRegistryTest is BaseTest {
   ILiquidatorsRegistry registry;

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../midas/strategies/WombatLpERC4626.sol";
-import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../ionic/strategies/WombatLpERC4626.sol";
+import { IonicFlywheelCore } from "../../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 
@@ -43,9 +43,9 @@ contract WombatERC4626Test is AbstractERC4626Test {
     testPreFix = _testPreFix;
 
     for (uint8 i = 0; i < rewardTokens.length; i++) {
-      MidasFlywheelCore impl = new MidasFlywheelCore();
+      IonicFlywheelCore impl = new IonicFlywheelCore();
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-      MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
+      IonicFlywheelCore flywheel = IonicFlywheelCore(address(proxy));
       flywheel.initialize(
         ERC20(address(rewardTokens[i])),
         IFlywheelRewards(address(0)),

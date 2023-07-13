@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "../BasePriceOracle.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 
 contract SimplePriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   mapping(address => uint256) prices;

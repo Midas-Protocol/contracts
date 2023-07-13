@@ -12,12 +12,12 @@ import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import { PoolLensSecondary } from "../PoolLensSecondary.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
-import { FusePoolLens } from "../FusePoolLens.sol";
-import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
+import { PoolLens } from "../PoolLens.sol";
+import { IonicLiquidator } from "../IonicLiquidator.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
@@ -39,15 +39,15 @@ contract NeondevnetE2ETest is WithPool {
   struct LiquidationData {
     address[] cTokens;
     uint256 oraclePrice;
-    FusePoolLens.FusePoolAsset[] assetsData;
-    FusePoolLens.FusePoolAsset[] assetsDataAfter;
+    PoolLens.PoolAsset[] assetsData;
+    PoolLens.PoolAsset[] assetsDataAfter;
     IRedemptionStrategy[] strategies;
     UniswapLpTokenLiquidator lpLiquidator;
     address[] swapToken0Path;
     address[] swapToken1Path;
     bytes[] abis;
     ICErc20[] allMarkets;
-    FuseSafeLiquidator liquidator;
+    IonicLiquidator liquidator;
     MockERC20 erc20;
     MockWNeon asset;
     IFundsConversionStrategy[] fundingStrategies;
@@ -114,7 +114,7 @@ contract NeondevnetE2ETest is WithPool {
 
     cToken.mint(10e18);
 
-    FusePoolLens.FusePoolAsset[] memory assets = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
+    PoolLens.PoolAsset[] memory assets = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
     assertEq(assets[0].supplyBalance, 10e18);
   }
@@ -136,7 +136,7 @@ contract NeondevnetE2ETest is WithPool {
     vars.cTokens = new address[](1);
 
     // setting up liquidator
-    vars.liquidator = new FuseSafeLiquidator();
+    vars.liquidator = new IonicLiquidator();
     vars.liquidator.initialize(
       wtoken, // wneon
       moraRouter, // moraswap router
@@ -149,8 +149,8 @@ contract NeondevnetE2ETest is WithPool {
     address accountOne = address(1);
     address accountTwo = address(2);
 
-    FusePoolLensSecondary secondary = new FusePoolLensSecondary();
-    secondary.initialize(fusePoolDirectory);
+    PoolLensSecondary secondary = new PoolLensSecondary();
+    secondary.initialize(poolDirectory);
 
     // Accounts pre supply
     deal(address(underlyingToken), accountTwo, 10000e18);
@@ -195,7 +195,7 @@ contract NeondevnetE2ETest is WithPool {
     vars.data = new bytes[](0);
 
     vm.startPrank(accountOne);
-    FusePoolLens.FusePoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
+    PoolLens.PoolAsset[] memory assetsData = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
     uint256 neonBalance = cWNeonToken.balanceOf(accountOne);
 
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(moraRouter);
@@ -203,7 +203,7 @@ contract NeondevnetE2ETest is WithPool {
     IUniswapV2Pair flashSwapPair = IUniswapV2Pair(pairAddress);
 
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+      IonicLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
         8e13,
         ICErc20(address(cToken)),
@@ -221,9 +221,7 @@ contract NeondevnetE2ETest is WithPool {
       )
     );
 
-    FusePoolLens.FusePoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(
-      IComptroller(address(comptroller))
-    );
+    PoolLens.PoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(IComptroller(address(comptroller)));
 
     uint256 neonBalanceAfter = cWNeonToken.balanceOf(accountOne);
 

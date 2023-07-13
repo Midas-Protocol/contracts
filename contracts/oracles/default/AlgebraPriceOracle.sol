@@ -13,7 +13,7 @@ import "../../external/uniswap/FullMath.sol";
  * @title UniswapV3PriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice AlgebraPriceOracle is a price oracle for Algebra pairs.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 contract AlgebraPriceOracle is ConcentratedLiquidityBasePriceOracle {
   /**

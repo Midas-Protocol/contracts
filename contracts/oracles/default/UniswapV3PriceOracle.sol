@@ -13,7 +13,7 @@ import "../../external/uniswap/IUniswapV3Pool.sol";
  * @title UniswapV3PriceOracle
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice UniswapV3PriceOracle is a price oracle for Uniswap V3 pairs.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 contract UniswapV3PriceOracle is ConcentratedLiquidityBasePriceOracle {
   /**

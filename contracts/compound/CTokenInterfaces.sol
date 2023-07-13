@@ -6,9 +6,9 @@ import { InterestRateModel } from "./InterestRateModel.sol";
 
 abstract contract CTokenAdminStorage {
   /*
-   * Administrator for Fuse
+   * Administrator for Ionic
    */
-  address payable public fuseAdmin;
+  address payable public ionicAdmin;
 
   /**
    * @dev LEGACY USE ONLY: Administrator for this contract
@@ -16,9 +16,9 @@ abstract contract CTokenAdminStorage {
   address payable internal __admin;
 
   /**
-   * @dev LEGACY USE ONLY: Whether or not the Fuse admin has admin rights
+   * @dev LEGACY USE ONLY: Whether or not the Ionic admin has admin rights
    */
-  bool internal __fuseAdminHasRights;
+  bool internal __ionicAdminHasRights;
 
   /**
    * @dev LEGACY USE ONLY: Whether or not the admin has admin rights
@@ -83,9 +83,9 @@ abstract contract CTokenStorage is CTokenAdminStorage {
   uint256 public adminFeeMantissa;
 
   /**
-   * @notice Fraction of interest currently set aside for Fuse fees
+   * @notice Fraction of interest currently set aside for Ionic fees
    */
-  uint256 public fuseFeeMantissa;
+  uint256 public ionicFeeMantissa;
 
   /**
    * @notice Fraction of interest currently set aside for reserves
@@ -118,9 +118,9 @@ abstract contract CTokenStorage is CTokenAdminStorage {
   uint256 public totalAdminFees;
 
   /**
-   * @notice Total amount of Fuse fees of the underlying held in this market
+   * @notice Total amount of Ionic fees of the underlying held in this market
    */
-  uint256 public totalFuseFees;
+  uint256 public totalIonicFees;
 
   /**
    * @notice Total number of tokens in circulation
@@ -199,7 +199,7 @@ abstract contract CTokenBaseEvents {
   event NewAdminFee(uint256 oldAdminFeeMantissa, uint256 newAdminFeeMantissa);
 
   /**
-   * @notice Event emitted when the Fuse fee is changed
+   * @notice Event emitted when the Ionic fee is changed
    */
   event NewFuseFee(uint256 oldFuseFeeMantissa, uint256 newFuseFeeMantissa);
 
@@ -376,7 +376,7 @@ interface CTokenStorageInterface {
 
   function adminHasRights() external view returns (bool);
 
-  function fuseAdminHasRights() external view returns (bool);
+  function ionicAdminHasRights() external view returns (bool);
 
   function comptroller() external view returns (IComptroller);
 
@@ -390,7 +390,7 @@ interface CTokenStorageInterface {
 
   function adminFeeMantissa() external view returns (uint256);
 
-  function fuseFeeMantissa() external view returns (uint256);
+  function ionicFeeMantissa() external view returns (uint256);
 
   function reserveFactorMantissa() external view returns (uint256);
 
@@ -402,7 +402,7 @@ interface CTokenStorageInterface {
 
   function totalAdminFees() external view returns (uint256);
 
-  function totalFuseFees() external view returns (uint256);
+  function totalIonicFees() external view returns (uint256);
 
   function totalBorrows() external view returns (uint256);
 

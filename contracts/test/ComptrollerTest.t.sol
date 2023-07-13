@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
@@ -20,7 +20,7 @@ import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 
 contract ComptrollerTest is BaseTest {
   IComptroller internal comptroller;
-  MidasFlywheel internal flywheel;
+  IonicFlywheel internal flywheel;
   address internal nonOwner = address(0x2222);
 
   event Failure(uint256 error, uint256 info, uint256 detail);
@@ -28,9 +28,9 @@ contract ComptrollerTest is BaseTest {
   function setUp() public {
     ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
     comptroller = IComptroller(address(new Comptroller(payable(address(this)))));
-    MidasFlywheel impl = new MidasFlywheel();
+    IonicFlywheel impl = new IonicFlywheel();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    flywheel = MidasFlywheel(address(proxy));
+    flywheel = IonicFlywheel(address(proxy));
     flywheel.initialize(rewardToken, IFlywheelRewards(address(2)), IFlywheelBooster(address(3)), address(this));
   }
 
@@ -67,8 +67,8 @@ contract ComptrollerTest is BaseTest {
   }
 
   function _testInflationProtection() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    FusePoolDirectory.FusePool[] memory pools = fpd.getAllPools();
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    PoolDirectory.Pool[] memory pools = fpd.getAllPools();
     for (uint256 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
       ICErc20[] memory markets = pool.getAllMarkets();

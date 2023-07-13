@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 import { LiquidityAmounts } from "../../external/uniswap/LiquidityAmounts.sol";
 import { TickMath } from "../../external/uniswap/TickMath.sol";
@@ -15,7 +15,7 @@ import { BasePriceOracle } from "../BasePriceOracle.sol";
  * @title GammaPoolPriceOracle
  * @author Carlo Mazzaferro <carlo.mazzaferro@gmail.com> (https://github.com/carlomazzaferro)
  * @notice GammaPoolPriceOracle is a price oracle for Gelato Gamma wrapped Uniswap V3 LP tokens.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 
 contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
@@ -44,7 +44,7 @@ contract GammaPoolPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
 
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) public view returns (uint256) {
