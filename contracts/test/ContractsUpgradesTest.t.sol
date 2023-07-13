@@ -54,7 +54,7 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFuseFeeDistributorUpgrade() public fork(BSC_MAINNET) {
+  function testFeeDistributorUpgrade() public fork(BSC_MAINNET) {
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
     // before upgrade

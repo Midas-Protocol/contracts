@@ -72,7 +72,7 @@ contract MaxWithdrawTest is WithPool {
 
     {
       address comptrollerAddress = address(comptroller);
-      AuthoritiesRegistry ar = fuseAdmin.authoritiesRegistry();
+      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
       PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
       ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
       ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
@@ -168,7 +168,7 @@ contract MaxWithdrawTest is WithPool {
 
     {
       address comptrollerAddress = address(comptroller);
-      AuthoritiesRegistry ar = fuseAdmin.authoritiesRegistry();
+      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
       PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
       ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
       ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
@@ -177,7 +177,7 @@ contract MaxWithdrawTest is WithPool {
 
     {
       address comptrollerAddress = address(comptroller);
-      AuthoritiesRegistry ar = fuseAdmin.authoritiesRegistry();
+      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
       PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
       ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
       ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);

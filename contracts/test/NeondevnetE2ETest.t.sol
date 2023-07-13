@@ -21,8 +21,8 @@ import { IonicLiquidator } from "../IonicLiquidator.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
-import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
+import { AuthoritiesRegistry } from "../ionic/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../ionic/PoolRolesAuthority.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
@@ -129,7 +129,7 @@ contract NeondevnetE2ETest is WithPool {
 
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
-    fuseAdmin.authoritiesRegistry().reconfigureAuthority(address(comptroller));
+    ionicAdmin.authoritiesRegistry().reconfigureAuthority(address(comptroller));
 
     vars.allMarkets = comptroller.getAllMarkets();
 
@@ -150,7 +150,7 @@ contract NeondevnetE2ETest is WithPool {
     address accountTwo = address(2);
     {
       address comptrollerAddress = address(comptroller);
-      AuthoritiesRegistry ar = fuseAdmin.authoritiesRegistry();
+      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
       PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
       ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
       ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);

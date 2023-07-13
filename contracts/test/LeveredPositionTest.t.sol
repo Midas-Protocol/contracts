@@ -614,7 +614,7 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
 
     vm.mockCall(
       address(ffd),
-      abi.encodeWithSelector(IFuseFeeDistributor.minBorrowEth.selector),
+      abi.encodeWithSelector(IFeeDistributor.minBorrowEth.selector),
       abi.encode(minBorrowNative)
     );
 
