@@ -363,13 +363,13 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
       address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
       for (uint256 j = 0; j < _inputTokens.length; j++) {
-        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
         IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
 
         // only nullify the input/output tokens config if the strategy matches
         if (_currentStrategy == strategyToRemove) {
           redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
-          inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+          inputTokensByOutputToken[_outputToken].remove(_inputTokens[j]);
           if (defaultOutputToken[_inputToken] == _outputToken) {
             defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
           }
@@ -460,6 +460,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = curveLpTokenLiquidatorNoRegistryData(inputToken, outputToken);
     } else if (isStrategy(strategy, "CurveSwapLiquidator")) {
       strategyData = curveSwapLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "CurveLpTokenWrapper")) {
+      strategyData = curveLpTokenWrapperData(inputToken, outputToken);
     } else if (isStrategy(strategy, "JarvisLiquidatorFunder")) {
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
     } else if (isStrategy(strategy, "XBombLiquidatorFunder")) {
@@ -675,6 +677,18 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     for (uint256 i = 0; i < j; i++) {
       tokens[i] = curvePool.coins(i);
     }
+  }
+
+  function curveLpTokenWrapperData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    view
+    returns (bytes memory strategyData)
+  {
+    CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(
+      ap.getAddress("CurveLpTokenPriceOracleNoRegistry")
+    );
+
+    strategyData = abi.encode(curveLpOracle.poolOf(address(outputToken)), outputToken);
   }
 
   function curveSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)

@@ -77,8 +77,8 @@ contract CurveLpTokenWrapper is IRedemptionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) external returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    ICurvePool curvePool = abi.decode(strategyData, (ICurvePool));
-    outputToken = IERC20Upgradeable(address(curvePool));
+    (ICurvePool curvePool, address _outputTokenAddress) = abi.decode(strategyData, (ICurvePool, address));
+    outputToken = IERC20Upgradeable(_outputTokenAddress);
 
     uint8 inputIndex = type(uint8).max;
 

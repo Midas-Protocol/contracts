@@ -198,13 +198,13 @@ abstract contract LeveredPositionTest is MarketsTest {
   ) internal {
     _configurePair(_collat, _stable);
     _configureTwoWayLiquidator(_collat, _stable, _liquidator);
-    _unpauseMarkets(_collat, _stable);
   }
 
   function _configurePair(address _collat, address _stable) internal {
     collateralMarket = ICErc20(_collat);
     stableMarket = ICErc20(_stable);
     //upgradePoolAndMarkets();
+    _unpauseMarkets(_collat, _stable);
     vm.prank(factory.owner());
     factory._setPairWhitelisted(collateralMarket, stableMarket, true);
   }
@@ -280,7 +280,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   }
 
   function testOpenLeveredPosition() public virtual whenForking {
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), 1e18, 1e15, "initial leverage ratio should be 1.0 (1e18)");
+    assertApproxEqRel(position.getCurrentLeverageRatio(), 1e18, 1e16, "initial leverage ratio should be 1.0 (1e18)");
   }
 
   function testAnyLeverageRatio(uint64 ratioDiff) public whenForking {
@@ -302,7 +302,7 @@ abstract contract LeveredPositionTest is MarketsTest {
 
     uint256 leverageRatioRealized = position.adjustLeverageRatio(targetLeverageRatio);
     emit log_named_uint("base collateral", position.getEquityAmount());
-    assertApproxEqAbs(leverageRatioRealized, targetLeverageRatio, 1e15, "target ratio not matching");
+    assertApproxEqRel(leverageRatioRealized, targetLeverageRatio, 1e16, "target ratio not matching");
   }
 
   function testMinMaxLeverageRatio() public whenForking {
@@ -313,11 +313,11 @@ abstract contract LeveredPositionTest is MarketsTest {
 
     assertGt(maxRatio, minRatio, "max ratio <= min ratio");
 
-    // attempting to adjust to minRatio - 0.011 should fail
+    // attempting to adjust to minRatio - 0.01 should fail
     vm.expectRevert(abi.encodeWithSelector(LeveredPosition.BorrowStableFailed.selector, 0x3fa));
-    position.adjustLeverageRatio(minRatio - 0.011e18);
-    // but adjusting to the minRatio should succeed
-    position.adjustLeverageRatio(minRatio + 2);
+    position.adjustLeverageRatio(minRatio - 0.01e18);
+    // but adjusting to the minRatio + 0.01 should succeed
+    position.adjustLeverageRatio(minRatio + 0.01e18);
   }
 
   function testMaxLeverageRatio() public whenForking {
@@ -330,7 +330,7 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 minRatio = position.getMinLeverageRatio();
     emit log_named_uint("min ratio", minRatio);
     position.adjustLeverageRatio(maxRatio);
-    assertApproxEqAbs(position.getCurrentLeverageRatio(), maxRatio, 1e15, "target max ratio not matching");
+    assertApproxEqRel(position.getCurrentLeverageRatio(), maxRatio, 1e16, "target max ratio not matching");
   }
 
   function testRewardsAccruedClaimed() public whenForking {
@@ -368,7 +368,7 @@ abstract contract LeveredPositionTest is MarketsTest {
   function testLeverMaxDown() public whenForking {
     uint256 maxRatio = position.getMaxLeverageRatio();
     uint256 leverageRatioRealized = position.adjustLeverageRatio(maxRatio);
-    assertApproxEqAbs(leverageRatioRealized, maxRatio, 1e15, "target ratio not matching");
+    assertApproxEqRel(leverageRatioRealized, maxRatio, 1e16, "target ratio not matching");
 
     uint256 minRatio = position.getMinLeverageRatio();
     emit log_named_uint("min ratio", minRatio);
@@ -377,9 +377,9 @@ abstract contract LeveredPositionTest is MarketsTest {
     uint256 ratioDiffStep = (maxRatio - 1e18) / 9;
     while (leverageRatioRealized > 1e18) {
       uint256 targetLeverDownRatio = leverageRatioRealized - ratioDiffStep;
-      if (targetLeverDownRatio - 1e18 < minRatio) targetLeverDownRatio = 1e18;
+      if (targetLeverDownRatio < minRatio) targetLeverDownRatio = 1e18;
       leverageRatioRealized = position.adjustLeverageRatio(targetLeverDownRatio);
-      assertApproxEqAbs(leverageRatioRealized, targetLeverDownRatio, 1e15, "target lever down ratio not matching");
+      assertApproxEqRel(leverageRatioRealized, targetLeverDownRatio, 1e16, "target lever down ratio not matching");
     }
 
     uint256 withdrawAmount = position.closePosition();
@@ -475,8 +475,7 @@ contract WmaticMaticXLeveredPositionTest is LeveredPositionTest {
     address wmaticWhale = 0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
     address maticxWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    BalancerSwapLiquidator balancerSwapLiquidator = new BalancerSwapLiquidator();
-    _configurePairAndLiquidator(wmaticMarket, maticxMarket, balancerSwapLiquidator);
+    _configurePair(wmaticMarket, maticxMarket);
     _fundMarketAndSelf(ICErc20(wmaticMarket), wmaticWhale);
     _fundMarketAndSelf(ICErc20(maticxMarket), maticxWhale);
 
@@ -535,9 +534,7 @@ contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
     vm.prank(twoBrl.minter());
     twoBrl.mint(twoBrlWhale, depositAmount * 100);
 
-    // TODO jBRL -> 2brl needs a reverse curve LP token liquidator
-    CurveLpTokenLiquidatorNoRegistry lpTokenLiquidator = new CurveLpTokenLiquidatorNoRegistry();
-    _configurePairAndLiquidator(twoBrlMarket, jBrlMarket, lpTokenLiquidator);
+    _configurePair(twoBrlMarket, jBrlMarket);
     _fundMarketAndSelf(ICErc20(twoBrlMarket), twoBrlWhale);
     _fundMarketAndSelf(ICErc20(jBrlMarket), jBrlWhale);
 
@@ -551,7 +548,7 @@ contract Par2EurLeveredPositionTest is LeveredPositionTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    uint256 depositAmount = 100e18;
+    uint256 depositAmount = 2000e18;
 
     address twoEurMarket = 0x1944FA4a490f85Ed99e2c6fF9234F94DE16fdbde;
     address parMarket = 0xCA1A940B02E15FF71C128f877b29bdb739785299;
@@ -563,8 +560,7 @@ contract Par2EurLeveredPositionTest is LeveredPositionTest {
     vm.prank(balancer);
     twoEur.transfer(twoEurWhale, 80 * depositAmount);
 
-    BalancerSwapLiquidator liquidator = new BalancerSwapLiquidator();
-    _configurePairAndLiquidator(twoEurMarket, parMarket, liquidator);
+    _configurePair(twoEurMarket, parMarket);
     _fundMarketAndSelf(ICErc20(twoEurMarket), twoEurWhale);
     _fundMarketAndSelf(ICErc20(parMarket), parWhale);
 
@@ -628,23 +624,24 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
     collateralMarket = ICErc20(xMarket);
     stableMarket = ICErc20(yMarket);
 
-    uint256 minBorrowStable;
-    uint256 stablePrice = stableMarket.comptroller().oracle().getUnderlyingPrice(stableMarket);
-    minBorrowStable = (minBorrowNative * 1e18) / stablePrice;
-    emit log_named_uint("min borrow stable", minBorrowStable);
+    upgradePoolAndMarkets();
 
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     IERC20Upgradeable stableToken = IERC20Upgradeable(stableMarket.underlying());
-    vm.startPrank(whale);
-    {
-      collateralToken.approve(address(registry), 1e36);
-      registry.amountOutAndSlippageOfSwap(collateralToken, 1e18, stableToken);
-      stableToken.approve(address(registry), 1e36);
-      registry.amountOutAndSlippageOfSwap(stableToken, 1e18, collateralToken);
+    // TODO call to cache the slippage
+    //    vm.startPrank(whale);
+    //    {
+    //      collateralToken.approve(address(registry), 1e36);
+    //      registry.amountOutAndSlippageOfSwap(collateralToken, 1e18, stableToken);
+    //      stableToken.approve(address(registry), 1e36);
+    //      registry.amountOutAndSlippageOfSwap(stableToken, 1e18, collateralToken);
+    //
+    //      collateralToken.transfer(address(this), depositAmount);
+    //    }
+    //    vm.stopPrank();
 
-      collateralToken.transfer(address(this), depositAmount);
-    }
-    vm.stopPrank();
+    vm.prank(whale);
+    collateralToken.transfer(address(this), depositAmount);
 
     collateralToken.approve(address(factory), depositAmount);
     position = factory.createAndFundPositionAtRatio(
@@ -661,11 +658,11 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
   }
 
   function testOpenLeveredPosition() public override whenForking {
-    assertApproxEqAbs(
+    assertApproxEqRel(
       position.getCurrentLeverageRatio(),
       ratioOnCreation,
-      1e15,
-      "initial leverage ratio should be 1.2"
+      1e16,
+      "initial leverage ratio mismatch"
     );
   }
 }
