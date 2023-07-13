@@ -5,7 +5,6 @@ import "./config/MarketsTest.t.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract PoolCapsAndBlacklistsTest is MarketsTest {
-  address payable ankrBnbPool = payable(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
   Comptroller pool;
   ComptrollerFirstExtension asExtension;
   address borrower = 0x28C0208b7144B511C73586Bb07dE2100495e92f3; // ANKR account
@@ -16,7 +15,8 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
   function afterForkSetUp() internal override {
     super.afterForkSetUp();
 
-    pool = Comptroller(ankrBnbPool);
+    // ankr pool
+    pool = Comptroller(payable(0x1851e32F34565cb95754310b031C5a2Fc0a8a905));
     asExtension = ComptrollerFirstExtension(address(pool));
     _upgradeExistingPool(address(pool));
 
@@ -136,12 +136,15 @@ contract PoolCapsAndBlacklistsTest is MarketsTest {
     markets[0] = ankrBNBMkt;
     markets[1] = ankrBNBAnkrMkt;
 
-    vm.prank(pool.admin());
+    vm.startPrank(pool.admin());
     asExtension._setMarketSupplyCaps(markets, asArray(1, 1));
+    asExtension._setMintPaused(ankrBNBMkt, false);
+    asExtension._setMintPaused(ankrBNBAnkrMkt, false);
+    vm.stopPrank();
 
     (, uint256 liquidityAfterCap, uint256 shortFallAfterCap) = pool.getAccountLiquidity(borrower);
     assertEq(liquidityBefore, liquidityAfterCap, "should have the same liquidity after cap");
-    assertEq(shortFallBefore, shortFallAfterCap, "should have the same liquidity after cap");
+    assertEq(shortFallBefore, shortFallAfterCap, "should have the same shortfall after cap");
 
     vm.expectRevert("!supply cap");
     pool.mintAllowed(address(ankrBNBMkt), borrower, 2);

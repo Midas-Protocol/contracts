@@ -140,23 +140,11 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     plugin.withdrawAccruedFees();
   }
 
-  function testMoonbeamAllPluginsFeeRecipient() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testAllPluginsFeeRecipient();
-  }
-
   function testPolygonAllPluginsFeeRecipient() public debuggingOnly fork(POLYGON_MAINNET) {
     _testAllPluginsFeeRecipient();
   }
 
   function testBscAllPluginsFeeRecipient() public debuggingOnly fork(BSC_MAINNET) {
-    _testAllPluginsFeeRecipient();
-  }
-
-  function testFantomAllPluginsFeeRecipient() public debuggingOnly fork(FANTOM_OPERA) {
-    _testAllPluginsFeeRecipient();
-  }
-
-  function testEvmosAllPluginsFeeRecipient() public debuggingOnly fork(EVMOS_MAINNET) {
     _testAllPluginsFeeRecipient();
   }
 

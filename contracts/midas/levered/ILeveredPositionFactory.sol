@@ -20,12 +20,6 @@ interface ILeveredPositionFactoryStorage {
 }
 
 interface ILeveredPositionFactoryBase {
-  function _setSlippages(
-    IERC20Upgradeable[] calldata inputTokens,
-    IERC20Upgradeable[] calldata outputTokens,
-    uint256[] calldata slippages
-  ) external;
-
   function _setLiquidatorsRegistry(ILiquidatorsRegistry _liquidatorsRegistry) external;
 
   function _setPairWhitelisted(
@@ -63,8 +57,6 @@ interface ILeveredPositionFactoryExtension {
   function removeClosedPosition(address closedPosition) external returns (bool removed);
 
   function closeAndRemoveUserPosition(LeveredPosition position) external returns (bool);
-
-  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken) external view returns (uint256);
 
   function getPositionsByAccount(address account) external view returns (address[] memory, bool[] memory);
 

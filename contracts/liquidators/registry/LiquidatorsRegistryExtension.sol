@@ -30,8 +30,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
   error NoRedemptionPath();
   error OutputTokenMismatch();
 
+  // @notice maximum slippage in swaps, in bps
+  uint256 public constant MAX_SLIPPAGE = 900; // 9%
+
   function _getExtensionFunctions() external pure override returns (bytes4[] memory) {
-    uint8 fnsCount = 13;
+    uint8 fnsCount = 15;
     bytes4[] memory functionSelectors = new bytes4[](fnsCount);
     functionSelectors[--fnsCount] = this.getRedemptionStrategies.selector;
     functionSelectors[--fnsCount] = this.getRedemptionStrategy.selector;
@@ -46,8 +49,32 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     functionSelectors[--fnsCount] = this.amountOutAndSlippageOfSwap.selector;
     functionSelectors[--fnsCount] = this.getAllPairsStrategies.selector;
     functionSelectors[--fnsCount] = this.pairsStrategiesMatch.selector;
+    functionSelectors[--fnsCount] = this.getSlippage.selector;
+    functionSelectors[--fnsCount] = this._setSlippages.selector;
     require(fnsCount == 0, "use the correct array length");
     return functionSelectors;
+  }
+
+  function getSlippage(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    external
+    view
+    returns (uint256 slippage)
+  {
+    slippage = conversionSlippage[inputToken][outputToken];
+    // TODO slippage == 0 should be allowed
+    if (slippage == 0) return MAX_SLIPPAGE;
+  }
+
+  function _setSlippages(
+    IERC20Upgradeable[] calldata inputTokens,
+    IERC20Upgradeable[] calldata outputTokens,
+    uint256[] calldata slippages
+  ) external onlyOwner {
+    require(slippages.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
+
+    for (uint256 i = 0; i < slippages.length; i++) {
+      conversionSlippage[inputTokens[i]][outputTokens[i]] = slippages[i];
+    }
   }
 
   function getAllRedemptionStrategies() public view returns (address[] memory) {
@@ -73,6 +100,15 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
 
     if (outputTokensValue < inputTokensValue) {
       slippage = ((inputTokensValue - outputTokensValue) * 1e18) / inputTokensValue;
+    }
+
+    // cache the slippage
+    if (
+      conversionSlippage[inputToken][outputToken] == 0 ||
+      block.timestamp - conversionSlippageUpdated[inputToken][outputToken] > 5000
+    ) {
+      conversionSlippage[inputToken][outputToken] = slippage;
+      conversionSlippageUpdated[inputToken][outputToken] = block.timestamp;
     }
   }
 
@@ -327,13 +363,13 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       IERC20Upgradeable _outputToken = IERC20Upgradeable(_outputTokens[i]);
       address[] memory _inputTokens = inputTokensByOutputToken[_outputToken].values();
       for (uint256 j = 0; j < _inputTokens.length; j++) {
-        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[i]);
+        IERC20Upgradeable _inputToken = IERC20Upgradeable(_inputTokens[j]);
         IRedemptionStrategy _currentStrategy = redemptionStrategiesByTokens[_inputToken][_outputToken];
 
         // only nullify the input/output tokens config if the strategy matches
         if (_currentStrategy == strategyToRemove) {
           redemptionStrategiesByTokens[_inputToken][_outputToken] = IRedemptionStrategy(address(0));
-          inputTokensByOutputToken[_outputToken].remove(_inputTokens[i]);
+          inputTokensByOutputToken[_outputToken].remove(_inputTokens[j]);
           if (defaultOutputToken[_inputToken] == _outputToken) {
             defaultOutputToken[_inputToken] = IERC20Upgradeable(address(0));
           }
@@ -368,9 +404,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       } else {
         // chain the next redeemed token from the default path
         nextRedeemedToken = defaultOutputToken[tokenToRedeem];
-        for (uint256 i = 0; i < tokenPath.length; i++) {
-          if (nextRedeemedToken == tokenPath[i]) break;
-        }
+      }
+
+      // check if going in an endless loop
+      for (uint256 i = 0; i < tokenPath.length; i++) {
+        if (nextRedeemedToken == tokenPath[i]) break;
       }
 
       (IRedemptionStrategy strategy, bytes memory strategyData) = getRedemptionStrategy(
@@ -422,6 +460,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = curveLpTokenLiquidatorNoRegistryData(inputToken, outputToken);
     } else if (isStrategy(strategy, "CurveSwapLiquidator")) {
       strategyData = curveSwapLiquidatorData(inputToken, outputToken);
+    } else if (isStrategy(strategy, "CurveLpTokenWrapper")) {
+      strategyData = curveLpTokenWrapperData(inputToken, outputToken);
     } else if (isStrategy(strategy, "JarvisLiquidatorFunder")) {
       strategyData = jarvisLiquidatorFunderData(inputToken, outputToken);
     } else if (isStrategy(strategy, "XBombLiquidatorFunder")) {
@@ -434,6 +474,8 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       strategyData = solidlyLpTokenWrapperData(inputToken, outputToken);
       //} else if (isStrategy(strategy, "ERC4626Liquidator")) {
       //   TODO strategyData = erc4626LiquidatorData(inputToken, outputToken);
+    } else {
+      revert("no strategy data");
     }
   }
 
@@ -637,6 +679,18 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     }
   }
 
+  function curveLpTokenWrapperData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
+    internal
+    view
+    returns (bytes memory strategyData)
+  {
+    CurveLpTokenPriceOracleNoRegistry curveLpOracle = CurveLpTokenPriceOracleNoRegistry(
+      ap.getAddress("CurveLpTokenPriceOracleNoRegistry")
+    );
+
+    strategyData = abi.encode(curveLpOracle.poolOf(address(outputToken)), outputToken);
+  }
+
   function curveSwapLiquidatorData(IERC20Upgradeable inputToken, IERC20Upgradeable outputToken)
     internal
     view
@@ -713,7 +767,11 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
     view
     returns (bytes memory strategyData)
   {
-    if (block.chainid == 97) {
+    if (block.chainid == 56) {
+      address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
+      address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
+      strategyData = abi.encode(inputToken, xbomb, bomb);
+    } else {
       IERC20Upgradeable chapelBomb = IERC20Upgradeable(0xe45589fBad3A1FB90F5b2A8A3E8958a8BAB5f768);
       IERC20Upgradeable chapelTUsd = IERC20Upgradeable(0x4f1885D25eF219D3D4Fa064809D6D4985FAb9A0b);
       IERC20Upgradeable chapelTDai = IERC20Upgradeable(0x8870f7102F1DcB1c35b01af10f1baF1B00aD6805);
@@ -733,10 +791,6 @@ contract LiquidatorsRegistryExtension is LiquidatorsRegistryStorage, DiamondExte
       } else if (inputToken == chapelTDai) {
         strategyData = abi.encode(inputToken, xbombSwapTDai, inputToken, chapelBomb);
       }
-    } else {
-      address xbomb = 0xAf16cB45B8149DA403AF41C63AbFEBFbcd16264b;
-      address bomb = 0x522348779DCb2911539e76A1042aA922F9C47Ee3;
-      strategyData = abi.encode(inputToken, xbomb, bomb);
     }
   }
 
