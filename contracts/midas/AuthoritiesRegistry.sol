@@ -45,6 +45,7 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     auth.configureRegistryCapabilities();
     auth.configurePoolSupplierCapabilities(pool);
     auth.configurePoolBorrowerCapabilities(pool);
+    // everyone can be a liquidator
     auth.configureOpenPoolLiquidatorCapabilities(pool);
     auth.configureLeveredPositionCapabilities(pool);
   }

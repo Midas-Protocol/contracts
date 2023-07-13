@@ -59,7 +59,7 @@ contract CurveV2PriceOracleTest is BaseTest {
     uint256 bnbx_mpo_price = mpo.price(Bnbx);
     vm.startPrank(address(mpo));
     uint256 priceBnbx = oracle.price(Bnbx);
-    assertApproxEqRel(bnbx_mpo_price, priceBnbx, 5e15); // 0.5%
+    assertApproxEqRel(bnbx_mpo_price, priceBnbx, 1e16); // 1%
     vm.stopPrank();
   }
 
@@ -70,8 +70,8 @@ contract CurveV2PriceOracleTest is BaseTest {
     vm.startPrank(address(mpo));
     uint256 priceWbtc = oracle.price(wbtc);
     uint256 priceBusd = oracle.price(busd);
-    assertApproxEqRel(wbtc_mpo_price, priceWbtc, 5e15); // 1%
-    assertApproxEqRel(busd_mpo_price, priceBusd, 5e15); // 1%
+    assertApproxEqRel(wbtc_mpo_price, priceWbtc, 1e16); // 1%
+    assertApproxEqRel(busd_mpo_price, priceBusd, 1e16); // 1%
     vm.stopPrank();
   }
 

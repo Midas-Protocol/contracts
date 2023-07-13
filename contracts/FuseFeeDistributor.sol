@@ -37,7 +37,7 @@ contract FuseFeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
     maxUtilizationRate = type(uint256).max;
   }
 
-  function reinitialize(AuthoritiesRegistry _ar) public reinitializer(3) {
+  function reinitialize(AuthoritiesRegistry _ar) public onlyOwnerOrAdmin {
     authoritiesRegistry = _ar;
   }
 

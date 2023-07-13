@@ -21,6 +21,8 @@ import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
 
 contract MockWNeon is MockERC20 {
   constructor() MockERC20("test", "test", 18) {}
@@ -127,6 +129,7 @@ contract NeondevnetE2ETest is WithPool {
 
     deployCErc20Delegate(address(vars.erc20), "MORA", "MoraSwap", 0.9e18);
     deployCErc20Delegate(address(vars.asset), "WNEON", "Wrapped Neon", 0.9e18);
+    fuseAdmin.authoritiesRegistry().reconfigureAuthority(address(comptroller));
 
     vars.allMarkets = comptroller.getAllMarkets();
 
@@ -148,6 +151,14 @@ contract NeondevnetE2ETest is WithPool {
 
     address accountOne = address(1);
     address accountTwo = address(2);
+    {
+      address comptrollerAddress = address(comptroller);
+      AuthoritiesRegistry ar = fuseAdmin.authoritiesRegistry();
+      PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
+      ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, address(vars.liquidator), poolAuth.LIQUIDATOR_ROLE(), true);
+    }
 
     FusePoolLensSecondary secondary = new FusePoolLensSecondary();
     secondary.initialize(fusePoolDirectory);
@@ -159,7 +170,7 @@ contract NeondevnetE2ETest is WithPool {
     // Account One Supply
     vm.startPrank(accountOne);
     vars.asset.approve(address(cWNeonToken), 1e36);
-    require(cWNeonToken.mint(1e17) == 0, "failed to mint cWNeonToken");
+    require(cWNeonToken.mint(1e19) == 0, "failed to mint cWNeonToken");
     vars.cTokens[0] = address(cWNeonToken);
     comptroller.enterMarkets(vars.cTokens);
     vm.stopPrank();
@@ -173,11 +184,10 @@ contract NeondevnetE2ETest is WithPool {
     vm.stopPrank();
 
     assertEq(cToken.totalSupply(), 10e18 * 5, "!ctoken total supply");
-    assertEq(cWNeonToken.totalSupply(), 1e17 * 5, "!cWNeonToken total supply");
+    assertEq(cWNeonToken.totalSupply(), 1e19 * 5, "!cWNeonToken total supply");
 
     // Account One Borrow
     vm.startPrank(accountOne);
-    underlyingToken.approve(address(cToken), 1e36);
     require(cToken.borrow(1e16) == 0, "failed to borrow");
     vm.stopPrank();
     assertEq(cToken.totalBorrows(), 1e16, "!ctoken total borrows");
@@ -205,7 +215,7 @@ contract NeondevnetE2ETest is WithPool {
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
       FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
-        8e13,
+        4e13,
         ICErc20(address(cToken)),
         ICErc20(address(cWNeonToken)),
         flashSwapPair,
