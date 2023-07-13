@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./config/BaseTest.t.sol";
-import "../midas/strategies/ThenaLpERC4626.sol";
+import "../ionic/strategies/ThenaLpERC4626.sol";
 
 import { ERC20Upgradeable as ERC20 } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ERC20 as SolERC20 } from "solmate/tokens/ERC20.sol";
@@ -17,7 +17,7 @@ import { Comptroller } from "../compound/Comptroller.sol";
 
 contract ThenaLpERC4626Test is BaseTest {
   ThenaLpERC4626 public plugin;
-  MidasFlywheel public flywheel;
+  IonicFlywheel public flywheel;
   ERC20 public thenaToken = ERC20(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11);
   ERC20 public lpHayBusdToken = ERC20(0x93B32a8dfE10e9196403dd111974E325219aec24);
   address public lpTokenWhale = 0xE43317c1f037CBbaF33F33C386f2cAF2B6b25C9C; // gauge v2
@@ -55,7 +55,7 @@ contract ThenaLpERC4626Test is BaseTest {
 
     address user = 0x28C0208b7144B511C73586Bb07dE2100495e92f3;
     Comptroller pool = Comptroller(address(market.comptroller()));
-    MidasFlywheel flywheel = MidasFlywheel(pool.rewardsDistributors(2));
+    IonicFlywheel flywheel = IonicFlywheel(pool.rewardsDistributors(2));
     flywheel.accrue(SolERC20(address(market)), user);
 
     plugin = ThenaLpERC4626(address(market.plugin()));

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { AaveV3ERC4626, IAaveV3Pool } from "../../midas/strategies/AaveV3ERC4626.sol";
+import { AaveV3ERC4626, IAaveV3Pool } from "../../ionic/strategies/AaveV3ERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
-import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { IonicFlywheelCore } from "../../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";

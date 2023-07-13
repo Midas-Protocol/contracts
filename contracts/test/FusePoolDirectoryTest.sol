@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract FusePoolDirectoryTest is BaseTest {
-  FusePoolDirectory fpd;
+  PoolDirectory fpd;
 
   function afterForkSetUp() internal override {
-    address fpdAddress = ap.getAddress("FusePoolDirectory");
-    fpd = FusePoolDirectory(fpdAddress);
+    address fpdAddress = ap.getAddress("PoolDirectory");
+    fpd = PoolDirectory(fpdAddress);
 
     // upgrade to the current changes impl
     {
-      FusePoolDirectory newImpl = new FusePoolDirectory();
+      PoolDirectory newImpl = new PoolDirectory();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(fpdAddress));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
@@ -30,9 +30,9 @@ contract FusePoolDirectoryTest is BaseTest {
   }
 
   function _testDeprecatePool() internal {
-    FusePoolDirectory.FusePool[] memory allPools = fpd.getAllPools();
+    PoolDirectory.Pool[] memory allPools = fpd.getAllPools();
 
-    FusePoolDirectory.FusePool memory poolToDeprecate;
+    PoolDirectory.Pool memory poolToDeprecate;
 
     // BOMB pool https://app.midascapital.xyz/56/pool/0
     uint256 index = 0;
@@ -42,7 +42,7 @@ contract FusePoolDirectoryTest is BaseTest {
     vm.prank(fpd.owner());
     fpd._deprecatePool(index);
 
-    (, FusePoolDirectory.FusePool[] memory allPoolsAfter) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory allPoolsAfter) = fpd.getActivePools();
 
     bool poolStillThere = false;
     for (uint256 i = 0; i < allPoolsAfter.length; i++) {

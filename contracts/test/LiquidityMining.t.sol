@@ -23,16 +23,16 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
-import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
+import { AuthoritiesRegistry } from "../ionic/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../ionic/PoolRolesAuthority.sol";
 
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstExtension.sol";
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { IonicFlywheelLensRouter } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -44,12 +44,12 @@ contract LiquidityMiningTest is BaseTest {
   IComptroller comptroller;
   CErc20Delegate cErc20Delegate;
   ICErc20 cErc20;
-  FuseFeeDistributor fuseAdmin;
-  FusePoolDirectory fusePoolDirectory;
+  FeeDistributor ionicAdmin;
+  PoolDirectory poolDirectory;
 
-  MidasFlywheel flywheel;
+  IonicFlywheel flywheel;
   FlywheelStaticRewards rewards;
-  MidasFlywheelLensRouter flywheelClaimer;
+  IonicFlywheelLensRouter flywheelClaimer;
 
   address user = address(1337);
 
@@ -62,7 +62,7 @@ contract LiquidityMiningTest is BaseTest {
   bool[] falseBoolArray;
   bool[] trueBoolArray;
   address[] newImplementation;
-  MidasFlywheelCore[] flywheelsToClaim;
+  IonicFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts(uint8 _baseDecimal, uint8 _rewardDecimal) public {
     baseDecimal = _baseDecimal;
@@ -70,31 +70,31 @@ contract LiquidityMiningTest is BaseTest {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", baseDecimal);
     rewardToken = new MockERC20("RewardToken", "RT", rewardDecimal);
     interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10**baseDecimal, 1 * 10**baseDecimal);
-    fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1 * 10**(baseDecimal - 2));
-    fusePoolDirectory = new FusePoolDirectory();
-    fusePoolDirectory.initialize(false, emptyAddresses);
+    ionicAdmin = new FeeDistributor();
+    ionicAdmin.initialize(1 * 10**(baseDecimal - 2));
+    poolDirectory = new PoolDirectory();
+    poolDirectory.initialize(false, emptyAddresses);
     cErc20Delegate = new CErc20Delegate();
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
   }
 
   function setUpPoolAndMarket() public {
     MockPriceOracle priceOracle = new MockPriceOracle(10);
     emptyAddresses.push(address(0));
-    Comptroller tempComptroller = new Comptroller(payable(fuseAdmin));
+    Comptroller tempComptroller = new Comptroller(payable(ionicAdmin));
     newUnitroller.push(address(tempComptroller));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    ionicAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
     extensions[0] = new ComptrollerFirstExtension();
-    fuseAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
-    (, address comptrollerAddress) = fusePoolDirectory.deployPool(
+    ionicAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
+    (, address comptrollerAddress) = poolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
-      abi.encode(payable(address(fuseAdmin))),
+      abi.encode(payable(address(ionicAdmin))),
       false,
       0.1e18,
       1.1e18,
@@ -108,19 +108,19 @@ contract LiquidityMiningTest is BaseTest {
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
     AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
     newAr.initialize(address(321));
-    fuseAdmin.reinitialize(newAr);
+    ionicAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     newAr.setUserRole(comptrollerAddress, user, poolAuth.BORROWER_ROLE(), true);
 
     newImplementation.push(address(cErc20Delegate));
-    fuseAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
+    ionicAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
     vm.roll(1);
     comptroller._deployMarket(
       false,
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "CUnderlyingToken",
         "CUT",
@@ -137,14 +137,14 @@ contract LiquidityMiningTest is BaseTest {
   }
 
   function setUpFlywheel() public {
-    MidasFlywheel impl = new MidasFlywheel();
+    IonicFlywheel impl = new IonicFlywheel();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    flywheel = MidasFlywheel(address(proxy));
+    flywheel = IonicFlywheel(address(proxy));
     flywheel.initialize(rewardToken, FlywheelStaticRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     rewards = new FlywheelStaticRewards(FlywheelCore(address(flywheel)), address(this), Authority(address(0)));
     flywheel.setFlywheelRewards(rewards);
 
-    flywheelClaimer = new MidasFlywheelLensRouter(fusePoolDirectory);
+    flywheelClaimer = new IonicFlywheelLensRouter(poolDirectory);
 
     flywheel.addStrategyForRewards(ERC20(address(cErc20)));
 
@@ -161,7 +161,7 @@ contract LiquidityMiningTest is BaseTest {
     );
 
     // preparation for a later call
-    flywheelsToClaim.push(MidasFlywheelCore(address(flywheel)));
+    flywheelsToClaim.push(IonicFlywheelCore(address(flywheel)));
   }
 
   function _initialize(uint8 _baseDecimal, uint8 _rewardDecimal) internal {

@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import "../midas/strategies/BombERC4626.sol";
+import "../ionic/strategies/BombERC4626.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract BombERC4626Test is BaseTest {

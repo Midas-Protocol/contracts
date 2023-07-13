@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
+import { IonicERC4626, DotDotLpERC4626, ILpDepositor } from "../../ionic/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
-import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { IonicFlywheelCore } from "../../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
+import { PoolDirectory } from "../../PoolDirectory.sol";
 
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
@@ -32,7 +32,7 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   uint256 BPS_DENOMINATOR = 10_000;
 
   address feeRecipient = address(16);
-  MidasERC4626 plugin;
+  IonicERC4626 plugin;
   ERC20Upgradeable underlyingToken = ERC20Upgradeable(0x1B6E11c5DB9B15DE87714eA9934a6c52371CfEA9);
 
   address whale = 0x0BC3a8239B0a63E945Ea1bd6722Ba747b9557e56;
@@ -42,11 +42,11 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   ERC20 dddToken = ERC20(0x84c97300a190676a19D1E13115629A11f8482Bd1);
   address flywheelOwner = address(1338);
-  MidasFlywheelCore dddFlywheel;
+  IonicFlywheelCore dddFlywheel;
   FuseFlywheelDynamicRewards dddRewards;
 
   ERC20 epxToken = ERC20(0xAf41054C1487b0e5E2B9250C0332eCBCe6CE9d71);
-  MidasFlywheelCore epxFlywheel;
+  IonicFlywheelCore epxFlywheel;
 
   uint256 rewardAmount = 1000e18;
   ERC20 marketKey;
@@ -56,15 +56,15 @@ contract FlywheelPerformanceFeeTest is BaseTest {
 
   function afterForkSetUp() internal override {
     vm.startPrank(flywheelOwner);
-    MidasFlywheelCore impl = new MidasFlywheelCore();
+    IonicFlywheelCore impl = new IonicFlywheelCore();
     TransparentUpgradeableProxy proxyDdd = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    dddFlywheel = MidasFlywheelCore(address(proxyDdd));
+    dddFlywheel = IonicFlywheelCore(address(proxyDdd));
     dddFlywheel.initialize(dddToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), flywheelOwner);
     dddRewards = new FuseFlywheelDynamicRewards(FlywheelCore(address(dddFlywheel)), 1);
     dddFlywheel.setFlywheelRewards(dddRewards);
 
     TransparentUpgradeableProxy proxyEpx = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    epxFlywheel = MidasFlywheelCore(address(proxyEpx));
+    epxFlywheel = IonicFlywheelCore(address(proxyEpx));
     epxFlywheel.initialize(epxToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
 
     ERC20 dddFlywheelRewardToken = FlywheelCore(address(dddFlywheel)).rewardToken();
@@ -205,14 +205,14 @@ contract FlywheelPerformanceFeeTest is BaseTest {
   }
 
   function _testAllFlywheelsFeeRecipient() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
       address[] memory fws = poolExt.getRewardsDistributors();
       for (uint256 j = 0; j < fws.length; j++) {
-        address fr = MidasFlywheelCore(fws[j]).feeRecipient();
+        address fr = IonicFlywheelCore(fws[j]).feeRecipient();
         if (fr != ap.getAddress("deployer")) emit log_named_address("flywheel fr", fws[j]);
         assertEq(fr, ap.getAddress("deployer"), "fee recipient not correct");
       }

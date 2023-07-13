@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
+import { IonicFlywheelCore } from "../../ionic/strategies/flywheel/IonicFlywheelCore.sol";
+import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../ionic/strategies/MiniChefERC4626.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
@@ -36,9 +36,9 @@ contract MiniChefERC4626Test is AbstractERC4626Test {
 
     poolId = _poolId;
     for (uint8 i = 0; i < _rewardTokens.length; i++) {
-      MidasFlywheelCore impl = new MidasFlywheelCore();
+      IonicFlywheelCore impl = new IonicFlywheelCore();
       TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
-      MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
+      IonicFlywheelCore flywheel = IonicFlywheelCore(address(proxy));
       flywheel.initialize(
         ERC20(_rewardTokens[i]),
         IFlywheelRewards(address(0)),

@@ -11,7 +11,7 @@ import "../BasePriceOracle.sol";
  * @title GelatoGUniPriceOracle
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice GelatoGUniPriceOracle is a price oracle for Gelato G-UNI wrapped Uniswap V3 LP tokens.
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
 contract GelatoGUniPriceOracle is BasePriceOracle {
   /**
@@ -37,7 +37,7 @@ contract GelatoGUniPriceOracle is BasePriceOracle {
 
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {

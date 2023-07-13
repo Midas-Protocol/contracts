@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
-import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../midas/strategies/MiniChefERC4626.sol";
+import { MiniChefERC4626, IMiniChefV2, IRewarder } from "../../ionic/strategies/MiniChefERC4626.sol";
 import { MiniChefTestConfigStorage } from "./MiniChefTestConfig.sol";
 import { AbstractAssetTest } from "../abstracts/AbstractAssetTest.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";

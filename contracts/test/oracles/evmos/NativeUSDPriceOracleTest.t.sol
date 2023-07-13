@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { SafeOwnableUpgradeable } from "../../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../../ionic/SafeOwnableUpgradeable.sol";
 import { IPriceOracle as IAdrastiaPriceOracle } from "adrastia/interfaces/IPriceOracle.sol";
 import { NativeUSDPriceOracle } from "../../../oracles/evmos/NativeUSDPriceOracle.sol";
 

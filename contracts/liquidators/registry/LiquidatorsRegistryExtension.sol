@@ -5,7 +5,7 @@ import "./ILiquidatorsRegistry.sol";
 import "./LiquidatorsRegistryStorage.sol";
 
 import "../IRedemptionStrategy.sol";
-import "../../midas/DiamondExtension.sol";
+import "../../ionic/DiamondExtension.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 
 import { IRouter } from "../../external/solidly/IRouter.sol";

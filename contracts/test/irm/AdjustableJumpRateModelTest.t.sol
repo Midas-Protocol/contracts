@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { AdjustableJumpRateModel, InterestRateModelParams } from "../../midas/irms/AdjustableJumpRateModel.sol";
+import { AdjustableJumpRateModel, InterestRateModelParams } from "../../ionic/irms/AdjustableJumpRateModel.sol";
 
 contract InterestRateModelTest is BaseTest {
   AdjustableJumpRateModel adjustableJumpRateModel;

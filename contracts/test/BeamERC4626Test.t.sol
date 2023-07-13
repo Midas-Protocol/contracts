@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.4.23;
 
-import "../midas/strategies/BeamERC4626.sol";
+import "../ionic/strategies/BeamERC4626.sol";
 import "./mocks/beam/MockVault.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";

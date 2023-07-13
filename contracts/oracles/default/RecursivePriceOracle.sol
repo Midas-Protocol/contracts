@@ -8,14 +8,14 @@ import "../../external/compound/IComptroller.sol";
 
 /**
  * @title RecursivePriceOracle
- * @notice Returns prices from other cTokens (from Fuse).
+ * @notice Returns prices from other cTokens (from Ionic).
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
 contract RecursivePriceOracle is IPriceOracle {
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
@@ -30,7 +30,7 @@ contract RecursivePriceOracle is IPriceOracle {
       return underlying.exchangeRateStored();
     }
 
-    // Fuse cTokens: cToken/token price * token/ETH price = cToken/ETH price
+    // Ionic cTokens: cToken/token price * token/ETH price = cToken/ETH price
     return (underlying.exchangeRateStored() * comptroller.oracle().getUnderlyingPrice(underlying)) / 1e18;
   }
 }
