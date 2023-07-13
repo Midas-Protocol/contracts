@@ -240,7 +240,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     uint256 maxBorrowValueScaled = maxBorrow * stableAssetPrice;
 
     // accounting for swaps slippage
-    uint256 assumedSlippage = registry.getSlippage(stableAsset, collateralAsset);
+    uint256 assumedSlippage = factory.liquidatorsRegistry().getSlippage(stableAsset, collateralAsset);
     uint256 maxTopUpCollateralSwapValueScaled = (maxBorrowValueScaled * (10000 - assumedSlippage)) / 10000;
 
     uint256 maxTopUpRepay = maxTopUpCollateralSwapValueScaled / collateralAssetPrice;
@@ -297,7 +297,7 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
 
     uint256 stableToBorrow = flashLoanedCollateralValueScaled / stableAssetPrice;
     // accounting for swaps slippage
-    uint256 assumedSlippage = factory.getSlippage(stableAsset, collateralAsset);
+    uint256 assumedSlippage = factory.liquidatorsRegistry().getSlippage(stableAsset, collateralAsset);
     stableToBorrow = (stableToBorrow * (10000 + assumedSlippage)) / 10000;
 
     ICErc20(address(collateralMarket)).flash(flashLoanCollateralAmount, abi.encode(stableToBorrow));
