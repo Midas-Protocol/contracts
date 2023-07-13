@@ -25,6 +25,8 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
+import { AuthoritiesRegistry } from "../../midas/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../../midas/PoolRolesAuthority.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -167,6 +169,14 @@ contract WithPool is BaseTest {
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
     comptroller = IComptroller(comptrollerAddress);
+
+    AuthoritiesRegistry impl = new AuthoritiesRegistry();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
+    AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
+    newAr.initialize(address(321));
+    fuseAdmin.reinitialize(newAr);
+    PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
+    newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
   }
 
   function upgradePool(address pool) internal {

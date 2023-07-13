@@ -15,17 +15,9 @@ contract AnkrCertificateTokenPriceOracleTest is BaseTest {
     oracle = new AnkrCertificateTokenPriceOracle();
     if (block.chainid == BSC_MAINNET) {
       oracle.initialize(ankrBNB);
-    } else if (block.chainid == FANTOM_OPERA) {
-      oracle.initialize(aFTMc);
     } else if (block.chainid == POLYGON_MAINNET) {
       oracle.initialize(aMATICc);
     }
-  }
-
-  function testAnkrFTMOracle() public forkAtBlock(FANTOM_OPERA, 51176746) {
-    uint256 priceAnkrFTMc = oracle.price(aFTMc);
-    assertGt(priceAnkrFTMc, 1e18);
-    assertEq(priceAnkrFTMc, 1032694573127108753);
   }
 
   function testAnkrBSCOracle() public forkAtBlock(BSC_MAINNET, 24150586) {

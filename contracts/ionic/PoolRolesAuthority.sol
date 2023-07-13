@@ -166,6 +166,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     for (uint256 i = 0; i < allMarkets.length; i++) {
       setPublicCapability(address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, false);
       setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
+      setRoleCapability(LIQUIDATOR_ROLE, address(allMarkets[i]), allMarkets[i].redeem.selector, true);
     }
   }
 
@@ -173,6 +174,8 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
       setPublicCapability(address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
+      // TODO this leaves redeeming open for everyone
+      setPublicCapability(address(allMarkets[i]), allMarkets[i].redeem.selector, true);
     }
   }
 

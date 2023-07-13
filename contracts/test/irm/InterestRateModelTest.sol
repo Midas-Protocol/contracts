@@ -40,27 +40,7 @@ contract InterestRateModelTest is BaseTest {
     } else if (block.chainid == POLYGON_MAINNET) {
       mimoRateModel = new JumpRateModel(13665600, 2e18, 0.4e17, 4e18, 0.8e18);
       jumpRateModel = new JumpRateModel(13665600, 0.2e17, 0.18e18, 2e18, 0.8e18);
-    } else if (block.chainid == FANTOM_OPERA) {
-      ankrCertificateInterestRateModelFTM = new AnkrFTMInterestRateModel(
-        21024000,
-        0.5e16,
-        3e18,
-        0.85e18,
-        day,
-        ANKR_FTM_RATE_PROVIDER
-      );
-      jumpRateModel = new JumpRateModel(21024000, 0.2e17, 0.18e18, 4e18, 0.8e18);
-      whitepaperInterestRateModel = new WhitePaperInterestRateModel(21024000, 0.2e17, 0.2e18);
     }
-  }
-
-  function testFantomIrm() public fork(FANTOM_OPERA) {
-    testJumpRateBorrowRate();
-    testJumpRateSupplyRate();
-    testAnkrFTMBorrowModelRate();
-    testAnkrFTMSupplyModelRate();
-    testWhitepaperBorrowRate();
-    testWhitepaperSupplyRate();
   }
 
   function testBscIrm() public fork(BSC_MAINNET) {

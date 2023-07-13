@@ -180,10 +180,6 @@ contract ExtensionsTest is MarketsTest {
     _testAllPoolsAllMarketsCTokenExtensionUpgrade();
   }
 
-  function testMoonbeamExistingCTokenExtensionUpgrade() public fork(MOONBEAM_MAINNET) {
-    _testAllPoolsAllMarketsCTokenExtensionUpgrade();
-  }
-
   function _testAllPoolsAllMarketsCTokenExtensionUpgrade() internal {
     PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
     (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
@@ -253,19 +249,11 @@ contract ExtensionsTest is MarketsTest {
     _testComptrollersExtensions();
   }
 
-  function testMoonbeamComptrollerExtensions() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
   function testChapelComptrollerExtensions() public debuggingOnly fork(BSC_CHAPEL) {
     _testComptrollersExtensions();
   }
 
   function testArbitrumComptrollerExtensions() public debuggingOnly fork(ARBITRUM_ONE) {
-    _testComptrollersExtensions();
-  }
-
-  function testFantomComptrollerExtensions() public debuggingOnly fork(FANTOM_OPERA) {
     _testComptrollersExtensions();
   }
 
@@ -293,23 +281,11 @@ contract ExtensionsTest is MarketsTest {
     }
   }
 
-  function testMoonbeamTotalUnderlyingSupplied() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testTotalUnderlyingSupplied();
-  }
-
   function testPolygonTotalUnderlyingSupplied() public debuggingOnly fork(POLYGON_MAINNET) {
     _testTotalUnderlyingSupplied();
   }
 
   function testBscTotalUnderlyingSupplied() public debuggingOnly fork(BSC_MAINNET) {
-    _testTotalUnderlyingSupplied();
-  }
-
-  function testEvmosTotalUnderlyingSupplied() public debuggingOnly fork(EVMOS_MAINNET) {
-    _testTotalUnderlyingSupplied();
-  }
-
-  function testFantomTotalUnderlyingSupplied() public debuggingOnly fork(FANTOM_OPERA) {
     _testTotalUnderlyingSupplied();
   }
 

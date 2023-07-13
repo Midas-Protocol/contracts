@@ -100,6 +100,10 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
+  function testMarketsLatestImplementationsChapel() public fork(BSC_CHAPEL) {
+    _testMarketsLatestImplementations();
+  }
+
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
     _testMarketsLatestImplementations();
   }
@@ -108,15 +112,7 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testMarketsLatestImplementations();
-  }
-
   function testMarketsLatestImplementationsArbitrum() public fork(ARBITRUM_ONE) {
-    _testMarketsLatestImplementations();
-  }
-
-  function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
     _testMarketsLatestImplementations();
   }
 
@@ -124,39 +120,37 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsFantom() public fork(FANTOM_OPERA) {
-    _testMarketsLatestImplementations();
-  }
-
   function _testMarketsLatestImplementations() internal {
     FeeDistributor ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
+    if (address(fpd) != address(0)) {
+      (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      ICErc20[] memory markets = pool.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate market = CErc20Delegate(address(markets[j]));
+      for (uint8 i = 0; i < pools.length; i++) {
+        IComptroller pool = IComptroller(pools[i].comptroller);
+        ICErc20[] memory markets = pool.getAllMarkets();
+        for (uint8 j = 0; j < markets.length; j++) {
+          CErc20Delegate market = CErc20Delegate(address(markets[j]));
 
-        address currentImpl = market.implementation();
-        (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
+          address currentImpl = market.implementation();
+          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 
-        if (currentImpl != upgradeToImpl) emit log_address(address(market));
-        assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
+          if (currentImpl != upgradeToImpl) emit log_address(address(market));
+          assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 
-        DiamondBase asBase = DiamondBase(address(markets[j]));
-        try asBase._listExtensions() returns (address[] memory extensions) {
-          assertEq(extensions.length, 1, "market is missing the first extension");
-        } catch {
-          emit log("market that is not yet upgraded to the extensions upgrade");
-          emit log_address(address(market));
-          emit log("implementation");
-          emit log_address(currentImpl);
-          emit log("pool");
-          emit log_address(pools[i].comptroller);
-          emit log("");
+          DiamondBase asBase = DiamondBase(address(markets[j]));
+          try asBase._listExtensions() returns (address[] memory extensions) {
+            assertEq(extensions.length, 1, "market is missing the first extension");
+          } catch {
+            emit log("market that is not yet upgraded to the extensions upgrade");
+            emit log_address(address(market));
+            emit log("implementation");
+            emit log_address(currentImpl);
+            emit log("pool");
+            emit log_address(pools[i].comptroller);
+            emit log("");
+          }
         }
       }
     }
@@ -167,10 +161,6 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testPauseGuardians();
-  }
-
-  function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
     _testPauseGuardians();
   }
 

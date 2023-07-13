@@ -35,14 +35,6 @@ contract FlywheelUpgradesTest is BaseTest {
     _testFlywheelUpgrade();
   }
 
-  function testFlywheelUpgradeMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testFlywheelUpgrade();
-  }
-
-  function testFlywheelUpgradeEvmos() public fork(EVMOS_MAINNET) {
-    _testFlywheelUpgrade();
-  }
-
   function _testFlywheelUpgrade() internal {
     IonicFlywheelCore newImpl = new IonicFlywheelCore();
 
@@ -99,14 +91,6 @@ contract FlywheelUpgradesTest is BaseTest {
   }
 
   function testBscFlywheelAllowance() public fork(BSC_MAINNET) {
-    _testAllPoolsMarketsAllowance();
-  }
-
-  function testMoonbeamFlywheelAllowance() public fork(MOONBEAM_MAINNET) {
-    _testAllPoolsMarketsAllowance();
-  }
-
-  function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
     _testAllPoolsMarketsAllowance();
   }
 

@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "./config/MarketsTest.t.sol";
 import { CompoundMarketERC4626 } from "../ionic/strategies/CompoundMarketERC4626.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { OptimizedAPRVaultExtension } from "../ionic/vault/OptimizedAPRVaultExtension.sol";
 import { OptimizedAPRVaultFirstExtension } from "../ionic/vault/OptimizedAPRVaultFirstExtension.sol";
@@ -93,6 +94,15 @@ contract OptimizedAPRVaultTest is MarketsTest {
     vm.stopPrank();
   }
 
+  function unpauseMarkets() internal {
+    IComptroller pool = ankrWbnbMarket.comptroller();
+
+    vm.startPrank(pool.admin());
+    pool._setMintPaused(ankrWbnbMarket, false);
+    pool._setMintPaused(ahWbnbMarket, false);
+    vm.stopPrank();
+  }
+
   function deployAdapters() internal {
     CompoundMarketERC4626 ankrMarketAdapter = new CompoundMarketERC4626();
     {
@@ -155,6 +165,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function setUpVault() internal {
+    unpauseMarkets();
+
     // make sure there is enough liquidity in the testing markets
     addLiquidity();
 

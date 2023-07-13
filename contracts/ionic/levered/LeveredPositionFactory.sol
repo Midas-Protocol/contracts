@@ -55,18 +55,6 @@ contract LeveredPositionFactory is LeveredPositionFactoryStorage, DiamondBase {
     liquidatorsRegistry = _liquidatorsRegistry;
   }
 
-  function _setSlippages(
-    IERC20Upgradeable[] calldata inputTokens,
-    IERC20Upgradeable[] calldata outputTokens,
-    uint256[] calldata slippages
-  ) external onlyOwner {
-    require(slippages.length == inputTokens.length && inputTokens.length == outputTokens.length, "!arrays len");
-
-    for (uint256 i = 0; i < slippages.length; i++) {
-      conversionSlippage[inputTokens[i]][outputTokens[i]] = slippages[i];
-    }
-  }
-
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace)
     public
     override

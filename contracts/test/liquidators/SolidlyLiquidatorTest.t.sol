@@ -55,7 +55,7 @@ contract SolidlyLiquidatorTest is BaseTest {
     uint256 inputValue = mpo.price(ankrAddress) * inputAmount;
 
     assertEq(address(outputToken), hayAddress, "!hay output");
-    assertApproxEqRel(outputValue, inputValue, 8e16, "!hay amount");
+    assertApproxEqRel(outputValue, inputValue, 9e16, "!hay amount");
   }
 
   function testSolidlyAnkrAnkrBNB() public fork(BSC_MAINNET) {

@@ -17,4 +17,7 @@ abstract contract LiquidatorsRegistryStorage is SafeOwnable {
   mapping(IERC20Upgradeable => IERC20Upgradeable) public defaultOutputToken;
   mapping(IERC20Upgradeable => EnumerableSet.AddressSet) internal inputTokensByOutputToken;
   EnumerableSet.AddressSet internal outputTokensSet;
+
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippageUpdated;
 }
