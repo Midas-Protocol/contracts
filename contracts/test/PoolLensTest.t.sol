@@ -6,7 +6,7 @@ import "./config/BaseTest.t.sol";
 import { PoolLens } from "../PoolLens.sol";
 import "../compound/ComptrollerInterface.sol";
 
-contract FusePoolLensTest is BaseTest {
+contract PoolLensTest is BaseTest {
   function testPolygonFPL() public debuggingOnly fork(POLYGON_MAINNET) {
     PoolLens fpl = PoolLens(0xD7225110D8F419b0E8Ad0A536977965E62fB5769);
     fpl.getPoolAssetsWithData(IComptroller(0xB08A309eFBFFa41f36A06b2D0C9a4629749b17a2));

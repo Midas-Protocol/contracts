@@ -7,7 +7,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-contract FusePoolDirectoryTest is BaseTest {
+contract PoolDirectoryTest is BaseTest {
   PoolDirectory fpd;
 
   function afterForkSetUp() internal override {
