@@ -11,7 +11,6 @@ import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
 import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";
 import { SafeOwnableUpgradeable } from "./ionic/SafeOwnableUpgradeable.sol";
-import { PatchedStorage } from "./utils/PatchedStorage.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./ionic/DiamondExtension.sol";
 import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
@@ -21,7 +20,7 @@ import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FeeDistributor controls and receives protocol fees from Ionic pools and relays admin actions to Ionic pools.
  */
-contract FeeDistributor is SafeOwnableUpgradeable, PatchedStorage {
+contract FeeDistributor is SafeOwnableUpgradeable {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 

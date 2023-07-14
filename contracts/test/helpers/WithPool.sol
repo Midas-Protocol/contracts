@@ -6,7 +6,7 @@ import { Auth, Authority } from "solmate/auth/Auth.sol";
 
 import { CErc20 } from "../../compound/CErc20.sol";
 import { CToken } from "../../compound/CToken.sol";
-import { WhitePaperInterestRateModel } from "../../compound/WhitePaperInterestRateModel.sol";
+import { JumpRateModel } from "../../compound/JumpRateModel.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
@@ -40,7 +40,7 @@ contract WithPool is BaseTest {
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
   IComptroller comptroller;
-  WhitePaperInterestRateModel interestModel;
+  JumpRateModel interestModel;
 
   FeeDistributor ionicAdmin;
   PoolDirectory poolDirectory;
@@ -124,7 +124,7 @@ contract WithPool is BaseTest {
   }
 
   function setUpBaseContracts() internal {
-    interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
+    interestModel = new JumpRateModel(2343665, 1e18, 1e18, 4e18, 0.8e18);
     poolDirectory = new PoolDirectory();
     poolDirectory.initialize(false, emptyAddresses);
 

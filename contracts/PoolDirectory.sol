@@ -7,14 +7,13 @@ import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { Unitroller } from "./compound/Unitroller.sol";
 import "./ionic/SafeOwnableUpgradeable.sol";
-import "./utils/PatchedStorage.sol";
 
 /**
  * @title PoolDirectory
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice PoolDirectory is a directory for Ionic interest rate pools.
  */
-contract PoolDirectory is SafeOwnableUpgradeable, PatchedStorage {
+contract PoolDirectory is SafeOwnableUpgradeable {
   /**
    * @dev Initializes a deployer whitelist if desired.
    * @param _enforceDeployerWhitelist Boolean indicating if the deployer whitelist is to be enforced.

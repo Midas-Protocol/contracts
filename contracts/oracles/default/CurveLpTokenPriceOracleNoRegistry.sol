@@ -5,7 +5,6 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
 import "../../external/curve/ICurvePool.sol";
 import "../../ionic/SafeOwnableUpgradeable.sol";
-import "../../utils/PatchedStorage.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -15,7 +14,7 @@ import "../BasePriceOracle.sol";
  * @notice CurveLpTokenPriceOracleNoRegistry is a price oracle for Curve LP tokens (using the sender as a root oracle).
  * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
-contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
+contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @dev Maps Curve LP token addresses to underlying token addresses.
    */

@@ -5,7 +5,6 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
 import "../../external/saddle/ISwap.sol";
 import "../../ionic/SafeOwnableUpgradeable.sol";
-import "../../utils/PatchedStorage.sol";
 
 import "../BasePriceOracle.sol";
 

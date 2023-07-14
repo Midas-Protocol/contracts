@@ -13,7 +13,7 @@ import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { ICErc20, ICErc20Plugin } from "../compound/CTokenInterfaces.sol";
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
+import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
@@ -38,7 +38,7 @@ contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
-  WhitePaperInterestRateModel interestModel;
+  JumpRateModel interestModel;
   IComptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
@@ -68,7 +68,7 @@ contract DeployMarketsTest is Test {
   function setUpBaseContracts() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
     rewardToken = new MockERC20("RewardToken", "RT", 18);
-    interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
+    interestModel = new JumpRateModel(2343665, 1e18, 1e18, 4e18, 0.8e18);
     ionicAdmin = new FeeDistributor();
     ionicAdmin.initialize(1e16);
     poolDirectory = new PoolDirectory();

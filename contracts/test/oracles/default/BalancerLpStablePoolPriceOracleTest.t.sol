@@ -14,7 +14,7 @@ import { BaseTest } from "../../config/BaseTest.t.sol";
 import { IBalancerLinearPool } from "../../../external/balancer/IBalancerLinearPool.sol";
 import { IBalancerStablePool } from "../../../external/balancer/IBalancerStablePool.sol";
 import { IBalancerVault, UserBalanceOp } from "../../../external/balancer/IBalancerVault.sol";
-import { BalancerReentrancyAttacker } from "../../../utils/BalancerReentrancyAttacker.sol";
+import { BalancerReentrancyAttacker } from "../../helpers/BalancerReentrancyAttacker.sol";
 
 contract BalancerLpStablePoolPriceOracleTest is BaseTest {
   BalancerLpStablePoolPriceOracle stableLpOracle;
