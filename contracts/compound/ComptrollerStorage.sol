@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./IFuseFeeDistributor.sol";
+import "./IFeeDistributor.sol";
 import "../oracles/BasePriceOracle.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract UnitrollerAdminStorage {
   /*
-   * Administrator for Fuse
+   * Administrator for Ionic
    */
-  address payable public fuseAdmin;
+  address payable public ionicAdmin;
 
   /**
    * @notice Administrator for this contract
@@ -23,9 +23,9 @@ contract UnitrollerAdminStorage {
   address public pendingAdmin;
 
   /**
-   * @notice Whether or not the Fuse admin has admin rights
+   * @notice Whether or not the Ionic admin has admin rights
    */
-  bool public fuseAdminHasRights = true;
+  bool public ionicAdminHasRights = true;
 
   /**
    * @notice Whether or not the admin has admin rights
@@ -36,7 +36,7 @@ contract UnitrollerAdminStorage {
    * @notice Returns a boolean indicating if the sender has admin rights
    */
   function hasAdminRights() internal view returns (bool) {
-    return (msg.sender == admin && adminHasRights) || (msg.sender == address(fuseAdmin) && fuseAdminHasRights);
+    return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
   }
 
   /**

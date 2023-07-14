@@ -2,8 +2,8 @@
 pragma solidity ^0.8.10;
 
 import "../IRedemptionStrategy.sol";
-import { SafeOwnable } from "../../midas/SafeOwnable.sol";
-import { AddressesProvider } from "../../midas/AddressesProvider.sol";
+import { SafeOwnable } from "../../ionic/SafeOwnable.sol";
+import { AddressesProvider } from "../../ionic/AddressesProvider.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
@@ -17,4 +17,7 @@ abstract contract LiquidatorsRegistryStorage is SafeOwnable {
   mapping(IERC20Upgradeable => IERC20Upgradeable) public defaultOutputToken;
   mapping(IERC20Upgradeable => EnumerableSet.AddressSet) internal inputTokensByOutputToken;
   EnumerableSet.AddressSet internal outputTokensSet;
+
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippage;
+  mapping(IERC20Upgradeable => mapping(IERC20Upgradeable => uint256)) internal conversionSlippageUpdated;
 }

@@ -49,7 +49,7 @@ contract CurveLiquidityGaugeV2Liquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(underlying == 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE ? address(0) : underlying);
     outputAmount = address(outputToken) == address(0) ? address(this).balance : outputToken.balanceOf(address(this));
 
-    // Convert to W_NATIVE if ETH because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
+    // Convert to W_NATIVE if ETH because `IonicLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
     if (address(outputToken) == address(0)) {
       W_NATIVE.deposit{ value: outputAmount }();
       return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);

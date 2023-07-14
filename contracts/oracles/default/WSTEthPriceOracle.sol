@@ -5,7 +5,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 
 import { IWstETH } from "../../external/lido/IWstETH.sol";
 
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 
 /**
@@ -31,7 +31,7 @@ contract WSTEthPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {
 
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
 

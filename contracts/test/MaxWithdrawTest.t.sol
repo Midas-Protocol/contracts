@@ -12,7 +12,7 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
-import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import { PoolLensSecondary } from "../PoolLensSecondary.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
@@ -44,8 +44,8 @@ contract MaxWithdrawTest is WithPool {
   }
 
   function testMaxWithdrawBsc() public fork(BSC_MAINNET) {
-    FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
-    poolLensSecondary.initialize(fusePoolDirectory);
+    PoolLensSecondary poolLensSecondary = new PoolLensSecondary();
+    poolLensSecondary.initialize(poolDirectory);
 
     LiquidationData memory vars;
     vm.roll(1);
@@ -69,6 +69,15 @@ contract MaxWithdrawTest is WithPool {
     address accountOne = address(1);
     address accountTwo = address(2);
     address accountThree = address(3);
+
+    {
+      address comptrollerAddress = address(comptroller);
+      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
+      PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
+      ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountThree, poolAuth.BORROWER_ROLE(), true);
+    }
 
     // Account One Supply
     deal(address(vars.bnb), accountOne, 5000000000e18);
@@ -135,8 +144,8 @@ contract MaxWithdrawTest is WithPool {
   }
 
   function testMIIMOMaxWithdraw() public fork(POLYGON_MAINNET) {
-    FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
-    poolLensSecondary.initialize(fusePoolDirectory);
+    PoolLensSecondary poolLensSecondary = new PoolLensSecondary();
+    poolLensSecondary.initialize(poolDirectory);
 
     LiquidationData memory vars;
     vm.roll(1);
@@ -157,8 +166,17 @@ contract MaxWithdrawTest is WithPool {
     address accountTwo = address(2);
     address accountThree = address(3);
 
-    FusePoolLensSecondary secondary = new FusePoolLensSecondary();
-    secondary.initialize(fusePoolDirectory);
+    {
+      address comptrollerAddress = address(comptroller);
+      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
+      PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
+      ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
+      ar.setUserRole(comptrollerAddress, accountThree, poolAuth.BORROWER_ROLE(), true);
+    }
+
+    PoolLensSecondary secondary = new PoolLensSecondary();
+    secondary.initialize(poolDirectory);
 
     deal(address(vars.mimo), accountOne, 5e27);
     deal(address(vars.mimo), accountThree, 5e27);

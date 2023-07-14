@@ -2,15 +2,12 @@
 pragma solidity >=0.8.0;
 
 import "./InterestRateModel.sol";
-import "./SafeMath.sol";
 
 /**
  * @title Compound's JumpRateModel Contract
  * @author Compound
  */
 contract JumpRateModel is InterestRateModel {
-  using SafeMath for uint256;
-
   event NewInterestParams(
     uint256 baseRatePerBlock,
     uint256 multiplierPerBlock,
@@ -59,9 +56,9 @@ contract JumpRateModel is InterestRateModel {
     uint256 kink_
   ) {
     blocksPerYear = _blocksPerYear;
-    baseRatePerBlock = baseRatePerYear.div(blocksPerYear);
-    multiplierPerBlock = multiplierPerYear.div(blocksPerYear);
-    jumpMultiplierPerBlock = jumpMultiplierPerYear.div(blocksPerYear);
+    baseRatePerBlock = baseRatePerYear / blocksPerYear;
+    multiplierPerBlock = multiplierPerYear / blocksPerYear;
+    jumpMultiplierPerBlock = jumpMultiplierPerYear / blocksPerYear;
     kink = kink_;
 
     emit NewInterestParams(baseRatePerBlock, multiplierPerBlock, jumpMultiplierPerBlock, kink);
@@ -84,7 +81,7 @@ contract JumpRateModel is InterestRateModel {
       return 0;
     }
 
-    return borrows.mul(1e18).div(cash.add(borrows).sub(reserves));
+    return (borrows * 1e18) / (cash + borrows - reserves);
   }
 
   /**
@@ -102,11 +99,11 @@ contract JumpRateModel is InterestRateModel {
     uint256 util = utilizationRate(cash, borrows, reserves);
 
     if (util <= kink) {
-      return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
+      return ((util * multiplierPerBlock) / 1e18) + baseRatePerBlock;
     } else {
-      uint256 normalRate = kink.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
-      uint256 excessUtil = util.sub(kink);
-      return excessUtil.mul(jumpMultiplierPerBlock).div(1e18).add(normalRate);
+      uint256 normalRate = ((kink * multiplierPerBlock) / 1e18) + baseRatePerBlock;
+      uint256 excessUtil = util - kink;
+      return ((excessUtil * jumpMultiplierPerBlock) / 1e18) + normalRate;
     }
   }
 
@@ -124,9 +121,9 @@ contract JumpRateModel is InterestRateModel {
     uint256 reserves,
     uint256 reserveFactorMantissa
   ) public view virtual override returns (uint256) {
-    uint256 oneMinusReserveFactor = uint256(1e18).sub(reserveFactorMantissa);
+    uint256 oneMinusReserveFactor = 1e18 - reserveFactorMantissa;
     uint256 borrowRate = getBorrowRate(cash, borrows, reserves);
-    uint256 rateToPool = borrowRate.mul(oneMinusReserveFactor).div(1e18);
-    return utilizationRate(cash, borrows, reserves).mul(rateToPool).div(1e18);
+    uint256 rateToPool = (borrowRate * oneMinusReserveFactor) / 1e18;
+    return (utilizationRate(cash, borrows, reserves) * rateToPool) / 1e18;
   }
 }

@@ -13,7 +13,7 @@ import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { ICErc20, ICErc20Plugin } from "../compound/CTokenInterfaces.sol";
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
+import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
@@ -24,21 +24,21 @@ import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDele
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { AuthoritiesRegistry } from "../midas/AuthoritiesRegistry.sol";
-import { PoolRolesAuthority } from "../midas/PoolRolesAuthority.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
+import { AuthoritiesRegistry } from "../ionic/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../ionic/PoolRolesAuthority.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 import { MockPriceOracle } from "../oracles/1337/MockPriceOracle.sol";
-import { MockERC4626 } from "../midas/strategies/MockERC4626.sol";
-import { MockERC4626Dynamic } from "../midas/strategies/MockERC4626Dynamic.sol";
+import { MockERC4626 } from "../ionic/strategies/MockERC4626.sol";
+import { MockERC4626Dynamic } from "../ionic/strategies/MockERC4626Dynamic.sol";
 
 contract DeployMarketsTest is Test {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
-  WhitePaperInterestRateModel interestModel;
+  JumpRateModel interestModel;
   IComptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
@@ -48,8 +48,8 @@ contract DeployMarketsTest is Test {
   MockERC4626 mockERC4626;
   MockERC4626Dynamic mockERC4626Dynamic;
 
-  FuseFeeDistributor fuseAdmin;
-  FusePoolDirectory fusePoolDirectory;
+  FeeDistributor ionicAdmin;
+  PoolDirectory poolDirectory;
 
   FuseFlywheelDynamicRewardsPlugin rewards;
 
@@ -63,16 +63,16 @@ contract DeployMarketsTest is Test {
   bool[] f;
   address[] oldCErC20Implementations;
   address[] newCErc20Implementations;
-  MidasFlywheelCore[] flywheelsToClaim;
+  IonicFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
     underlyingToken = new MockERC20("UnderlyingToken", "UT", 18);
     rewardToken = new MockERC20("RewardToken", "RT", 18);
-    interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
-    fuseAdmin = new FuseFeeDistributor();
-    fuseAdmin.initialize(1e16);
-    fusePoolDirectory = new FusePoolDirectory();
-    fusePoolDirectory.initialize(false, emptyAddresses);
+    interestModel = new JumpRateModel(2343665, 1e18, 1e18, 4e18, 0.8e18);
+    ionicAdmin = new FeeDistributor();
+    ionicAdmin.initialize(1e16);
+    poolDirectory = new PoolDirectory();
+    poolDirectory.initialize(false, emptyAddresses);
   }
 
   function setUpWhiteList() public {
@@ -82,9 +82,9 @@ contract DeployMarketsTest is Test {
 
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
 
     for (uint256 i = 0; i < 7; i++) {
       t.push(true);
@@ -107,7 +107,7 @@ contract DeployMarketsTest is Test {
     newCErc20Implementations.push(address(cErc20PluginDelegate));
     newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
 
-    fuseAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
+    ionicAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
   }
 
   function setUpPool() public {
@@ -115,18 +115,18 @@ contract DeployMarketsTest is Test {
 
     MockPriceOracle priceOracle = new MockPriceOracle(10);
     emptyAddresses.push(address(0));
-    Comptroller tempComptroller = new Comptroller(payable(address(fuseAdmin)));
+    Comptroller tempComptroller = new Comptroller(payable(address(ionicAdmin)));
     newUnitroller.push(address(tempComptroller));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    ionicAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
     extensions[0] = new ComptrollerFirstExtension();
-    fuseAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
-    (, address comptrollerAddress) = fusePoolDirectory.deployPool(
+    ionicAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
+    (, address comptrollerAddress) = poolDirectory.deployPool(
       "TestPool",
       address(tempComptroller),
-      abi.encode(payable(address(fuseAdmin))),
+      abi.encode(payable(address(ionicAdmin))),
       false,
       0.1e18,
       1.1e18,
@@ -140,7 +140,7 @@ contract DeployMarketsTest is Test {
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
     AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
     newAr.initialize(address(321));
-    fuseAdmin.reinitialize(newAr);
+    ionicAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
   }
@@ -159,7 +159,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -195,7 +195,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -225,9 +225,9 @@ contract DeployMarketsTest is Test {
   }
 
   function testDeployCErc20PluginRewardsDelegate() public {
-    MidasFlywheelCore impl = new MidasFlywheelCore();
+    IonicFlywheelCore impl = new IonicFlywheelCore();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
-    MidasFlywheelCore flywheel = MidasFlywheelCore(address(proxy));
+    IonicFlywheelCore flywheel = IonicFlywheelCore(address(proxy));
     flywheel.initialize(underlyingToken, IFlywheelRewards(address(0)), IFlywheelBooster(address(0)), address(this));
     FlywheelCore asFlywheelCore = FlywheelCore(address(flywheel));
     rewards = new FuseFlywheelDynamicRewardsPlugin(asFlywheelCore, 1);
@@ -243,7 +243,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -290,7 +290,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -310,7 +310,7 @@ contract DeployMarketsTest is Test {
     address implBefore = cToken.implementation();
     // just testing to replace the plugin delegate with the plugin rewards delegate
     whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
-    fuseAdmin._setLatestCErc20Delegate(
+    ionicAdmin._setLatestCErc20Delegate(
       address(cErc20PluginDelegate),
       address(cErc20PluginRewardsDelegate),
       false,
@@ -339,7 +339,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -358,8 +358,8 @@ contract DeployMarketsTest is Test {
 
     address pluginImplBefore = address(cToken.plugin());
     whitelistPlugin(address(pluginA), address(pluginB));
-    fuseAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
-    fuseAdmin._upgradePluginToLatestImplementation(address(cToken));
+    ionicAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
+    ionicAdmin._upgradePluginToLatestImplementation(address(cToken));
     address pluginImplAfter = address(cToken.plugin());
 
     assertEq(pluginImplBefore, address(pluginA), "the old impl should be the A plugin");
@@ -378,7 +378,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -400,14 +400,14 @@ contract DeployMarketsTest is Test {
 
     // just testing to replace the plugin delegate with the plugin rewards delegate
     whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
-    fuseAdmin._setLatestCErc20Delegate(
+    ionicAdmin._setLatestCErc20Delegate(
       address(cErc20PluginDelegate),
       address(cErc20PluginRewardsDelegate),
       false,
       abi.encode(address(0)) // should trigger use of latest implementation
     );
     whitelistPlugin(address(pluginA), address(pluginB));
-    fuseAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
+    ionicAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
 
     // trigger the auto implementations from a non-admin address
     vm.prank(address(7));
@@ -432,7 +432,7 @@ contract DeployMarketsTest is Test {
     _newCErc20Implementations[0] = address(newImpl);
     arrayOfTrue[0] = true;
 
-    fuseAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
+    ionicAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
   }
 
   function whitelistCErc20Delegate(address oldImpl, address newImpl) public {
@@ -446,7 +446,7 @@ contract DeployMarketsTest is Test {
     _oldCErC20Implementations[0] = address(oldImpl);
     _newCErc20Implementations[0] = address(newImpl);
 
-    fuseAdmin._editCErc20DelegateWhitelist(
+    ionicAdmin._editCErc20DelegateWhitelist(
       _oldCErC20Implementations,
       _newCErc20Implementations,
       arrayOfFalse,
@@ -461,7 +461,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -515,7 +515,7 @@ contract DeployMarketsTest is Test {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",

@@ -16,23 +16,23 @@ import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
 import { CErc20 } from "../compound/CErc20.sol";
-import { MidasFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
+import { IonicFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 
 contract FLRTest is BaseTest {
   address rewardToken;
 
-  MidasFlywheel flywheel;
+  IonicFlywheel flywheel;
   FlywheelStaticRewards rewards;
-  MidasFlywheelLensRouter lensRouter;
+  IonicFlywheelLensRouter lensRouter;
 
-  FusePoolDirectory internal fpd;
+  PoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    lensRouter = new MidasFlywheelLensRouter(fpd);
+    fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    lensRouter = new IonicFlywheelLensRouter(fpd);
   }
 
   function setUpFlywheel(
@@ -41,7 +41,7 @@ contract FLRTest is BaseTest {
     IComptroller comptroller,
     address admin
   ) public {
-    flywheel = new MidasFlywheel();
+    flywheel = new IonicFlywheel();
     flywheel.initialize(
       ERC20(_rewardToken),
       FlywheelStaticRewards(address(0)),
@@ -102,7 +102,7 @@ contract FLRTest is BaseTest {
     emit log_named_uint("rewardsEndTimestamp", rewardsEndTimestamp);
     emit log_named_uint("mkt ts", ERC20(mkt).totalSupply());
 
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
+    IonicFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
       IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
     );
     for (uint256 i = 0; i < marketRewardsInfos.length; i++) {
@@ -125,80 +125,16 @@ contract FLRTest is BaseTest {
     }
   }
 
-  function testMoonbeamFlywheelLensRouter() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    ERC20 market = ERC20(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
-    rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
-    IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
-    // setUpFlywheel(rewardToken, address(market), comptroller, ap.owner());
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(34315417857347)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
-      abi.encode(15786961530391797)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
-      abi.encode(10)
-    );
-
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getPoolMarketRewardsInfo(comptroller);
-    for (uint8 i = 0; i < info.length; i++) {
-      for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
-        if (info[i].rewardsInfo[j].formattedAPR != 0) {
-          emit log("");
-          emit log_named_address("market", address(info[i].market));
-          emit log_named_uint("rewardSpeedPerSecondPerToken", info[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
-          emit log_named_uint("formattedAPR", info[i].rewardsInfo[j].formattedAPR);
-          emit log_named_uint("rewardTokenPrice", info[i].rewardsInfo[j].rewardTokenPrice);
-          emit log_named_address("rewardToken", info[i].rewardsInfo[j].rewardToken);
-          emit log_named_uint("totalSupply", info[i].market.totalSupply());
-        }
-      }
-    }
-  }
-
   function testBscLensRouter() public fork(BSC_MAINNET) {
     IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
     address user = 0x927d81b91c41D1961e3A7d24847b95484e60C626;
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
+    IonicFlywheelLensRouter router = IonicFlywheelLensRouter(ap.getAddress("IonicFlywheelLensRouter"));
 
     router.claimRewardsForPool(user, pool);
   }
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
+    IonicFlywheelLensRouter router = IonicFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
     router.getPoolMarketRewardsInfo(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
-  }
-
-  function testMoonbeamLensRouter() public fork(MOONBEAM_MAINNET) {
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(34315417857347)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
-      abi.encode(15786961530391797)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
-      abi.encode(10)
-    );
-
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
-
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      router.getPoolMarketRewardsInfo(IComptroller(pools[i].comptroller));
-    }
   }
 }

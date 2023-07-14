@@ -3,12 +3,12 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplacingFlywheel.sol";
-import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
-import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
+import { IonicReplacingFlywheel } from "../ionic/strategies/flywheel/IonicReplacingFlywheel.sol";
+import { ReplacingFlywheelDynamicRewards } from "../ionic/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
+import { IonicFlywheelLensRouter } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
@@ -21,10 +21,10 @@ import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { FlywheelDynamicRewards } from "flywheel-v2/rewards/FlywheelDynamicRewards.sol";
 
 contract FlywheelUpgradesTest is BaseTest {
-  FusePoolDirectory internal fpd;
+  PoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
   }
 
   function testFlywheelUpgradeBsc() public fork(BSC_MAINNET) {
@@ -35,18 +35,10 @@ contract FlywheelUpgradesTest is BaseTest {
     _testFlywheelUpgrade();
   }
 
-  function testFlywheelUpgradeMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testFlywheelUpgrade();
-  }
-
-  function testFlywheelUpgradeEvmos() public fork(EVMOS_MAINNET) {
-    _testFlywheelUpgrade();
-  }
-
   function _testFlywheelUpgrade() internal {
-    MidasFlywheelCore newImpl = new MidasFlywheelCore();
+    IonicFlywheelCore newImpl = new IonicFlywheelCore();
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
@@ -59,7 +51,7 @@ contract FlywheelUpgradesTest is BaseTest {
         emit log_named_address("pool", address(pool));
       }
       for (uint8 j = 0; j < flywheels.length; j++) {
-        MidasFlywheelCore flywheel = MidasFlywheelCore(flywheels[j]);
+        IonicFlywheelCore flywheel = IonicFlywheelCore(flywheels[j]);
 
         // upgrade
         TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(flywheels[j]));
@@ -102,16 +94,8 @@ contract FlywheelUpgradesTest is BaseTest {
     _testAllPoolsMarketsAllowance();
   }
 
-  function testMoonbeamFlywheelAllowance() public fork(MOONBEAM_MAINNET) {
-    _testAllPoolsMarketsAllowance();
-  }
-
-  function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
-    _testAllPoolsMarketsAllowance();
-  }
-
   function _testAllPoolsMarketsAllowance() internal {
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       _testMarketsAllowance(pools[i].comptroller);
@@ -130,7 +114,7 @@ contract FlywheelUpgradesTest is BaseTest {
       if (compareStrings(contractType, "CErc20PluginRewardsDelegate")) {
         for (uint8 i = 0; i < fws.length; i++) {
           ERC20 asStrategy = ERC20(address(markets[j]));
-          MidasFlywheelCore flywheel = MidasFlywheelCore(fws[i]);
+          IonicFlywheelCore flywheel = IonicFlywheelCore(fws[i]);
           (uint224 index, ) = flywheel.strategyState(asStrategy);
           ERC20 rewToken = flywheel.rewardToken();
           address rewardsContractAddress = address(flywheel.flywheelRewards());

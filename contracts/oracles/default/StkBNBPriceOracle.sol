@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { IStakePool, ExchangeRateData } from "../../external/pstake/IStakePool.sol";
 
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 import "../BasePriceOracle.sol";
 
 contract StkBNBPriceOracle is SafeOwnableUpgradeable, BasePriceOracle {

@@ -22,7 +22,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
   event NewImplementation(address oldImplementation, address newImplementation);
 
   /**
-   * @notice Event emitted when the Fuse admin rights are changed
+   * @notice Event emitted when the Ionic admin rights are changed
    */
   event FuseAdminRightsToggled(bool hasRights);
 
@@ -41,10 +41,10 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
    */
   event NewAdmin(address oldAdmin, address newAdmin);
 
-  constructor(address payable _fuseAdmin) {
+  constructor(address payable _ionicAdmin) {
     // Set admin to caller
     admin = msg.sender;
-    fuseAdmin = _fuseAdmin;
+    ionicAdmin = _ionicAdmin;
   }
 
   /*** Admin Functions ***/
@@ -54,14 +54,14 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
     }
     if (
-      !IFuseFeeDistributor(fuseAdmin).comptrollerImplementationWhitelist(
+      !IFeeDistributor(ionicAdmin).comptrollerImplementationWhitelist(
         comptrollerImplementation,
         newPendingImplementation
       )
     ) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
     }
-    //require(Comptroller(newPendingImplementation).fuseAdmin() == fuseAdmin, "fuseAdmin not matching");
+    //require(Comptroller(newPendingImplementation).ionicAdmin() == ionicAdmin, "ionicAdmin not matching");
 
     address oldPendingImplementation = pendingComptrollerImplementation;
     pendingComptrollerImplementation = newPendingImplementation;
@@ -182,7 +182,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
       if (callSuccess) (autoImplementation) = abi.decode(data, (bool));
 
       if (autoImplementation) {
-        address latestComptrollerImplementation = IFuseFeeDistributor(fuseAdmin).latestComptrollerImplementation(
+        address latestComptrollerImplementation = IFeeDistributor(ionicAdmin).latestComptrollerImplementation(
           comptrollerImplementation
         );
 

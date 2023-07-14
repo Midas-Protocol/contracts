@@ -15,7 +15,7 @@ interface IComptroller {
 
   function adminHasRights() external view returns (bool);
 
-  function fuseAdminHasRights() external view returns (bool);
+  function ionicAdminHasRights() external view returns (bool);
 
   function oracle() external view returns (IPriceOracle);
 

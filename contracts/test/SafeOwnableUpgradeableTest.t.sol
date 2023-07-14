@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
-import { SafeOwnableUpgradeable } from "../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../ionic/SafeOwnableUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract SomeOwnable is SafeOwnableUpgradeable {

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
-import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CToken } from "../compound/CToken.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
-import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -20,11 +20,11 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract ContractsUpgradesTest is BaseTest {
   function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
-    address contractToTest = ap.getAddress("FusePoolDirectory"); // FusePoolDirectory proxy
+    address contractToTest = ap.getAddress("PoolDirectory"); // PoolDirectory proxy
 
     // before upgrade
-    FusePoolDirectory fpdBefore = FusePoolDirectory(contractToTest);
-    FusePoolDirectory.FusePool[] memory poolsBefore = fpdBefore.getAllPools();
+    PoolDirectory fpdBefore = PoolDirectory(contractToTest);
+    PoolDirectory.Pool[] memory poolsBefore = fpdBefore.getAllPools();
     address ownerBefore = fpdBefore.owner();
     emit log_address(ownerBefore);
 
@@ -33,7 +33,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     // upgrade
     {
-      FusePoolDirectory newImpl = new FusePoolDirectory();
+      PoolDirectory newImpl = new PoolDirectory();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(contractToTest));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
@@ -42,11 +42,11 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FusePoolDirectory fpd = FusePoolDirectory(contractToTest);
+    PoolDirectory fpd = PoolDirectory(contractToTest);
     address ownerAfter = fpd.owner();
     emit log_address(ownerAfter);
 
-    (, FusePoolDirectory.FusePool[] memory poolsAfter) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory poolsAfter) = fpd.getActivePools();
     uint256 lenAfter = poolsAfter.length;
     emit log_uint(poolsAfter.length);
 
@@ -54,11 +54,11 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
-  function testFuseFeeDistributorUpgrade() public fork(BSC_MAINNET) {
+  function testFeeDistributorUpgrade() public fork(BSC_MAINNET) {
     address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
 
     // before upgrade
-    FuseFeeDistributor ffdProxy = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    FeeDistributor ffdProxy = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
@@ -72,7 +72,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     // upgrade
     {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      FeeDistributor newImpl = new FeeDistributor();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffdProxy)));
       bytes32 bytesAtSlot = vm.load(address(proxy), _ADMIN_SLOT);
       address admin = address(uint160(uint256(bytesAtSlot)));
@@ -81,7 +81,7 @@ contract ContractsUpgradesTest is BaseTest {
     }
 
     // after upgrade
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(address(ffdProxy)));
+    FeeDistributor ffd = FeeDistributor(payable(address(ffdProxy)));
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
@@ -100,6 +100,10 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
+  function testMarketsLatestImplementationsChapel() public fork(BSC_CHAPEL) {
+    _testMarketsLatestImplementations();
+  }
+
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
     _testMarketsLatestImplementations();
   }
@@ -108,15 +112,7 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testMarketsLatestImplementations();
-  }
-
   function testMarketsLatestImplementationsArbitrum() public fork(ARBITRUM_ONE) {
-    _testMarketsLatestImplementations();
-  }
-
-  function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
     _testMarketsLatestImplementations();
   }
 
@@ -124,39 +120,37 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsFantom() public fork(FANTOM_OPERA) {
-    _testMarketsLatestImplementations();
-  }
-
   function _testMarketsLatestImplementations() internal {
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    FeeDistributor ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    if (address(fpd) != address(0)) {
+      (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      ICErc20[] memory markets = pool.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate market = CErc20Delegate(address(markets[j]));
+      for (uint8 i = 0; i < pools.length; i++) {
+        IComptroller pool = IComptroller(pools[i].comptroller);
+        ICErc20[] memory markets = pool.getAllMarkets();
+        for (uint8 j = 0; j < markets.length; j++) {
+          CErc20Delegate market = CErc20Delegate(address(markets[j]));
 
-        address currentImpl = market.implementation();
-        (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
+          address currentImpl = market.implementation();
+          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 
-        if (currentImpl != upgradeToImpl) emit log_address(address(market));
-        assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
+          if (currentImpl != upgradeToImpl) emit log_address(address(market));
+          assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 
-        DiamondBase asBase = DiamondBase(address(markets[j]));
-        try asBase._listExtensions() returns (address[] memory extensions) {
-          assertEq(extensions.length, 1, "market is missing the first extension");
-        } catch {
-          emit log("market that is not yet upgraded to the extensions upgrade");
-          emit log_address(address(market));
-          emit log("implementation");
-          emit log_address(currentImpl);
-          emit log("pool");
-          emit log_address(pools[i].comptroller);
-          emit log("");
+          DiamondBase asBase = DiamondBase(address(markets[j]));
+          try asBase._listExtensions() returns (address[] memory extensions) {
+            assertEq(extensions.length, 1, "market is missing the first extension");
+          } catch {
+            emit log("market that is not yet upgraded to the extensions upgrade");
+            emit log_address(address(market));
+            emit log("implementation");
+            emit log_address(currentImpl);
+            emit log("pool");
+            emit log_address(pools[i].comptroller);
+            emit log("");
+          }
         }
       }
     }
@@ -170,15 +164,11 @@ contract ContractsUpgradesTest is BaseTest {
     _testPauseGuardians();
   }
 
-  function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testPauseGuardians();
-  }
-
   function _testPauseGuardians() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
     address deployer = ap.getAddress("deployer");
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);

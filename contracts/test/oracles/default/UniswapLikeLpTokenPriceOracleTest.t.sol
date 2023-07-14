@@ -120,31 +120,6 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     verifyLpPrice(lpToken, price, 1e17);
   }
 
-  function testGlmrUsdcLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
-    address lpToken = 0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79; // Lp GLMR-USDC
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-  }
-
-  function testGlmrWbtcpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
-    address lpToken = 0xf8f5E8B9Ee84664695B14862212D8092E16331F6; // Lp WBTC-WGLMR
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-
-    // This approximation doesn't really work with larger priced tokens
-    // verifyLpPrice(lpToken, price, 1e17);
-  }
-
-  function testWGlmrWethLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
-    address lpToken = 0x8577273FB3B72306F3A59E26ab77116f5D428DAa; // Lp WETH-WGLMR
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-    verifyLpPrice(lpToken, price, 1e17);
-  }
-
   // Fixed block number tests
 
   // https://bscscan.com/tx/0xad3d5e2ddcd246bf6b76e381b8231ef32e3d82b539baf2e1d6a677b9a61967a4

@@ -6,7 +6,7 @@ import "./helpers/WithPool.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { FusePoolLensSecondary } from "../FusePoolLensSecondary.sol";
+import { PoolLensSecondary } from "../PoolLensSecondary.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 contract MockAsset is MockERC20 {
@@ -43,8 +43,8 @@ contract MaxBorrowTest is WithPool {
   }
 
   function testMaxBorrow() public fork(POLYGON_MAINNET) {
-    FusePoolLensSecondary poolLensSecondary = new FusePoolLensSecondary();
-    poolLensSecondary.initialize(fusePoolDirectory);
+    PoolLensSecondary poolLensSecondary = new PoolLensSecondary();
+    poolLensSecondary.initialize(poolDirectory);
 
     LiquidationData memory vars;
     vm.roll(1);

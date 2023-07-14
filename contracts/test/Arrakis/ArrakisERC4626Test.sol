@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { ArrakisERC4626, IGuniPool } from "../../midas/strategies/ArrakisERC4626.sol";
+import { ArrakisERC4626, IGuniPool } from "../../ionic/strategies/ArrakisERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";

@@ -6,10 +6,10 @@ import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import { FuseSafeLiquidator } from "../FuseSafeLiquidator.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { IonicLiquidator } from "../IonicLiquidator.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { BaseTest } from "./config/BaseTest.t.sol";
-import { AddressesProvider } from "../midas/AddressesProvider.sol";
+import { AddressesProvider } from "../ionic/AddressesProvider.sol";
 import { CurveLpTokenPriceOracleNoRegistry } from "../oracles/default/CurveLpTokenPriceOracleNoRegistry.sol";
 import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2LpTokenPriceOracleNoRegistry.sol";
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
@@ -22,7 +22,7 @@ import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 
 contract AnyLiquidationTest is BaseTest {
-  FuseSafeLiquidator fsl;
+  IonicLiquidator fsl;
   address uniswapRouter;
   mapping(address => address) assetSpecificRouters;
 
@@ -58,8 +58,8 @@ contract AnyLiquidationTest is BaseTest {
     if (block.chainid == BSC_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x58F876857a02D6762E0101bb5C46A8c1ED44Dc16); // WBNB-BUSD
       mostLiquidPair2 = IUniswapV2Pair(0x61EB789d75A95CAa3fF50ed7E47b96c132fEc082); // WBNB-BTCB
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
+      fsl = IonicLiquidator(payable(ap.getAddress("IonicLiquidator")));
+      //      fsl = new IonicLiquidator();
       //      fsl.initialize(
       //        ap.getAddress("wtoken"),
       //        uniswapRouter,
@@ -76,8 +76,8 @@ contract AnyLiquidationTest is BaseTest {
     } else if (block.chainid == POLYGON_MAINNET) {
       mostLiquidPair1 = IUniswapV2Pair(0x6e7a5FAFcec6BB1e78bAE2A1F0B612012BF14827); // USDC/WMATIC
       mostLiquidPair2 = IUniswapV2Pair(0x369582d2010B6eD950B571F4101e3bB9b554876F); // SAND/WMATIC
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
+      fsl = IonicLiquidator(payable(ap.getAddress("IonicLiquidator")));
+      //      fsl = new IonicLiquidator();
       //      fsl.initialize(
       //        ap.getAddress("wtoken"),
       //        uniswapRouter,
@@ -85,20 +85,6 @@ contract AnyLiquidationTest is BaseTest {
       //        ap.getAddress("wBTCToken"),
       //        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
       //        30
-      //      );
-    } else if (block.chainid == MOONBEAM_MAINNET) {
-      // TODO figure out how to mock all xcDOT calls
-      mostLiquidPair1 = IUniswapV2Pair(0xa927E1e1E044CA1D9fe1854585003477331fE2Af); // GLMR/xcDOT
-      mostLiquidPair2 = IUniswapV2Pair(0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79); // GLMR/USDC
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
-      //      fsl.initialize(
-      //        ap.getAddress("wtoken"),
-      //        uniswapRouter,
-      //        ap.getAddress("stableToken"),
-      //        ap.getAddress("wBTCToken"),
-      //        "0x48a6ca3d52d0d0a6c53a83cc3c8688dd46ea4cb786b169ee959b95ad30f61643",
-      //        25
       //      );
     }
   }
@@ -118,17 +104,12 @@ contract AnyLiquidationTest is BaseTest {
     doTestAnyLiquidation(random);
   }
 
-  function testMoonbeamAnyLiquidation(uint256 random) public debuggingOnly fork(MOONBEAM_MAINNET) {
-    vm.assume(random > 100 && random < type(uint64).max);
-    doTestAnyLiquidation(random);
-  }
-
   struct LiquidationData {
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
     ICErc20[] markets;
     address[] borrowers;
-    FuseSafeLiquidator liquidator;
+    IonicLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] fundingDatas;
     ICErc20 debtMarket;
@@ -140,7 +121,7 @@ contract AnyLiquidationTest is BaseTest {
     IUniswapV2Pair flashSwapPair;
   }
 
-  function getPoolAndBorrower(uint256 random, FusePoolDirectory.FusePool[] memory pools)
+  function getPoolAndBorrower(uint256 random, PoolDirectory.Pool[] memory pools)
     internal
     view
     returns (IComptroller, address)
@@ -239,8 +220,7 @@ contract AnyLiquidationTest is BaseTest {
     LiquidationData memory vars;
     vars.liquidator = fsl;
 
-    (, FusePoolDirectory.FusePool[] memory pools) = FusePoolDirectory(ap.getAddress("FusePoolDirectory"))
-      .getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = PoolDirectory(ap.getAddress("PoolDirectory")).getActivePools();
 
     while (true) {
       // get a random pool and a random borrower from it
@@ -325,6 +305,7 @@ contract AnyLiquidationTest is BaseTest {
     if (exchangeCollateralTo != address(0)) {
       address collateralTokenToRedeem = vars.collateralMarket.underlying();
       while (collateralTokenToRedeem != exchangeCollateralTo) {
+        // TODO
         AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
         if (strategy.addr == address(0)) break;
         collateralTokenToRedeem = addRedemptionStrategy(
@@ -343,19 +324,17 @@ contract AnyLiquidationTest is BaseTest {
     vm.prank(ap.owner());
     try
       vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-        FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+        IonicLiquidator.LiquidateToTokensWithFlashSwapVars(
           vars.borrower,
           vars.repayAmount,
           ICErc20(address(vars.debtMarket)),
           ICErc20(address(vars.collateralMarket)),
           vars.flashSwapPair,
           0,
-          exchangeCollateralTo,
           IUniswapV2Router02(uniswapRouter), // TODO ASSET_SPECIFIC_ROUTER
           IUniswapV2Router02(uniswapRouter), // TODO ASSET_SPECIFIC_ROUTER
           vars.strategies,
           vars.redemptionDatas,
-          0,
           vars.fundingStrategies,
           vars.fundingDatas
         )
