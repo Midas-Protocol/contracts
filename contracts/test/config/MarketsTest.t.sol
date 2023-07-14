@@ -2,20 +2,20 @@
 pragma solidity >=0.8.0;
 
 import { BaseTest } from "./BaseTest.t.sol";
-import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
+import { FeeDistributor } from "../../FeeDistributor.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
-import { DiamondExtension } from "../../midas/DiamondExtension.sol";
+import { DiamondExtension } from "../../ionic/DiamondExtension.sol";
 import { CTokenFirstExtension } from "../../compound/CTokenFirstExtension.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
-import { AuthoritiesRegistry } from "../../midas/AuthoritiesRegistry.sol";
+import { AuthoritiesRegistry } from "../../ionic/AuthoritiesRegistry.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract MarketsTest is BaseTest {
-  FuseFeeDistributor internal ffd;
+  FeeDistributor internal ffd;
 
   CErc20Delegate internal cErc20Delegate;
   CErc20PluginRewardsDelegate internal cErc20PluginRewardsDelegate;
@@ -25,7 +25,7 @@ contract MarketsTest is BaseTest {
   ComptrollerFirstExtension internal comptrollerExtension;
 
   function afterForkSetUp() internal virtual override {
-    ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     upgradeFfd();
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
@@ -38,7 +38,7 @@ contract MarketsTest is BaseTest {
 
   function upgradeFfd() internal {
     {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      FeeDistributor newImpl = new FeeDistributor();
       TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
       bytes32 bytesAtSlot = vm.load(address(proxy), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103);
       address admin = address(uint160(uint256(bytesAtSlot)));
@@ -91,7 +91,7 @@ contract MarketsTest is BaseTest {
     bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
       ? bytes("")
       : abi.encode(address(0));
-    vm.prank(asDelegate.fuseAdmin());
+    vm.prank(asDelegate.ionicAdmin());
     asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
   }
 

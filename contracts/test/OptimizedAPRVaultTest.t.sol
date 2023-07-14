@@ -2,18 +2,18 @@
 pragma solidity >=0.8.0;
 
 import "./config/MarketsTest.t.sol";
-import { CompoundMarketERC4626 } from "../midas/strategies/CompoundMarketERC4626.sol";
+import { CompoundMarketERC4626 } from "../ionic/strategies/CompoundMarketERC4626.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
-import { OptimizedAPRVaultExtension } from "../midas/vault/OptimizedAPRVaultExtension.sol";
-import { OptimizedAPRVaultFirstExtension } from "../midas/vault/OptimizedAPRVaultFirstExtension.sol";
-import { OptimizedAPRVaultSecondExtension } from "../midas/vault/OptimizedAPRVaultSecondExtension.sol";
-import { VaultFees } from "../midas/vault/IVault.sol";
-import { OptimizedVaultsRegistry } from "../midas/vault/OptimizedVaultsRegistry.sol";
-import { AdapterConfig } from "../midas/vault/OptimizedAPRVaultStorage.sol";
-import { OptimizedAPRVaultBase } from "../midas/vault/OptimizedAPRVaultBase.sol";
-import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+import { OptimizedAPRVaultExtension } from "../ionic/vault/OptimizedAPRVaultExtension.sol";
+import { OptimizedAPRVaultFirstExtension } from "../ionic/vault/OptimizedAPRVaultFirstExtension.sol";
+import { OptimizedAPRVaultSecondExtension } from "../ionic/vault/OptimizedAPRVaultSecondExtension.sol";
+import { VaultFees } from "../ionic/vault/IVault.sol";
+import { OptimizedVaultsRegistry } from "../ionic/vault/OptimizedVaultsRegistry.sol";
+import { AdapterConfig } from "../ionic/vault/OptimizedAPRVaultStorage.sol";
+import { OptimizedAPRVaultBase } from "../ionic/vault/OptimizedAPRVaultBase.sol";
+import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
@@ -135,7 +135,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function deployVault() internal {
-    MidasFlywheel flywheelLogic = new MidasFlywheel();
+    IonicFlywheel flywheelLogic = new IonicFlywheel();
     bytes memory params = abi.encode(
       IERC20Metadata(wnativeAddress),
       adapters,
@@ -490,7 +490,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
       _adapters[0].adapter = twoBrlMarketAdapter;
       _adapters[0].allocation = 1e18;
 
-      MidasFlywheel flywheelLogic = new MidasFlywheel();
+      IonicFlywheel flywheelLogic = new IonicFlywheel();
 
       bytes memory params = abi.encode(
         twoBrl,
@@ -537,8 +537,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
     OptimizedAPRVaultFirstExtension vaultFirstExt = vault.asFirstExtension();
     {
       // TODO figure out why these accrue calls are necessary
-      MidasFlywheel flywheelDDD = vaultFirstExt.flywheelForRewardToken(ddd);
-      MidasFlywheel flywheelEPX = vaultFirstExt.flywheelForRewardToken(epx);
+      IonicFlywheel flywheelDDD = vaultFirstExt.flywheelForRewardToken(ddd);
+      IonicFlywheel flywheelEPX = vaultFirstExt.flywheelForRewardToken(epx);
       flywheelDDD.accrue(ERC20(address(vault)), twoBrlWhale);
       flywheelEPX.accrue(ERC20(address(vault)), twoBrlWhale);
 

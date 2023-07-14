@@ -39,7 +39,7 @@ contract AlphaHomoraV2SafeBoxETHLiquidator is IRedemptionStrategy {
     outputToken = IERC20Upgradeable(address(0));
     outputAmount = address(this).balance;
 
-    // Convert to W_NATIVE because `FuseSafeLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
+    // Convert to W_NATIVE because `IonicLiquidator.repayTokenFlashLoan` only supports tokens (not ETH) as output from redemptions (reverts on line 24 because `underlyingCollateral` is the zero address)
     W_NATIVE.deposit{ value: outputAmount }();
     return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
   }

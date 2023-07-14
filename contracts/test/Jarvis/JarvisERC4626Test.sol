@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { JarvisERC4626, IElysianFields } from "../../midas/strategies/JarvisERC4626.sol";
+import { JarvisERC4626, IElysianFields } from "../../ionic/strategies/JarvisERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 

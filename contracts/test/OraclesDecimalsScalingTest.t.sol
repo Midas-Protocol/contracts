@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
@@ -12,11 +12,11 @@ import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/co
 
 contract OraclesDecimalsScalingTest is BaseTest {
   MasterPriceOracle mpo;
-  FusePoolDirectory fusePoolDirectory;
+  PoolDirectory poolDirectory;
 
   function afterForkSetUp() internal override {
     mpo = MasterPriceOracle(ap.getAddress("MasterPriceOracle"));
-    fusePoolDirectory = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    poolDirectory = PoolDirectory(ap.getAddress("PoolDirectory"));
   }
 
   function testOracleDecimalsBsc() public fork(BSC_MAINNET) {
@@ -42,8 +42,8 @@ contract OraclesDecimalsScalingTest is BaseTest {
   }
 
   function testOraclesDecimals() internal {
-    if (address(fusePoolDirectory) != address(0)) {
-      (, FusePoolDirectory.FusePool[] memory pools) = fusePoolDirectory.getActivePools();
+    if (address(poolDirectory) != address(0)) {
+      (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
       for (uint8 i = 0; i < pools.length; i++) {
         IComptroller comptroller = IComptroller(pools[i].comptroller);

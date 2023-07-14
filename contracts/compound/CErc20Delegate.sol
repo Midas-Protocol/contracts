@@ -39,10 +39,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
     bytes memory becomeImplementationData
   ) internal {
     // Check whitelist
-    require(
-      IFuseFeeDistributor(fuseAdmin).cErc20DelegateWhitelist(implementation, implementation_, allowResign),
-      "!impl"
-    );
+    require(IFeeDistributor(ionicAdmin).cErc20DelegateWhitelist(implementation, implementation_, allowResign), "!impl");
 
     // Call _resignImplementation internally (this delegate's code)
     if (allowResign) _resignImplementation();
@@ -69,7 +66,7 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
   }
 
   function _updateExtensions() internal {
-    address[] memory latestExtensions = IFuseFeeDistributor(fuseAdmin).getCErc20DelegateExtensions(implementation);
+    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getCErc20DelegateExtensions(implementation);
     address[] memory currentExtensions = LibDiamond.listExtensions();
 
     // don't update if they are the same
@@ -110,8 +107,8 @@ contract CErc20Delegate is CDelegateInterface, CErc20 {
    */
   function _prepare() external payable override {
     if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFuseFeeDistributor(
-        fuseAdmin
+      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFeeDistributor(
+        ionicAdmin
       ).latestCErc20Delegate(implementation);
       if (implementation != latestCErc20Delegate) {
         _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);

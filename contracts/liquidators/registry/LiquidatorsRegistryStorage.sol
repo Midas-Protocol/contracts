@@ -2,8 +2,8 @@
 pragma solidity ^0.8.10;
 
 import "../IRedemptionStrategy.sol";
-import { SafeOwnable } from "../../midas/SafeOwnable.sol";
-import { AddressesProvider } from "../../midas/AddressesProvider.sol";
+import { SafeOwnable } from "../../ionic/SafeOwnable.sol";
+import { AddressesProvider } from "../../ionic/AddressesProvider.sol";
 
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";

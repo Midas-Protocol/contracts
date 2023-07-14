@@ -3,12 +3,11 @@ pragma solidity >=0.8.0;
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
-import { AnkrFTMInterestRateModel, IAnkrRateProvider as IAnkrFTMRateProvider } from "../../midas/irms/AnkrFTMInterestRateModel.sol";
-import { AnkrBNBInterestRateModel, IAnkrRateProvider as IAnkrBNBRateProvider } from "../../midas/irms/AnkrBNBInterestRateModel.sol";
-import { AnkrCertificateInterestRateModel } from "../../midas/irms/AnkrCertificateInterestRateModel.sol";
+import { AnkrFTMInterestRateModel, IAnkrRateProvider as IAnkrFTMRateProvider } from "../../ionic/irms/AnkrFTMInterestRateModel.sol";
+import { AnkrBNBInterestRateModel, IAnkrRateProvider as IAnkrBNBRateProvider } from "../../ionic/irms/AnkrBNBInterestRateModel.sol";
+import { AnkrCertificateInterestRateModel } from "../../ionic/irms/AnkrCertificateInterestRateModel.sol";
 
 import { JumpRateModel } from "../../compound/JumpRateModel.sol";
-import { WhitePaperInterestRateModel } from "../../compound/WhitePaperInterestRateModel.sol";
 
 contract InterestRateModelTest is BaseTest {
   AnkrFTMInterestRateModel ankrCertificateInterestRateModelFTM;
@@ -16,7 +15,6 @@ contract InterestRateModelTest is BaseTest {
 
   JumpRateModel jumpRateModel;
   JumpRateModel mimoRateModel;
-  WhitePaperInterestRateModel whitepaperInterestRateModel;
 
   address ANKR_BNB_RATE_PROVIDER = 0xCb0006B31e6b403fEeEC257A8ABeE0817bEd7eBa;
   address ANKR_BNB_BOND = 0x52F24a5e03aee338Da5fd9Df68D2b6FAe1178827;
@@ -36,7 +34,6 @@ contract InterestRateModelTest is BaseTest {
         ANKR_BNB_BOND
       );
       jumpRateModel = new JumpRateModel(10512000, 0.2e17, 0.18e18, 4e18, 0.8e18);
-      whitepaperInterestRateModel = new WhitePaperInterestRateModel(10512000, 0.2e17, 0.2e18);
     } else if (block.chainid == POLYGON_MAINNET) {
       mimoRateModel = new JumpRateModel(13665600, 2e18, 0.4e17, 4e18, 0.8e18);
       jumpRateModel = new JumpRateModel(13665600, 0.2e17, 0.18e18, 2e18, 0.8e18);
@@ -48,8 +45,6 @@ contract InterestRateModelTest is BaseTest {
     testJumpRateSupplyRate();
     testAnkrBNBBorrowModelRate();
     testAnkrBNBSupplyModelRate();
-    testWhitepaperBorrowRate();
-    testWhitepaperSupplyRate();
   }
 
   function testPolygonIrm() public fork(POLYGON_MAINNET) {
@@ -289,53 +284,5 @@ contract InterestRateModelTest is BaseTest {
     util = ankrCertificateInterestRateModelBNB.utilizationRate(8e18, 7.2e18, 7.2e18);
     assertEq(util, 0.9e18);
     assertApproxEqRel(_convertToPerYearBsc(supplyRate) * 100, 14.3e18, 1e17, "!supply rate for utilization 90");
-  }
-
-  function testWhitepaperBorrowRate() internal {
-    uint256 borrowRate = whitepaperInterestRateModel.getBorrowRate(0, 0, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-    borrowRate = whitepaperInterestRateModel.getBorrowRate(1e18, 10e18, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-    borrowRate = whitepaperInterestRateModel.getBorrowRate(2e18, 10e18, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-    borrowRate = whitepaperInterestRateModel.getBorrowRate(3e18, 10e18, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-    borrowRate = whitepaperInterestRateModel.getBorrowRate(4e18, 10e18, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-    borrowRate = whitepaperInterestRateModel.getBorrowRate(5e18, 10e18, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-    borrowRate = whitepaperInterestRateModel.getBorrowRate(6e18, 10e18, 5e18);
-    assertGe(_convertToPerYearBsc(borrowRate), 0);
-    assertLe(_convertToPerYearBsc(borrowRate), 100e18);
-  }
-
-  function testWhitepaperSupplyRate() internal {
-    uint256 supplyRate = whitepaperInterestRateModel.getSupplyRate(0, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
-    whitepaperInterestRateModel.getSupplyRate(1e18, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
-    whitepaperInterestRateModel.getSupplyRate(2e18, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
-    whitepaperInterestRateModel.getSupplyRate(3e18, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
-    whitepaperInterestRateModel.getSupplyRate(4e18, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
-    whitepaperInterestRateModel.getSupplyRate(5e18, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
-    whitepaperInterestRateModel.getSupplyRate(6e18, 10e18, 5e18, 0.2e18);
-    assertGe(_convertToPerYearBsc(supplyRate), 0);
-    assertLe(_convertToPerYearBsc(supplyRate), 100e18);
   }
 }

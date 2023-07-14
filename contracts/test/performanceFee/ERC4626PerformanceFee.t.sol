@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
-import { IBeefyVault, BeefyERC4626, MidasERC4626 } from "../../midas/strategies/BeefyERC4626.sol";
+import { IBeefyVault, BeefyERC4626, IonicERC4626 } from "../../ionic/strategies/BeefyERC4626.sol";
 import { IComptroller } from "../../compound/ComptrollerInterface.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
+import { PoolDirectory } from "../../PoolDirectory.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { IERC4626 } from "../../compound/IERC4626.sol";
@@ -153,8 +153,8 @@ contract ERC4626PerformanceFeeTest is BaseTest {
   }
 
   function _testAllPluginsFeeRecipient() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller comptroller = IComptroller(pools[i].comptroller);
@@ -163,7 +163,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
 
         try delegate.plugin() returns (IERC4626 _plugin) {
-          MidasERC4626 plugin = MidasERC4626(address(_plugin));
+          IonicERC4626 plugin = IonicERC4626(address(_plugin));
 
           address fr = plugin.feeRecipient();
           if (fr != ap.getAddress("deployer")) emit log_named_address("plugin fr", address(plugin));

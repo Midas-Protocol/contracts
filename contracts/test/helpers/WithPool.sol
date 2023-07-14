@@ -6,7 +6,7 @@ import { Auth, Authority } from "solmate/auth/Auth.sol";
 
 import { CErc20 } from "../../compound/CErc20.sol";
 import { CToken } from "../../compound/CToken.sol";
-import { WhitePaperInterestRateModel } from "../../compound/WhitePaperInterestRateModel.sol";
+import { JumpRateModel } from "../../compound/JumpRateModel.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
@@ -16,17 +16,17 @@ import { CErc20Delegator } from "../../compound/CErc20Delegator.sol";
 import { IComptroller } from "../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
-import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
-import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
+import { FeeDistributor } from "../../FeeDistributor.sol";
+import { PoolDirectory } from "../../PoolDirectory.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
-import { FusePoolLens } from "../../FusePoolLens.sol";
+import { PoolLens } from "../../PoolLens.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
-import { AuthoritiesRegistry } from "../../midas/AuthoritiesRegistry.sol";
-import { PoolRolesAuthority } from "../../midas/PoolRolesAuthority.sol";
+import { AuthoritiesRegistry } from "../../ionic/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../../ionic/PoolRolesAuthority.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -40,12 +40,12 @@ contract WithPool is BaseTest {
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
   IComptroller comptroller;
-  WhitePaperInterestRateModel interestModel;
+  JumpRateModel interestModel;
 
-  FuseFeeDistributor fuseAdmin;
-  FusePoolDirectory fusePoolDirectory;
+  FeeDistributor ionicAdmin;
+  PoolDirectory poolDirectory;
   MasterPriceOracle priceOracle;
-  FusePoolLens poolLens;
+  PoolLens poolLens;
 
   address[] markets;
   address[] emptyAddresses;
@@ -64,23 +64,23 @@ contract WithPool is BaseTest {
     priceOracle = _masterPriceOracle;
     underlyingToken = _underlyingToken;
 
-    fuseAdmin = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    ionicAdmin = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     // upgrade
     {
-      FuseFeeDistributor newImpl = new FuseFeeDistributor();
-      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(fuseAdmin)));
+      FeeDistributor newImpl = new FeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ionicAdmin)));
       bytes32 bytesAtSlot = vm.load(address(proxy), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103);
       address admin = address(uint160(uint256(bytesAtSlot)));
       vm.prank(admin);
       proxy.upgradeTo(address(newImpl));
     }
 
-    //    fuseAdmin = new FuseFeeDistributor();
-    //    fuseAdmin.initialize(1e16);
+    //    ionicAdmin = new FeeDistributor();
+    //    ionicAdmin.initialize(1e16);
     {
-      vm.prank(fuseAdmin.owner());
-      fuseAdmin._setPendingOwner(address(this));
-      fuseAdmin._acceptOwner();
+      vm.prank(ionicAdmin.owner());
+      ionicAdmin._setPendingOwner(address(this));
+      ionicAdmin._acceptOwner();
     }
     setUpBaseContracts();
     setUpWhiteList();
@@ -95,9 +95,9 @@ contract WithPool is BaseTest {
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
 
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
-    fuseAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+    ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
 
     for (uint256 i = 0; i < 7; i++) {
       t.push(true);
@@ -120,17 +120,17 @@ contract WithPool is BaseTest {
     newCErc20Implementations.push(address(cErc20PluginDelegate));
     newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
 
-    fuseAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
+    ionicAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
   }
 
   function setUpBaseContracts() internal {
-    interestModel = new WhitePaperInterestRateModel(2343665, 1e18, 1e18);
-    fusePoolDirectory = new FusePoolDirectory();
-    fusePoolDirectory.initialize(false, emptyAddresses);
+    interestModel = new JumpRateModel(2343665, 1e18, 1e18, 4e18, 0.8e18);
+    poolDirectory = new PoolDirectory();
+    poolDirectory.initialize(false, emptyAddresses);
 
-    poolLens = new FusePoolLens();
+    poolLens = new PoolLens();
     poolLens.initialize(
-      fusePoolDirectory,
+      poolDirectory,
       "Pool",
       "lens",
       hardcodedAddresses,
@@ -149,19 +149,19 @@ contract WithPool is BaseTest {
     uint256 liquidationIncentive
   ) public {
     emptyAddresses.push(address(0));
-    newComptrollers.push(address(new Comptroller(payable(fuseAdmin))));
+    newComptrollers.push(address(new Comptroller(payable(ionicAdmin))));
     trueBoolArray.push(true);
     falseBoolArray.push(false);
-    fuseAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newComptrollers, trueBoolArray);
+    ionicAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newComptrollers, trueBoolArray);
 
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
     extensions[0] = new ComptrollerFirstExtension();
-    fuseAdmin._setComptrollerExtensions(address(newComptrollers[0]), extensions);
+    ionicAdmin._setComptrollerExtensions(address(newComptrollers[0]), extensions);
 
-    (, address comptrollerAddress) = fusePoolDirectory.deployPool(
+    (, address comptrollerAddress) = poolDirectory.deployPool(
       name,
       newComptrollers[0],
-      abi.encode(payable(address(fuseAdmin))),
+      abi.encode(payable(address(ionicAdmin))),
       enforceWhitelist,
       closeFactor,
       liquidationIncentive,
@@ -174,13 +174,13 @@ contract WithPool is BaseTest {
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
     AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
     newAr.initialize(address(321));
-    fuseAdmin.reinitialize(newAr);
+    ionicAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
   }
 
   function upgradePool(address pool) internal {
-    FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    FeeDistributor ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     Comptroller newComptrollerImplementation = new Comptroller(payable(ffd));
 
     Unitroller asUnitroller = Unitroller(payable(pool));
@@ -216,7 +216,7 @@ contract WithPool is BaseTest {
       abi.encode(
         _underlyingToken,
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         name,
         symbol,
@@ -237,7 +237,7 @@ contract WithPool is BaseTest {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -258,7 +258,7 @@ contract WithPool is BaseTest {
       abi.encode(
         address(underlyingToken),
         comptroller,
-        payable(address(fuseAdmin)),
+        payable(address(ionicAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
@@ -280,6 +280,6 @@ contract WithPool is BaseTest {
     _newCErc20Implementations[0] = address(newImpl);
     arrayOfTrue[0] = true;
 
-    fuseAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
+    ionicAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
   }
 }

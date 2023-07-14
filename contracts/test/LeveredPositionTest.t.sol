@@ -2,19 +2,19 @@
 pragma solidity >=0.8.0;
 
 import { MarketsTest, BaseTest, CErc20Delegate } from "./config/MarketsTest.t.sol";
-import { DiamondBase, DiamondExtension } from "../midas/DiamondExtension.sol";
+import { DiamondBase, DiamondExtension } from "../ionic/DiamondExtension.sol";
 
-import { LeveredPosition } from "../midas/levered/LeveredPosition.sol";
-import { LeveredPositionFactory, IFuseFeeDistributor } from "../midas/levered/LeveredPositionFactory.sol";
+import { LeveredPosition } from "../ionic/levered/LeveredPosition.sol";
+import { LeveredPositionFactory, IFeeDistributor } from "../ionic/levered/LeveredPositionFactory.sol";
 import { JarvisLiquidatorFunder } from "../liquidators/JarvisLiquidatorFunder.sol";
 import { SolidlySwapLiquidator } from "../liquidators/SolidlySwapLiquidator.sol";
 import { BalancerSwapLiquidator } from "../liquidators/BalancerSwapLiquidator.sol";
 import { AlgebraSwapLiquidator } from "../liquidators/AlgebraSwapLiquidator.sol";
 import { CurveLpTokenLiquidatorNoRegistry } from "../liquidators/CurveLpTokenLiquidatorNoRegistry.sol";
-import { LeveredPositionFactoryExtension } from "../midas/levered/LeveredPositionFactoryExtension.sol";
-import { ILeveredPositionFactory } from "../midas/levered/ILeveredPositionFactory.sol";
+import { LeveredPositionFactoryExtension } from "../ionic/levered/LeveredPositionFactoryExtension.sol";
+import { ILeveredPositionFactory } from "../ionic/levered/ILeveredPositionFactory.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
-import { LeveredPositionsLens } from "../midas/levered/LeveredPositionsLens.sol";
+import { LeveredPositionsLens } from "../ionic/levered/LeveredPositionsLens.sol";
 import { LiquidatorsRegistry } from "../liquidators/registry/LiquidatorsRegistry.sol";
 import { LiquidatorsRegistryExtension } from "../liquidators/registry/LiquidatorsRegistryExtension.sol";
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
@@ -614,7 +614,7 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
 
     vm.mockCall(
       address(ffd),
-      abi.encodeWithSelector(IFuseFeeDistributor.minBorrowEth.selector),
+      abi.encodeWithSelector(IFeeDistributor.minBorrowEth.selector),
       abi.encode(minBorrowNative)
     );
 

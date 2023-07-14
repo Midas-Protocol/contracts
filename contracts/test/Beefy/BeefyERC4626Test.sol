@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import { BeefyERC4626, IBeefyVault, IBeefyStrategy } from "../../midas/strategies/BeefyERC4626.sol";
+import { BeefyERC4626, IBeefyVault, IBeefyStrategy } from "../../ionic/strategies/BeefyERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 

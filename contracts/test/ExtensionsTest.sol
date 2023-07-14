@@ -3,14 +3,14 @@ pragma solidity >=0.8.0;
 
 import { MarketsTest } from "./config/MarketsTest.t.sol";
 
-import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
+import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
-import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { PoolDirectory } from "../PoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
-import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
+import { FeeDistributor } from "../FeeDistributor.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
@@ -118,7 +118,7 @@ contract ExtensionsTest is MarketsTest {
   }
 
   function testNewPoolExtensions() public fork(BSC_MAINNET) {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
     _prepareComptrollerUpgrade(address(0));
 
@@ -142,9 +142,9 @@ contract ExtensionsTest is MarketsTest {
 
   function testMulticallMarket() public fork(BSC_MAINNET) {
     uint8 random = uint8(block.timestamp % 256);
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
     ICErc20[] memory markets = somePool.getAllMarkets();
@@ -181,8 +181,8 @@ contract ExtensionsTest is MarketsTest {
   }
 
   function _testAllPoolsAllMarketsCTokenExtensionUpgrade() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
     for (uint256 i = 0; i < pools.length; i++) {
       _testPoolAllMarketsExtensionUpgrade(pools[i].comptroller);
     }
@@ -258,9 +258,9 @@ contract ExtensionsTest is MarketsTest {
   }
 
   function _testComptrollersExtensions() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       address payable asPayable = payable(pools[i].comptroller);
@@ -271,9 +271,9 @@ contract ExtensionsTest is MarketsTest {
   }
 
   function testBulkAutoUpgrade() public debuggingOnly fork(POLYGON_MAINNET) {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       vm.prank(ffd.owner());
@@ -290,9 +290,9 @@ contract ExtensionsTest is MarketsTest {
   }
 
   function _testTotalUnderlyingSupplied() internal {
-    FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
       //      if (pools[i].comptroller == 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459) continue;

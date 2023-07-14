@@ -5,7 +5,7 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 import { MasterPriceOracle } from "../MasterPriceOracle.sol";
 
 import "../../external/curve/ICurveV2Pool.sol";
-import "../../midas/SafeOwnableUpgradeable.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -86,7 +86,7 @@ contract CurveV2LpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePric
 
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {

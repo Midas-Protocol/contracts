@@ -4,8 +4,7 @@ pragma solidity >=0.8.0;
 import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 
 import "../../external/curve/ICurvePool.sol";
-import "../../midas/SafeOwnableUpgradeable.sol";
-import "../../utils/PatchedStorage.sol";
+import "../../ionic/SafeOwnableUpgradeable.sol";
 
 import "../BasePriceOracle.sol";
 
@@ -13,9 +12,9 @@ import "../BasePriceOracle.sol";
  * @title CurveLpTokenPriceOracleNoRegistry
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice CurveLpTokenPriceOracleNoRegistry is a price oracle for Curve LP tokens (using the sender as a root oracle).
- * @dev Implements the `PriceOracle` interface used by Fuse pools (and Compound v2).
+ * @dev Implements the `PriceOracle` interface used by Ionic pools (and Compound v2).
  */
-contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedStorage, BasePriceOracle {
+contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @dev Maps Curve LP token addresses to underlying token addresses.
    */
@@ -98,7 +97,7 @@ contract CurveLpTokenPriceOracleNoRegistry is SafeOwnableUpgradeable, PatchedSto
 
   /**
    * @notice Returns the price in ETH of the token underlying `cToken`.
-   * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
+   * @dev Implements the `PriceOracle` interface for Ionic pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
   function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {

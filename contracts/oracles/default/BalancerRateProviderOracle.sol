@@ -5,7 +5,7 @@ import { EIP20Interface } from "../../compound/EIP20Interface.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { IRateProvider } from "../../external/balancer/IRateProvider.sol";
 
-import { SafeOwnableUpgradeable } from "../../midas/SafeOwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
 import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
 
 /**

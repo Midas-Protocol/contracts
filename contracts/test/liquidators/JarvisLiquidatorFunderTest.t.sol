@@ -5,7 +5,7 @@ import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { CToken } from "../../compound/CToken.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { JarvisLiquidatorFunder } from "../../liquidators/JarvisLiquidatorFunder.sol";
-import { FuseSafeLiquidator } from "../../FuseSafeLiquidator.sol";
+import { IonicLiquidator } from "../../IonicLiquidator.sol";
 import { IUniswapV2Pair } from "../../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../../external/uniswap/IUniswapV2Factory.sol";
 import { IComptroller } from "../../external/compound/IComptroller.sol";
@@ -79,7 +79,7 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     address[] cTokens;
     IRedemptionStrategy[] strategies;
     bytes[] abis;
-    FuseSafeLiquidator liquidator;
+    IonicLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
     bytes[] data;
   }
@@ -90,16 +90,9 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     IUniswapV2Router02 uniswapRouter = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
 
     // setting up a new liquidator
-    //    vars.liquidator = FuseSafeLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
-    vars.liquidator = new FuseSafeLiquidator();
-    vars.liquidator.initialize(
-      ap.getAddress("wtoken"),
-      address(uniswapRouter),
-      ap.getAddress("bUSD"),
-      0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c, // BTCB
-      "0x00fb7f630766e6a796048ea87d01acd3068e8ff67d078148a3fa3f4a84f69bd5",
-      25
-    );
+    //    vars.liquidator = IonicLiquidator(payable(0xc9C3D317E89f4390A564D56180bBB1842CF3c99C));
+    vars.liquidator = new IonicLiquidator();
+    vars.liquidator.initialize(ap.getAddress("wtoken"), address(uniswapRouter), 25);
 
     IComptroller comptroller = IComptroller(0x31d76A64Bc8BbEffb601fac5884372DEF910F044);
 
@@ -166,19 +159,17 @@ contract JarvisLiquidatorFunderTest is BaseTest {
     // liquidate
     vm.prank(accountTwo);
     vars.liquidator.safeLiquidateToTokensWithFlashLoan(
-      FuseSafeLiquidator.LiquidateToTokensWithFlashSwapVars(
+      IonicLiquidator.LiquidateToTokensWithFlashSwapVars(
         accountOne,
         repayAmount,
         ICErc20(address(cTokenJBRL)),
         ICErc20(address(cTokenBUSD)),
         flashSwapPair,
         0,
-        address(0),
         uniswapRouter,
         uniswapRouter,
         vars.strategies,
         vars.abis,
-        0,
         vars.fundingStrategies,
         vars.data
       )
