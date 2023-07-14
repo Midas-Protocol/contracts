@@ -15,7 +15,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
 import { CToken } from "../compound/CToken.sol";
-import { WhitePaperInterestRateModel } from "../compound/WhitePaperInterestRateModel.sol";
+import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
@@ -40,7 +40,7 @@ contract LiquidityMiningTest is BaseTest {
   MockERC20 underlyingToken;
   MockERC20 rewardToken;
 
-  WhitePaperInterestRateModel interestModel;
+  JumpRateModel interestModel;
   IComptroller comptroller;
   CErc20Delegate cErc20Delegate;
   ICErc20 cErc20;
@@ -69,7 +69,7 @@ contract LiquidityMiningTest is BaseTest {
     rewardDecimal = _rewardDecimal;
     underlyingToken = new MockERC20("UnderlyingToken", "UT", baseDecimal);
     rewardToken = new MockERC20("RewardToken", "RT", rewardDecimal);
-    interestModel = new WhitePaperInterestRateModel(2343665, 1 * 10**baseDecimal, 1 * 10**baseDecimal);
+    interestModel = new JumpRateModel(2343665, 1 * 10**baseDecimal, 1 * 10**baseDecimal, 4 * 10**baseDecimal, 0.8e18);
     ionicAdmin = new FeeDistributor();
     ionicAdmin.initialize(1 * 10**(baseDecimal - 2));
     poolDirectory = new PoolDirectory();
