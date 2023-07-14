@@ -3,14 +3,15 @@ pragma solidity >=0.8.0;
 
 import "./ComptrollerInterface.sol";
 import "./InterestRateModel.sol";
-import "./CDelegateInterface.sol";
+import { DiamondBase, DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
+import { CErc20Base } from "./CTokenInterfaces.sol";
 
 /**
  * @title Compound's CErc20Delegator Contract
  * @notice CTokens which wrap an EIP-20 underlying and delegate to an implementation
  * @author Compound
  */
-contract CErc20Delegator is CDelegationStorage {
+contract CErc20Delegator is CErc20Base, DiamondBase {
   /**
    * @notice Construct a new money market
    * @param underlying_ The address of the underlying asset
@@ -59,6 +60,16 @@ contract CErc20Delegator is CDelegationStorage {
         becomeImplementationData
       )
     );
+  }
+
+  /**
+   * @dev register a logic extension
+   * @param extensionToAdd the extension whose functions are to be added
+   * @param extensionToReplace the extension whose functions are to be removed/replaced
+   */
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
+    require(msg.sender == address(ionicAdmin), "!unauthorized");
+    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
   /**

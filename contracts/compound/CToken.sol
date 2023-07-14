@@ -7,7 +7,6 @@ import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
-import { DiamondBase, DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { IFeeDistributor } from "./IFeeDistributor.sol";
 
@@ -16,7 +15,7 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
  * @notice Abstract base for CTokens
  * @author Compound
  */
-abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, DiamondBase {
+abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential {
   modifier isAuthorized() {
     require(
       IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
@@ -921,20 +920,6 @@ abstract contract CToken is CTokenBase, TokenErrorReporter, Exponential, Diamond
     doTransferOut(UnitrollerAdminStorage(address(comptroller)).admin(), withdrawAmount);
 
     return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @dev register a logic extension
-   * @param extensionToAdd the extension whose functions are to be added
-   * @param extensionToReplace the extension whose functions are to be removed/replaced
-   */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
-    require(
-      msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights(),
-      "!unauthorized - no admin rights"
-    );
-    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
   /*** Reentrancy Guard ***/

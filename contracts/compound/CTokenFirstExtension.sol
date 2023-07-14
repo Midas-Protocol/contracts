@@ -14,7 +14,6 @@ import { Multicall } from "../utils/Multicall.sol";
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CTokenFirstExtension is
-  CDelegationStorage,
   CTokenExtensionBase,
   TokenErrorReporter,
   Exponential,
