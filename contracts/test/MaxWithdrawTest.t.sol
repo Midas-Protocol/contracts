@@ -175,15 +175,6 @@ contract MaxWithdrawTest is WithPool {
       ar.setUserRole(comptrollerAddress, accountThree, poolAuth.BORROWER_ROLE(), true);
     }
 
-    {
-      address comptrollerAddress = address(comptroller);
-      AuthoritiesRegistry ar = ionicAdmin.authoritiesRegistry();
-      PoolRolesAuthority poolAuth = ar.poolsAuthorities(comptrollerAddress);
-      ar.setUserRole(comptrollerAddress, accountOne, poolAuth.BORROWER_ROLE(), true);
-      ar.setUserRole(comptrollerAddress, accountTwo, poolAuth.BORROWER_ROLE(), true);
-      ar.setUserRole(comptrollerAddress, accountThree, poolAuth.BORROWER_ROLE(), true);
-    }
-
     PoolLensSecondary secondary = new PoolLensSecondary();
     secondary.initialize(poolDirectory);
 
