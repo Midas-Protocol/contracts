@@ -38,8 +38,8 @@ contract CErc20PluginDelegate is CErc20Delegate {
     require(fnsCount == 0, "use the correct array length");
   }
 
-    /**
-     * @notice Delegate interface to become the implementation
+  /**
+   * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
   function _becomeImplementation(bytes memory data) public virtual override {

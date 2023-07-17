@@ -14,7 +14,6 @@ import { EIP20Interface } from "./EIP20Interface.sol";
  * @author Compound
  */
 contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
-
   /*
     // New implementations always get set via the settor (post-initialize)
     delegateTo(
@@ -29,7 +28,7 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
   */
 
   /**
- * @notice Initialize the new money market
+   * @notice Initialize the new money market
    * @param underlying_ The address of the underlying asset
    * @param comptroller_ The address of the Comptroller
    * @param feeDistributor The FeeDistributor contract address.
@@ -66,7 +65,6 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
     underlying = underlying_;
     EIP20Interface(underlying).totalSupply();
   }
-
 
   /**
    * @notice Initialize the money market

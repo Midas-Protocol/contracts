@@ -12,13 +12,7 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract CTokenFirstExtension is
-  CTokenExtensionBase,
-  TokenErrorReporter,
-  Exponential,
-  DiamondExtension,
-  Multicall
-{
+contract CTokenFirstExtension is CTokenExtensionBase, TokenErrorReporter, Exponential, DiamondExtension, Multicall {
   modifier isAuthorized() {
     require(
       IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),

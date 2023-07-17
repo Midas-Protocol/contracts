@@ -58,10 +58,7 @@ contract LatestImplementationWhitelisted is BaseTest {
       emit log_address(implementationsSet[k]);
 
       address latestImpl = ionicAdmin.latestComptrollerImplementation(implementationsSet[k]);
-      assertTrue(
-        implementationsSet[k] == latestImpl,
-        "some pool is not upgraded the latest impl"
-      );
+      assertTrue(implementationsSet[k] == latestImpl, "some pool is not upgraded the latest impl");
     }
   }
 
@@ -92,10 +89,7 @@ contract LatestImplementationWhitelisted is BaseTest {
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = ionicAdmin
         .latestCErc20Delegate(CErc20Delegate(implementationsSet[k]).delegateType());
 
-      assertTrue(
-        implementationsSet[k] == latestCErc20Delegate,
-        "some markets need to be upgraded"
-      );
+      assertTrue(implementationsSet[k] == latestCErc20Delegate, "some markets need to be upgraded");
     }
   }
 
@@ -132,10 +126,7 @@ contract LatestImplementationWhitelisted is BaseTest {
 
       emit log_address(pluginsSet[k]);
 
-      assertTrue(
-        pluginsSet[k] == latestPluginImpl,
-        "some plugin is not upgraded to the latest impl"
-      );
+      assertTrue(pluginsSet[k] == latestPluginImpl, "some plugin is not upgraded to the latest impl");
     }
   }
 }

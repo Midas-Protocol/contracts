@@ -9,7 +9,6 @@ import "./CToken.sol";
  * @author Compound
  */
 contract CErc20Delegate is CErc20 {
-
   function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
     uint8 fnsCount = 6;
 
@@ -29,6 +28,7 @@ contract CErc20Delegate is CErc20 {
 
     require(fnsCount == 0, "use the correct array length");
   }
+
   /**
    * @notice Called by the delegator on a delegate to initialize it for duty
    */

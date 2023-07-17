@@ -394,7 +394,7 @@ abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, C
 // TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
 abstract contract CTokenZeroExtBase is CErc20Storage, CTokenEvents, CTokenInterface, CDelegateInterface {
   /**
- * @notice Emitted when implementation is changed
+   * @notice Emitted when implementation is changed
    */
   event NewImplementation(address oldImplementation, address newImplementation);
 }
@@ -446,7 +446,9 @@ interface CErc20PluginStorageInterface is CErc20StorageInterface {
 }
 
 // TODO merge with ICErc20
-interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {}
+interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {
+
+}
 
 interface ICErc20 is ICToken, CDelegateInterface {}
 
