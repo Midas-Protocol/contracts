@@ -66,11 +66,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
 
-    require(
-      IFeeDistributor(ionicAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
-      "plugin implementation not whitelisted"
-    );
-
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
@@ -124,6 +119,10 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferOut(address to, uint256 amount) internal override {
     plugin.withdraw(amount, to, address(this));
+  }
+
+  function delegateType() public pure virtual override returns (uint8) {
+    return 2;
   }
 
   function contractType() external pure virtual override returns (string memory) {

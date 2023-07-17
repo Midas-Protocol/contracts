@@ -50,16 +50,9 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
   /*** Admin Functions ***/
 
   function _setPendingImplementation(address newPendingImplementation) public returns (uint256) {
+    // TODO remove pool owner permission?
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
-    }
-    if (
-      !IFeeDistributor(ionicAdmin).comptrollerImplementationWhitelist(
-        comptrollerImplementation,
-        newPendingImplementation
-      )
-    ) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_CONTRACT_CHECK);
     }
     //require(Comptroller(newPendingImplementation).ionicAdmin() == ionicAdmin, "ionicAdmin not matching");
 

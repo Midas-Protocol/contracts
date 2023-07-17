@@ -68,13 +68,9 @@ contract MarketsTest is BaseTest {
       newImpl = cErc20PluginRewardsDelegate;
     }
 
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
-
     // set the new ctoken delegate as the latest
     vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encode(address(0)));
+    ffd._setLatestCErc20Delegate(market.delegateType(), address(newImpl), false, abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
@@ -96,19 +92,7 @@ contract MarketsTest is BaseTest {
   }
 
   function _prepareComptrollerUpgrade(address oldCompImpl) internal {
-    // whitelist the upgrade
     vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldCompImpl),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    // whitelist the new pool creation
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(address(0)),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
     extensions[0] = comptrollerExtension;
     ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);

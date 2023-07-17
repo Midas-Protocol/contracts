@@ -15,12 +15,16 @@ import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { DiamondExtension, DiamondBase } from "./ionic/DiamondExtension.sol";
 import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
 
+contract FeeDistributorStorage {
+  // TODO
+}
+
 /**
  * @title FeeDistributor
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice FeeDistributor controls and receives protocol fees from Ionic pools and relays admin actions to Ionic pools.
  */
-contract FeeDistributor is SafeOwnableUpgradeable {
+contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   using AddressUpgradeable for address;
   using SafeERC20Upgradeable for IERC20Upgradeable;
 
@@ -177,67 +181,6 @@ contract FeeDistributor is SafeOwnableUpgradeable {
   }
 
   /**
-   * @dev Whitelisted Comptroller implementation contract addresses for each existing implementation.
-   */
-  mapping(address => mapping(address => bool)) public comptrollerImplementationWhitelist;
-
-  /**
-   * @dev Adds/removes Comptroller implementations to the whitelist.
-   * @param oldImplementations The old `Comptroller` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `Comptroller` implementations to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `implementations`.
-   */
-  function _editComptrollerImplementationWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == statuses.length,
-      "No Comptroller implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      comptrollerImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
-  }
-
-  /**
-   * @dev Whitelisted CErc20Delegate implementation contract addresses and `allowResign` values for each existing implementation.
-   */
-  mapping(address => mapping(address => mapping(bool => bool))) public cErc20DelegateWhitelist;
-
-  /**
-   * @dev Adds/removes CErc20Delegate implementations to the whitelist.
-   * @param oldImplementations The old `CErc20Delegate` implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of `CErc20Delegate` implementations to be whitelisted/unwhitelisted.
-   * @param allowResign Array of `allowResign` values corresponding to `newImplementations` to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `newImplementations`.
-   */
-  function _editCErc20DelegateWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata allowResign,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == allowResign.length &&
-        newImplementations.length == statuses.length,
-      "No CErc20Delegate implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      cErc20DelegateWhitelist[oldImplementations[i]][newImplementations[i]][allowResign[i]] = statuses[i];
-  }
-
-  /**
-   * @dev Whitelisted CEtherDelegate implementation contract addresses and `allowResign` values for each existing implementation.
-   */
-  /// keep this in the storage to not break the layout
-  mapping(address => mapping(address => mapping(bool => bool))) public cEtherDelegateWhitelist;
-
-  /**
    * @dev Latest Comptroller implementation for each existing implementation.
    */
   mapping(address => address) internal _latestComptrollerImplementation;
@@ -273,12 +216,12 @@ contract FeeDistributor is SafeOwnableUpgradeable {
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
-  mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
+  mapping(uint8 => CDelegateUpgradeData) public _latestCErc20Delegate;
 
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
-  function latestCErc20Delegate(address oldImplementation)
+  function latestCErc20Delegate(uint8 delegateType)
     external
     view
     returns (
@@ -287,28 +230,28 @@ contract FeeDistributor is SafeOwnableUpgradeable {
       bytes memory
     )
   {
-    CDelegateUpgradeData memory data = _latestCErc20Delegate[oldImplementation];
+    CDelegateUpgradeData memory data = _latestCErc20Delegate[delegateType];
     bytes memory emptyBytes;
     return
       data.implementation != address(0)
         ? (data.implementation, data.allowResign, data.becomeImplementationData)
-        : (oldImplementation, false, emptyBytes);
+        : (address(0), false, emptyBytes);
   }
 
   /**
    * @dev Sets the latest `CErc20Delegate` upgrade implementation address and data.
-   * @param oldImplementation The old `CErc20Delegate` implementation address to upgrade from.
+   * @param delegateType The old `CErc20Delegate` implementation address to upgrade from.
    * @param newImplementation Latest `CErc20Delegate` implementation address.
    * @param allowResign Whether or not `resignImplementation` should be called on the old implementation before upgrade.
    * @param becomeImplementationData Data passed to the new implementation via `becomeImplementation` after upgrade.
    */
   function _setLatestCErc20Delegate(
-    address oldImplementation,
+    uint8 delegateType,
     address newImplementation,
     bool allowResign,
     bytes calldata becomeImplementationData
   ) external onlyOwner {
-    _latestCErc20Delegate[oldImplementation] = CDelegateUpgradeData(
+    _latestCErc20Delegate[delegateType] = CDelegateUpgradeData(
       newImplementation,
       allowResign,
       becomeImplementationData
@@ -330,32 +273,6 @@ contract FeeDistributor is SafeOwnableUpgradeable {
    * @dev Latest Plugin implementation for each existing implementation.
    */
   mapping(address => address) public _latestPluginImplementation;
-
-  /**
-   * @dev Whitelisted Plugin implementation contract addresses for each existing implementation.
-   */
-  mapping(address => mapping(address => bool)) public pluginImplementationWhitelist;
-
-  /**
-   * @dev Adds/removes plugin implementations to the whitelist.
-   * @param oldImplementations The old plugin implementation addresses to upgrade from for each `newImplementations` to upgrade to.
-   * @param newImplementations Array of plugin implementations to be whitelisted/unwhitelisted.
-   * @param statuses Array of whitelist statuses corresponding to `implementations`.
-   */
-  function _editPluginImplementationWhitelist(
-    address[] calldata oldImplementations,
-    address[] calldata newImplementations,
-    bool[] calldata statuses
-  ) external onlyOwner {
-    require(
-      newImplementations.length > 0 &&
-        newImplementations.length == oldImplementations.length &&
-        newImplementations.length == statuses.length,
-      "No plugin implementations supplied or array lengths not equal."
-    );
-    for (uint256 i = 0; i < newImplementations.length; i++)
-      pluginImplementationWhitelist[oldImplementations[i]][newImplementations[i]] = statuses[i];
-  }
 
   /**
    * @dev Latest Plugin implementation for each existing implementation.

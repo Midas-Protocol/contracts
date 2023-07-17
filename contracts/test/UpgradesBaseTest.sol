@@ -32,20 +32,6 @@ abstract contract UpgradesBaseTest is BaseTest {
     // instantiate the new implementation
     Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
     address comptrollerImplementationAddress = address(newComptrollerImplementation);
-
-    // whitelist the upgrade
-    vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
-      asArray(comptrollerImplementationAddress),
-      asArray(true)
-    );
-    // whitelist the new pool creation
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(address(0)),
-      asArray(comptrollerImplementationAddress),
-      asArray(true)
-    );
     // add the extension to the auto upgrade config
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
     extensions[0] = poolExt;
@@ -74,10 +60,6 @@ abstract contract UpgradesBaseTest is BaseTest {
       newImpl = new CErc20PluginRewardsDelegate();
       becomeImplData = abi.encode(address(0));
     }
-
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);

@@ -58,10 +58,9 @@ contract LatestImplementationWhitelisted is BaseTest {
       emit log_address(implementationsSet[k]);
 
       address latestImpl = ionicAdmin.latestComptrollerImplementation(implementationsSet[k]);
-      bool whitelisted = ionicAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
       assertTrue(
-        whitelisted || implementationsSet[k] == latestImpl,
-        "latest implementation for old implementation not whitelisted"
+        implementationsSet[k] == latestImpl,
+        "some pool is not upgraded the latest impl"
       );
     }
   }
@@ -91,13 +90,11 @@ contract LatestImplementationWhitelisted is BaseTest {
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = ionicAdmin
-        .latestCErc20Delegate(implementationsSet[k]);
-
-      bool whitelisted = ionicAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
+        .latestCErc20Delegate(CErc20Delegate(implementationsSet[k]).delegateType());
 
       assertTrue(
-        whitelisted || implementationsSet[k] == latestCErc20Delegate,
-        "no whitelisted implementation for old implementation"
+        implementationsSet[k] == latestCErc20Delegate,
+        "some markets need to be upgraded"
       );
     }
   }
@@ -133,12 +130,11 @@ contract LatestImplementationWhitelisted is BaseTest {
     for (uint8 k = 0; k < pluginsSet.length; k++) {
       address latestPluginImpl = ionicAdmin.latestPluginImplementation(pluginsSet[k]);
 
-      bool whitelisted = ionicAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
       emit log_address(pluginsSet[k]);
 
       assertTrue(
-        whitelisted || pluginsSet[k] == latestPluginImpl,
-        "no whitelisted implementation for old implementation"
+        pluginsSet[k] == latestPluginImpl,
+        "some plugin is not upgraded to the latest impl"
       );
     }
   }

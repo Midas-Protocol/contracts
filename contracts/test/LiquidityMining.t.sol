@@ -56,11 +56,6 @@ contract LiquidityMiningTest is BaseTest {
   uint8 rewardDecimal;
 
   address[] markets;
-  address[] emptyAddresses;
-  address[] newUnitroller;
-  bool[] falseBoolArray;
-  bool[] trueBoolArray;
-  address[] newImplementation;
   IonicFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts(uint8 _baseDecimal, uint8 _rewardDecimal) public {
@@ -72,7 +67,7 @@ contract LiquidityMiningTest is BaseTest {
     ionicAdmin = new FeeDistributor();
     ionicAdmin.initialize(1 * 10**(baseDecimal - 2));
     poolDirectory = new PoolDirectory();
-    poolDirectory.initialize(false, emptyAddresses);
+    poolDirectory.initialize(false, new address[](0));
     cErc20Delegate = new CErc20Delegate();
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
@@ -81,12 +76,7 @@ contract LiquidityMiningTest is BaseTest {
 
   function setUpPoolAndMarket() public {
     MockPriceOracle priceOracle = new MockPriceOracle(10);
-    emptyAddresses.push(address(0));
-    Comptroller tempComptroller = new Comptroller(payable(ionicAdmin));
-    newUnitroller.push(address(tempComptroller));
-    trueBoolArray.push(true);
-    falseBoolArray.push(false);
-    ionicAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
+    Comptroller tempComptroller = new Comptroller(payable(address(ionicAdmin)));
     DiamondExtension[] memory extensions = new DiamondExtension[](1);
     extensions[0] = new ComptrollerFirstExtension();
     ionicAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
@@ -111,8 +101,6 @@ contract LiquidityMiningTest is BaseTest {
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     newAr.setUserRole(comptrollerAddress, user, poolAuth.BORROWER_ROLE(), true);
 
-    newImplementation.push(address(cErc20Delegate));
-    ionicAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
     vm.roll(1);
     comptroller._deployMarket(
       cErc20Delegate,
@@ -200,7 +188,7 @@ contract LiquidityMiningTest is BaseTest {
     assertEq(index, 10**rewardDecimal + rewardsPerToken, "!index");
 
     // claim and check user balance
-    flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
+    flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, asArray(true));
     assertEq(rewardToken.balanceOf(user), userRewards, "!user rewards");
 
     // mint more tokens by user and rerun test
@@ -216,7 +204,7 @@ contract LiquidityMiningTest is BaseTest {
     uint256 userRewards2 = (10 * (rewardsPerToken2 * cErc20.balanceOf(user))) / (1 * 10**baseDecimal);
 
     // accrue all unclaimed rewards and claim them
-    flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, trueBoolArray);
+    flywheelClaimer.claimRewardsForMarket(user, asErc20, flywheelsToClaim, asArray(true));
 
     emit log_named_uint("userRewards", userRewards);
     emit log_named_uint("userRewards2", userRewards2);

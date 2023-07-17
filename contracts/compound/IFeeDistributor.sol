@@ -13,25 +13,9 @@ interface IFeeDistributor {
 
   function interestFeeRate() external view returns (uint256);
 
-  function comptrollerImplementationWhitelist(address oldImplementation, address newImplementation)
-    external
-    view
-    returns (bool);
-
-  function pluginImplementationWhitelist(address oldImplementation, address newImplementation)
-    external
-    view
-    returns (bool);
-
-  function cErc20DelegateWhitelist(
-    address oldImplementation,
-    address newImplementation,
-    bool allowResign
-  ) external view returns (bool);
-
   function latestComptrollerImplementation(address oldImplementation) external view returns (address);
 
-  function latestCErc20Delegate(address oldImplementation)
+  function latestCErc20Delegate(uint8 delegateType)
     external
     view
     returns (

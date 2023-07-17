@@ -369,28 +369,35 @@ interface CDelegateInterface {
     address implementation_,
     bool allowResign,
     bytes calldata becomeImplementationData
-  ) external virtual;
+  ) external;
 
   /**
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @dev Should revert if any issues arise which make it unfit for delegation
    * @param data The encoded bytes data for any initialization
    */
-  function _becomeImplementation(bytes calldata data) external virtual;
+  function _becomeImplementation(bytes calldata data) external;
 
   /**
    * @notice Function called before all delegator functions
    * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
    */
-  function _prepare() external payable virtual;
+  function _prepare() external payable;
 
-  function contractType() external pure virtual returns (string memory);
+  function delegateType() external pure returns (uint8);
+
+  function contractType() external pure returns (string memory);
 }
 
 abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {}
 
 // TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
-abstract contract CTokenZeroExtBase is CErc20Storage, CTokenEvents, CTokenInterface, CDelegateInterface {}
+abstract contract CTokenZeroExtBase is CErc20Storage, CTokenEvents, CTokenInterface, CDelegateInterface {
+  /**
+ * @notice Emitted when implementation is changed
+   */
+  event NewImplementation(address oldImplementation, address newImplementation);
+}
 
 abstract contract CErc20DelegatorBase is CErc20Storage, CTokenEvents {}
 

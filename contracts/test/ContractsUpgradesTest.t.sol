@@ -55,20 +55,18 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testFeeDistributorUpgrade() public fork(BSC_MAINNET) {
-    address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
+    // TODO use an already deployed market
+    CErc20Delegate oldCercDelegate = new CErc20Delegate();
 
     // before upgrade
     FeeDistributor ffdProxy = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, , ) = ffdProxy.latestCErc20Delegate(oldCercDelegate);
-    //    bool whitelistedBefore = ffdProxy.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
+    (address latestCErc20DelegateBefore, , ) = ffdProxy.latestCErc20Delegate(oldCercDelegate.delegateType());
 
     emit log_uint(marketsCounterBefore);
     emit log_address(ownerBefore);
-    //    if (whitelistedBefore) emit log("whitelisted before");
-    //    else emit log("should be whitelisted");
 
     // upgrade
     {
@@ -85,17 +83,13 @@ contract ContractsUpgradesTest is BaseTest {
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
-    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate);
-    //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
+    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate.delegateType());
 
     emit log_uint(marketsCounterAfter);
     emit log_address(ownerAfter);
-    //    if (whitelistedAfter) emit log("whitelisted After");
-    //    else emit log("should be whitelisted");
 
     assertEq(latestCErc20DelegateBefore, latestCErc20DelegateAfter, "latest delegates do not match");
     assertEq(marketsCounterBefore, marketsCounterAfter, "markets counter does not match");
-    //    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
 
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
@@ -133,9 +127,10 @@ contract ContractsUpgradesTest is BaseTest {
         for (uint8 j = 0; j < markets.length; j++) {
           CErc20Delegate market = CErc20Delegate(address(markets[j]));
 
-          address currentImpl = market.implementation();
-          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
+          uint8 currentDelegateType = market.delegateType();
+          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentDelegateType);
 
+          address currentImpl = market.implementation();
           if (currentImpl != upgradeToImpl) emit log_address(address(market));
           assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 

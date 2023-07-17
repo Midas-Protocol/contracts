@@ -11,7 +11,7 @@ import "./CToken.sol";
 contract CErc20Delegate is CErc20 {
 
   function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
-    uint8 fnsCount = 5;
+    uint8 fnsCount = 6;
 
     bytes4[] memory superFunctionSelectors = super._getExtensionFunctions();
     functionSelectors = new bytes4[](superFunctionSelectors.length + fnsCount);
@@ -22,6 +22,7 @@ contract CErc20Delegate is CErc20 {
 
     functionSelectors[--fnsCount + superFunctionSelectors.length] = this.implementation.selector;
     functionSelectors[--fnsCount + superFunctionSelectors.length] = this.contractType.selector;
+    functionSelectors[--fnsCount + superFunctionSelectors.length] = this.delegateType.selector;
     functionSelectors[--fnsCount + superFunctionSelectors.length] = this._becomeImplementation.selector;
     functionSelectors[--fnsCount + superFunctionSelectors.length] = this._setImplementationSafe.selector;
     functionSelectors[--fnsCount + superFunctionSelectors.length] = this._prepare.selector;
@@ -36,12 +37,7 @@ contract CErc20Delegate is CErc20 {
   }
 
   function implementation() public view returns (address) {
-    address[] memory currentExtensions = LibDiamond.listExtensions();
-    if (currentExtensions.length == 0) {
-      return address(0);
-    } else {
-      return address(currentExtensions[0]);
-    }
+    return LibDiamond.getExtensionForFunction(this.delegateType.selector);
   }
 
   /**
@@ -60,36 +56,34 @@ contract CErc20Delegate is CErc20 {
     bool allowResign,
     bytes memory becomeImplementationData
   ) internal {
-    address currentDelegate = implementation();
-    // Check whitelist
-    require(IFeeDistributor(ionicAdmin).cErc20DelegateWhitelist(currentDelegate, implementation_, allowResign), "!impl");
-
     // Call _resignImplementation internally (this delegate's code)
     if (allowResign) _resignImplementation();
 
+    address currentDelegate = LibDiamond.getExtensionForFunction(this.delegateType.selector);
     LibDiamond.registerExtension(DiamondExtension(implementation_), DiamondExtension(currentDelegate));
 
     this._becomeImplementation(becomeImplementationData);
 
-//    emit NewImplementation(oldImplementation, implementation);
+    emit NewImplementation(currentDelegate, implementation_);
   }
 
   function _updateExtensions() internal {
-//    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getCErc20DelegateExtensions(implementation);
-//    address[] memory currentExtensions = LibDiamond.listExtensions();
-//
-//    // don't update if they are the same
-//    if (latestExtensions.length == 1 && currentExtensions.length == 1 && latestExtensions[0] == currentExtensions[0])
-//      return;
-//
-//    // removed the current (old) extensions
-//    for (uint256 i = 0; i < currentExtensions.length; i++) {
-//      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
-//    }
-//    // add the new extensions
-//    for (uint256 i = 0; i < latestExtensions.length; i++) {
-//      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
-//    }
+    address currentDelegate = LibDiamond.getExtensionForFunction(this.delegateType.selector);
+    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getCErc20DelegateExtensions(currentDelegate);
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+
+    // don't update if they are the same
+    if (latestExtensions.length == 1 && currentExtensions.length == 1 && latestExtensions[0] == currentExtensions[0])
+      return;
+
+    // removed the current (old) extensions
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+    // add the new extensions
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
   }
 
   /**
@@ -116,16 +110,22 @@ contract CErc20Delegate is CErc20 {
    */
   function _prepare() external payable override {
     if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
-      address currentDelegate = implementation();
+      uint8 currentDelegateType = delegateType();
       (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFeeDistributor(
         ionicAdmin
-      ).latestCErc20Delegate(currentDelegate);
+      ).latestCErc20Delegate(currentDelegateType);
+
+      address currentDelegate = LibDiamond.getExtensionForFunction(this.delegateType.selector);
       if (currentDelegate != latestCErc20Delegate) {
         _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);
       } else {
         _updateExtensions();
       }
     }
+  }
+
+  function delegateType() public pure virtual override returns (uint8) {
+    return 1;
   }
 
   function contractType() external pure virtual override returns (string memory) {
