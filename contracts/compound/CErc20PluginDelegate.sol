@@ -22,8 +22,24 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   IERC4626 public plugin;
 
-  /**
-   * @notice Delegate interface to become the implementation
+  function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
+    uint8 fnsCount = 2;
+
+    bytes4[] memory superFunctionSelectors = super._getExtensionFunctions();
+    functionSelectors = new bytes4[](superFunctionSelectors.length + fnsCount);
+
+    for (uint256 i = 0; i < superFunctionSelectors.length; i++) {
+      functionSelectors[i] = superFunctionSelectors[i];
+    }
+
+    functionSelectors[--fnsCount + superFunctionSelectors.length] = this.plugin.selector;
+    functionSelectors[--fnsCount + superFunctionSelectors.length] = this._updatePlugin.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+  }
+
+    /**
+     * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
    */
   function _becomeImplementation(bytes memory data) public virtual override {
@@ -79,7 +95,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @notice Gets balance of the plugin in terms of the underlying
    * @return The quantity of underlying tokens owned by this contract
    */
-  function getCashPrior() internal view override returns (uint256) {
+  function getCashInternal() internal view override returns (uint256) {
     return plugin.previewRedeem(plugin.balanceOf(address(this)));
   }
 

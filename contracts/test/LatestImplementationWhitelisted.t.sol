@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import { CErc20 } from "../compound/CErc20.sol";
+import { CErc20 } from "../compound/CToken.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";

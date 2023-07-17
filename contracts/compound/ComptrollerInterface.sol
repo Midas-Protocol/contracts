@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 import { ICErc20 } from "./CTokenInterfaces.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 interface ComptrollerInterface {
   function isDeprecated(ICErc20 cToken) external view returns (bool);
@@ -10,8 +11,9 @@ interface ComptrollerInterface {
   function _become(address _unitroller) external;
 
   function _deployMarket(
-    bool,
+    DiamondExtension firstExtension,
     bytes memory constructorData,
+    bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
   ) external returns (uint256);
 

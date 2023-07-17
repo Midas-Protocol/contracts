@@ -15,7 +15,7 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
-import { CErc20 } from "../compound/CErc20.sol";
+import { CErc20 } from "../compound/CToken.sol";
 import { IonicFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";

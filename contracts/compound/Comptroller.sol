@@ -1210,8 +1210,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
    */
   function _deployMarket(
-    bool,
+    DiamondExtension firstExtension,
     bytes calldata constructorData,
+    bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
   ) external returns (uint256) {
     // Check caller is admin
@@ -1224,7 +1225,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     ionicAdminHasRights = true;
 
     // Deploy via Ionic admin
-    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(constructorData));
+    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(firstExtension, constructorData, becomeImplData));
     // Reset Ionic admin rights to the original value
     ionicAdminHasRights = oldFuseAdminHasRights;
     // Support market here in the Comptroller

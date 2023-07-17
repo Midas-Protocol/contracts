@@ -18,7 +18,7 @@ import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
 import { PoolLens } from "../PoolLens.sol";
 import { IonicLiquidator } from "../IonicLiquidator.sol";
-import { CErc20 } from "../compound/CErc20.sol";
+import { CErc20 } from "../compound/CToken.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { AuthoritiesRegistry } from "../ionic/AuthoritiesRegistry.sol";

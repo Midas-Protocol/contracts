@@ -3,11 +3,10 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../ionic/IFlashLoanReceiver.sol";
-import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
+import { CTokenExtensionBase, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
-import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
@@ -703,8 +702,8 @@ contract CTokenFirstExtension is
     if (!localOnly) comptroller._afterNonReentrant();
   }
 
-  function asCToken() internal view returns (CTokenInterface) {
-    return CTokenInterface(address(this));
+  function asCToken() internal view returns (CErc20Interface) {
+    return CErc20Interface(address(this));
   }
 
   function multicall(bytes[] calldata data)

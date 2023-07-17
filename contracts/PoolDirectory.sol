@@ -331,11 +331,6 @@ contract PoolDirectory is SafeOwnableUpgradeable {
   }
 
   /**
-   * @dev placeholder var to keep the storage gap
-   */
-  mapping(address => address[]) private placeholder;
-
-  /**
    * @notice Modify existing Ionic pool name.
    */
   function setPoolName(uint256 index, string calldata name) external {

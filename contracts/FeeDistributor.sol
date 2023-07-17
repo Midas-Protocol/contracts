@@ -148,7 +148,11 @@ contract FeeDistributor is SafeOwnableUpgradeable {
    * @dev Deploys a CToken for an underlying ERC20
    * @param constructorData Encoded construction data for `CToken initialize()`
    */
-  function deployCErc20(bytes calldata constructorData) external returns (address) {
+  function deployCErc20(
+    DiamondExtension firstExtension,
+    bytes calldata constructorData,
+    bytes calldata becomeImplData
+  ) external returns (address) {
     // Make sure comptroller == msg.sender
     (address underlying, address comptroller) = abi.decode(constructorData[0:64], (address, address));
     require(comptroller == msg.sender, "Comptroller is not sender.");
@@ -158,6 +162,16 @@ contract FeeDistributor is SafeOwnableUpgradeable {
 
     bytes memory cErc20DelegatorCreationCode = abi.encodePacked(type(CErc20Delegator).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(0, salt, cErc20DelegatorCreationCode);
+
+    // register the first ext
+    DiamondBase(proxy)._registerExtension(firstExtension, DiamondExtension(address(0)));
+    // derive the other exts
+    DiamondExtension[] memory ctokenExts = cErc20DelegateExtensions[address(firstExtension)];
+    for (uint256 i = 0; i < ctokenExts.length; i++) {
+      if (ctokenExts[i] == firstExtension) continue;
+      DiamondBase(proxy)._registerExtension(ctokenExts[i], DiamondExtension(address(0)));
+    }
+    CErc20PluginDelegate(address(proxy))._becomeImplementation(becomeImplData);
 
     return proxy;
   }
@@ -260,12 +274,6 @@ contract FeeDistributor is SafeOwnableUpgradeable {
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
   mapping(address => CDelegateUpgradeData) public _latestCErc20Delegate;
-
-  /**
-   * @dev Latest CEtherDelegate implementation for each existing implementation.
-   */
-  /// keep this in the storage to not break the layout
-  mapping(address => CDelegateUpgradeData) public _latestCEtherDelegate;
 
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.

@@ -21,7 +21,7 @@ import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstE
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
-import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
+import { CErc20 } from "../compound/CToken.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
@@ -80,10 +80,16 @@ contract DeployMarketsTest is Test {
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
 
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
-    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
+    cErc20DelegateExtensions[0] = cErc20Delegate;
+    cErc20DelegateExtensions[1] = new CTokenFirstExtension();
+    ionicAdmin._setCErc20DelegateExtensions(address(0), cErc20DelegateExtensions);
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+
+    cErc20DelegateExtensions[0] = cErc20PluginDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+
+    cErc20DelegateExtensions[0] = cErc20PluginRewardsDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
 
     for (uint256 i = 0; i < 7; i++) {
@@ -155,7 +161,7 @@ contract DeployMarketsTest is Test {
   function testDeployCErc20Delegate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -163,11 +169,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 
@@ -191,7 +196,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -199,11 +204,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(mockERC4626)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(mockERC4626),
       0.9e18
     );
 
@@ -239,7 +243,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginRewardsDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -247,11 +251,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginRewardsDelegate),
-        abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken)),
       0.9e18
     );
 
@@ -286,7 +289,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -294,11 +297,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(mockERC4626)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(mockERC4626),
       0.9e18
     );
 
@@ -335,7 +337,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -343,11 +345,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(pluginA)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(pluginA),
       0.9e18
     );
 
@@ -374,7 +375,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -382,11 +383,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(pluginA)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(pluginA),
       0.9e18
     );
 
@@ -457,7 +457,7 @@ contract DeployMarketsTest is Test {
   function testInflateExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -465,11 +465,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 
@@ -511,7 +510,7 @@ contract DeployMarketsTest is Test {
   function testSupplyCapInflatedExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -519,11 +518,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 

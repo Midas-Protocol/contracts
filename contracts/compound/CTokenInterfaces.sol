@@ -57,11 +57,6 @@ abstract contract CTokenStorage is CTokenAdminStorage {
    */
   uint256 internal constant reserveFactorPlusFeesMaxMantissa = 1e18;
 
-  /*
-   * LEGACY USE ONLY: Pending administrator for this contract
-   */
-  address payable private __pendingAdmin;
-
   /**
    * @notice Contract which oversees inter-cToken operations
    */
@@ -161,11 +156,9 @@ abstract contract CTokenStorage is CTokenAdminStorage {
    * Share of seized collateral taken as fees
    */
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
-
-  // TODO remove after the next deploy
-  bool public constant isCEther = false;
 }
 
+// TODO merge with CTokenStorage
 abstract contract CErc20Storage is CTokenStorage {
   /**
    * @notice Underlying asset for this CToken
@@ -365,13 +358,43 @@ interface CErc20Interface is CTokenInterface {
   ) external returns (uint256);
 }
 
+interface CDelegateInterface {
+  /**
+   * @notice Called by the admin to update the implementation of the delegator
+   * @param implementation_ The address of the new implementation for delegation
+   * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
+   * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
+   */
+  function _setImplementationSafe(
+    address implementation_,
+    bool allowResign,
+    bytes calldata becomeImplementationData
+  ) external virtual;
+
+  /**
+   * @notice Called by the delegator on a delegate to initialize it for duty
+   * @dev Should revert if any issues arise which make it unfit for delegation
+   * @param data The encoded bytes data for any initialization
+   */
+  function _becomeImplementation(bytes calldata data) external virtual;
+
+  /**
+   * @notice Function called before all delegator functions
+   * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
+   */
+  function _prepare() external payable virtual;
+
+  function contractType() external pure virtual returns (string memory);
+}
+
 abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {}
 
-abstract contract CTokenBase is CTokenStorage, CTokenEvents, CTokenInterface {}
+// TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
+abstract contract CTokenZeroExtBase is CErc20Storage, CTokenEvents, CTokenInterface, CDelegateInterface {}
 
-abstract contract CErc20Base is CErc20Storage, CTokenEvents, CErc20Interface {}
+abstract contract CErc20DelegatorBase is CErc20Storage, CTokenEvents {}
 
-interface CTokenStorageInterface {
+interface CErc20StorageInterface {
   function admin() external view returns (address);
 
   function adminHasRights() external view returns (bool);
@@ -407,9 +430,7 @@ interface CTokenStorageInterface {
   function totalBorrows() external view returns (uint256);
 
   function accrualBlockNumber() external view returns (uint256);
-}
 
-interface CErc20StorageInterface is CTokenStorageInterface {
   function underlying() external view returns (address);
 }
 
@@ -417,11 +438,8 @@ interface CErc20PluginStorageInterface is CErc20StorageInterface {
   function plugin() external view returns (address);
 }
 
-interface ICTokenBase is CTokenInterface, CTokenStorageInterface {}
-
-interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {}
-
-interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {}
+// TODO merge with ICErc20
+interface ICToken is CErc20Interface, CTokenExtensionInterface, CErc20StorageInterface {}
 
 interface ICErc20 is CErc20StorageInterface, ICToken {}
 

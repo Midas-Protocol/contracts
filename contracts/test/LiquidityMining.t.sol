@@ -13,8 +13,7 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { CErc20 } from "../compound/CErc20.sol";
-import { CToken } from "../compound/CToken.sol";
+import { CErc20, CToken } from "../compound/CToken.sol";
 import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
@@ -116,7 +115,7 @@ contract LiquidityMiningTest is BaseTest {
     ionicAdmin._editCErc20DelegateWhitelist(emptyAddresses, newImplementation, falseBoolArray, trueBoolArray);
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -124,11 +123,10 @@ contract LiquidityMiningTest is BaseTest {
         InterestRateModel(address(interestModel)),
         "CUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 

@@ -4,8 +4,7 @@ pragma solidity >=0.4.23;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 
-import { CErc20 } from "../../compound/CErc20.sol";
-import { CToken } from "../../compound/CToken.sol";
+import { CErc20, CToken } from "../../compound/CToken.sol";
 import { JumpRateModel } from "../../compound/JumpRateModel.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
@@ -212,7 +211,7 @@ contract WithPool is BaseTest {
     uint256 _collateralFactorMantissa
   ) public {
     comptroller._deployMarket(
-      false,
+      cErc20Delegate,
       abi.encode(
         _underlyingToken,
         comptroller,
@@ -220,11 +219,10 @@ contract WithPool is BaseTest {
         InterestRateModel(address(interestModel)),
         name,
         symbol,
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       _collateralFactorMantissa
     );
   }
@@ -233,7 +231,7 @@ contract WithPool is BaseTest {
     whitelistPlugin(_erc4626, _erc4626);
 
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -241,11 +239,10 @@ contract WithPool is BaseTest {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(_erc4626),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(_erc4626),
       _collateralFactorMantissa
     );
   }
@@ -254,7 +251,7 @@ contract WithPool is BaseTest {
     whitelistPlugin(_mockERC4626Dynamic, _mockERC4626Dynamic);
 
     comptroller._deployMarket(
-      false,
+      cErc20PluginRewardsDelegate,
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -262,11 +259,10 @@ contract WithPool is BaseTest {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginRewardsDelegate),
-        abi.encode(_mockERC4626Dynamic),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(_mockERC4626Dynamic),
       _collateralFactorMantissa
     );
   }

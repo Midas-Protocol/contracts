@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "../ionic/AuthoritiesRegistry.sol";
+import "../ionic/DiamondExtension.sol";
 
 interface IFeeDistributor {
   function minBorrowEth() external view returns (uint256);
@@ -45,7 +46,11 @@ interface IFeeDistributor {
 
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (address[] memory);
 
-  function deployCErc20(bytes calldata constructorData) external returns (address);
+  function deployCErc20(
+    DiamondExtension firstExtension,
+    bytes calldata constructorData,
+    bytes calldata becomeImplData
+  ) external returns (address);
 
   function canCall(
     address pool,
