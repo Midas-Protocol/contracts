@@ -39,15 +39,17 @@ contract AuthoritiesRegistry is SafeOwnableUpgradeable {
     IComptroller pool = IComptroller(poolAddress);
     PoolRolesAuthority auth = poolsAuthorities[address(pool)];
 
-    require(address(auth) != address(0), "no such authority");
-    require(msg.sender == owner() || msg.sender == poolAddress, "not owner or pool");
+    if (msg.sender != poolAddress || address(auth) != address(0)) {
+      require(address(auth) != address(0), "no such authority");
+      require(msg.sender == owner() || msg.sender == poolAddress, "not owner or pool");
 
-    auth.configureRegistryCapabilities();
-    auth.configurePoolSupplierCapabilities(pool);
-    auth.configurePoolBorrowerCapabilities(pool);
-    // everyone can be a liquidator
-    auth.configureOpenPoolLiquidatorCapabilities(pool);
-    auth.configureLeveredPositionCapabilities(pool);
+      auth.configureRegistryCapabilities();
+      auth.configurePoolSupplierCapabilities(pool);
+      auth.configurePoolBorrowerCapabilities(pool);
+      // everyone can be a liquidator
+      auth.configureOpenPoolLiquidatorCapabilities(pool);
+      auth.configureLeveredPositionCapabilities(pool);
+    }
   }
 
   function canCall(
