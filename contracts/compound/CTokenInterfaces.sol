@@ -439,8 +439,8 @@ interface CErc20PluginStorageInterface is CErc20StorageInterface {
 }
 
 // TODO merge with ICErc20
-interface ICToken is CErc20Interface, CTokenExtensionInterface, CErc20StorageInterface {}
+interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {}
 
-interface ICErc20 is CErc20StorageInterface, ICToken {}
+interface ICErc20 is ICToken, CDelegateInterface {}
 
-interface ICErc20Plugin is CErc20PluginStorageInterface, ICToken {}
+interface ICErc20Plugin is CErc20PluginStorageInterface, ICToken, CDelegateInterface {}

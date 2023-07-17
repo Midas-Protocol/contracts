@@ -454,11 +454,12 @@ contract FeeDistributor is SafeOwnableUpgradeable {
     pool._toggleAutoImplementations(true);
 
     // auto upgrade the pool
+    // TODO switch to _prepare()
     pool.enterMarkets(new address[](0));
 
     for (uint8 i = 0; i < markets.length; i++) {
-      // auto upgrade the market
-      markets[i].accrueInterest();
+      // upgrade the market
+      markets[i]._prepare();
     }
 
     if (!autoImplOnBefore) pool._toggleAutoImplementations(false);

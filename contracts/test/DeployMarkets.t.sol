@@ -149,6 +149,7 @@ contract DeployMarketsTest is Test {
     ionicAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
+    newAr.setUserRole(comptrollerAddress, address(ionicAdmin), poolAuth.SUPPLIER_ROLE(), true);
   }
 
   function setUp() public {
@@ -319,9 +320,9 @@ contract DeployMarketsTest is Test {
       abi.encode(address(0)) // should trigger use of latest implementation
     );
 
-    // trigger the auto implementations
-    vm.prank(address(7));
-    ICErc20(address(cToken)).accrueInterest();
+    // run the upgrade
+    vm.prank(ionicAdmin.owner());
+    ionicAdmin.autoUpgradePool(comptroller);
 
     address implAfter = cToken.implementation();
 
@@ -409,9 +410,9 @@ contract DeployMarketsTest is Test {
     whitelistPlugin(address(pluginA), address(pluginB));
     ionicAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
 
-    // trigger the auto implementations from a non-admin address
-    vm.prank(address(7));
-    cToken.accrueInterest();
+    // run the upgrade
+    vm.prank(ionicAdmin.owner());
+    ionicAdmin.autoUpgradePool(comptroller);
 
     address pluginImplAfter = address(cToken.plugin());
     address implAfter = CErc20PluginDelegate(address(cToken)).implementation();

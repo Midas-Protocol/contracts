@@ -84,7 +84,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
       deposit(amount);
     }
 
-    emit NewPluginImplementation(address(plugin), _plugin);
+    emit NewPluginImplementation(oldImplementation, _plugin);
   }
 
   /*** CToken Overrides ***/
