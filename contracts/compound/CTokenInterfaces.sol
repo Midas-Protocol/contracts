@@ -352,10 +352,9 @@ interface CDelegatorInterface {
   function _setImplementationSafe(address implementation_, bytes calldata becomeImplementationData) external;
 
   /**
-   * @notice Function called before all delegator functions
    * @dev upgrades the implementation if necessary
    */
-  function _prepare() external payable;
+  function _upgrade() external payable;
 }
 
 interface CDelegateInterface {

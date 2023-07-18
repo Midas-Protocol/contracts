@@ -141,18 +141,16 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
    * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
    */
   function _setImplementationInternal(address implementation_, bytes memory becomeImplementationData) internal {
-    address currentDelegate = implementation();
-    LibDiamond.registerExtension(DiamondExtension(implementation_), DiamondExtension(currentDelegate));
+    address delegateBefore = implementation();
     _updateExtensions(implementation_);
 
-    // TODO can we replace it with reinitialize? "_becomeImplementation(bytes)"
     _functionCall(
       address(this),
       abi.encodeWithSelector(CDelegateInterface._becomeImplementation.selector, becomeImplementationData),
       "!become impl"
     );
 
-    emit NewImplementation(currentDelegate, implementation_);
+    emit NewImplementation(delegateBefore, implementation_);
   }
 
   function _updateExtensions(address newDelegate) internal {
@@ -183,10 +181,9 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
   }
 
   /**
-   * @notice Function called before all delegator functions
    * @dev upgrades the implementation if necessary
    */
-  function _prepare() external payable override {
+  function _upgrade() external payable override {
     require(msg.sender == address(this) || hasAdminRights(), "!self or admin");
 
     (bool success, bytes memory data) = address(this).staticcall(abi.encodeWithSignature("delegateType()"));

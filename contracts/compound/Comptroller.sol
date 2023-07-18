@@ -942,10 +942,7 @@ contract Comptroller is ComptrollerBase, ComptrollerInterface, ComptrollerErrorR
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _addRewardsDistributor(address distributor) external returns (uint256) {
-    // Check caller is admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ADD_REWARDS_DISTRIBUTOR_OWNER_CHECK);
-    }
+    require(hasAdminRights(), "!admin");
 
     // Check marker method
     require(IIonicFlywheel(distributor).isRewardsDistributor(), "!isRewardsDistributor");
@@ -1201,7 +1198,7 @@ contract Comptroller is ComptrollerBase, ComptrollerInterface, ComptrollerErrorR
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
    */
   function _deployMarket(
-    DiamondExtension firstExtension,
+    uint8 delegateType,
     bytes calldata constructorData,
     bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
@@ -1216,7 +1213,7 @@ contract Comptroller is ComptrollerBase, ComptrollerInterface, ComptrollerErrorR
     ionicAdminHasRights = true;
 
     // Deploy via Ionic admin
-    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(firstExtension, constructorData, becomeImplData));
+    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(delegateType, constructorData, becomeImplData));
     // Reset Ionic admin rights to the original value
     ionicAdminHasRights = oldFuseAdminHasRights;
     // Support market here in the Comptroller

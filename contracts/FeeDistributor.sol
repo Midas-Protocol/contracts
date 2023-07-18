@@ -175,7 +175,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
    * @param constructorData Encoded construction data for `CToken initialize()`
    */
   function deployCErc20(
-    DiamondExtension firstExtension,
+    uint8 delegateType,
     bytes calldata constructorData,
     bytes calldata becomeImplData
   ) external returns (address) {
@@ -189,12 +189,14 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     bytes memory cErc20DelegatorCreationCode = abi.encodePacked(type(CErc20Delegator).creationCode, constructorData);
     address proxy = Create2Upgradeable.deploy(0, salt, cErc20DelegatorCreationCode);
 
-    // register the first ext
-    DiamondBase(proxy)._registerExtension(firstExtension, DiamondExtension(address(0)));
-    // derive the other exts
-    DiamondExtension[] memory ctokenExts = cErc20DelegateExtensions[address(firstExtension)];
+    CDelegateUpgradeData memory data = _latestCErc20Delegate[delegateType];
+    DiamondExtension delegateAsExtension = DiamondExtension(data.implementation);
+    // register the first extension
+    DiamondBase(proxy)._registerExtension(delegateAsExtension, DiamondExtension(address(0)));
+    // derive and configure the other extensions
+    DiamondExtension[] memory ctokenExts = cErc20DelegateExtensions[address(delegateAsExtension)];
     for (uint256 i = 0; i < ctokenExts.length; i++) {
-      if (ctokenExts[i] == firstExtension) continue;
+      if (ctokenExts[i] == delegateAsExtension) continue;
       DiamondBase(proxy)._registerExtension(ctokenExts[i], DiamondExtension(address(0)));
     }
     CErc20PluginDelegate(address(proxy))._becomeImplementation(becomeImplData);
@@ -341,11 +343,11 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     ICErc20[] memory markets = pool.getAllMarkets();
 
     // auto upgrade the pool
-    pool._prepare();
+    pool._upgrade();
 
     for (uint8 i = 0; i < markets.length; i++) {
       // upgrade the market
-      markets[i]._prepare();
+      markets[i]._upgrade();
     }
   }
 

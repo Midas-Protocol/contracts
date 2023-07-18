@@ -25,7 +25,7 @@ interface IFeeDistributor {
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (address[] memory);
 
   function deployCErc20(
-    DiamondExtension firstExtension,
+    uint8 delegateType,
     bytes calldata constructorData,
     bytes calldata becomeImplData
   ) external returns (address);

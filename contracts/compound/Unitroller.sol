@@ -10,7 +10,7 @@ import "./Comptroller.sol";
  * @dev Storage for the comptroller is at this address, while execution is delegated via the Diamond Extensions
  * CTokens should reference this contract as their comptroller.
  */
-contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, DiamondBase {
+contract Unitroller is ComptrollerV3Storage, ComptrollerErrorReporter, DiamondBase {
   /**
    * @notice Event emitted when the admin rights are changed
    */
@@ -102,14 +102,13 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, Diamond
   }
 
   function comptrollerImplementation() public view returns (address) {
-    return LibDiamond.getExtensionForFunction(bytes4(keccak256(bytes("_deployMarket(address,bytes,bytes,uint256)"))));
+    return LibDiamond.getExtensionForFunction(bytes4(keccak256(bytes("_deployMarket(uint8,bytes,bytes,uint256)"))));
   }
 
   /**
-   * @notice Function called before all delegator functions
    * @dev upgrades the implementation if necessary
    */
-  function _prepare() external payable {
+  function _upgrade() external payable {
     require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
 
     address currentImplementation = comptrollerImplementation();

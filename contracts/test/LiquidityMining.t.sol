@@ -105,7 +105,7 @@ contract LiquidityMiningTest is BaseTest {
 
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20Delegate,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,

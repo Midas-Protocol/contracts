@@ -12,7 +12,7 @@ interface ComptrollerInterface {
   function isDeprecated(ICErc20 cToken) external view returns (bool);
 
   function _deployMarket(
-    DiamondExtension firstExtension,
+    uint8 delegateType,
     bytes memory constructorData,
     bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
@@ -300,7 +300,7 @@ interface ComptrollerExtensionInterface {
 interface UnitrollerInterface {
   function comptrollerImplementation() external view returns (address);
 
-  function _prepare() external payable;
+  function _upgrade() external payable;
 
   function _acceptAdmin() external returns (uint256);
 

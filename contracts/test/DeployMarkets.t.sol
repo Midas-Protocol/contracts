@@ -129,7 +129,7 @@ contract DeployMarketsTest is Test {
   function testDeployCErc20Delegate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20Delegate,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -162,7 +162,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20PluginDelegate,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -207,7 +207,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20PluginRewardsDelegate,
+      cErc20PluginRewardsDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -251,7 +251,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20PluginDelegate,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -295,7 +295,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20PluginDelegate,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -330,7 +330,7 @@ contract DeployMarketsTest is Test {
 
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20PluginDelegate,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -378,7 +378,7 @@ contract DeployMarketsTest is Test {
   function testInflateExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20Delegate,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -431,7 +431,7 @@ contract DeployMarketsTest is Test {
   function testSupplyCapInflatedExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      cErc20Delegate,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,

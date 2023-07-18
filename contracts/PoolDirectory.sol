@@ -172,7 +172,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
 
     // Setup the pool
     IComptroller comptrollerProxy = IComptroller(proxy);
-    comptrollerProxy._prepare();
+    comptrollerProxy._upgrade();
 
     // Set pool parameters
     require(comptrollerProxy._setCloseFactor(closeFactor) == 0, "Failed to set pool close factor.");

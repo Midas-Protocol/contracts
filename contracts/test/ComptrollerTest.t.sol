@@ -10,13 +10,14 @@ import { PoolDirectory } from "../PoolDirectory.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel-v2/interfaces/IFlywheelRewards.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 
 contract ComptrollerTest is BaseTest {
   IComptroller internal comptroller;
@@ -26,23 +27,29 @@ contract ComptrollerTest is BaseTest {
   event Failure(uint256 error, uint256 info, uint256 detail);
 
   function setUp() public {
-    ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-    comptroller = IComptroller(address(new Comptroller()));
-    IonicFlywheel impl = new IonicFlywheel();
-    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
-    flywheel = IonicFlywheel(address(proxy));
-    flywheel.initialize(rewardToken, IFlywheelRewards(address(2)), IFlywheelBooster(address(3)), address(this));
+    {
+      Unitroller proxy = new Unitroller(payable(address(this)));
+      proxy._registerExtension(new Comptroller(), DiamondExtension(address(0)));
+      comptroller = IComptroller(address(proxy));
+    }
+    {
+      ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
+      IonicFlywheel impl = new IonicFlywheel();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
+      flywheel = IonicFlywheel(address(proxy));
+      flywheel.initialize(rewardToken, IFlywheelRewards(address(2)), IFlywheelBooster(address(3)), address(this));
+    }
   }
 
   function test__setFlywheel() external {
+    vm.prank(comptroller.admin());
     comptroller._addRewardsDistributor(address(flywheel));
     assertEq(comptroller.rewardsDistributors(0), address(flywheel));
   }
 
   function test__setFlywheelRevertsIfNonOwner() external {
     vm.startPrank(nonOwner);
-    vm.expectEmit(false, false, false, true, address(comptroller));
-    emit Failure(1, 2, 0);
+    vm.expectRevert("!admin");
     comptroller._addRewardsDistributor(address(flywheel));
   }
 

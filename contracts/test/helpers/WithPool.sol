@@ -168,7 +168,7 @@ contract WithPool is BaseTest {
     uint256 _collateralFactorMantissa
   ) public {
     comptroller._deployMarket(
-      cErc20Delegate,
+      cErc20Delegate.delegateType(),
       abi.encode(
         _underlyingToken,
         comptroller,
@@ -186,7 +186,7 @@ contract WithPool is BaseTest {
 
   function deployCErc20PluginDelegate(address _erc4626, uint256 _collateralFactorMantissa) public {
     comptroller._deployMarket(
-      cErc20PluginDelegate,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -204,7 +204,7 @@ contract WithPool is BaseTest {
 
   function deployCErc20PluginRewardsDelegate(address _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
     comptroller._deployMarket(
-      cErc20PluginRewardsDelegate,
+      cErc20PluginRewardsDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
