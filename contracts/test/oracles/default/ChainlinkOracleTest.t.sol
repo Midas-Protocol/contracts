@@ -33,7 +33,7 @@ contract ChainlinkOraclesTest is BaseTest {
     address[] memory aggregators = new address[](1);
     aggregators[0] = aggregatorAddress;
 
-    vm.prank(oracle.admin());
+    vm.prank(oracle.owner());
     oracle.setPriceFeeds(underlyings, aggregators, ChainlinkPriceOracleV2.FeedBaseCurrency.USD);
   }
 

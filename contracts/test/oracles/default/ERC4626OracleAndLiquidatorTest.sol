@@ -62,8 +62,9 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
   function setUpBaseOracles() public {
     setUpMpoAndAddresses();
     BasePriceOracle[] memory oracles = new BasePriceOracle[](2);
-    chainlinkOracle = new ChainlinkPriceOracleV2(mpo.admin(), true, address(wethToken), nativeUsdPriceFeed);
-    vm.prank(chainlinkOracle.admin());
+    chainlinkOracle = new ChainlinkPriceOracleV2();
+    chainlinkOracle.initialize(address(usdcToken), nativeUsdPriceFeed);
+    vm.prank(chainlinkOracle.owner());
     chainlinkOracle.setPriceFeeds(
       asArray(address(usdcToken), address(wbtcToken)),
       asArray(usdcEthPriceFeed, wbtcEthPriceFeed),
@@ -172,7 +173,7 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
     uint256 redeemValue = (mpo.price(address(erc4626Vault)) * balance) / 1e18;
     // get the redeemed value of the output token
     uint256 redeemOutputTokenValue = (mpo.price(address(_outputToken)) * liquidatorBalance) /
-      10**ERC20Upgradeable(address(_outputToken)).decimals();
+      10 ** ERC20Upgradeable(address(_outputToken)).decimals();
     // ensure they are approximately equal
     assertApproxEqRel(redeemValue, redeemOutputTokenValue, 3e16, "!diff > 3%");
 
