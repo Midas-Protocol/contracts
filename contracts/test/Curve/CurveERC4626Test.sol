@@ -9,7 +9,7 @@ import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { FlywheelCore } from "flywheel-v2/FlywheelCore.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { ICErc20PluginRewards } from "../../compound/CTokenInterfaces.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 struct RewardsCycle {
@@ -48,9 +48,9 @@ contract CurveERC4626Test is AbstractERC4626Test {
     initialStrategyBalance = 0;
     initialStrategySupply = 0;
     deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
-    marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
-    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
+    marketAddress = comptroller.cTokensByUnderlying(address(underlyingToken));
+    ICErc20PluginRewards cToken = ICErc20PluginRewards(marketAddress);
+    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), abi.encode(address(plugin)));
     assertEq(address(cToken.plugin()), address(plugin));
     marketKey = ERC20(marketAddress);
     CurveGaugeERC4626(address(plugin)).setRewardDestination(marketAddress);
@@ -155,7 +155,7 @@ contract CurveERC4626Test is AbstractERC4626Test {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
+    ICErc20PluginRewards(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     for (uint8 i; i < flywheels.length; i++) {

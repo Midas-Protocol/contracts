@@ -224,7 +224,7 @@ contract ExtensionsTest is MarketsTest {
     if (totalSupplyBefore == 0) return; // total supply should be non-zero
 
     // TODO
-    _upgradeMarket(CErc20Delegate(address(asDelegator)));
+    _upgradeMarket(ICErc20(address(asDelegator)));
 
     // check if the extension was added
     address[] memory extensions = asDelegator._listExtensions();

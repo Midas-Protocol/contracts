@@ -18,7 +18,6 @@ interface IFeeDistributor {
     view
     returns (
       address cErc20Delegate,
-      bool allowResign,
       bytes memory becomeImplementationData
     );
 

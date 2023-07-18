@@ -63,7 +63,7 @@ contract ContractsUpgradesTest is BaseTest {
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, , ) = ffdProxy.latestCErc20Delegate(oldCercDelegate.delegateType());
+    (address latestCErc20DelegateBefore, ) = ffdProxy.latestCErc20Delegate(oldCercDelegate.delegateType());
 
     emit log_uint(marketsCounterBefore);
     emit log_address(ownerBefore);
@@ -83,7 +83,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
-    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate.delegateType());
+    (address latestCErc20DelegateAfter, ) = ffd.latestCErc20Delegate(oldCercDelegate.delegateType());
 
     emit log_uint(marketsCounterAfter);
     emit log_address(ownerAfter);
@@ -125,10 +125,10 @@ contract ContractsUpgradesTest is BaseTest {
         IComptroller pool = IComptroller(pools[i].comptroller);
         ICErc20[] memory markets = pool.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
-          CErc20Delegate market = CErc20Delegate(address(markets[j]));
+          ICErc20 market = markets[j];
 
           uint8 currentDelegateType = market.delegateType();
-          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentDelegateType);
+          (address upgradeToImpl, ) = ffd.latestCErc20Delegate(currentDelegateType);
 
           address currentImpl = market.implementation();
           if (currentImpl != upgradeToImpl) emit log_address(address(market));

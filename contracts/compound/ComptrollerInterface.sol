@@ -6,8 +6,6 @@ import { ICErc20 } from "./CTokenInterfaces.sol";
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 interface ComptrollerInterface {
-  function _prepare() external payable;
-
   function isDeprecated(ICErc20 cToken) external view returns (bool);
 
   function _deployMarket(
@@ -296,11 +294,23 @@ interface ComptrollerExtensionInterface {
   ) external view returns (uint256);
 }
 
+interface UnitrollerInterface {
+  function comptrollerImplementation() external view returns (address);
+
+  function _prepare() external payable;
+
+  function _acceptAdmin() external returns (uint256);
+
+  function _setPendingAdmin(address newPendingAdmin) external returns (uint256);
+
+  function _toggleAdminRights(bool hasRights) external returns (uint256);
+}
+
 interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {}
 
-interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
+//interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
 
-interface IComptroller is IComptrollerBase, ComptrollerExtensionInterface {}
+interface IComptroller is ComptrollerInterface, ComptrollerExtensionInterface, UnitrollerInterface, ComptrollerStorageInterface {}
 
 abstract contract ComptrollerBase is ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)

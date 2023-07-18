@@ -3,30 +3,16 @@ pragma solidity >=0.8.0;
 
 import { IComptroller } from "./ComptrollerInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
+import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
 abstract contract CTokenAdminStorage {
   /*
    * Administrator for Ionic
    */
   address payable public ionicAdmin;
-
-  /**
-   * @dev LEGACY USE ONLY: Administrator for this contract
-   */
-  address payable internal __admin;
-
-  /**
-   * @dev LEGACY USE ONLY: Whether or not the Ionic admin has admin rights
-   */
-  bool internal __ionicAdminHasRights;
-
-  /**
-   * @dev LEGACY USE ONLY: Whether or not the admin has admin rights
-   */
-  bool internal __adminHasRights;
 }
 
-abstract contract CTokenStorage is CTokenAdminStorage {
+abstract contract CErc20Storage is CTokenAdminStorage {
   /**
    * @dev Guard variable for re-entrancy checks
    */
@@ -156,10 +142,7 @@ abstract contract CTokenStorage is CTokenAdminStorage {
    * Share of seized collateral taken as fees
    */
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
-}
 
-// TODO merge with CTokenStorage
-abstract contract CErc20Storage is CTokenStorage {
   /**
    * @notice Underlying asset for this CToken
    */
@@ -358,19 +341,26 @@ interface CErc20Interface is CTokenInterface {
   ) external returns (uint256);
 }
 
-interface CDelegateInterface {
+interface CDelegatorInterface {
+  function implementation() external view returns (address);
   /**
    * @notice Called by the admin to update the implementation of the delegator
    * @param implementation_ The address of the new implementation for delegation
-   * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
    * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
    */
   function _setImplementationSafe(
     address implementation_,
-    bool allowResign,
     bytes calldata becomeImplementationData
   ) external;
 
+  /**
+   * @notice Function called before all delegator functions
+   * @dev upgrades the implementation if necessary
+   */
+  function _prepare() external payable;
+}
+
+interface CDelegateInterface {
   /**
    * @notice Called by the delegator on a delegate to initialize it for duty
    * @dev Should revert if any issues arise which make it unfit for delegation
@@ -378,33 +368,36 @@ interface CDelegateInterface {
    */
   function _becomeImplementation(bytes calldata data) external;
 
-  /**
-   * @notice Function called before all delegator functions
-   * @dev upgrades the implementation if necessary
-   */
-  function _prepare() external payable;
-
   function delegateType() external pure returns (uint8);
 
   function contractType() external pure returns (string memory);
 }
 
-abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {}
-
-// TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
-abstract contract CTokenZeroExtBase is CErc20Storage, CTokenEvents, CTokenInterface, CDelegateInterface {
+abstract contract CErc20AdminBase is CErc20Storage {
   /**
-   * @notice Emitted when implementation is changed
+   * @notice Returns a boolean indicating if the sender has admin rights
    */
-  event NewImplementation(address oldImplementation, address newImplementation);
+  function hasAdminRights() internal view returns (bool) {
+    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
+    return
+    (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
+    (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
+  }
 }
 
-abstract contract CErc20DelegatorBase is CErc20Storage, CTokenEvents {}
+abstract contract CTokenExtensionBase is CErc20AdminBase, CTokenExtensionEvents, CTokenExtensionInterface {}
+
+// TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
+abstract contract CTokenZeroExtBase is CErc20AdminBase, CTokenEvents, CTokenInterface, CDelegateInterface {}
+
+abstract contract CErc20DelegatorBase is CErc20AdminBase, CTokenEvents, CDelegatorInterface {}
 
 interface CErc20StorageInterface {
   function admin() external view returns (address);
 
   function adminHasRights() external view returns (bool);
+
+  function ionicAdmin() external view returns (address);
 
   function ionicAdminHasRights() external view returns (bool);
 
@@ -445,11 +438,15 @@ interface CErc20PluginStorageInterface is CErc20StorageInterface {
   function plugin() external view returns (address);
 }
 
-// TODO merge with ICErc20
-interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {
-
+interface CErc20PluginRewardsInterface is CErc20PluginStorageInterface {
+  function approve(address, address) external;
 }
 
-interface ICErc20 is ICToken, CDelegateInterface {}
+// TODO merge with ICErc20 after merging CErc20 with CToken
+interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {}
 
-interface ICErc20Plugin is CErc20PluginStorageInterface, ICToken, CDelegateInterface {}
+interface ICErc20 is ICToken, CDelegatorInterface, CDelegateInterface {}
+
+interface ICErc20Plugin is CErc20PluginStorageInterface, ICErc20 {}
+
+interface ICErc20PluginRewards is CErc20PluginRewardsInterface, ICErc20 {}

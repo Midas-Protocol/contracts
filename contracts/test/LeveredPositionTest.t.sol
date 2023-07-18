@@ -178,8 +178,8 @@ abstract contract LeveredPositionTest is MarketsTest {
 
   function upgradePoolAndMarkets() internal {
     _upgradeExistingPool(address(collateralMarket.comptroller()));
-    _upgradeMarket(CErc20Delegate(address(collateralMarket)));
-    _upgradeMarket(CErc20Delegate(address(stableMarket)));
+    _upgradeMarket(collateralMarket);
+    _upgradeMarket(stableMarket);
   }
 
   function _unpauseMarkets(address collat, address stable) internal {

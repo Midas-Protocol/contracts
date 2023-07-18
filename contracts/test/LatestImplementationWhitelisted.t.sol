@@ -1,8 +1,7 @@
 pragma solidity ^0.8.0;
 
 import { CErc20 } from "../compound/CToken.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
-import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
@@ -40,7 +39,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
+      IComptroller comptroller = IComptroller(payable(pools[i].comptroller));
       address implementation = comptroller.comptrollerImplementation();
 
       bool added = false;
@@ -66,11 +65,11 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
+      IComptroller comptroller = IComptroller(payable(pools[i].comptroller));
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
-        address implementation = delegate.implementation();
+        ICErc20 market = markets[j];
+        address implementation = market.implementation();
 
         bool added = false;
         for (uint8 k = 0; k < implementationsSet.length; k++) {
@@ -86,7 +85,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = ionicAdmin
+      (address latestCErc20Delegate, bytes memory becomeImplementationData) = ionicAdmin
         .latestCErc20Delegate(CErc20Delegate(implementationsSet[k]).delegateType());
 
       assertTrue(implementationsSet[k] == latestCErc20Delegate, "some markets need to be upgraded");
@@ -97,7 +96,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
+      IComptroller comptroller = IComptroller(payable(pools[i].comptroller));
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));

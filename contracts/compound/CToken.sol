@@ -7,7 +7,7 @@ import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
-import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
+import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
 
@@ -23,16 +23,6 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
       "not authorized"
     );
     _;
-  }
-
-  /**
-   * @notice Returns a boolean indicating if the sender has admin rights
-   */
-  function hasAdminRights() internal view returns (bool) {
-    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
-    return
-      (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
-      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
   }
 
   /**
@@ -844,7 +834,7 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     totalAdminFees = totalAdminFees - withdrawAmount;
 
     // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(UnitrollerAdminStorage(address(comptroller)).admin(), withdrawAmount);
+    doTransferOut(ComptrollerV3Storage(address(comptroller)).admin(), withdrawAmount);
 
     return uint256(Error.NO_ERROR);
   }

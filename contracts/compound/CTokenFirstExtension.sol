@@ -4,7 +4,6 @@ pragma solidity >=0.8.0;
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../ionic/IFlashLoanReceiver.sol";
 import { CTokenExtensionBase, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
-import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
@@ -652,16 +651,6 @@ contract CTokenFirstExtension is CTokenExtensionBase, TokenErrorReporter, Expone
     totalBorrows -= amount;
 
     emit Flash(msg.sender, amount);
-  }
-
-  /**
-   * @notice Returns a boolean indicating if the sender has admin rights
-   */
-  function hasAdminRights() internal view returns (bool) {
-    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
-    return
-      (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
-      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
   }
 
   /*** Reentrancy Guard ***/

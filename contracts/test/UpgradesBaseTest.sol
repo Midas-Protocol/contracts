@@ -10,6 +10,7 @@ import { Unitroller } from "../compound/Unitroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -40,11 +41,11 @@ abstract contract UpgradesBaseTest is BaseTest {
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._registerExtension(comptrollerImplementationAddress, asUnitroller.comptrollerImplementation());
+    asUnitroller._registerExtension(DiamondExtension(comptrollerImplementationAddress), DiamondExtension(asUnitroller.comptrollerImplementation()));
     vm.stopPrank();
   }
 
-  function _upgradeMarketWithExtension(CErc20Delegate market) internal {
+  function _upgradeMarketWithExtension(ICErc20 market) internal {
     address implBefore = market.implementation();
 
     // instantiate the new implementation
@@ -68,6 +69,6 @@ abstract contract UpgradesBaseTest is BaseTest {
 
     // upgrade to the new delegate
     vm.prank(address(ffd));
-    market._setImplementationSafe(address(newImpl), false, becomeImplData);
+    market._setImplementationSafe(address(newImpl), becomeImplData);
   }
 }

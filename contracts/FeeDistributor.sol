@@ -19,7 +19,6 @@ contract FeeDistributorStorage {
 
   struct CDelegateUpgradeData {
     address implementation;
-    bool allowResign;
     bytes becomeImplementationData;
   }
 
@@ -237,7 +236,6 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     view
     returns (
       address,
-      bool,
       bytes memory
     )
   {
@@ -245,26 +243,23 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     bytes memory emptyBytes;
     return
       data.implementation != address(0)
-        ? (data.implementation, data.allowResign, data.becomeImplementationData)
-        : (address(0), false, emptyBytes);
+        ? (data.implementation, data.becomeImplementationData)
+        : (address(0), emptyBytes);
   }
 
   /**
    * @dev Sets the latest `CErc20Delegate` upgrade implementation address and data.
    * @param delegateType The old `CErc20Delegate` implementation address to upgrade from.
    * @param newImplementation Latest `CErc20Delegate` implementation address.
-   * @param allowResign Whether or not `resignImplementation` should be called on the old implementation before upgrade.
    * @param becomeImplementationData Data passed to the new implementation via `becomeImplementation` after upgrade.
    */
   function _setLatestCErc20Delegate(
     uint8 delegateType,
     address newImplementation,
-    bool allowResign,
     bytes calldata becomeImplementationData
   ) external onlyOwner {
     _latestCErc20Delegate[delegateType] = CDelegateUpgradeData(
       newImplementation,
-      allowResign,
       becomeImplementationData
     );
   }

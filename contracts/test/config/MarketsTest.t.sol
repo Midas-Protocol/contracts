@@ -11,6 +11,7 @@ import { Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 import { AuthoritiesRegistry } from "../../ionic/AuthoritiesRegistry.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -56,7 +57,7 @@ contract MarketsTest is BaseTest {
     }
   }
 
-  function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
+  function _prepareCTokenUpgrade(ICErc20 market) internal returns (address) {
     address implBefore = market.implementation();
     //emit log("implementation before");
     //emit log_address(implBefore);
@@ -70,7 +71,7 @@ contract MarketsTest is BaseTest {
 
     // set the new ctoken delegate as the latest
     vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(market.delegateType(), address(newImpl), false, abi.encode(address(0)));
+    ffd._setLatestCErc20Delegate(market.delegateType(), address(newImpl), abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
@@ -81,14 +82,14 @@ contract MarketsTest is BaseTest {
     return address(newImpl);
   }
 
-  function _upgradeMarket(CErc20Delegate asDelegate) internal {
-    address newDelegate = _prepareCTokenUpgrade(asDelegate);
+  function _upgradeMarket(ICErc20 market) internal {
+    address newDelegate = _prepareCTokenUpgrade(market);
 
     bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
       ? bytes("")
       : abi.encode(address(0));
-    vm.prank(asDelegate.ionicAdmin());
-    asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
+    vm.prank(market.ionicAdmin());
+    market._setImplementationSafe(newDelegate, becomeImplData);
   }
 
   function _prepareComptrollerUpgrade(address oldCompImpl) internal {
@@ -108,7 +109,7 @@ contract MarketsTest is BaseTest {
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._registerExtension(latestComptrollerImplementation, DiamondExtension(oldComptrollerImplementation));
+    asUnitroller._registerExtension(DiamondExtension(latestComptrollerImplementation), DiamondExtension(oldComptrollerImplementation));
     vm.stopPrank();
   }
 }

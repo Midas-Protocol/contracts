@@ -1257,85 +1257,14 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     return ComptrollerExtensionInterface(address(this));
   }
 
-  //// UPGRADES LOGIC
-
   function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
-    uint8 fnsCount = 3;
+    uint8 fnsCount = 0;
 
     functionSelectors = new bytes4[](fnsCount);
 
-    functionSelectors[--fnsCount] = this.comptrollerImplementation.selector;
-    functionSelectors[--fnsCount] = this._becomeImplementation.selector;
-    functionSelectors[--fnsCount] = this._prepare.selector;
+    //functionSelectors[--fnsCount] = this.zzzzzzzzz.selector;
 
     require(fnsCount == 0, "use the correct array length");
-  }
-
-  function comptrollerImplementation() public view returns (address) {
-    return LibDiamond.getExtensionForFunction(this._deployMarket.selector);
-  }
-
-  /**
-   * @notice Function called before all delegator functions
-   * @dev upgrades the implementation if necessary
-   */
-  function _prepare() external payable {
-    require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
-
-    address currentImplementation = comptrollerImplementation();
-    address latestComptrollerImplementation = IFeeDistributor(ionicAdmin).latestComptrollerImplementation(
-      currentImplementation
-    );
-
-    if (currentImplementation != latestComptrollerImplementation) {
-      LibDiamond.registerExtension(DiamondExtension(latestComptrollerImplementation), DiamondExtension(currentImplementation));
-      // update the extensions that are specific for the new comptroller
-      _updateExtensions();
-      // reinitialize
-      _functionCall(address(this), abi.encodeWithSignature("_becomeImplementation()"), "!become impl");
-    } else {
-      _updateExtensions();
-    }
-  }
-
-  function _functionCall(
-    address target,
-    bytes memory data,
-    string memory errorMessage
-  ) internal returns (bytes memory) {
-    (bool success, bytes memory returndata) = target.call(data);
-
-    if (!success) {
-      // Look for revert reason and bubble it up if present
-      if (returndata.length > 0) {
-        // The easiest way to bubble the revert reason is using memory via assembly
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-          let returndata_size := mload(returndata)
-          revert(add(32, returndata), returndata_size)
-        }
-      } else {
-        revert(errorMessage);
-      }
-    }
-
-    return returndata;
-  }
-
-  function _updateExtensions() internal {
-    address currentComptroller = comptrollerImplementation();
-    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getComptrollerExtensions(currentComptroller);
-    address[] memory currentExtensions = LibDiamond.listExtensions();
-
-    // removed the current (old) extensions
-    for (uint256 i = 0; i < currentExtensions.length; i++) {
-      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
-    }
-    // add the new extensions
-    for (uint256 i = 0; i < latestExtensions.length; i++) {
-      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
-    }
   }
 
   /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/

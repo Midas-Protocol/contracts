@@ -12,7 +12,7 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import { ICErc20, ICErc20Plugin } from "../compound/CTokenInterfaces.sol";
+import { ICErc20, ICErc20Plugin, ICErc20PluginRewards } from "../compound/CTokenInterfaces.sol";
 import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
@@ -221,7 +221,7 @@ contract DeployMarketsTest is Test {
     );
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20PluginRewards cToken = ICErc20PluginRewards(address(allMarkets[allMarkets.length - 1]));
 
     flywheel.addStrategyForRewards(ERC20(address(cToken)));
 
@@ -265,7 +265,7 @@ contract DeployMarketsTest is Test {
     );
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
 
@@ -274,7 +274,6 @@ contract DeployMarketsTest is Test {
     ionicAdmin._setLatestCErc20Delegate(
       cToken.delegateType(),
       address(cErc20PluginRewardsDelegate),
-      false,
       abi.encode(address(0)) // should trigger use of latest implementation
     );
 
@@ -350,14 +349,13 @@ contract DeployMarketsTest is Test {
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
 
     address pluginImplBefore = address(cToken.plugin());
-    address implBefore = CErc20PluginDelegate(address(cToken)).implementation();
-    uint8 delegateType = CErc20PluginDelegate(address(cToken)).delegateType();
+    address implBefore = cToken.implementation();
+    uint8 delegateType = cToken.delegateType();
 
     // just testing to replace the plugin delegate with the plugin rewards delegate
     ionicAdmin._setLatestCErc20Delegate(
       delegateType,
       address(cErc20PluginRewardsDelegate),
-      false,
       abi.encode(address(0)) // should trigger use of latest implementation
     );
     ionicAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
@@ -367,7 +365,7 @@ contract DeployMarketsTest is Test {
     ionicAdmin.autoUpgradePool(comptroller);
 
     address pluginImplAfter = address(cToken.plugin());
-    address implAfter = CErc20PluginDelegate(address(cToken)).implementation();
+    address implAfter = cToken.implementation();
 
     assertEq(pluginImplBefore, address(pluginA), "the old impl should be the A plugin");
     assertEq(pluginImplAfter, address(pluginB), "the new impl should be the B plugin");

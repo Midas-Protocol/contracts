@@ -95,6 +95,72 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, Diamond
     return uint256(Error.NO_ERROR);
   }
 
+  function comptrollerImplementation() public view returns (address) {
+    return LibDiamond.getExtensionForFunction(bytes4(keccak256(bytes("_deployMarket(address,bytes,bytes,uint256)"))));
+  }
+
+  /**
+   * @notice Function called before all delegator functions
+   * @dev upgrades the implementation if necessary
+   */
+  function _prepare() external payable {
+    require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
+
+    address currentImplementation = comptrollerImplementation();
+    address latestComptrollerImplementation = IFeeDistributor(ionicAdmin).latestComptrollerImplementation(
+      currentImplementation
+    );
+
+    if (currentImplementation != latestComptrollerImplementation) {
+      LibDiamond.registerExtension(DiamondExtension(latestComptrollerImplementation), DiamondExtension(currentImplementation));
+      // update the extensions that are specific for the new comptroller
+      _updateExtensions(latestComptrollerImplementation);
+      // reinitialize
+      _functionCall(address(this), abi.encodeWithSignature("_becomeImplementation()"), "!become impl");
+    } else {
+      _updateExtensions(latestComptrollerImplementation);
+    }
+  }
+
+  function _functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    (bool success, bytes memory returndata) = target.call(data);
+
+    if (!success) {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+
+    return returndata;
+  }
+
+  function _updateExtensions(address currentComptroller) internal {
+    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getComptrollerExtensions(currentComptroller);
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+
+    // removed the current (old) extensions
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+    // add the new extensions
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
+  }
+
   /**
    * @dev register a logic extension
    * @param extensionToAdd the extension whose functions are to be added
