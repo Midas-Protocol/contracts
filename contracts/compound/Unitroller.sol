@@ -11,7 +11,6 @@ import "./Comptroller.sol";
  * CTokens should reference this contract as their comptroller.
  */
 contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, DiamondBase {
-
   /**
    * @notice Event emitted when the admin rights are changed
    */
@@ -112,7 +111,10 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, Diamond
     );
 
     if (currentImplementation != latestComptrollerImplementation) {
-      LibDiamond.registerExtension(DiamondExtension(latestComptrollerImplementation), DiamondExtension(currentImplementation));
+      LibDiamond.registerExtension(
+        DiamondExtension(latestComptrollerImplementation),
+        DiamondExtension(currentImplementation)
+      );
       // update the extensions that are specific for the new comptroller
       _updateExtensions(latestComptrollerImplementation);
       // reinitialize

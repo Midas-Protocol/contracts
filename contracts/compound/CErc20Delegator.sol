@@ -140,16 +140,17 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
    * @param implementation_ The address of the new implementation for delegation
    * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
    */
-  function _setImplementationInternal(
-    address implementation_,
-    bytes memory becomeImplementationData
-  ) internal {
+  function _setImplementationInternal(address implementation_, bytes memory becomeImplementationData) internal {
     address currentDelegate = implementation();
     LibDiamond.registerExtension(DiamondExtension(implementation_), DiamondExtension(currentDelegate));
     _updateExtensions(currentDelegate);
 
     // TODO can we replace it with reinitialize? "_becomeImplementation(bytes)"
-    _functionCall(address(this), abi.encodeWithSelector(CDelegateInterface._becomeImplementation.selector, becomeImplementationData), "!become impl");
+    _functionCall(
+      address(this),
+      abi.encodeWithSelector(CDelegateInterface._becomeImplementation.selector, becomeImplementationData),
+      "!become impl"
+    );
 
     emit NewImplementation(currentDelegate, implementation_);
   }
@@ -173,10 +174,7 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
    * @param implementation_ The address of the new implementation for delegation
    * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
    */
-  function _setImplementationSafe(
-    address implementation_,
-    bytes calldata becomeImplementationData
-  ) external override {
+  function _setImplementationSafe(address implementation_, bytes calldata becomeImplementationData) external override {
     // Check admin rights
     require(hasAdminRights(), "!admin");
 
@@ -195,9 +193,8 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
     require(success, "no delegate type");
 
     uint8 currentDelegateType = abi.decode(data, (uint8));
-    (address latestCErc20Delegate, bytes memory becomeImplementationData) = IFeeDistributor(
-      ionicAdmin
-    ).latestCErc20Delegate(currentDelegateType);
+    (address latestCErc20Delegate, bytes memory becomeImplementationData) = IFeeDistributor(ionicAdmin)
+      .latestCErc20Delegate(currentDelegateType);
 
     address currentDelegate = implementation();
     if (currentDelegate != latestCErc20Delegate) {

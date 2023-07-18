@@ -310,7 +310,14 @@ interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerSto
 
 //interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
 
-interface IComptroller is ComptrollerInterface, ComptrollerExtensionInterface, UnitrollerInterface, ComptrollerStorageInterface {}
+interface IComptroller is
+  ComptrollerInterface,
+  ComptrollerExtensionInterface,
+  UnitrollerInterface,
+  ComptrollerStorageInterface
+{
+
+}
 
 abstract contract ComptrollerBase is ComptrollerInterface {
   /// @notice Indicator that this is a Comptroller contract (for inspection)

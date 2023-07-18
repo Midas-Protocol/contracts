@@ -85,8 +85,9 @@ contract LatestImplementationWhitelisted is BaseTest {
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
-      (address latestCErc20Delegate, bytes memory becomeImplementationData) = ionicAdmin
-        .latestCErc20Delegate(CErc20Delegate(implementationsSet[k]).delegateType());
+      (address latestCErc20Delegate, bytes memory becomeImplementationData) = ionicAdmin.latestCErc20Delegate(
+        CErc20Delegate(implementationsSet[k]).delegateType()
+      );
 
       assertTrue(implementationsSet[k] == latestCErc20Delegate, "some markets need to be upgraded");
     }

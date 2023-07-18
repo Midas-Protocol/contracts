@@ -16,7 +16,6 @@ import { DiamondExtension, DiamondBase } from "./ionic/DiamondExtension.sol";
 import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
 
 contract FeeDistributorStorage {
-
   struct CDelegateUpgradeData {
     address implementation;
     bytes becomeImplementationData;
@@ -127,10 +126,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
    * @param _minBorrowEth Minimum borrow balance (in ETH) per user per Ionic pool asset (only checked on new borrows, not redemptions).
    * @param _maxUtilizationRate Maximum utilization rate (scaled by 1e18) for Ionic pool assets (only checked on new borrows, not redemptions).
    */
-  function _setPoolLimits(
-    uint256 _minBorrowEth,
-    uint256 _maxUtilizationRate
-  ) external onlyOwner {
+  function _setPoolLimits(uint256 _minBorrowEth, uint256 _maxUtilizationRate) external onlyOwner {
     minBorrowEth = _minBorrowEth;
     maxUtilizationRate = _maxUtilizationRate;
   }
@@ -231,14 +227,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
    */
-  function latestCErc20Delegate(uint8 delegateType)
-    external
-    view
-    returns (
-      address,
-      bytes memory
-    )
-  {
+  function latestCErc20Delegate(uint8 delegateType) external view returns (address, bytes memory) {
     CDelegateUpgradeData memory data = _latestCErc20Delegate[delegateType];
     bytes memory emptyBytes;
     return
@@ -258,10 +247,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     address newImplementation,
     bytes calldata becomeImplementationData
   ) external onlyOwner {
-    _latestCErc20Delegate[delegateType] = CDelegateUpgradeData(
-      newImplementation,
-      becomeImplementationData
-    );
+    _latestCErc20Delegate[delegateType] = CDelegateUpgradeData(newImplementation, becomeImplementationData);
   }
 
   /**

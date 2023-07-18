@@ -152,7 +152,10 @@ contract WithPool is BaseTest {
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._registerExtension(newComptrollerImplementation, DiamondExtension(asUnitroller.comptrollerImplementation()));
+    asUnitroller._registerExtension(
+      newComptrollerImplementation,
+      DiamondExtension(asUnitroller.comptrollerImplementation())
+    );
     vm.stopPrank();
   }
 

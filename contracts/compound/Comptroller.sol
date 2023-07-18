@@ -325,15 +325,19 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     return uint256(Error.NO_ERROR);
   }
 
-
   /**
    * @notice Validates mint and reverts on rejection. May emit logs.
-     * @param cToken Asset being minted
-     * @param minter The address minting the tokens
-     * @param actualMintAmount The amount of the underlying asset being minted
-     * @param mintTokens The number of tokens being minted
-     */
-  function mintVerify(address cToken, address minter, uint actualMintAmount, uint mintTokens) external {
+   * @param cToken Asset being minted
+   * @param minter The address minting the tokens
+   * @param actualMintAmount The amount of the underlying asset being minted
+   * @param mintTokens The number of tokens being minted
+   */
+  function mintVerify(
+    address cToken,
+    address minter,
+    uint256 actualMintAmount,
+    uint256 mintTokens
+  ) external {
     // Add minter to suppliers mapping
     suppliers[minter] = true;
   }

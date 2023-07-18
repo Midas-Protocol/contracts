@@ -16,10 +16,7 @@ interface IFeeDistributor {
   function latestCErc20Delegate(uint8 delegateType)
     external
     view
-    returns (
-      address cErc20Delegate,
-      bytes memory becomeImplementationData
-    );
+    returns (address cErc20Delegate, bytes memory becomeImplementationData);
 
   function latestPluginImplementation(address oldImplementation) external view returns (address);
 

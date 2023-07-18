@@ -343,15 +343,13 @@ interface CErc20Interface is CTokenInterface {
 
 interface CDelegatorInterface {
   function implementation() external view returns (address);
+
   /**
    * @notice Called by the admin to update the implementation of the delegator
    * @param implementation_ The address of the new implementation for delegation
    * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
    */
-  function _setImplementationSafe(
-    address implementation_,
-    bytes calldata becomeImplementationData
-  ) external;
+  function _setImplementationSafe(address implementation_, bytes calldata becomeImplementationData) external;
 
   /**
    * @notice Function called before all delegator functions
@@ -380,15 +378,17 @@ abstract contract CErc20AdminBase is CErc20Storage {
   function hasAdminRights() internal view returns (bool) {
     ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
     return
-    (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
-    (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
+      (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
+      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
   }
 }
 
 abstract contract CTokenExtensionBase is CErc20AdminBase, CTokenExtensionEvents, CTokenExtensionInterface {}
 
 // TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
-abstract contract CTokenZeroExtBase is CErc20AdminBase, CTokenEvents, CTokenInterface, CDelegateInterface {}
+abstract contract CTokenZeroExtBase is CErc20AdminBase, CTokenEvents, CTokenInterface, CDelegateInterface {
+
+}
 
 abstract contract CErc20DelegatorBase is CErc20AdminBase, CTokenEvents, CDelegatorInterface {}
 
@@ -443,7 +443,9 @@ interface CErc20PluginRewardsInterface is CErc20PluginStorageInterface {
 }
 
 // TODO merge with ICErc20 after merging CErc20 with CToken
-interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {}
+interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {
+
+}
 
 interface ICErc20 is ICToken, CDelegatorInterface, CDelegateInterface {}
 

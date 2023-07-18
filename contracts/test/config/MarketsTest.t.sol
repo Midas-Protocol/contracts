@@ -109,7 +109,10 @@ contract MarketsTest is BaseTest {
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._registerExtension(DiamondExtension(latestComptrollerImplementation), DiamondExtension(oldComptrollerImplementation));
+    asUnitroller._registerExtension(
+      DiamondExtension(latestComptrollerImplementation),
+      DiamondExtension(oldComptrollerImplementation)
+    );
     vm.stopPrank();
   }
 }
