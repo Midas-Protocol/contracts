@@ -93,7 +93,7 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle, SafeOwnableUpgradeable {
 
     if (baseCurrency == FeedBaseCurrency.ETH) {
       (, int256 tokenEthPrice, , , ) = feed.latestRoundData();
-      return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10 ** uint256(feed.decimals())) : 0;
+      return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10**uint256(feed.decimals())) : 0;
     } else if (baseCurrency == FeedBaseCurrency.USD) {
       int256 nativeTokenUsdPrice;
       uint8 usdPriceDecimals;
@@ -111,7 +111,7 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle, SafeOwnableUpgradeable {
 
       return
         tokenUsdPrice >= 0
-          ? ((uint256(tokenUsdPrice) * 1e18 * (10 ** uint256(usdPriceDecimals))) / (10 ** uint256(feed.decimals()))) /
+          ? ((uint256(tokenUsdPrice) * 1e18 * (10**uint256(usdPriceDecimals))) / (10**uint256(feed.decimals()))) /
             uint256(nativeTokenUsdPrice)
           : 0;
     } else {
@@ -141,7 +141,7 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle, SafeOwnableUpgradeable {
     uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
     return
       underlyingDecimals <= 18
-        ? uint256(oraclePrice) * (10 ** (18 - underlyingDecimals))
-        : uint256(oraclePrice) / (10 ** (underlyingDecimals - 18));
+        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
+        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
   }
 }
