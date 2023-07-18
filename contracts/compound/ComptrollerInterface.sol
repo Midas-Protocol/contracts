@@ -318,7 +318,9 @@ interface IComptroller is
   ComptrollerExtensionInterface,
   UnitrollerInterface,
   ComptrollerStorageInterface
-{}
+{
+
+}
 
 abstract contract ComptrollerBase is ComptrollerV3Storage {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
