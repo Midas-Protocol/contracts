@@ -28,11 +28,6 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   bool public CAN_ADMIN_OVERWRITE;
 
   /**
-   * @dev The Wrapped native asset address.
-   */
-  address public WTOKEN;
-
-  /**
    * @notice DIA NATIVE/USD price feed contracts.
    */
   bytes32 public NATIVE_TOKEN_USD_FEED;
@@ -49,13 +44,11 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   IPyth public PYTH;
 
   function initialize(
-    address wtoken,
     address pythAddress,
     bytes32 nativeTokenUsdFeed,
     address usdToken
   ) public initializer {
     __SafeOwnable_init(msg.sender);
-    WTOKEN = wtoken;
     NATIVE_TOKEN_USD_FEED = nativeTokenUsdFeed;
     USD_TOKEN = usdToken;
     PYTH = IPyth(pythAddress);
@@ -86,9 +79,6 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
    * Assumes price feeds are 8 decimals (TODO: doublecheck)
    */
   function _price(address underlying) internal view returns (uint256) {
-    // Return 1e18 for WTOKEN
-    if (underlying == WTOKEN || underlying == address(0)) return 1e18;
-
     // Get token/native price from Oracle
     bytes32 feed = priceFeedIds[underlying];
     require(feed != "", "No oracle price feed found for this underlying ERC20 token.");
