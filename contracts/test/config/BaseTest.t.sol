@@ -16,7 +16,7 @@ abstract contract BaseTest is Test {
   uint128 constant ARBITRUM_ONE = 42161;
 
   uint128 constant BSC_CHAPEL = 97;
-  uint128 constant NEON_DEVNET = 245022926;
+  uint128 constant NEON_DEVNET = 245022934;
 
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;

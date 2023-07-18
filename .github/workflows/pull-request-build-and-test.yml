@@ -156,9 +156,9 @@ jobs:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      NEON_DEVNET_RPC_URL: https://devnet.neonevm.org
-      NEON_DEVNET_ARCHIVE_RPC_URL: https://devnet.neonevm.org
-      TEST_RUN_CHAINID: 245022926
+      NEON_RPC_URL: https://neon-proxy-mainnet.solana.p2p.org
+      NEON_ARCHIVE_RPC_URL: https://neon-proxy-mainnet.solana.p2p.org
+      TEST_RUN_CHAINID: 245022934
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
     runs-on: ubuntu-latest
     steps:

@@ -65,7 +65,7 @@ contract NeondevnetE2ETest is WithPool {
     );
     deal(address(underlyingToken), address(this), 10e18);
     deal(wtoken, address(this), 10e18);
-    setUpPool("neondevnet-test", false, 0.1e18, 1.1e18);
+    setUpPool("neon-test", false, 0.1e18, 1.1e18);
   }
 
   function testNeonDeployCErc20Delegate() public fork(NEON_DEVNET) {
