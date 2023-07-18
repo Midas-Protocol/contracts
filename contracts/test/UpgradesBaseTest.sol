@@ -40,8 +40,7 @@ abstract contract UpgradesBaseTest is BaseTest {
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(comptrollerImplementationAddress);
-    newComptrollerImplementation._become(address(asUnitroller));
+    asUnitroller._registerExtension(comptrollerImplementationAddress, asUnitroller.comptrollerImplementation());
     vm.stopPrank();
   }
 

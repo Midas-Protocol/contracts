@@ -7,6 +7,7 @@ import { IComptroller } from "./compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { Unitroller } from "./compound/Unitroller.sol";
 import "./ionic/SafeOwnableUpgradeable.sol";
+import "./ionic/DiamondExtension.sol";
 
 /**
  * @title PoolDirectory
@@ -171,13 +172,10 @@ contract PoolDirectory is SafeOwnableUpgradeable {
 
     // Setup Unitroller
     Unitroller unitroller = Unitroller(payable(proxy));
-    require(
-      unitroller._setPendingImplementation(implementation) == 0,
-      "Failed to set pending implementation on Unitroller."
-    ); // Checks Comptroller implementation whitelist
-    IComptroller comptrollerImplementation = IComptroller(implementation);
-    comptrollerImplementation._become(proxy);
+    unitroller._registerExtension(DiamondExtension(implementation), DiamondExtension(address(0)));
+
     IComptroller comptrollerProxy = IComptroller(proxy);
+    comptrollerProxy._prepare();
 
     // Set pool parameters
     require(comptrollerProxy._setCloseFactor(closeFactor) == 0, "Failed to set pool close factor.");
@@ -190,9 +188,6 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     // Whitelist
     if (enforceWhitelist)
       require(comptrollerProxy._setWhitelistEnforcement(true) == 0, "Failed to enforce supplier/borrower whitelist.");
-
-    // Enable auto-implementation
-    require(comptrollerProxy._toggleAutoImplementations(true) == 0, "Failed to enable pool auto implementations.");
 
     // Make msg.sender the admin
     require(unitroller._setPendingAdmin(msg.sender) == 0, "Failed to set pending admin on Unitroller.");

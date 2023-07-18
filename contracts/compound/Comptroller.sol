@@ -20,7 +20,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorReporter, Exponential, DiamondBase {
+contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorReporter, Exponential, DiamondExtension {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   /// @notice Emitted when an admin supports a market
@@ -46,9 +46,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
 
   /// @notice Emitted when the whitelist enforcement is changed
   event WhitelistEnforcementChanged(bool enforce);
-
-  /// @notice Emitted when auto implementations are toggled
-  event AutoImplementationsToggled(bool enabled);
 
   /// @notice Emitted when a new RewardsDistributor contract is added to hooks
   event AddedRewardsDistributor(address rewardsDistributor);
@@ -328,6 +325,19 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     return uint256(Error.NO_ERROR);
   }
 
+
+  /**
+   * @notice Validates mint and reverts on rejection. May emit logs.
+     * @param cToken Asset being minted
+     * @param minter The address minting the tokens
+     * @param actualMintAmount The amount of the underlying asset being minted
+     * @param mintTokens The number of tokens being minted
+     */
+  function mintVerify(address cToken, address minter, uint actualMintAmount, uint mintTokens) external {
+    // Add minter to suppliers mapping
+    suppliers[minter] = true;
+  }
+
   /**
    * @notice Validates redeem and reverts on rejection. May emit logs.
    * @param cToken Asset being redeemed
@@ -341,10 +351,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     uint256 redeemAmount,
     uint256 redeemTokens
   ) external override {
-    // Shh - currently unused
-    cToken;
-    redeemer;
-
     require(markets[msg.sender].isListed, "!market");
 
     // Require tokens is zero or amount is also zero
@@ -535,11 +541,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     address borrower,
     uint256 repayAmount
   ) external override returns (uint256) {
-    // Shh - currently unused
-    payer;
-    borrower;
-    repayAmount;
-
     // Make sure market is listed
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -566,9 +567,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     address borrower,
     uint256 repayAmount
   ) external override returns (uint256) {
-    // Shh - currently unused
-    liquidator;
-
     // Make sure markets are listed
     if (!markets[cTokenBorrowed].isListed || !markets[cTokenCollateral].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -618,11 +616,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!seizeGuardianPaused, "!seize:paused");
-
-    // Shh - currently unused
-    liquidator;
-    borrower;
-    seizeTokens;
 
     // Make sure markets are listed
     if (!markets[cTokenCollateral].isListed || !markets[cTokenBorrowed].isListed) {
@@ -1237,69 +1230,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
   }
 
-  /**
-   * @notice Toggles the auto-implementation feature
-   * @param enabled If the feature is to be enabled
-   * @return uint 0=success, otherwise a failure. (See enum Error for details)
-   */
-  function _toggleAutoImplementations(bool enabled) public returns (uint256) {
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.TOGGLE_AUTO_IMPLEMENTATIONS_ENABLED_OWNER_CHECK);
-    }
-
-    // Return no error if already set to the desired value
-    if (autoImplementation == enabled) return uint256(Error.NO_ERROR);
-
-    // Store autoImplementation with value enabled
-    autoImplementation = enabled;
-
-    // Emit AutoImplementationsToggled(enabled)
-    emit AutoImplementationsToggled(enabled);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  function _become(address _unitroller) public {
-    Unitroller unitroller = Unitroller(payable(_unitroller));
-    require(
-      (msg.sender == address(ionicAdmin) && unitroller.ionicAdminHasRights()) ||
-        (msg.sender == unitroller.admin() && unitroller.adminHasRights()),
-      "!admin"
-    );
-
-    uint256 changeStatus = unitroller._acceptImplementation();
-    require(changeStatus == 0, "!unauthorized - not pending impl");
-
-    Comptroller(payable(address(unitroller)))._becomeImplementation();
-  }
-
   function _becomeImplementation() external {
-    require(msg.sender == comptrollerImplementation, "!implementation");
-
-    address[] memory currentExtensions = LibDiamond.listExtensions();
-    for (uint256 i = 0; i < currentExtensions.length; i++) {
-      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
-    }
-
-    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getComptrollerExtensions(comptrollerImplementation);
-    for (uint256 i = 0; i < latestExtensions.length; i++) {
-      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
-    }
+    require(msg.sender == address(this), "!self call");
 
     if (!_notEnteredInitialized) {
       _notEntered = true;
       _notEnteredInitialized = true;
     }
-  }
-
-  /**
-   * @dev register a logic extension
-   * @param extensionToAdd the extension whose functions are to be added
-   * @param extensionToReplace the extension whose functions are to be removed/replaced
-   */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    require(msg.sender == address(ionicAdmin) && ionicAdminHasRights, "!unauthorized - no admin rights");
-    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
   /*** Helper Functions ***/
@@ -1318,6 +1255,87 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
 
   function asComptrollerExtension() internal view returns (ComptrollerExtensionInterface) {
     return ComptrollerExtensionInterface(address(this));
+  }
+
+  //// UPGRADES LOGIC
+
+  function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
+    uint8 fnsCount = 3;
+
+    functionSelectors = new bytes4[](fnsCount);
+
+    functionSelectors[--fnsCount] = this.comptrollerImplementation.selector;
+    functionSelectors[--fnsCount] = this._becomeImplementation.selector;
+    functionSelectors[--fnsCount] = this._prepare.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+  }
+
+  function comptrollerImplementation() public view returns (address) {
+    return LibDiamond.getExtensionForFunction(this._deployMarket.selector);
+  }
+
+  /**
+   * @notice Function called before all delegator functions
+   * @dev upgrades the implementation if necessary
+   */
+  function _prepare() external payable {
+    require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
+
+    address currentImplementation = comptrollerImplementation();
+    address latestComptrollerImplementation = IFeeDistributor(ionicAdmin).latestComptrollerImplementation(
+      currentImplementation
+    );
+
+    if (currentImplementation != latestComptrollerImplementation) {
+      LibDiamond.registerExtension(DiamondExtension(latestComptrollerImplementation), DiamondExtension(currentImplementation));
+      // update the extensions that are specific for the new comptroller
+      _updateExtensions();
+      // reinitialize
+      _functionCall(address(this), abi.encodeWithSignature("_becomeImplementation()"), "!become impl");
+    } else {
+      _updateExtensions();
+    }
+  }
+
+  function _functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    (bool success, bytes memory returndata) = target.call(data);
+
+    if (!success) {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+
+    return returndata;
+  }
+
+  function _updateExtensions() internal {
+    address currentComptroller = comptrollerImplementation();
+    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getComptrollerExtensions(currentComptroller);
+    address[] memory currentExtensions = LibDiamond.listExtensions();
+
+    // removed the current (old) extensions
+    for (uint256 i = 0; i < currentExtensions.length; i++) {
+      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
+    }
+    // add the new extensions
+    for (uint256 i = 0; i < latestExtensions.length; i++) {
+      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
+    }
   }
 
   /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/

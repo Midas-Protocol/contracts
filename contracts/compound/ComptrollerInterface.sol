@@ -6,9 +6,9 @@ import { ICErc20 } from "./CTokenInterfaces.sol";
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 interface ComptrollerInterface {
-  function isDeprecated(ICErc20 cToken) external view returns (bool);
+  function _prepare() external payable;
 
-  function _become(address _unitroller) external;
+  function isDeprecated(ICErc20 cToken) external view returns (bool);
 
   function _deployMarket(
     DiamondExtension firstExtension,
@@ -32,8 +32,6 @@ interface ComptrollerInterface {
   function _setWhitelistEnforcement(bool enforce) external returns (uint256);
 
   function _setWhitelistStatuses(address[] calldata _suppliers, bool[] calldata statuses) external returns (uint256);
-
-  function _toggleAutoImplementations(bool enabled) external returns (uint256);
 
   function _addRewardsDistributor(address distributor) external returns (uint256);
 
@@ -122,6 +120,13 @@ interface ComptrollerInterface {
     uint256 transferTokens
   ) external returns (uint256);
 
+  function mintVerify(
+    address cToken,
+    address minter,
+    uint256 actualMintAmount,
+    uint256 mintTokens
+  ) external;
+
   /*** Liquidity/Liquidation Calculations ***/
 
   function getAccountLiquidity(address account)
@@ -180,8 +185,6 @@ interface ComptrollerStorageInterface {
   function supplyCaps(address cToken) external view returns (uint256);
 
   function borrowCaps(address cToken) external view returns (uint256);
-
-  function autoImplementation() external view returns (bool);
 
   function markets(address cToken) external view returns (bool, uint256);
 

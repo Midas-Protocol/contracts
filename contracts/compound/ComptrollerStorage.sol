@@ -38,16 +38,6 @@ contract UnitrollerAdminStorage {
   function hasAdminRights() internal view returns (bool) {
     return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
   }
-
-  /**
-   * @notice Active brains of Unitroller
-   */
-  address public comptrollerImplementation;
-
-  /**
-   * @notice Pending brains of Unitroller
-   */
-  address public pendingComptrollerImplementation;
 }
 
 contract ComptrollerV1Storage is UnitrollerAdminStorage {
@@ -144,11 +134,6 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
 }
 
 contract ComptrollerV3Storage is ComptrollerV2Storage {
-  /**
-   * @dev Whether or not the implementation should be auto-upgraded.
-   */
-  bool public autoImplementation;
-
   /// @notice The borrowCapGuardian can set borrowCaps to any number for any market. Lowering the borrow cap could disable borrowing on the given market.
   address public borrowCapGuardian;
 

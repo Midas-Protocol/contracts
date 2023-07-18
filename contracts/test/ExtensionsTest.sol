@@ -205,12 +205,6 @@ contract ExtensionsTest is MarketsTest {
       emit log("market");
       emit log_address(address(someMarket));
 
-      Comptroller pool = Comptroller(payable(poolAddress));
-
-      // turn auto impl off
-      vm.prank(pool.admin());
-      pool._toggleAutoImplementations(false);
-
       try this._testExistingCTokenExtensionUpgrade(asDelegator) {} catch Error(string memory reason) {
         address plugin = address(CErc20PluginDelegate(address(asDelegator)).plugin());
         emit log("plugin");

@@ -7,24 +7,10 @@ import "./Comptroller.sol";
 
 /**
  * @title Unitroller
- * @dev Storage for the comptroller is at this address, while execution is delegated to the `comptrollerImplementation`.
+ * @dev Storage for the comptroller is at this address, while execution is delegated via the Diamond Extensions
  * CTokens should reference this contract as their comptroller.
  */
-contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
-  /**
-   * @notice Emitted when pendingComptrollerImplementation is changed
-   */
-  event NewPendingImplementation(address oldPendingImplementation, address newPendingImplementation);
-
-  /**
-   * @notice Emitted when pendingComptrollerImplementation is accepted, which means comptroller implementation is updated
-   */
-  event NewImplementation(address oldImplementation, address newImplementation);
-
-  /**
-   * @notice Event emitted when the Ionic admin rights are changed
-   */
-  event FuseAdminRightsToggled(bool hasRights);
+contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, DiamondBase {
 
   /**
    * @notice Event emitted when the admin rights are changed
@@ -42,51 +28,11 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
   event NewAdmin(address oldAdmin, address newAdmin);
 
   constructor(address payable _ionicAdmin) {
-    // Set admin to caller
     admin = msg.sender;
     ionicAdmin = _ionicAdmin;
   }
 
   /*** Admin Functions ***/
-
-  function _setPendingImplementation(address newPendingImplementation) public returns (uint256) {
-    // TODO remove pool owner permission?
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_IMPLEMENTATION_OWNER_CHECK);
-    }
-    //require(Comptroller(newPendingImplementation).ionicAdmin() == ionicAdmin, "ionicAdmin not matching");
-
-    address oldPendingImplementation = pendingComptrollerImplementation;
-    pendingComptrollerImplementation = newPendingImplementation;
-    emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Accepts new implementation of comptroller. msg.sender must be pendingImplementation
-   * @dev Admin function for new implementation to accept it's role as implementation
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _acceptImplementation() public returns (uint256) {
-    // Check caller is pendingImplementation and pendingImplementation ≠ address(0)
-    if (msg.sender != pendingComptrollerImplementation || pendingComptrollerImplementation == address(0)) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ACCEPT_PENDING_IMPLEMENTATION_ADDRESS_CHECK);
-    }
-
-    // Save current values for inclusion in log
-    address oldImplementation = comptrollerImplementation;
-    address oldPendingImplementation = pendingComptrollerImplementation;
-
-    comptrollerImplementation = pendingComptrollerImplementation;
-
-    pendingComptrollerImplementation = address(0);
-
-    emit NewImplementation(oldImplementation, comptrollerImplementation);
-    emit NewPendingImplementation(oldPendingImplementation, pendingComptrollerImplementation);
-
-    return uint256(Error.NO_ERROR);
-  }
 
   /**
    * @notice Toggles admin rights.
@@ -94,7 +40,6 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _toggleAdminRights(bool hasRights) external returns (uint256) {
-    // Check caller = admin
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.TOGGLE_ADMIN_RIGHTS_OWNER_CHECK);
     }
@@ -102,10 +47,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     // Check that rights have not already been set to the desired value
     if (adminHasRights == hasRights) return uint256(Error.NO_ERROR);
 
-    // Set adminHasRights
     adminHasRights = hasRights;
-
-    // Emit AdminRightsToggled()
     emit AdminRightsToggled(hasRights);
 
     return uint256(Error.NO_ERROR);
@@ -118,18 +60,12 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _setPendingAdmin(address newPendingAdmin) public returns (uint256) {
-    // Check caller = admin
     if (!hasAdminRights()) {
       return fail(Error.UNAUTHORIZED, FailureInfo.SET_PENDING_ADMIN_OWNER_CHECK);
     }
 
-    // Save current value, if any, for inclusion in log
     address oldPendingAdmin = pendingAdmin;
-
-    // Store pendingAdmin with value newPendingAdmin
     pendingAdmin = newPendingAdmin;
-
-    // Emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin)
     emit NewPendingAdmin(oldPendingAdmin, newPendingAdmin);
 
     return uint256(Error.NO_ERROR);
@@ -150,10 +86,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
     address oldAdmin = admin;
     address oldPendingAdmin = pendingAdmin;
 
-    // Store admin with value pendingAdmin
     admin = pendingAdmin;
-
-    // Clear the pending value
     pendingAdmin = address(0);
 
     emit NewAdmin(oldAdmin, admin);
@@ -163,44 +96,12 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter {
   }
 
   /**
-   * @dev Delegates execution to an implementation contract.
-   * It returns to the external caller whatever the implementation returns
-   * or forwards reverts.
+   * @dev register a logic extension
+   * @param extensionToAdd the extension whose functions are to be added
+   * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
-  fallback() external payable {
-    // Check for automatic implementation
-    if (msg.sender != address(this)) {
-      (bool callSuccess, bytes memory data) = address(this).staticcall(abi.encodeWithSignature("autoImplementation()"));
-      bool autoImplementation;
-      if (callSuccess) (autoImplementation) = abi.decode(data, (bool));
-
-      if (autoImplementation) {
-        address latestComptrollerImplementation = IFeeDistributor(ionicAdmin).latestComptrollerImplementation(
-          comptrollerImplementation
-        );
-
-        if (comptrollerImplementation != latestComptrollerImplementation) {
-          address oldImplementation = comptrollerImplementation; // Save current value for inclusion in log
-          comptrollerImplementation = latestComptrollerImplementation;
-          emit NewImplementation(oldImplementation, comptrollerImplementation);
-        }
-      }
-    }
-
-    // delegate all other functions to current implementation
-    (bool success, ) = comptrollerImplementation.delegatecall(msg.data);
-
-    assembly {
-      let free_mem_ptr := mload(0x40)
-      returndatacopy(free_mem_ptr, 0, returndatasize())
-
-      switch success
-      case 0 {
-        revert(free_mem_ptr, returndatasize())
-      }
-      default {
-        return(free_mem_ptr, returndatasize())
-      }
-    }
+  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
+    require(msg.sender == address(ionicAdmin), "!unauthorized");
+    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 }

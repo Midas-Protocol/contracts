@@ -16,7 +16,60 @@ import { DiamondExtension, DiamondBase } from "./ionic/DiamondExtension.sol";
 import { AuthoritiesRegistry } from "./ionic/AuthoritiesRegistry.sol";
 
 contract FeeDistributorStorage {
-  // TODO
+
+  struct CDelegateUpgradeData {
+    address implementation;
+    bool allowResign;
+    bytes becomeImplementationData;
+  }
+
+  /**
+   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
+   * @dev A value of 0 means unset whereas a negative value means 0.
+   */
+  mapping(address => int256) public customInterestFeeRates;
+
+  /**
+   * @dev Latest Comptroller implementation for each existing implementation.
+   */
+  mapping(address => address) internal _latestComptrollerImplementation;
+
+  /**
+   * @dev Latest CErc20Delegate implementation for each existing implementation.
+   */
+  mapping(uint8 => CDelegateUpgradeData) internal _latestCErc20Delegate;
+
+  /**
+   * @dev Latest Plugin implementation for each existing implementation.
+   */
+  mapping(address => address) internal _latestPluginImplementation;
+
+  mapping(address => DiamondExtension[]) public comptrollerExtensions;
+
+  mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
+
+  AuthoritiesRegistry public authoritiesRegistry;
+
+  /**
+   * @dev used as salt for the creation of new markets
+   */
+  uint256 public marketsCounter;
+
+  /**
+   * @dev Minimum borrow balance (in ETH) per user per Ionic pool asset (only checked on new borrows, not redemptions).
+   */
+  uint256 public minBorrowEth;
+
+  /**
+   * @dev Maximum utilization rate (scaled by 1e18) for Ionic pool assets (only checked on new borrows, not redemptions).
+   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
+   */
+  uint256 public maxUtilizationRate;
+
+  /**
+   * @notice The proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
+   */
+  uint256 public defaultInterestFeeRate;
 }
 
 /**
@@ -36,18 +89,12 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     require(_defaultInterestFeeRate <= 1e18, "Interest fee rate cannot be more than 100%.");
     __SafeOwnable_init(msg.sender);
     defaultInterestFeeRate = _defaultInterestFeeRate;
-    maxSupplyEth = type(uint256).max;
     maxUtilizationRate = type(uint256).max;
   }
 
   function reinitialize(AuthoritiesRegistry _ar) public onlyOwnerOrAdmin {
     authoritiesRegistry = _ar;
   }
-
-  /**
-   * @notice The proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
-   */
-  uint256 public defaultInterestFeeRate;
 
   /**
    * @dev Sets the default proportion of Ionic pool interest taken as a protocol fee.
@@ -77,35 +124,15 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   }
 
   /**
-   * @dev Minimum borrow balance (in ETH) per user per Ionic pool asset (only checked on new borrows, not redemptions).
-   */
-  uint256 public minBorrowEth;
-
-  /**
-   * @dev Maximum supply balance (in ETH) per user per Ionic pool asset.
-   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
-   */
-  uint256 public maxSupplyEth;
-
-  /**
-   * @dev Maximum utilization rate (scaled by 1e18) for Ionic pool assets (only checked on new borrows, not redemptions).
-   * No longer used as of `Rari-Capital/compound-protocol` version `fuse-v1.1.0`.
-   */
-  uint256 public maxUtilizationRate;
-
-  /**
    * @dev Sets the proportion of Ionic pool interest taken as a protocol fee.
    * @param _minBorrowEth Minimum borrow balance (in ETH) per user per Ionic pool asset (only checked on new borrows, not redemptions).
-   * @param _maxSupplyEth Maximum supply balance (in ETH) per user per Ionic pool asset.
    * @param _maxUtilizationRate Maximum utilization rate (scaled by 1e18) for Ionic pool assets (only checked on new borrows, not redemptions).
    */
   function _setPoolLimits(
     uint256 _minBorrowEth,
-    uint256 _maxSupplyEth,
     uint256 _maxUtilizationRate
   ) external onlyOwner {
     minBorrowEth = _minBorrowEth;
-    maxSupplyEth = _maxSupplyEth;
     maxUtilizationRate = _maxUtilizationRate;
   }
 
@@ -124,7 +151,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   }
 
   /**
-   * @dev Receives ETH fees.
+   * @dev Receives native fees.
    */
   receive() external payable {}
 
@@ -183,11 +210,6 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   /**
    * @dev Latest Comptroller implementation for each existing implementation.
    */
-  mapping(address => address) internal _latestComptrollerImplementation;
-
-  /**
-   * @dev Latest Comptroller implementation for each existing implementation.
-   */
   function latestComptrollerImplementation(address oldImplementation) external view returns (address) {
     return
       _latestComptrollerImplementation[oldImplementation] != address(0)
@@ -206,17 +228,6 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   {
     _latestComptrollerImplementation[oldImplementation] = newImplementation;
   }
-
-  struct CDelegateUpgradeData {
-    address implementation;
-    bool allowResign;
-    bytes becomeImplementationData;
-  }
-
-  /**
-   * @dev Latest CErc20Delegate implementation for each existing implementation.
-   */
-  mapping(uint8 => CDelegateUpgradeData) public _latestCErc20Delegate;
 
   /**
    * @dev Latest CErc20Delegate implementation for each existing implementation.
@@ -257,22 +268,6 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
       becomeImplementationData
     );
   }
-
-  /**
-   * @notice Maps Unitroller (Comptroller proxy) addresses to the proportion of Ionic pool interest taken as a protocol fee (scaled by 1e18).
-   * @dev A value of 0 means unset whereas a negative value means 0.
-   */
-  mapping(address => int256) public customInterestFeeRates;
-
-  /**
-   * @dev used as salt for the creation of new markets
-   */
-  uint256 public marketsCounter;
-
-  /**
-   * @dev Latest Plugin implementation for each existing implementation.
-   */
-  mapping(address => address) public _latestPluginImplementation;
 
   /**
    * @dev Latest Plugin implementation for each existing implementation.
@@ -334,8 +329,6 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     customInterestFeeRates[comptroller] = rate;
   }
 
-  mapping(address => DiamondExtension[]) public comptrollerExtensions;
-
   function getComptrollerExtensions(address comptroller) external view returns (DiamondExtension[] memory) {
     return comptrollerExtensions[comptroller];
   }
@@ -352,8 +345,6 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     DiamondBase(pool)._registerExtension(extensionToAdd, extensionToReplace);
   }
 
-  mapping(address => DiamondExtension[]) public cErc20DelegateExtensions;
-
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (DiamondExtension[] memory) {
     return cErc20DelegateExtensions[cErc20Delegate];
   }
@@ -367,26 +358,15 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
 
   function autoUpgradePool(IComptroller pool) external onlyOwner {
     ICErc20[] memory markets = pool.getAllMarkets();
-    bool autoImplOnBefore = pool.autoImplementation();
-    pool._toggleAutoImplementations(true);
 
     // auto upgrade the pool
-    // TODO switch to _prepare()
-    pool.enterMarkets(new address[](0));
+    pool._prepare();
 
     for (uint8 i = 0; i < markets.length; i++) {
       // upgrade the market
       markets[i]._prepare();
     }
-
-    if (!autoImplOnBefore) pool._toggleAutoImplementations(false);
   }
-
-  function toggleAutoimplementations(IComptroller pool, bool enabled) external onlyOwner {
-    pool._toggleAutoImplementations(enabled);
-  }
-
-  AuthoritiesRegistry public authoritiesRegistry;
 
   function canCall(
     address pool,

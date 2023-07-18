@@ -14,19 +14,6 @@ import { EIP20Interface } from "./EIP20Interface.sol";
  * @author Compound
  */
 contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
-  /*
-    // New implementations always get set via the settor (post-initialize)
-    delegateTo(
-      implementation_,
-      abi.encodeWithSignature(
-        "_setImplementationSafe(address,bool,bytes)",
-        implementation_,
-        false,
-        becomeImplementationData
-      )
-    );
-  */
-
   /**
    * @notice Initialize the new money market
    * @param underlying_ The address of the underlying asset

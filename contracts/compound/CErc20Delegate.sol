@@ -41,40 +41,28 @@ contract CErc20Delegate is CErc20 {
   }
 
   /**
-   * @notice Called by the delegator on a delegate to forfeit its responsibility
-   */
-  function _resignImplementation() internal virtual {}
-
-  /**
    * @dev Internal function to update the implementation of the delegator
    * @param implementation_ The address of the new implementation for delegation
-   * @param allowResign Flag to indicate whether to call _resignImplementation on the old implementation
    * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
    */
   function _setImplementationInternal(
     address implementation_,
-    bool allowResign,
     bytes memory becomeImplementationData
   ) internal {
-    // Call _resignImplementation internally (this delegate's code)
-    if (allowResign) _resignImplementation();
-
-    address currentDelegate = LibDiamond.getExtensionForFunction(this.delegateType.selector);
+    address currentDelegate = implementation();
     LibDiamond.registerExtension(DiamondExtension(implementation_), DiamondExtension(currentDelegate));
+    _updateExtensions();
 
+    // TODO can we replace it with reinitialize?
     this._becomeImplementation(becomeImplementationData);
 
     emit NewImplementation(currentDelegate, implementation_);
   }
 
   function _updateExtensions() internal {
-    address currentDelegate = LibDiamond.getExtensionForFunction(this.delegateType.selector);
+    address currentDelegate = implementation();
     address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getCErc20DelegateExtensions(currentDelegate);
     address[] memory currentExtensions = LibDiamond.listExtensions();
-
-    // don't update if they are the same
-    if (latestExtensions.length == 1 && currentExtensions.length == 1 && latestExtensions[0] == currentExtensions[0])
-      return;
 
     // removed the current (old) extensions
     for (uint256 i = 0; i < currentExtensions.length; i++) {
@@ -100,27 +88,30 @@ contract CErc20Delegate is CErc20 {
     // Check admin rights
     require(hasAdminRights(), "!admin");
 
+    // TODO allowResign is unused
     // Set implementation
-    _setImplementationInternal(implementation_, allowResign, becomeImplementationData);
+    _setImplementationInternal(implementation_, becomeImplementationData);
   }
 
   /**
    * @notice Function called before all delegator functions
-   * @dev Checks comptroller.autoImplementation and upgrades the implementation if necessary
+   * @dev upgrades the implementation if necessary
    */
   function _prepare() external payable override {
-    if (msg.sender != address(this) && ComptrollerV3Storage(address(comptroller)).autoImplementation()) {
-      uint8 currentDelegateType = delegateType();
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFeeDistributor(
-        ionicAdmin
-      ).latestCErc20Delegate(currentDelegateType);
+    require(msg.sender == address(this) || hasAdminRights(), "!self or admin");
 
-      address currentDelegate = LibDiamond.getExtensionForFunction(this.delegateType.selector);
-      if (currentDelegate != latestCErc20Delegate) {
-        _setImplementationInternal(latestCErc20Delegate, allowResign, becomeImplementationData);
-      } else {
-        _updateExtensions();
-      }
+    uint8 currentDelegateType = delegateType();
+    (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = IFeeDistributor(
+      ionicAdmin
+    ).latestCErc20Delegate(currentDelegateType);
+    // TODO allowResign is unused
+
+    address currentDelegate = implementation();
+    if (currentDelegate != latestCErc20Delegate) {
+      _setImplementationInternal(latestCErc20Delegate, becomeImplementationData);
+    } else {
+      // only update the extensions without reinitializing with becomeImplementationData
+      _updateExtensions();
     }
   }
 
