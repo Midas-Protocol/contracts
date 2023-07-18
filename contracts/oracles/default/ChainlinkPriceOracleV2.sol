@@ -6,6 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeabl
 import "../../external/chainlink/AggregatorV3Interface.sol";
 
 import "../BasePriceOracle.sol";
+import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
 
 /**
  * @title ChainlinkPriceOracleV2
@@ -13,7 +14,7 @@ import "../BasePriceOracle.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract ChainlinkPriceOracleV2 is BasePriceOracle {
+contract ChainlinkPriceOracleV2 is BasePriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice Maps ERC20 token addresses to ETH-based Chainlink price feed contracts.
    */
@@ -39,59 +40,19 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
   address public NATIVE_TOKEN_USD_PRICE_FEED;
 
   /**
-   * @dev The administrator of this `MasterPriceOracle`.
+   * @notice The USD Token of the chain
    */
-  address public admin;
-
-  /**
-   * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
-   */
-  bool public canAdminOverwrite;
-
-  /**
-   * @dev The Wrapped native asset address.
-   */
-  address public immutable wtoken;
+  address public USD_TOKEN;
 
   /**
    * @dev Constructor to set admin and canAdminOverwrite, wtoken address and native token USD price feed address
-   * @param _admin The admin who can assign oracles to underlying tokens.
-   * @param _canAdminOverwrite Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
-   * @param _wtoken The Wrapped native asset address
+   * @param _usdToken The Wrapped native asset address
    * @param nativeTokenUsd Will this oracle return prices denominated in USD or in the native token.
    */
-  constructor(
-    address _admin,
-    bool _canAdminOverwrite,
-    address _wtoken,
-    address nativeTokenUsd
-  ) {
-    admin = _admin;
-    canAdminOverwrite = _canAdminOverwrite;
-    wtoken = _wtoken;
+  function initialize(address _usdToken, address nativeTokenUsd) public initializer {
+    __SafeOwnable_init(msg.sender);
+    USD_TOKEN = _usdToken;
     NATIVE_TOKEN_USD_PRICE_FEED = nativeTokenUsd;
-  }
-
-  /**
-   * @dev Changes the admin and emits an event.
-   */
-  function changeAdmin(address newAdmin) external onlyAdmin {
-    address oldAdmin = admin;
-    admin = newAdmin;
-    emit NewAdmin(oldAdmin, newAdmin);
-  }
-
-  /**
-   * @dev Event emitted when `admin` is changed.
-   */
-  event NewAdmin(address oldAdmin, address newAdmin);
-
-  /**
-   * @dev Modifier that checks if `msg.sender == admin`.
-   */
-  modifier onlyAdmin() {
-    require(msg.sender == admin, "Sender is not the admin.");
-    _;
   }
 
   /**
@@ -104,7 +65,7 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
     address[] memory underlyings,
     address[] memory feeds,
     FeedBaseCurrency baseCurrency
-  ) external onlyAdmin {
+  ) external onlyOwner {
     // Input validation
     require(
       underlyings.length > 0 && underlyings.length == feeds.length,
@@ -114,14 +75,6 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
     // For each token/feed
     for (uint256 i = 0; i < underlyings.length; i++) {
       address underlying = underlyings[i];
-
-      // Check for existing oracle if !canAdminOverwrite
-      if (!canAdminOverwrite)
-        require(
-          address(priceFeeds[underlying]) == address(0),
-          "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
-        );
-
       // Set feed and base currency
       priceFeeds[underlying] = AggregatorV3Interface(feeds[i]);
       feedBaseCurrencies[underlying] = baseCurrency;
@@ -133,9 +86,6 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
    * @dev If the oracle got constructed with `nativeTokenUsd` = TRUE this will return a price denominated in USD otherwise in the native token
    */
   function _price(address underlying) internal view returns (uint256) {
-    // Return 1e18 for WTOKEN
-    if (underlying == wtoken || underlying == address(0)) return 1e18;
-
     // Get token/ETH price from Chainlink
     AggregatorV3Interface feed = priceFeeds[underlying];
     require(address(feed) != address(0), "No Chainlink price feed found for this underlying ERC20 token.");
@@ -143,22 +93,26 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
 
     if (baseCurrency == FeedBaseCurrency.ETH) {
       (, int256 tokenEthPrice, , , ) = feed.latestRoundData();
-      return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10**uint256(feed.decimals())) : 0;
+      return tokenEthPrice >= 0 ? (uint256(tokenEthPrice) * 1e18) / (10 ** uint256(feed.decimals())) : 0;
     } else if (baseCurrency == FeedBaseCurrency.USD) {
-      
       int256 nativeTokenUsdPrice;
+      uint8 usdPriceDecimals;
+
       if (NATIVE_TOKEN_USD_PRICE_FEED == address(0)) {
-        nativeTokenUsdPrice = int256(BasePriceOracle(msg.sender).price(wtoken));
+        uint256 usdNativeTokenPrice = BasePriceOracle(msg.sender).price(USD_TOKEN);
+        nativeTokenUsdPrice = int256(1e36 / usdNativeTokenPrice); // 18 decimals
+        usdPriceDecimals = 18;
       } else {
         (, nativeTokenUsdPrice, , , ) = AggregatorV3Interface(NATIVE_TOKEN_USD_PRICE_FEED).latestRoundData();
-          if (nativeTokenUsdPrice <= 0) return 0;
+        if (nativeTokenUsdPrice <= 0) return 0;
+        usdPriceDecimals = AggregatorV3Interface(NATIVE_TOKEN_USD_PRICE_FEED).decimals();
       }
       (, int256 tokenUsdPrice, , , ) = feed.latestRoundData();
-      
+
       return
         tokenUsdPrice >= 0
-          ? ((uint256(tokenUsdPrice) * 1e18 * (10**uint256(AggregatorV3Interface(NATIVE_TOKEN_USD_PRICE_FEED).decimals()))) /
-            (10**uint256(feed.decimals()))) / uint256(nativeTokenUsdPrice)
+          ? ((uint256(tokenUsdPrice) * 1e18 * (10 ** uint256(usdPriceDecimals))) / (10 ** uint256(feed.decimals()))) /
+            uint256(nativeTokenUsdPrice)
           : 0;
     } else {
       revert("unknown base currency");
@@ -187,7 +141,7 @@ contract ChainlinkPriceOracleV2 is BasePriceOracle {
     uint256 underlyingDecimals = uint256(ERC20Upgradeable(underlying).decimals());
     return
       underlyingDecimals <= 18
-        ? uint256(oraclePrice) * (10**(18 - underlyingDecimals))
-        : uint256(oraclePrice) / (10**(underlyingDecimals - 18));
+        ? uint256(oraclePrice) * (10 ** (18 - underlyingDecimals))
+        : uint256(oraclePrice) / (10 ** (underlyingDecimals - 18));
   }
 }
