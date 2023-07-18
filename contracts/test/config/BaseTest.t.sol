@@ -155,9 +155,9 @@ abstract contract BaseTest is Test {
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(address(0));
     } else if (chainid == NEON_DEVNET) {
-      ap = AddressesProvider(0x3F56f8571988D03Cdc7E51fdaB19ADb032CCbe21);
+      ap = AddressesProvider(address(0));
     } else if (chainid == ARBITRUM_ONE) {
-      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
+      ap = AddressesProvider(address(0));
     } else {
       dpa = new ProxyAdmin();
       AddressesProvider logic = new AddressesProvider();
@@ -175,7 +175,7 @@ abstract contract BaseTest is Test {
     }
     if (ap.getAddress("deployer") == address(0)) {
       vm.prank(ap.owner());
-      ap.setAddress("deployer", 0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
+      ap.setAddress("deployer", 0x9308dddeC9B5cCd8a2685A46E913C892FE31C826);
     }
   }
 

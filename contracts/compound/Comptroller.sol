@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ICErc20, CErc20Interface } from "./CTokenInterfaces.sol";
+import { ICErc20 } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";

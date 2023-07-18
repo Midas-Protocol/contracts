@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../ionic/IFlashLoanReceiver.sol";
-import { CTokenExtensionBase, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { CErc20SecondExtensionBase, CTokenSecondExtensionInterface, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
@@ -11,7 +11,7 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract CTokenFirstExtension is CTokenExtensionBase, TokenErrorReporter, Exponential, DiamondExtension, Multicall {
+contract CTokenFirstExtension is CErc20SecondExtensionBase, TokenErrorReporter, Exponential, DiamondExtension, Multicall {
   modifier isAuthorized() {
     require(
       IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
@@ -685,14 +685,14 @@ contract CTokenFirstExtension is CTokenExtensionBase, TokenErrorReporter, Expone
     if (!localOnly) comptroller._afterNonReentrant();
   }
 
-  function asCToken() internal view returns (CErc20Interface) {
-    return CErc20Interface(address(this));
+  function asCToken() internal view returns (ICErc20) {
+    return ICErc20(address(this));
   }
 
   function multicall(bytes[] calldata data)
     public
     payable
-    override(CTokenExtensionInterface, Multicall)
+    override(CTokenSecondExtensionInterface, Multicall)
     returns (bytes[] memory results)
   {
     return Multicall.multicall(data);

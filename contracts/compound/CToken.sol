@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { IComptroller } from "./ComptrollerInterface.sol";
-import { CTokenZeroExtBase, CErc20Interface, ICErc20 } from "./CTokenInterfaces.sol";
+import { CTokenFirstExtensionBase, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
@@ -12,11 +12,12 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
 
 /**
- * @title Compound's CToken Contract
- * @notice Abstract base for CTokens
+ * @title Compound's CErc20 Contract
+ * @notice CTokens which wrap an EIP-20 underlying
+ * @dev This contract should not to be deployed on its own; instead, deploy `CErc20Delegator` (proxy contract) and `CErc20Delegate` (logic/implementation contract).
  * @author Compound
  */
-abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, DiamondExtension {
+abstract contract CErc20 is CTokenFirstExtensionBase, TokenErrorReporter, Exponential, DiamondExtension {
   modifier isAuthorized() {
     require(
       IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
@@ -25,12 +26,265 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     _;
   }
 
+  function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 13;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.mint.selector;
+    functionSelectors[--fnsCount] = this.redeem.selector;
+    functionSelectors[--fnsCount] = this.redeemUnderlying.selector;
+    functionSelectors[--fnsCount] = this.borrow.selector;
+    functionSelectors[--fnsCount] = this.repayBorrow.selector;
+    functionSelectors[--fnsCount] = this.repayBorrowBehalf.selector;
+    functionSelectors[--fnsCount] = this.liquidateBorrow.selector;
+    functionSelectors[--fnsCount] = this.getCash.selector;
+    functionSelectors[--fnsCount] = this.seize.selector;
+    functionSelectors[--fnsCount] = this.selfTransferOut.selector;
+    functionSelectors[--fnsCount] = this.selfTransferIn.selector;
+    functionSelectors[--fnsCount] = this._withdrawFuseFees.selector;
+    functionSelectors[--fnsCount] = this._withdrawAdminFees.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
+
+  /*** User Interface ***/
+
+  /**
+   * @notice Sender supplies assets into the market and receives cTokens in exchange
+   * @dev Accrues interest whether or not the operation succeeds, unless reverted
+   * @param mintAmount The amount of the underlying asset to supply
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function mint(uint256 mintAmount) external override isAuthorized returns (uint256) {
+    (uint256 err, ) = mintInternal(mintAmount);
+    return err;
+  }
+
+  /**
+   * @notice Sender redeems cTokens in exchange for the underlying asset
+   * @dev Accrues interest whether or not the operation succeeds, unless reverted
+   * @param redeemTokens The number of cTokens to redeem into underlying
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function redeem(uint256 redeemTokens) external override isAuthorized returns (uint256) {
+    return redeemInternal(redeemTokens);
+  }
+
+  /**
+   * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
+   * @dev Accrues interest whether or not the operation succeeds, unless reverted
+   * @param redeemAmount The amount of underlying to redeem
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function redeemUnderlying(uint256 redeemAmount) external override isAuthorized returns (uint256) {
+    return redeemUnderlyingInternal(redeemAmount);
+  }
+
+  /**
+   * @notice Sender borrows assets from the protocol to their own address
+   * @param borrowAmount The amount of the underlying asset to borrow
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function borrow(uint256 borrowAmount) external override isAuthorized returns (uint256) {
+    return borrowInternal(borrowAmount);
+  }
+
+  /**
+   * @notice Sender repays their own borrow
+   * @param repayAmount The amount to repay
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function repayBorrow(uint256 repayAmount) external override isAuthorized returns (uint256) {
+    (uint256 err, ) = repayBorrowInternal(repayAmount);
+    return err;
+  }
+
+  /**
+   * @notice Sender repays a borrow belonging to borrower
+   * @param borrower the account with the debt being payed off
+   * @param repayAmount The amount to repay
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function repayBorrowBehalf(address borrower, uint256 repayAmount) external override isAuthorized returns (uint256) {
+    (uint256 err, ) = repayBorrowBehalfInternal(borrower, repayAmount);
+    return err;
+  }
+
+  /**
+   * @notice The sender liquidates the borrowers collateral.
+   *  The collateral seized is transferred to the liquidator.
+   * @param borrower The borrower of this cToken to be liquidated
+   * @param repayAmount The amount of the underlying borrowed asset to repay
+   * @param cTokenCollateral The market in which to seize collateral from the borrower
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function liquidateBorrow(
+    address borrower,
+    uint256 repayAmount,
+    address cTokenCollateral
+  ) external override isAuthorized returns (uint256) {
+    (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
+    return err;
+  }
+
   /**
    * @notice Get cash balance of this cToken in the underlying asset
    * @return The quantity of underlying asset owned by this contract
    */
   function getCash() external view override returns (uint256) {
     return getCashInternal();
+  }
+
+  /**
+   * @notice Transfers collateral tokens (this market) to the liquidator.
+   * @dev Will fail unless called by another cToken during the process of liquidation.
+   *  Its absolutely critical to use msg.sender as the borrowed cToken and not a parameter.
+   * @param liquidator The account receiving seized collateral
+   * @param borrower The account having collateral seized
+   * @param seizeTokens The number of cTokens to seize
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function seize(
+    address liquidator,
+    address borrower,
+    uint256 seizeTokens
+  ) external override nonReentrant(true) returns (uint256) {
+    return seizeInternal(msg.sender, liquidator, borrower, seizeTokens);
+  }
+
+  function selfTransferOut(address to, uint256 amount) external override {
+    require(msg.sender == address(this), "!self");
+    doTransferOut(to, amount);
+  }
+
+  function selfTransferIn(address from, uint256 amount) external override returns (uint256) {
+    require(msg.sender == address(this), "!self");
+    return doTransferIn(from, amount);
+  }
+
+  /**
+   * @notice Accrues interest and reduces Ionic fees by transferring to Ionic
+   * @param withdrawAmount Amount of fees to withdraw
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+    asCTokenExtension().accrueInterest();
+
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_FUSE_FEES_FRESH_CHECK);
+    }
+
+    if (getCashInternal() < withdrawAmount) {
+      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE);
+    }
+
+    if (withdrawAmount > totalIonicFees) {
+      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_FUSE_FEES_VALIDATION);
+    }
+
+    /////////////////////////
+    // EFFECTS & INTERACTIONS
+    // (No safe failures beyond this point)
+
+    uint256 totalIonicFeesNew = totalIonicFees - withdrawAmount;
+    totalIonicFees = totalIonicFeesNew;
+
+    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
+    doTransferOut(address(ionicAdmin), withdrawAmount);
+
+    return uint256(Error.NO_ERROR);
+  }
+
+  /**
+   * @notice Accrues interest and reduces admin fees by transferring to admin
+   * @param withdrawAmount Amount of fees to withdraw
+   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
+   */
+  function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+    asCTokenExtension().accrueInterest();
+
+    if (accrualBlockNumber != block.number) {
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_ADMIN_FEES_FRESH_CHECK);
+    }
+
+    // Fail gracefully if protocol has insufficient underlying cash
+    if (getCashInternal() < withdrawAmount) {
+      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_ADMIN_FEES_CASH_NOT_AVAILABLE);
+    }
+
+    if (withdrawAmount > totalAdminFees) {
+      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_ADMIN_FEES_VALIDATION);
+    }
+
+    /////////////////////////
+    // EFFECTS & INTERACTIONS
+    // (No safe failures beyond this point)
+    totalAdminFees = totalAdminFees - withdrawAmount;
+
+    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
+    doTransferOut(ComptrollerV3Storage(address(comptroller)).admin(), withdrawAmount);
+
+    return uint256(Error.NO_ERROR);
+  }
+
+  /*** Safe Token ***/
+
+  /**
+   * @notice Gets balance of this contract in terms of the underlying
+   * @dev This excludes the value of the current message, if any
+   * @return The quantity of underlying tokens owned by this contract
+   */
+  function getCashInternal() internal view virtual returns (uint256) {
+    return EIP20Interface(underlying).balanceOf(address(this));
+  }
+
+  /**
+   * @dev Similar to EIP20 transfer, except it handles a False result from `transferFrom` and reverts in that case.
+   *      This will revert due to insufficient balance or insufficient allowance.
+   *      This function returns the actual amount received,
+   *      which may be less than `amount` if there is a fee attached to the transfer.
+   *
+   *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
+   *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
+   */
+  function doTransferIn(address from, uint256 amount) internal virtual returns (uint256) {
+    uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
+    _callOptionalReturn(
+      abi.encodeWithSelector(EIP20Interface.transferFrom.selector, from, address(this), amount),
+      "TOKEN_TRANSFER_IN_FAILED"
+    );
+
+    // Calculate the amount that was *actually* transferred
+    uint256 balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
+    require(balanceAfter >= balanceBefore, "TOKEN_TRANSFER_IN_OVERFLOW");
+    return balanceAfter - balanceBefore; // underflow already checked above, just subtract
+  }
+
+  /**
+   * @dev Similar to EIP20 transfer, except it handles a False success from `transfer` and returns an explanatory
+   *      error code rather than reverting. If caller has not called checked protocol's balance, this may revert due to
+   *      insufficient cash held in this contract. If caller has checked protocol's balance prior to this call, and verified
+   *      it is >= amount, this should not revert in normal conditions.
+   *
+   *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
+   *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
+   */
+  function doTransferOut(address to, uint256 amount) internal virtual {
+    _callOptionalReturn(
+      abi.encodeWithSelector(EIP20Interface.transfer.selector, to, amount),
+      "TOKEN_TRANSFER_OUT_FAILED"
+    );
+  }
+
+  /**
+   * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
+   * on the return value: the return value is optional (but if data is returned, it must not be false).
+   * @param data The call data (encoded using abi.encode or one of its variants).
+   * @param errorMessage The revert string to return on failure.
+   */
+  function _callOptionalReturn(bytes memory data, string memory errorMessage) internal {
+    bytes memory returndata = _functionCall(underlying, data, errorMessage);
+    if (returndata.length > 0) require(abi.decode(returndata, (bool)), errorMessage);
   }
 
   /**
@@ -561,7 +815,7 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     }
 
     /* Verify cTokenCollateral market's block number equals current block number */
-    if (CToken(cTokenCollateral).accrualBlockNumber() != block.number) {
+    if (CErc20(cTokenCollateral).accrualBlockNumber() != block.number) {
       return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_COLLATERAL_FRESHNESS_CHECK), 0);
     }
 
@@ -606,7 +860,7 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     if (cTokenCollateral == address(this)) {
       seizeError = seizeInternal(address(this), liquidator, borrower, seizeTokens);
     } else {
-      seizeError = CToken(cTokenCollateral).seize(liquidator, borrower, seizeTokens);
+      seizeError = CErc20(cTokenCollateral).seize(liquidator, borrower, seizeTokens);
     }
 
     /* Revert if seize tokens fails (since we cannot be sure of side effects) */
@@ -620,23 +874,6 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     // comptroller.liquidateBorrowVerify(address(this), cTokenCollateral, liquidator, borrower, actualRepayAmount, seizeTokens);
 
     return (uint256(Error.NO_ERROR), actualRepayAmount);
-  }
-
-  /**
-   * @notice Transfers collateral tokens (this market) to the liquidator.
-   * @dev Will fail unless called by another cToken during the process of liquidation.
-   *  Its absolutely critical to use msg.sender as the borrowed cToken and not a parameter.
-   * @param liquidator The account receiving seized collateral
-   * @param borrower The account having collateral seized
-   * @param seizeTokens The number of cTokens to seize
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function seize(
-    address liquidator,
-    address borrower,
-    uint256 seizeTokens
-  ) external override nonReentrant(true) returns (uint256) {
-    return seizeInternal(msg.sender, liquidator, borrower, seizeTokens);
   }
 
   struct SeizeInternalLocalVars {
@@ -742,103 +979,6 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     return ICErc20(address(this));
   }
 
-  /*** Safe Token ***/
-
-  /**
-   * @notice Gets balance of this contract in terms of the underlying
-   * @dev This excludes the value of the current message, if any
-   * @return The quantity of underlying owned by this contract
-   */
-  function getCashInternal() internal view virtual returns (uint256);
-
-  /**
-   * @dev Performs a transfer in, reverting upon failure. Returns the amount actually transferred to the protocol, in case of a fee.
-   *  This may revert due to insufficient balance or insufficient allowance.
-   */
-  function doTransferIn(address from, uint256 amount) internal virtual returns (uint256);
-
-  /**
-   * @dev Performs a transfer out, ideally returning an explanatory error code upon failure tather than reverting.
-   *  If caller has not called checked protocol's balance, may revert due to insufficient cash held in the contract.
-   *  If caller has checked protocol's balance, and verified it is >= amount, this should not revert in normal conditions.
-   */
-  function doTransferOut(address to, uint256 amount) internal virtual;
-
-  function selfTransferOut(address to, uint256 amount) external override {
-    require(msg.sender == address(this), "!self");
-    doTransferOut(to, amount);
-  }
-
-  function selfTransferIn(address from, uint256 amount) external override returns (uint256) {
-    require(msg.sender == address(this), "!self");
-    return doTransferIn(from, amount);
-  }
-
-  /**
-   * @notice Accrues interest and reduces Ionic fees by transferring to Ionic
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    asCTokenExtension().accrueInterest();
-
-    if (accrualBlockNumber != block.number) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_FUSE_FEES_FRESH_CHECK);
-    }
-
-    if (getCashInternal() < withdrawAmount) {
-      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE);
-    }
-
-    if (withdrawAmount > totalIonicFees) {
-      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_FUSE_FEES_VALIDATION);
-    }
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-
-    uint256 totalIonicFeesNew = totalIonicFees - withdrawAmount;
-    totalIonicFees = totalIonicFeesNew;
-
-    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(address(ionicAdmin), withdrawAmount);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  /**
-   * @notice Accrues interest and reduces admin fees by transferring to admin
-   * @param withdrawAmount Amount of fees to withdraw
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function _withdrawAdminFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
-    asCTokenExtension().accrueInterest();
-
-    if (accrualBlockNumber != block.number) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_ADMIN_FEES_FRESH_CHECK);
-    }
-
-    // Fail gracefully if protocol has insufficient underlying cash
-    if (getCashInternal() < withdrawAmount) {
-      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_ADMIN_FEES_CASH_NOT_AVAILABLE);
-    }
-
-    if (withdrawAmount > totalAdminFees) {
-      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_ADMIN_FEES_VALIDATION);
-    }
-
-    /////////////////////////
-    // EFFECTS & INTERACTIONS
-    // (No safe failures beyond this point)
-    totalAdminFees = totalAdminFees - withdrawAmount;
-
-    // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-    doTransferOut(ComptrollerV3Storage(address(comptroller)).admin(), withdrawAmount);
-
-    return uint256(Error.NO_ERROR);
-  }
-
   /*** Reentrancy Guard ***/
 
   /**
@@ -905,173 +1045,5 @@ abstract contract CToken is CTokenZeroExtBase, TokenErrorReporter, Exponential, 
     }
 
     return returndata;
-  }
-}
-
-/**
- * @title Compound's CErc20 Contract
- * @notice CTokens which wrap an EIP-20 underlying
- * @dev This contract should not to be deployed on its own; instead, deploy `CErc20Delegator` (proxy contract) and `CErc20Delegate` (logic/implementation contract).
- * @author Compound
- */
-abstract contract CErc20 is CToken, CErc20Interface {
-  function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 12;
-    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.mint.selector;
-    functionSelectors[--fnsCount] = this.redeem.selector;
-    functionSelectors[--fnsCount] = this.redeemUnderlying.selector;
-    functionSelectors[--fnsCount] = this.borrow.selector;
-    functionSelectors[--fnsCount] = this.repayBorrow.selector;
-    functionSelectors[--fnsCount] = this.repayBorrowBehalf.selector;
-    functionSelectors[--fnsCount] = this.liquidateBorrow.selector;
-    functionSelectors[--fnsCount] = this.getCash.selector;
-    functionSelectors[--fnsCount] = this.seize.selector;
-    functionSelectors[--fnsCount] = this.selfTransferOut.selector;
-    functionSelectors[--fnsCount] = this.selfTransferIn.selector;
-    functionSelectors[--fnsCount] = this._withdrawAdminFees.selector;
-
-    require(fnsCount == 0, "use the correct array length");
-    return functionSelectors;
-  }
-
-  /*** User Interface ***/
-
-  /**
-   * @notice Sender supplies assets into the market and receives cTokens in exchange
-   * @dev Accrues interest whether or not the operation succeeds, unless reverted
-   * @param mintAmount The amount of the underlying asset to supply
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function mint(uint256 mintAmount) external override isAuthorized returns (uint256) {
-    (uint256 err, ) = mintInternal(mintAmount);
-    return err;
-  }
-
-  /**
-   * @notice Sender redeems cTokens in exchange for the underlying asset
-   * @dev Accrues interest whether or not the operation succeeds, unless reverted
-   * @param redeemTokens The number of cTokens to redeem into underlying
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function redeem(uint256 redeemTokens) external override isAuthorized returns (uint256) {
-    return redeemInternal(redeemTokens);
-  }
-
-  /**
-   * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
-   * @dev Accrues interest whether or not the operation succeeds, unless reverted
-   * @param redeemAmount The amount of underlying to redeem
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function redeemUnderlying(uint256 redeemAmount) external override isAuthorized returns (uint256) {
-    return redeemUnderlyingInternal(redeemAmount);
-  }
-
-  /**
-   * @notice Sender borrows assets from the protocol to their own address
-   * @param borrowAmount The amount of the underlying asset to borrow
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function borrow(uint256 borrowAmount) external override isAuthorized returns (uint256) {
-    return borrowInternal(borrowAmount);
-  }
-
-  /**
-   * @notice Sender repays their own borrow
-   * @param repayAmount The amount to repay
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function repayBorrow(uint256 repayAmount) external override isAuthorized returns (uint256) {
-    (uint256 err, ) = repayBorrowInternal(repayAmount);
-    return err;
-  }
-
-  /**
-   * @notice Sender repays a borrow belonging to borrower
-   * @param borrower the account with the debt being payed off
-   * @param repayAmount The amount to repay
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function repayBorrowBehalf(address borrower, uint256 repayAmount) external override isAuthorized returns (uint256) {
-    (uint256 err, ) = repayBorrowBehalfInternal(borrower, repayAmount);
-    return err;
-  }
-
-  /**
-   * @notice The sender liquidates the borrowers collateral.
-   *  The collateral seized is transferred to the liquidator.
-   * @param borrower The borrower of this cToken to be liquidated
-   * @param repayAmount The amount of the underlying borrowed asset to repay
-   * @param cTokenCollateral The market in which to seize collateral from the borrower
-   * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-   */
-  function liquidateBorrow(
-    address borrower,
-    uint256 repayAmount,
-    address cTokenCollateral
-  ) external override isAuthorized returns (uint256) {
-    (uint256 err, ) = liquidateBorrowInternal(borrower, repayAmount, cTokenCollateral);
-    return err;
-  }
-
-  /*** Safe Token ***/
-
-  /**
-   * @notice Gets balance of this contract in terms of the underlying
-   * @dev This excludes the value of the current message, if any
-   * @return The quantity of underlying tokens owned by this contract
-   */
-  function getCashInternal() internal view virtual override returns (uint256) {
-    return EIP20Interface(underlying).balanceOf(address(this));
-  }
-
-  /**
-   * @dev Similar to EIP20 transfer, except it handles a False result from `transferFrom` and reverts in that case.
-   *      This will revert due to insufficient balance or insufficient allowance.
-   *      This function returns the actual amount received,
-   *      which may be less than `amount` if there is a fee attached to the transfer.
-   *
-   *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
-   *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
-   */
-  function doTransferIn(address from, uint256 amount) internal virtual override returns (uint256) {
-    uint256 balanceBefore = EIP20Interface(underlying).balanceOf(address(this));
-    _callOptionalReturn(
-      abi.encodeWithSelector(EIP20Interface.transferFrom.selector, from, address(this), amount),
-      "TOKEN_TRANSFER_IN_FAILED"
-    );
-
-    // Calculate the amount that was *actually* transferred
-    uint256 balanceAfter = EIP20Interface(underlying).balanceOf(address(this));
-    require(balanceAfter >= balanceBefore, "TOKEN_TRANSFER_IN_OVERFLOW");
-    return balanceAfter - balanceBefore; // underflow already checked above, just subtract
-  }
-
-  /**
-   * @dev Similar to EIP20 transfer, except it handles a False success from `transfer` and returns an explanatory
-   *      error code rather than reverting. If caller has not called checked protocol's balance, this may revert due to
-   *      insufficient cash held in this contract. If caller has checked protocol's balance prior to this call, and verified
-   *      it is >= amount, this should not revert in normal conditions.
-   *
-   *      Note: This wrapper safely handles non-standard ERC-20 tokens that do not return a value.
-   *            See here: https://medium.com/coinmonks/missing-return-value-bug-at-least-130-tokens-affected-d67bf08521ca
-   */
-  function doTransferOut(address to, uint256 amount) internal virtual override {
-    _callOptionalReturn(
-      abi.encodeWithSelector(EIP20Interface.transfer.selector, to, amount),
-      "TOKEN_TRANSFER_OUT_FAILED"
-    );
-  }
-
-  /**
-   * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
-   * on the return value: the return value is optional (but if data is returned, it must not be false).
-   * @param data The call data (encoded using abi.encode or one of its variants).
-   * @param errorMessage The revert string to return on failure.
-   */
-  function _callOptionalReturn(bytes memory data, string memory errorMessage) internal {
-    bytes memory returndata = _functionCall(underlying, data, errorMessage);
-    if (returndata.length > 0) require(abi.decode(returndata, (bool)), errorMessage);
   }
 }

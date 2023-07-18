@@ -6,7 +6,7 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { IRateProvider } from "../../external/balancer/IRateProvider.sol";
 
 import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
-import { BasePriceOracle, ICErc20, ICToken } from "../BasePriceOracle.sol";
+import { BasePriceOracle, ICErc20 } from "../BasePriceOracle.sol";
 
 /**
  * @title BalancerRateProviderOracle

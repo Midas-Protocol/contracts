@@ -2,7 +2,6 @@
 pragma solidity >=0.8.0;
 
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
-import { CToken } from "../../compound/CToken.sol";
 import { MasterPriceOracle } from "../../oracles/MasterPriceOracle.sol";
 import { JarvisLiquidatorFunder } from "../../liquidators/JarvisLiquidatorFunder.sol";
 import { IonicLiquidator } from "../../IonicLiquidator.sol";

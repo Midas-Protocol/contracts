@@ -13,7 +13,7 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { CErc20, CToken } from "../compound/CToken.sol";
+import { CErc20 } from "../compound/CToken.sol";
 import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";

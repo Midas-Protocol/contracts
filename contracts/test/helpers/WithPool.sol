@@ -4,7 +4,6 @@ pragma solidity >=0.4.23;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 
-import { CErc20, CToken } from "../../compound/CToken.sol";
 import { JumpRateModel } from "../../compound/JumpRateModel.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
@@ -31,10 +30,7 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract WithPool is BaseTest {
   ERC20Upgradeable public underlyingToken;
-  CErc20 cErc20;
-  CToken cToken;
   CErc20Delegate cErc20Delegate;
-
   CErc20PluginDelegate cErc20PluginDelegate;
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
@@ -78,7 +74,6 @@ contract WithPool is BaseTest {
     }
     setUpBaseContracts();
     setUpExtensions();
-    // setUpPoolAndMarket();
   }
 
   function setUpExtensions() internal {

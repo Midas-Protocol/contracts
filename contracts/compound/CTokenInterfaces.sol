@@ -239,7 +239,7 @@ abstract contract CTokenEvents is CTokenBaseEvents {
   event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
 }
 
-interface CTokenExtensionInterface {
+interface CTokenSecondExtensionInterface {
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external returns (bool);
@@ -301,27 +301,7 @@ interface CTokenExtensionInterface {
   function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) external view returns (uint256);
 }
 
-interface CTokenInterface {
-  function getCash() external view returns (uint256);
-
-  function seize(
-    address liquidator,
-    address borrower,
-    uint256 seizeTokens
-  ) external returns (uint256);
-
-  /*** Admin Functions ***/
-
-  function _withdrawAdminFees(uint256 withdrawAmount) external returns (uint256);
-
-  function _withdrawFuseFees(uint256 withdrawAmount) external returns (uint256);
-
-  function selfTransferOut(address to, uint256 amount) external;
-
-  function selfTransferIn(address from, uint256 amount) external returns (uint256);
-}
-
-interface CErc20Interface is CTokenInterface {
+interface CTokenFirstExtensionInterface {
   function mint(uint256 mintAmount) external returns (uint256);
 
   function redeem(uint256 redeemTokens) external returns (uint256);
@@ -339,6 +319,24 @@ interface CErc20Interface is CTokenInterface {
     uint256 repayAmount,
     address cTokenCollateral
   ) external returns (uint256);
+
+  function getCash() external view returns (uint256);
+
+  function seize(
+    address liquidator,
+    address borrower,
+    uint256 seizeTokens
+  ) external returns (uint256);
+
+  /*** Admin Functions ***/
+
+  function _withdrawAdminFees(uint256 withdrawAmount) external returns (uint256);
+
+  function _withdrawFuseFees(uint256 withdrawAmount) external returns (uint256);
+
+  function selfTransferOut(address to, uint256 amount) external;
+
+  function selfTransferIn(address from, uint256 amount) external returns (uint256);
 }
 
 interface CDelegatorInterface {
@@ -382,12 +380,9 @@ abstract contract CErc20AdminBase is CErc20Storage {
   }
 }
 
-abstract contract CTokenExtensionBase is CErc20AdminBase, CTokenExtensionEvents, CTokenExtensionInterface {}
+abstract contract CErc20SecondExtensionBase is CErc20AdminBase, CTokenExtensionEvents, CTokenSecondExtensionInterface {}
 
-// TODO replace CTokenInterface with CErc20Interface after merging CErc20 with CToken
-abstract contract CTokenZeroExtBase is CErc20AdminBase, CTokenEvents, CTokenInterface, CDelegateInterface {
-
-}
+abstract contract CTokenFirstExtensionBase is CErc20AdminBase, CTokenEvents, CTokenFirstExtensionInterface, CDelegateInterface {}
 
 abstract contract CErc20DelegatorBase is CErc20AdminBase, CTokenEvents, CDelegatorInterface {}
 
@@ -441,12 +436,7 @@ interface CErc20PluginRewardsInterface is CErc20PluginStorageInterface {
   function approve(address, address) external;
 }
 
-// TODO merge with ICErc20 after merging CErc20 with CToken
-interface ICToken is CErc20StorageInterface, CErc20Interface, CTokenExtensionInterface {
-
-}
-
-interface ICErc20 is ICToken, CDelegatorInterface, CDelegateInterface {}
+interface ICErc20 is CErc20StorageInterface, CTokenFirstExtensionInterface, CTokenSecondExtensionInterface, CDelegatorInterface, CDelegateInterface {}
 
 interface ICErc20Plugin is CErc20PluginStorageInterface, ICErc20 {}
 

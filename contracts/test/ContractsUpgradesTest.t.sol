@@ -9,7 +9,6 @@ import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CToken } from "../compound/CToken.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
