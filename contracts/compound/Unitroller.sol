@@ -34,6 +34,13 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, Diamond
   /*** Admin Functions ***/
 
   /**
+   * @notice Returns a boolean indicating if the sender has admin rights
+   */
+  function hasAdminRights() internal view returns (bool) {
+    return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
+  }
+
+  /**
    * @notice Toggles admin rights.
    * @param hasRights Boolean indicating if the admin is to have rights.
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -110,17 +117,11 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, Diamond
       currentImplementation
     );
 
+    _updateExtensions(latestComptrollerImplementation);
+
     if (currentImplementation != latestComptrollerImplementation) {
-      LibDiamond.registerExtension(
-        DiamondExtension(latestComptrollerImplementation),
-        DiamondExtension(currentImplementation)
-      );
-      // update the extensions that are specific for the new comptroller
-      _updateExtensions(latestComptrollerImplementation);
       // reinitialize
       _functionCall(address(this), abi.encodeWithSignature("_becomeImplementation()"), "!become impl");
-    } else {
-      _updateExtensions(latestComptrollerImplementation);
     }
   }
 
@@ -169,7 +170,7 @@ contract Unitroller is UnitrollerAdminStorage, ComptrollerErrorReporter, Diamond
    * @param extensionToReplace the extension whose functions are to be removed/replaced
    */
   function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    require(msg.sender == address(ionicAdmin), "!unauthorized");
+    require(hasAdminRights(), "!unauthorized");
     LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 }

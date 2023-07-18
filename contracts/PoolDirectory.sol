@@ -170,10 +170,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
       unitrollerCreationCode
     );
 
-    // Setup Unitroller
-    Unitroller unitroller = Unitroller(payable(proxy));
-    unitroller._registerExtension(DiamondExtension(implementation), DiamondExtension(address(0)));
-
+    // Setup the pool
     IComptroller comptrollerProxy = IComptroller(proxy);
     comptrollerProxy._prepare();
 
@@ -190,7 +187,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
       require(comptrollerProxy._setWhitelistEnforcement(true) == 0, "Failed to enforce supplier/borrower whitelist.");
 
     // Make msg.sender the admin
-    require(unitroller._setPendingAdmin(msg.sender) == 0, "Failed to set pending admin on Unitroller.");
+    require(comptrollerProxy._setPendingAdmin(msg.sender) == 0, "Failed to set pending admin on Unitroller.");
 
     // Register the pool with this PoolDirectory
     return (_registerPool(name, proxy), proxy);

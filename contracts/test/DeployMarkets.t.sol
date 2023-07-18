@@ -90,9 +90,11 @@ contract DeployMarketsTest is Test {
     underlyingToken.mint(address(this), 100e36);
 
     MockPriceOracle priceOracle = new MockPriceOracle(10);
-    Comptroller tempComptroller = new Comptroller(payable(address(ionicAdmin)));
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    Comptroller tempComptroller = new Comptroller();
+    ionicAdmin._setLatestComptrollerImplementation(address(0), address(tempComptroller));
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = new ComptrollerFirstExtension();
+    extensions[1] = tempComptroller;
     ionicAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
     (, address comptrollerAddress) = poolDirectory.deployPool(
       "TestPool",

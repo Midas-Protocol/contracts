@@ -119,9 +119,11 @@ contract WithPool is BaseTest {
     uint256 closeFactor,
     uint256 liquidationIncentive
   ) public {
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ionicAdmin)));
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    Comptroller newComptrollerImplementation = new Comptroller();
+    ionicAdmin._setLatestComptrollerImplementation(address(0), address(newComptrollerImplementation));
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = new ComptrollerFirstExtension();
+    extensions[1] = newComptrollerImplementation;
     ionicAdmin._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
 
     (, address comptrollerAddress) = poolDirectory.deployPool(
@@ -146,7 +148,7 @@ contract WithPool is BaseTest {
   }
 
   function upgradePool(address pool) internal {
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ionicAdmin)));
+    Comptroller newComptrollerImplementation = new Comptroller();
 
     Unitroller asUnitroller = Unitroller(payable(pool));
 

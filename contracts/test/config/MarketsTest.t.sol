@@ -33,7 +33,7 @@ contract MarketsTest is BaseTest {
     newCTokenExtension = new CTokenFirstExtension();
 
     comptrollerExtension = new ComptrollerFirstExtension();
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
+    Comptroller newComptrollerImplementation = new Comptroller();
     latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
 
@@ -94,8 +94,10 @@ contract MarketsTest is BaseTest {
 
   function _prepareComptrollerUpgrade(address oldCompImpl) internal {
     vm.startPrank(ffd.owner());
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    ffd._setLatestComptrollerImplementation(address(0), latestComptrollerImplementation);
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = comptrollerExtension;
+    extensions[1] = Comptroller(latestComptrollerImplementation);
     ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
     vm.stopPrank();
   }

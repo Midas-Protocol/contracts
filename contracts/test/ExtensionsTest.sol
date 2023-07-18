@@ -6,14 +6,14 @@ import { MarketsTest } from "./config/MarketsTest.t.sol";
 import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
-import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
-
+import { ComptrollerV3Storage } from "../compound/ComptrollerStorage.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";

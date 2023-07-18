@@ -5,13 +5,11 @@ import { ICErc20, CErc20Interface } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
-import { ComptrollerBase } from "./ComptrollerInterface.sol";
-import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
 import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { IIonicFlywheel } from "../ionic/strategies/flywheel/IIonicFlywheel.sol";
 import { DiamondExtension, DiamondBase, LibDiamond } from "../ionic/DiamondExtension.sol";
-import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
+import { ComptrollerExtensionInterface, ComptrollerBase, ComptrollerInterface } from "./ComptrollerInterface.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -20,7 +18,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorReporter, Exponential, DiamondExtension {
+contract Comptroller is ComptrollerBase, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondExtension {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   /// @notice Emitted when an admin supports a market
@@ -64,10 +62,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
 
   // liquidationIncentiveMantissa must be no greater than this value
   uint256 internal constant liquidationIncentiveMaxMantissa = 1.5e18; // 1.5
-
-  constructor(address payable _ionicAdmin) {
-    ionicAdmin = _ionicAdmin;
-  }
 
   modifier isAuthorized() {
     require(IFeeDistributor(ionicAdmin).canCall(address(this), msg.sender, address(this), msg.sig), "not authorized");
@@ -1262,11 +1256,40 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   }
 
   function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
-    uint8 fnsCount = 0;
+    uint8 fnsCount = 30;
 
     functionSelectors = new bytes4[](fnsCount);
 
-    //functionSelectors[--fnsCount] = this.zzzzzzzzz.selector;
+    functionSelectors[--fnsCount] = this.isDeprecated.selector;
+    functionSelectors[--fnsCount] = this._deployMarket.selector;
+    functionSelectors[--fnsCount] = this.getAssetsIn.selector;
+    functionSelectors[--fnsCount] = this.checkMembership.selector;
+    functionSelectors[--fnsCount] = this._setPriceOracle.selector;
+    functionSelectors[--fnsCount] = this._setCloseFactor.selector;
+    functionSelectors[--fnsCount] = this._setCollateralFactor.selector;
+    functionSelectors[--fnsCount] = this._setLiquidationIncentive.selector;
+    functionSelectors[--fnsCount] = this._setWhitelistEnforcement.selector;
+    functionSelectors[--fnsCount] = this._setWhitelistStatuses.selector;
+    functionSelectors[--fnsCount] = this._addRewardsDistributor.selector;
+    functionSelectors[--fnsCount] = this.getHypotheticalAccountLiquidity.selector;
+    functionSelectors[--fnsCount] = this.getMaxRedeemOrBorrow.selector;
+    functionSelectors[--fnsCount] = this.enterMarkets.selector;
+    functionSelectors[--fnsCount] = this.exitMarket.selector;
+    functionSelectors[--fnsCount] = this.mintAllowed.selector;
+    functionSelectors[--fnsCount] = this.redeemAllowed.selector;
+    functionSelectors[--fnsCount] = this.redeemVerify.selector;
+    functionSelectors[--fnsCount] = this.borrowAllowed.selector;
+    functionSelectors[--fnsCount] = this.borrowWithinLimits.selector;
+    functionSelectors[--fnsCount] = this.repayBorrowAllowed.selector;
+    functionSelectors[--fnsCount] = this.liquidateBorrowAllowed.selector;
+    functionSelectors[--fnsCount] = this.seizeAllowed.selector;
+    functionSelectors[--fnsCount] = this.transferAllowed.selector;
+    functionSelectors[--fnsCount] = this.mintVerify.selector;
+    functionSelectors[--fnsCount] = this.getAccountLiquidity.selector;
+    functionSelectors[--fnsCount] = this.liquidateCalculateSeizeTokens.selector;
+    functionSelectors[--fnsCount] = this._beforeNonReentrant.selector;
+    functionSelectors[--fnsCount] = this._afterNonReentrant.selector;
+    functionSelectors[--fnsCount] = this._becomeImplementation.selector;
 
     require(fnsCount == 0, "use the correct array length");
   }

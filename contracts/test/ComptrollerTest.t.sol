@@ -27,7 +27,7 @@ contract ComptrollerTest is BaseTest {
 
   function setUp() public {
     ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
-    comptroller = IComptroller(address(new Comptroller(payable(address(this)))));
+    comptroller = IComptroller(address(new Comptroller()));
     IonicFlywheel impl = new IonicFlywheel();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(dpa), "");
     flywheel = IonicFlywheel(address(proxy));

@@ -143,7 +143,7 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
   function _setImplementationInternal(address implementation_, bytes memory becomeImplementationData) internal {
     address currentDelegate = implementation();
     LibDiamond.registerExtension(DiamondExtension(implementation_), DiamondExtension(currentDelegate));
-    _updateExtensions(currentDelegate);
+    _updateExtensions(implementation_);
 
     // TODO can we replace it with reinitialize? "_becomeImplementation(bytes)"
     _functionCall(
@@ -155,8 +155,8 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
     emit NewImplementation(currentDelegate, implementation_);
   }
 
-  function _updateExtensions(address currentDelegate) internal {
-    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getCErc20DelegateExtensions(currentDelegate);
+  function _updateExtensions(address newDelegate) internal {
+    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getCErc20DelegateExtensions(newDelegate);
     address[] memory currentExtensions = LibDiamond.listExtensions();
 
     // removed the current (old) extensions

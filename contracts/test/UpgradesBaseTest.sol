@@ -31,11 +31,14 @@ abstract contract UpgradesBaseTest is BaseTest {
     address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
 
     // instantiate the new implementation
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
+    Comptroller newComptrollerImplementation = new Comptroller();
+    vm.startPrank(ffd.owner());
     address comptrollerImplementationAddress = address(newComptrollerImplementation);
+    ffd._setLatestComptrollerImplementation(address(0), comptrollerImplementationAddress);
     // add the extension to the auto upgrade config
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = poolExt;
+    extensions[1] = newComptrollerImplementation;
     ffd._setComptrollerExtensions(comptrollerImplementationAddress, extensions);
     vm.stopPrank();
 

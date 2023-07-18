@@ -4,8 +4,11 @@ pragma solidity >=0.8.0;
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 import { ICErc20 } from "./CTokenInterfaces.sol";
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
+import { ComptrollerV3Storage } from "../compound/ComptrollerStorage.sol";
 
 interface ComptrollerInterface {
+  function _becomeImplementation() external;
+
   function isDeprecated(ICErc20 cToken) external view returns (bool);
 
   function _deployMarket(
@@ -315,11 +318,16 @@ interface IComptroller is
   ComptrollerExtensionInterface,
   UnitrollerInterface,
   ComptrollerStorageInterface
-{
+{}
 
-}
-
-abstract contract ComptrollerBase is ComptrollerInterface {
+abstract contract ComptrollerBase is ComptrollerV3Storage {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
+
+  /**
+   * @notice Returns a boolean indicating if the sender has admin rights
+   */
+  function hasAdminRights() internal view returns (bool) {
+    return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
+  }
 }
