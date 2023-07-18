@@ -67,6 +67,9 @@ abstract contract UpgradesBaseTest is BaseTest {
       becomeImplData = abi.encode(address(0));
     }
 
+    // set the new delegate as the latest
+    ffd._setLatestCErc20Delegate(newImpl.delegateType(), address(newImpl), abi.encode(address(0)));
+
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = marketExt;

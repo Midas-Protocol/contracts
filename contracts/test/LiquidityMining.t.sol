@@ -69,6 +69,8 @@ contract LiquidityMiningTest is BaseTest {
     poolDirectory = new PoolDirectory();
     poolDirectory.initialize(false, new address[](0));
     cErc20Delegate = new CErc20Delegate();
+    // set the new delegate as the latest
+    ionicAdmin._setLatestCErc20Delegate(cErc20Delegate.delegateType(), address(cErc20Delegate), abi.encode(address(0)));
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);

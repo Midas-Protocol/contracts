@@ -84,6 +84,24 @@ contract DeployMarketsTest is Test {
 
     cErc20DelegateExtensions[0] = cErc20PluginRewardsDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
+
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20Delegate.delegateType(),
+      address(cErc20Delegate),
+      ""
+    );
+
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20PluginDelegate.delegateType(),
+      address(cErc20PluginDelegate),
+      abi.encode(address(0))
+    );
+
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20PluginRewardsDelegate.delegateType(),
+      address(cErc20PluginRewardsDelegate),
+      abi.encode(address(0))
+    );
   }
 
   function setUpPool() public {

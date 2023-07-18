@@ -89,6 +89,10 @@ contract WithPool is BaseTest {
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
 
+    ionicAdmin._setLatestCErc20Delegate(cErc20Delegate.delegateType(), address(cErc20Delegate), "");
+    ionicAdmin._setLatestCErc20Delegate(cErc20PluginDelegate.delegateType(), address(cErc20PluginDelegate), abi.encode(address(0)));
+    ionicAdmin._setLatestCErc20Delegate(cErc20PluginRewardsDelegate.delegateType(), address(cErc20PluginRewardsDelegate), abi.encode(address(0)));
+
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
