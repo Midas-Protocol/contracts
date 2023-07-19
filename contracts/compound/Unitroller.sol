@@ -34,13 +34,6 @@ contract Unitroller is ComptrollerV3Storage, ComptrollerErrorReporter, DiamondBa
   /*** Admin Functions ***/
 
   /**
-   * @notice Returns a boolean indicating if the sender has admin rights
-   */
-  function hasAdminRights() internal view returns (bool) {
-    return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
-  }
-
-  /**
    * @notice Toggles admin rights.
    * @param hasRights Boolean indicating if the admin is to have rights.
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)

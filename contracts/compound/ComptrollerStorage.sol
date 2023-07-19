@@ -32,6 +32,13 @@ contract UnitrollerAdminStorage {
    * @notice Whether or not the admin has admin rights
    */
   bool public adminHasRights = true;
+
+  /**
+   * @notice Returns a boolean indicating if the sender has admin rights
+   */
+  function hasAdminRights() internal view returns (bool) {
+    return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
+  }
 }
 
 contract ComptrollerV1Storage is UnitrollerAdminStorage {

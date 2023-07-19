@@ -325,11 +325,4 @@ interface IComptroller is
 abstract contract ComptrollerBase is ComptrollerV3Storage {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
-
-  /**
-   * @notice Returns a boolean indicating if the sender has admin rights
-   */
-  function hasAdminRights() internal view returns (bool) {
-    return (msg.sender == admin && adminHasRights) || (msg.sender == address(ionicAdmin) && ionicAdminHasRights);
-  }
 }
