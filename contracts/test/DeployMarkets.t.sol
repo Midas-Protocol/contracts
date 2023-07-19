@@ -22,7 +22,7 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20 } from "../compound/CToken.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";

@@ -11,7 +11,7 @@ import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { PoolLensSecondary } from "../PoolLensSecondary.sol";
 import { UniswapLpTokenLiquidator } from "../liquidators/UniswapLpTokenLiquidator.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
@@ -226,7 +226,9 @@ contract NeondevnetE2ETest is WithPool {
       )
     );
 
-    PoolLens.PoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(IonicComptroller(address(comptroller)));
+    PoolLens.PoolAsset[] memory assetsDataAfter = poolLens.getPoolAssetsWithData(
+      IonicComptroller(address(comptroller))
+    );
 
     uint256 neonBalanceAfter = cWNeonToken.balanceOf(accountOne);
 

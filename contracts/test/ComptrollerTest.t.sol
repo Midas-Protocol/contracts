@@ -5,7 +5,7 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";

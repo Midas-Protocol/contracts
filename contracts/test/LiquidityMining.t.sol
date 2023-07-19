@@ -20,7 +20,7 @@ import { Comptroller } from "../compound/Comptroller.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";

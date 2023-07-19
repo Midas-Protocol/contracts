@@ -5,7 +5,7 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { IBeefyVault, BeefyERC4626, IonicERC4626 } from "../../ionic/strategies/BeefyERC4626.sol";
-import {IonicComptroller} from "../../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../../compound/ComptrollerInterface.sol";
 import { PoolDirectory } from "../../PoolDirectory.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";

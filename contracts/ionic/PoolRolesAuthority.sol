@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import {IonicComptroller, ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller, ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
 import { ICErc20, CTokenSecondExtensionInterface, CTokenFirstExtensionInterface } from "../compound/CTokenInterfaces.sol";
 
 import { RolesAuthority, Authority } from "solmate/auth/authorities/RolesAuthority.sol";

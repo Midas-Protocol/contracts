@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import {IonicComptroller} from "./compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "./compound/ComptrollerInterface.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { IUniswapV2Pair } from "./external/uniswap/IUniswapV2Pair.sol";
 

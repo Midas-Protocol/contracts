@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 

@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import { CErc20 } from "../compound/CToken.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";

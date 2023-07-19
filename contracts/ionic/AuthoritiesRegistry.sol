@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { PoolRolesAuthority } from "../ionic/PoolRolesAuthority.sol";
 import { SafeOwnableUpgradeable } from "../ionic/SafeOwnableUpgradeable.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 

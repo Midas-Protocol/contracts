@@ -6,7 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import {IonicComptroller} from "./compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "./compound/ComptrollerInterface.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
 import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";

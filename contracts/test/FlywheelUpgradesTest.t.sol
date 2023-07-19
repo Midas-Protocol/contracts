@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { PoolDirectory } from "../PoolDirectory.sol";
-import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { IonicReplacingFlywheel } from "../ionic/strategies/flywheel/IonicReplacingFlywheel.sol";
 import { ReplacingFlywheelDynamicRewards } from "../ionic/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
