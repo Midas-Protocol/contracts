@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "./compound/ComptrollerInterface.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { IUniswapV2Pair } from "./external/uniswap/IUniswapV2Pair.sol";
 
@@ -60,7 +60,7 @@ contract PoolLensSecondary is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
-  function getPoolOwnership(IComptroller comptroller)
+  function getPoolOwnership(IonicComptroller comptroller)
     external
     view
     returns (
@@ -168,7 +168,7 @@ contract PoolLensSecondary is Initializable {
     ICErc20 cTokenModify,
     bool isBorrow
   ) internal returns (uint256) {
-    IComptroller comptroller = IComptroller(cTokenModify.comptroller());
+    IonicComptroller comptroller = IonicComptroller(cTokenModify.comptroller());
     return comptroller.getMaxRedeemOrBorrow(account, cTokenModify, isBorrow);
   }
 
@@ -176,7 +176,7 @@ contract PoolLensSecondary is Initializable {
    * @notice Returns an array of all markets, an array of all `RewardsDistributor` contracts, an array of reward token addresses for each `RewardsDistributor`, an array of supply speeds for each distributor for each, and their borrow speeds.
    * @param comptroller The Ionic pool Comptroller to check.
    */
-  function getRewardSpeedsByPool(IComptroller comptroller)
+  function getRewardSpeedsByPool(IonicComptroller comptroller)
     public
     view
     returns (
@@ -225,7 +225,7 @@ contract PoolLensSecondary is Initializable {
    * @notice For each `Comptroller`, returns an array of all markets, an array of all `RewardsDistributor` contracts, an array of reward token addresses for each `RewardsDistributor`, an array of supply speeds for each distributor for each, and their borrow speeds.
    * @param comptrollers The Ionic pool Comptrollers to check.
    */
-  function getRewardSpeedsByPools(IComptroller[] memory comptrollers)
+  function getRewardSpeedsByPools(IonicComptroller[] memory comptrollers)
     external
     view
     returns (
@@ -323,7 +323,7 @@ contract PoolLensSecondary is Initializable {
     view
     returns (
       uint256[] memory,
-      IComptroller[] memory,
+      IonicComptroller[] memory,
       address[][] memory
     )
   {
@@ -332,19 +332,19 @@ contract PoolLensSecondary is Initializable {
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
-      try IComptroller(pools[i].comptroller).suppliers(supplier) returns (bool isSupplier) {
+      try IonicComptroller(pools[i].comptroller).suppliers(supplier) returns (bool isSupplier) {
         if (isSupplier) arrayLength++;
       } catch {}
     }
 
     // Build array
     uint256[] memory indexes = new uint256[](arrayLength);
-    IComptroller[] memory comptrollers = new IComptroller[](arrayLength);
+    IonicComptroller[] memory comptrollers = new IonicComptroller[](arrayLength);
     address[][] memory distributors = new address[][](arrayLength);
     uint256 index = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
 
       try comptroller.suppliers(supplier) returns (bool isSupplier) {
         if (isSupplier) {
@@ -373,17 +373,17 @@ contract PoolLensSecondary is Initializable {
     view
     returns (
       uint256[] memory,
-      IComptroller[] memory,
+      IonicComptroller[] memory,
       address[][] memory
     )
   {
     (uint256[] memory poolIds, PoolDirectory.Pool[] memory pools) = directory.getActivePools();
 
-    IComptroller[] memory comptrollers = new IComptroller[](pools.length);
+    IonicComptroller[] memory comptrollers = new IonicComptroller[](pools.length);
     address[][] memory distributors = new address[][](pools.length);
 
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
       try comptroller.getRewardsDistributors() returns (address[] memory _distributors) {
         comptrollers[i] = comptroller;
         distributors[i] = flywheelsWithRewardsForPoolUser(user, _distributors);

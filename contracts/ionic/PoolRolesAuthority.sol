@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { IComptroller, ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller, ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
 import { ICErc20, CTokenSecondExtensionInterface, CTokenFirstExtensionInterface } from "../compound/CTokenInterfaces.sol";
 
 import { RolesAuthority, Authority } from "solmate/auth/authorities/RolesAuthority.sol";
@@ -59,15 +59,15 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     );
   }
 
-  function openPoolSupplierCapabilities(IComptroller pool) external requiresAuth {
+  function openPoolSupplierCapabilities(IonicComptroller pool) external requiresAuth {
     _setPublicPoolSupplierCapabilities(pool, true);
   }
 
-  function closePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
+  function closePoolSupplierCapabilities(IonicComptroller pool) external requiresAuth {
     _setPublicPoolSupplierCapabilities(pool, false);
   }
 
-  function _setPublicPoolSupplierCapabilities(IComptroller pool, bool setPublic) internal {
+  function _setPublicPoolSupplierCapabilities(IonicComptroller pool, bool setPublic) internal {
     setPublicCapability(address(pool), pool.enterMarkets.selector, setPublic);
     setPublicCapability(address(pool), pool.exitMarket.selector, setPublic);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
@@ -79,7 +79,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configurePoolSupplierCapabilities(IComptroller pool) external requiresAuth {
+  function configurePoolSupplierCapabilities(IonicComptroller pool) external requiresAuth {
     _configurePoolSupplierCapabilities(pool, SUPPLIER_ROLE);
   }
 
@@ -119,7 +119,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     return false;
   }
 
-  function _configurePoolSupplierCapabilities(IComptroller pool, uint8 role) internal {
+  function _configurePoolSupplierCapabilities(IonicComptroller pool, uint8 role) internal {
     setRoleCapability(role, address(pool), pool.enterMarkets.selector, true);
     setRoleCapability(role, address(pool), pool.exitMarket.selector, true);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
@@ -131,15 +131,15 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function openPoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
+  function openPoolBorrowerCapabilities(IonicComptroller pool) external requiresAuth {
     _setPublicPoolBorrowerCapabilities(pool, true);
   }
 
-  function closePoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
+  function closePoolBorrowerCapabilities(IonicComptroller pool) external requiresAuth {
     _setPublicPoolBorrowerCapabilities(pool, false);
   }
 
-  function _setPublicPoolBorrowerCapabilities(IComptroller pool, bool setPublic) internal {
+  function _setPublicPoolBorrowerCapabilities(IonicComptroller pool, bool setPublic) internal {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
       setPublicCapability(address(allMarkets[i]), allMarkets[i].borrow.selector, setPublic);
@@ -149,7 +149,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configurePoolBorrowerCapabilities(IComptroller pool) external requiresAuth {
+  function configurePoolBorrowerCapabilities(IonicComptroller pool) external requiresAuth {
     // borrowers have the SUPPLIER_ROLE capabilities by default
     _configurePoolSupplierCapabilities(pool, BORROWER_ROLE);
     ICErc20[] memory allMarkets = pool.getAllMarkets();
@@ -161,7 +161,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configureClosedPoolLiquidatorCapabilities(IComptroller pool) external requiresAuth {
+  function configureClosedPoolLiquidatorCapabilities(IonicComptroller pool) external requiresAuth {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
       setPublicCapability(address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, false);
@@ -170,7 +170,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configureOpenPoolLiquidatorCapabilities(IComptroller pool) external requiresAuth {
+  function configureOpenPoolLiquidatorCapabilities(IonicComptroller pool) external requiresAuth {
     ICErc20[] memory allMarkets = pool.getAllMarkets();
     for (uint256 i = 0; i < allMarkets.length; i++) {
       setPublicCapability(address(allMarkets[i]), allMarkets[i].liquidateBorrow.selector, true);
@@ -179,7 +179,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
     }
   }
 
-  function configureLeveredPositionCapabilities(IComptroller pool) external requiresAuth {
+  function configureLeveredPositionCapabilities(IonicComptroller pool) external requiresAuth {
     setRoleCapability(LEVERED_POSITION_ROLE, address(pool), pool.enterMarkets.selector, true);
     setRoleCapability(LEVERED_POSITION_ROLE, address(pool), pool.exitMarket.selector, true);
     ICErc20[] memory allMarkets = pool.getAllMarkets();

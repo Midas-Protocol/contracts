@@ -11,7 +11,7 @@ import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../../compound/CErc20Delegator.sol";
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../../FeeDistributor.sol";
@@ -34,7 +34,7 @@ contract WithPool is BaseTest {
   CErc20PluginDelegate cErc20PluginDelegate;
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
-  IComptroller comptroller;
+  IonicComptroller comptroller;
   Comptroller newComptroller;
   JumpRateModel interestModel;
 
@@ -146,7 +146,7 @@ contract WithPool is BaseTest {
       address(priceOracle)
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = IComptroller(comptrollerAddress);
+    comptroller = IonicComptroller(comptrollerAddress);
 
     AuthoritiesRegistry impl = new AuthoritiesRegistry();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");

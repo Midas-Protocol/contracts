@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "./ErrorReporter.sol";
 import "./ComptrollerStorage.sol";
 import "./Comptroller.sol";
+import { DiamondExtension, DiamondBase, LibDiamond } from "../ionic/DiamondExtension.sol";
 
 /**
  * @title Unitroller

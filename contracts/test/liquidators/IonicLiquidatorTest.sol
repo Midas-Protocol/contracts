@@ -5,7 +5,7 @@ import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/
 import { IonicLiquidator } from "../../IonicLiquidator.sol";
 import { ICurvePool } from "../../external/curve/ICurvePool.sol";
 import { CurveSwapLiquidatorFunder } from "../../liquidators/CurveSwapLiquidatorFunder.sol";
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../../compound/ComptrollerInterface.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";

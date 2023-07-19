@@ -313,7 +313,7 @@ interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerSto
 
 //interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
 
-interface IComptroller is
+interface IonicComptroller is
   ComptrollerInterface,
   ComptrollerExtensionInterface,
   UnitrollerInterface,

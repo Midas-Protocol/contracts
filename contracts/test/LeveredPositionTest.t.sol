@@ -20,7 +20,7 @@ import { LiquidatorsRegistryExtension } from "../liquidators/registry/Liquidator
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -514,7 +514,7 @@ interface TwoBrl {
 }
 
 contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
-  IComptroller pool;
+  IonicComptroller pool;
   ComptrollerFirstExtension asExtension;
 
   function setUp() public fork(BSC_MAINNET) {}
@@ -580,7 +580,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
     address maticXBbaWMaticWhale = 0xB0B28d7A74e62DF5F6F9E0d9Ae0f4e7982De9585;
     address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    IComptroller pool = IComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
+    IonicComptroller pool = IonicComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
     _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerSwapLiquidator());
 
     {
@@ -617,13 +617,13 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
       abi.encode(minBorrowNative)
     );
 
-    address xMarket = address(3); // BOMB
-    address yMarket = address(2); // tdai
+    address xMarket = 0x11771Cd06dB2633EF6A0cEef027E8e1A120d3f25; // BOMB
+    address yMarket = 0x66b05c1711094c32c99a65d2734C72dE0A1C3c81; // tdai
 
     collateralMarket = ICErc20(xMarket);
     stableMarket = ICErc20(yMarket);
 
-    upgradePoolAndMarkets();
+    //upgradePoolAndMarkets();
 
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     IERC20Upgradeable stableToken = IERC20Upgradeable(stableMarket.underlying());

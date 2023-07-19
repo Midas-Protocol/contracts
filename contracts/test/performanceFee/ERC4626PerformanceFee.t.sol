@@ -5,7 +5,7 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { IBeefyVault, BeefyERC4626, IonicERC4626 } from "../../ionic/strategies/BeefyERC4626.sol";
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../../compound/ComptrollerInterface.sol";
 import { PoolDirectory } from "../../PoolDirectory.sol";
 import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
@@ -157,7 +157,7 @@ contract ERC4626PerformanceFeeTest is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));

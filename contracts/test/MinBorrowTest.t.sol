@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
@@ -22,7 +22,7 @@ contract MinBorrowTest is BaseTest {
 
     ICErc20 usdcMarket = ICErc20(0x16B8da195CdC7F380B333bf6cF2f0f33c1061755);
     ICErc20 busdMarket = ICErc20(0x3BCb7dbBe729B24bE6c660B3e8ADD1Cb352e371D);
-    IComptroller comptroller = usdcMarket.comptroller();
+    IonicComptroller comptroller = usdcMarket.comptroller();
     deal(address(usdc), address(this), 10000e18);
     deal(address(busd), address(1), 10000e18);
 

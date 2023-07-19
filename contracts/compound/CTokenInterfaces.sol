@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { IComptroller } from "./ComptrollerInterface.sol";
+import {IonicComptroller} from "./ComptrollerInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
@@ -46,7 +46,7 @@ abstract contract CErc20Storage is CTokenAdminStorage {
   /**
    * @notice Contract which oversees inter-cToken operations
    */
-  IComptroller public comptroller;
+  IonicComptroller public comptroller;
 
   /**
    * @notice Model which tells what the current interest rate should be
@@ -404,7 +404,7 @@ interface CErc20StorageInterface {
 
   function ionicAdminHasRights() external view returns (bool);
 
-  function comptroller() external view returns (IComptroller);
+  function comptroller() external view returns (IonicComptroller);
 
   function name() external view returns (string memory);
 

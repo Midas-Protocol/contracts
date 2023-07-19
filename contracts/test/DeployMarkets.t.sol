@@ -22,7 +22,7 @@ import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20 } from "../compound/CToken.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
@@ -39,7 +39,7 @@ contract DeployMarketsTest is Test {
   MockERC20 rewardToken;
 
   JumpRateModel interestModel;
-  IComptroller comptroller;
+  IonicComptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
@@ -121,7 +121,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = IComptroller(comptrollerAddress);
+    comptroller = IonicComptroller(comptrollerAddress);
 
     AuthoritiesRegistry impl = new AuthoritiesRegistry();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");

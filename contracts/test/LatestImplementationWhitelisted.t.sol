@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 import { CErc20 } from "../compound/CToken.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
@@ -39,7 +39,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(payable(pools[i].comptroller));
+      IonicComptroller comptroller = IonicComptroller(payable(pools[i].comptroller));
       address implementation = comptroller.comptrollerImplementation();
 
       bool added = false;
@@ -65,7 +65,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(payable(pools[i].comptroller));
+      IonicComptroller comptroller = IonicComptroller(payable(pools[i].comptroller));
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         ICErc20 market = markets[j];
@@ -97,7 +97,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(payable(pools[i].comptroller));
+      IonicComptroller comptroller = IonicComptroller(payable(pools[i].comptroller));
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));

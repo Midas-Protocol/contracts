@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.10;
 
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IFundsConversionStrategy } from "../../liquidators/IFundsConversionStrategy.sol";
@@ -36,8 +36,8 @@ contract LeveredPosition is LeveredPositionStorage, IFlashLoanReceiver {
     ICErc20 _collateralMarket,
     ICErc20 _stableMarket
   ) LeveredPositionStorage(_positionOwner) {
-    IComptroller collateralPool = _collateralMarket.comptroller();
-    IComptroller stablePool = _stableMarket.comptroller();
+    IonicComptroller collateralPool = _collateralMarket.comptroller();
+    IonicComptroller stablePool = _stableMarket.comptroller();
     require(collateralPool == stablePool, "markets pools differ");
     pool = collateralPool;
 

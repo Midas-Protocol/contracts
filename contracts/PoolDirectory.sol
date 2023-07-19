@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "./compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { Unitroller } from "./compound/Unitroller.sol";
 import "./ionic/SafeOwnableUpgradeable.sol";
@@ -171,7 +171,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     );
 
     // Setup the pool
-    IComptroller comptrollerProxy = IComptroller(proxy);
+    IonicComptroller comptrollerProxy = IonicComptroller(proxy);
     comptrollerProxy._upgrade();
 
     // Set pool parameters
@@ -249,7 +249,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
 
     (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
-      try IComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
+      try IonicComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
         if (enforceWhitelist) continue;
       } catch {}
 
@@ -261,7 +261,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
-      try IComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
+      try IonicComptroller(activePools[i].comptroller).enforceWhitelist() returns (bool enforceWhitelist) {
         if (enforceWhitelist) continue;
       } catch {}
 
@@ -282,7 +282,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
 
     (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
-      try IComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+      try IonicComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
         if (!isUsing) continue;
       } catch {}
 
@@ -294,7 +294,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
-      try IComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
+      try IonicComptroller(activePools[i].comptroller).isUserOfPool(user) returns (bool isUsing) {
         if (!isUsing) continue;
       } catch {}
 
@@ -326,7 +326,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
    * @notice Modify existing Ionic pool name.
    */
   function setPoolName(uint256 index, string calldata name) external {
-    IComptroller _comptroller = IComptroller(pools[index].comptroller);
+    IonicComptroller _comptroller = IonicComptroller(pools[index].comptroller);
     require(
       (msg.sender == _comptroller.admin() && _comptroller.adminHasRights()) || msg.sender == owner(),
       "!permission"
@@ -369,7 +369,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
 
     (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
-      IComptroller comptroller = IComptroller(activePools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(activePools[i].comptroller);
 
       try comptroller.admin() returns (address admin) {
         if (whitelistedAdmin != adminWhitelist[admin]) continue;
@@ -383,7 +383,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
-      IComptroller comptroller = IComptroller(activePools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(activePools[i].comptroller);
 
       try comptroller.admin() returns (address admin) {
         if (whitelistedAdmin != adminWhitelist[admin]) continue;
@@ -410,7 +410,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     uint256 arrayLength = 0;
     (, Pool[] memory activePools) = getActivePools();
     for (uint256 i = 0; i < activePools.length; i++) {
-      IComptroller comptroller = IComptroller(activePools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(activePools[i].comptroller);
 
       try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
         if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
@@ -424,7 +424,7 @@ contract PoolDirectory is SafeOwnableUpgradeable {
     uint256 index = 0;
 
     for (uint256 i = 0; i < activePools.length; i++) {
-      IComptroller comptroller = IComptroller(activePools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(activePools[i].comptroller);
       try comptroller.enforceWhitelist() returns (bool enforceWhitelist) {
         if (!enforceWhitelist || !comptroller.whitelist(account)) continue;
       } catch {}

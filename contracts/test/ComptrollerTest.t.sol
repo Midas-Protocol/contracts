@@ -5,7 +5,7 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
@@ -20,7 +20,7 @@ import { MockERC20 } from "solmate/test/utils/mocks/MockERC20.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract ComptrollerTest is BaseTest {
-  IComptroller internal comptroller;
+  IonicComptroller internal comptroller;
   IonicFlywheel internal flywheel;
   address internal nonOwner = address(0x2222);
 
@@ -30,7 +30,7 @@ contract ComptrollerTest is BaseTest {
     {
       Unitroller proxy = new Unitroller(payable(address(this)));
       proxy._registerExtension(new Comptroller(), DiamondExtension(address(0)));
-      comptroller = IComptroller(address(proxy));
+      comptroller = IonicComptroller(address(proxy));
     }
     {
       ERC20 rewardToken = new MockERC20("RewardToken", "RT", 18);
@@ -65,7 +65,7 @@ contract ComptrollerTest is BaseTest {
     PoolDirectory fpd = PoolDirectory(ap.getAddress("PoolDirectory"));
     PoolDirectory.Pool[] memory pools = fpd.getAllPools();
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
+      IonicComptroller pool = IonicComptroller(pools[i].comptroller);
       ICErc20[] memory markets = pool.getAllMarkets();
       for (uint256 j = 0; j < markets.length; j++) {
         ICErc20 market = markets[j];

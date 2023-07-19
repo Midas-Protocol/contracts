@@ -14,7 +14,7 @@ import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 import { ComptrollerV3Storage } from "../compound/ComptrollerStorage.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -273,7 +273,7 @@ contract ExtensionsTest is MarketsTest {
 
     for (uint8 i = 0; i < pools.length; i++) {
       vm.prank(ffd.owner());
-      ffd.autoUpgradePool(IComptroller(pools[i].comptroller));
+      ffd.autoUpgradePool(IonicComptroller(pools[i].comptroller));
     }
   }
 

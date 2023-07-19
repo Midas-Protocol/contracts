@@ -70,8 +70,9 @@ contract MarketsTest is BaseTest {
     }
 
     // set the new ctoken delegate as the latest
+    uint8 delegateType = market.delegateType();
     vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(market.delegateType(), address(newImpl), abi.encode(address(0)));
+    ffd._setLatestCErc20Delegate(delegateType, address(newImpl), abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
     DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);

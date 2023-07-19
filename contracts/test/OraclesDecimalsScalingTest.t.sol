@@ -5,7 +5,7 @@ import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 
 import { IERC20MetadataUpgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 
@@ -45,7 +45,7 @@ contract OraclesDecimalsScalingTest is BaseTest {
       (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
       for (uint8 i = 0; i < pools.length; i++) {
-        IComptroller comptroller = IComptroller(pools[i].comptroller);
+        IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
         ICErc20[] memory markets = comptroller.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
           address underlying = markets[j].underlying();

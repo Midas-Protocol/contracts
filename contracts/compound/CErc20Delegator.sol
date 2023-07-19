@@ -30,7 +30,7 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
    */
   constructor(
     address underlying_,
-    IComptroller comptroller_,
+    IonicComptroller comptroller_,
     address payable ionicAdmin_,
     InterestRateModel interestRateModel_,
     string memory name_,

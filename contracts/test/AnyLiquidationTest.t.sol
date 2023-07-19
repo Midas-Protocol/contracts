@@ -16,7 +16,7 @@ import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
@@ -114,7 +114,7 @@ contract AnyLiquidationTest is BaseTest {
     bytes[] fundingDatas;
     ICErc20 debtMarket;
     ICErc20 collateralMarket;
-    IComptroller comptroller;
+    IonicComptroller comptroller;
     address borrower;
     uint256 repayAmount;
     address flashSwapFundingToken;
@@ -124,23 +124,23 @@ contract AnyLiquidationTest is BaseTest {
   function getPoolAndBorrower(uint256 random, PoolDirectory.Pool[] memory pools)
     internal
     view
-    returns (IComptroller, address)
+    returns (IonicComptroller, address)
   {
     if (pools.length == 0) revert("no pools to pick from");
 
     uint256 i = random % pools.length; // random pool
-    IComptroller comptroller = IComptroller(pools[i].comptroller);
+    IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
 
     address bscBombPool = 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459;
     if (address(comptroller) == bscBombPool) {
       // we don't want to deal with the bomb liquidations
-      return (IComptroller(address(0)), address(0));
+      return (IonicComptroller(address(0)), address(0));
     }
 
     address[] memory borrowers = comptroller.getAllBorrowers();
 
     if (borrowers.length == 0) {
-      return (IComptroller(address(0)), address(0));
+      return (IonicComptroller(address(0)), address(0));
     } else {
       uint256 k = random % borrowers.length; // random borrower
       address borrower = borrowers[k];

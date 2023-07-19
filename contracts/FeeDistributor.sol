@@ -6,7 +6,7 @@ import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeab
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/utils/Create2Upgradeable.sol";
 
-import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "./compound/ComptrollerInterface.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 import { CErc20Delegator } from "./compound/CErc20Delegator.sol";
 import { CErc20PluginDelegate } from "./compound/CErc20PluginDelegate.sol";
@@ -134,7 +134,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
   function getMinBorrowEth(ICErc20 _ctoken) public view returns (uint256) {
     (, , uint256 borrowBalance, ) = _ctoken.getAccountSnapshot(_msgSender());
     if (borrowBalance == 0) return minBorrowEth;
-    IComptroller comptroller = IComptroller(address(_ctoken.comptroller()));
+    IonicComptroller comptroller = IonicComptroller(address(_ctoken.comptroller()));
     BasePriceOracle oracle = comptroller.oracle();
     uint256 underlyingPriceEth = oracle.price(ICErc20(address(_ctoken)).underlying());
     uint256 underlyingDecimals = _ctoken.decimals();
@@ -339,7 +339,7 @@ contract FeeDistributor is SafeOwnableUpgradeable, FeeDistributorStorage {
     cErc20DelegateExtensions[cErc20Delegate] = extensions;
   }
 
-  function autoUpgradePool(IComptroller pool) external onlyOwner {
+  function autoUpgradePool(IonicComptroller pool) external onlyOwner {
     ICErc20[] memory markets = pool.getAllMarkets();
 
     // auto upgrade the pool

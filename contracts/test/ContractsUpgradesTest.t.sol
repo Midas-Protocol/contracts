@@ -6,7 +6,7 @@ import { PoolDirectory } from "../PoolDirectory.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import {IonicComptroller} from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
@@ -121,7 +121,7 @@ contract ContractsUpgradesTest is BaseTest {
       (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
       for (uint8 i = 0; i < pools.length; i++) {
-        IComptroller pool = IComptroller(pools[i].comptroller);
+        IonicComptroller pool = IonicComptroller(pools[i].comptroller);
         ICErc20[] memory markets = pool.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
           ICErc20 market = markets[j];
@@ -166,7 +166,7 @@ contract ContractsUpgradesTest is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
+      IonicComptroller pool = IonicComptroller(pools[i].comptroller);
       address pauseGuardian = pool.pauseGuardian();
       if (pauseGuardian != address(0) && pauseGuardian != deployer) {
         emit log_named_address("pool", address(pool));

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { IComptroller } from "./ComptrollerInterface.sol";
+import {IonicComptroller} from "./ComptrollerInterface.sol";
 import { CTokenSecondExtensionBase, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
