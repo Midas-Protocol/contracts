@@ -601,7 +601,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
 }
 
 contract BombTDaiLeveredPositionTest is LeveredPositionTest {
-  uint256 depositAmount = 10000e18;
+  uint256 depositAmount = 100e18;
   address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
   uint256 ratioOnCreation = 1.0e18;
   uint256 minBorrowNative = 1e16;

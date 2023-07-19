@@ -59,9 +59,10 @@ contract LeveredPositionFactoryExtension is
     positionsByAccount[msg.sender].add(address(position));
 
     AuthoritiesRegistry authoritiesRegistry = feeDistributor.authoritiesRegistry();
-    PoolRolesAuthority poolAuth = authoritiesRegistry.poolsAuthorities(address(_collateralMarket.comptroller()));
+    address poolAddress = address(_collateralMarket.comptroller());
+    PoolRolesAuthority poolAuth = authoritiesRegistry.poolsAuthorities(poolAddress);
     if (address(poolAuth) != address(0)) {
-      poolAuth.setUserRole(address(position), poolAuth.LEVERED_POSITION_ROLE(), true);
+      authoritiesRegistry.setUserRole(poolAddress, address(position), poolAuth.LEVERED_POSITION_ROLE(), true);
     }
 
     return position;
