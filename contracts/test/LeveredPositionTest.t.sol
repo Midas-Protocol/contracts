@@ -94,7 +94,7 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    ICErc20 stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // TDAI
+    ICErc20 stableMarket = ICErc20(address(1)); // TDAI
     uint256 borrowAmount = 14925373134328358;
 
     uint256 borrowValue = (mpo.getUnderlyingPrice(stableMarket) * borrowAmount) / 1e18;
@@ -102,7 +102,7 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
-    ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // DAI
+    ICErc20 _stableMarket = ICErc20(address(1)); // DAI
 
     uint256 borrowRate = 5.2e16; // 5.2%
     vm.mockCall(
@@ -126,7 +126,7 @@ contract LeveredPositionFactoryTest is BaseTest {
     int256 netApy = lens.getNetAPY(
       2.7e16, // 2.7%
       1e18, // supply amount
-      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD), // BOMB
+      ICErc20(address(0)), // BOMB
       _stableMarket,
       2e18 // ratio
     );
@@ -617,8 +617,8 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
       abi.encode(minBorrowNative)
     );
 
-    address xMarket = 0xfa60851E76728eb31EFeA660937cD535C887fDbD; // BOMB
-    address yMarket = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15; // tdai
+    address xMarket = address(3); // BOMB
+    address yMarket = address(2); // tdai
 
     collateralMarket = ICErc20(xMarket);
     stableMarket = ICErc20(yMarket);
