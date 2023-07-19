@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { IComptroller, ComptrollerInterface } from "../compound/ComptrollerInterface.sol";
-import { ICErc20, CTokenFirstExtensionInterface, CTokenSecondExtensionInterface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20, CTokenSecondExtensionInterface, CTokenFirstExtensionInterface } from "../compound/CTokenInterfaces.sol";
 
 import { RolesAuthority, Authority } from "solmate/auth/authorities/RolesAuthority.sol";
 
@@ -86,14 +86,14 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
   function getSupplierMarketSelectors() internal pure returns (bytes4[] memory selectors) {
     uint8 fnsCount = 6;
     selectors = new bytes4[](fnsCount);
-    selectors[--fnsCount] = CTokenFirstExtensionInterface.mint.selector;
-    selectors[--fnsCount] = CTokenFirstExtensionInterface.redeem.selector;
-    selectors[--fnsCount] = CTokenFirstExtensionInterface.redeemUnderlying.selector;
+    selectors[--fnsCount] = CTokenSecondExtensionInterface.mint.selector;
+    selectors[--fnsCount] = CTokenSecondExtensionInterface.redeem.selector;
+    selectors[--fnsCount] = CTokenSecondExtensionInterface.redeemUnderlying.selector;
 
     // TODO transfer/approve fns needed at all?
-    selectors[--fnsCount] = CTokenSecondExtensionInterface.transfer.selector;
-    selectors[--fnsCount] = CTokenSecondExtensionInterface.transferFrom.selector;
-    selectors[--fnsCount] = CTokenSecondExtensionInterface.approve.selector;
+    selectors[--fnsCount] = CTokenFirstExtensionInterface.transfer.selector;
+    selectors[--fnsCount] = CTokenFirstExtensionInterface.transferFrom.selector;
+    selectors[--fnsCount] = CTokenFirstExtensionInterface.approve.selector;
 
     // selectors[--fnsCount] = ICErc20.multicall.selector;
 
@@ -102,7 +102,7 @@ contract PoolRolesAuthority is RolesAuthority, Initializable {
   }
 
   function isDefaultOpenCall(address target, bytes4 selector) external pure returns (bool) {
-    if (selector == CTokenFirstExtensionInterface.repayBorrow.selector) return true;
+    if (selector == CTokenSecondExtensionInterface.repayBorrow.selector) return true;
 
     return isSupplierCall(target, selector);
   }

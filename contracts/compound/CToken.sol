@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import { IComptroller } from "./ComptrollerInterface.sol";
-import { CTokenFirstExtensionBase, ICErc20 } from "./CTokenInterfaces.sol";
+import { CTokenSecondExtensionBase, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { EIP20Interface } from "./EIP20Interface.sol";
@@ -17,7 +17,7 @@ import { DiamondExtension, LibDiamond } from "../ionic/DiamondExtension.sol";
  * @dev This contract should not to be deployed on its own; instead, deploy `CErc20Delegator` (proxy contract) and `CErc20Delegate` (logic/implementation contract).
  * @author Compound
  */
-abstract contract CErc20 is CTokenFirstExtensionBase, TokenErrorReporter, Exponential, DiamondExtension {
+abstract contract CErc20 is CTokenSecondExtensionBase, TokenErrorReporter, Exponential, DiamondExtension {
   modifier isAuthorized() {
     require(
       IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),

@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../ionic/IFlashLoanReceiver.sol";
-import { CErc20SecondExtensionBase, CTokenSecondExtensionInterface, ICErc20 } from "./CTokenInterfaces.sol";
+import { CErc20FirstExtensionBase, CTokenFirstExtensionInterface, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
@@ -11,7 +11,13 @@ import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract CTokenFirstExtension is CErc20SecondExtensionBase, TokenErrorReporter, Exponential, DiamondExtension, Multicall {
+contract CTokenFirstExtension is
+  CErc20FirstExtensionBase,
+  TokenErrorReporter,
+  Exponential,
+  DiamondExtension,
+  Multicall
+{
   modifier isAuthorized() {
     require(
       IFeeDistributor(ionicAdmin).canCall(address(comptroller), msg.sender, address(this), msg.sig),
@@ -692,7 +698,7 @@ contract CTokenFirstExtension is CErc20SecondExtensionBase, TokenErrorReporter, 
   function multicall(bytes[] calldata data)
     public
     payable
-    override(CTokenSecondExtensionInterface, Multicall)
+    override(CTokenFirstExtensionInterface, Multicall)
     returns (bytes[] memory results)
   {
     return Multicall.multicall(data);

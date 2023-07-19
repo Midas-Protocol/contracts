@@ -4,7 +4,6 @@ pragma solidity >=0.8.0;
 import { BaseTest } from "./config/BaseTest.t.sol";
 import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
 

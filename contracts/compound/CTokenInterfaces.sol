@@ -190,11 +190,11 @@ abstract contract CTokenBaseEvents {
   event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 }
 
-abstract contract CTokenExtensionEvents is CTokenBaseEvents {
+abstract contract CTokenFirstExtensionEvents is CTokenBaseEvents {
   event Flash(address receiver, uint256 amount);
 }
 
-abstract contract CTokenEvents is CTokenBaseEvents {
+abstract contract CTokenSecondExtensionEvents is CTokenBaseEvents {
   /*** Market Events ***/
 
   /**
@@ -239,7 +239,7 @@ abstract contract CTokenEvents is CTokenBaseEvents {
   event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
 }
 
-interface CTokenSecondExtensionInterface {
+interface CTokenFirstExtensionInterface {
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external returns (bool);
@@ -301,7 +301,7 @@ interface CTokenSecondExtensionInterface {
   function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) external view returns (uint256);
 }
 
-interface CTokenFirstExtensionInterface {
+interface CTokenSecondExtensionInterface {
   function mint(uint256 mintAmount) external returns (uint256);
 
   function redeem(uint256 redeemTokens) external returns (uint256);
@@ -380,11 +380,20 @@ abstract contract CErc20AdminBase is CErc20Storage {
   }
 }
 
-abstract contract CErc20SecondExtensionBase is CErc20AdminBase, CTokenExtensionEvents, CTokenSecondExtensionInterface {}
+abstract contract CErc20FirstExtensionBase is
+  CErc20AdminBase,
+  CTokenFirstExtensionEvents,
+  CTokenFirstExtensionInterface
+{}
 
-abstract contract CTokenFirstExtensionBase is CErc20AdminBase, CTokenEvents, CTokenFirstExtensionInterface, CDelegateInterface {}
+abstract contract CTokenSecondExtensionBase is
+  CErc20AdminBase,
+  CTokenSecondExtensionEvents,
+  CTokenSecondExtensionInterface,
+  CDelegateInterface
+{}
 
-abstract contract CErc20DelegatorBase is CErc20AdminBase, CTokenEvents, CDelegatorInterface {}
+abstract contract CErc20DelegatorBase is CErc20AdminBase, CTokenSecondExtensionEvents, CDelegatorInterface {}
 
 interface CErc20StorageInterface {
   function admin() external view returns (address);
@@ -436,7 +445,13 @@ interface CErc20PluginRewardsInterface is CErc20PluginStorageInterface {
   function approve(address, address) external;
 }
 
-interface ICErc20 is CErc20StorageInterface, CTokenFirstExtensionInterface, CTokenSecondExtensionInterface, CDelegatorInterface, CDelegateInterface {}
+interface ICErc20 is
+  CErc20StorageInterface,
+  CTokenSecondExtensionInterface,
+  CTokenFirstExtensionInterface,
+  CDelegatorInterface,
+  CDelegateInterface
+{}
 
 interface ICErc20Plugin is CErc20PluginStorageInterface, ICErc20 {}
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { MarketsTest, BaseTest, CErc20Delegate } from "./config/MarketsTest.t.sol";
+import { MarketsTest, BaseTest } from "./config/MarketsTest.t.sol";
 import { DiamondBase, DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 import { LeveredPosition } from "../ionic/levered/LeveredPosition.sol";
@@ -21,7 +21,6 @@ import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegist
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
