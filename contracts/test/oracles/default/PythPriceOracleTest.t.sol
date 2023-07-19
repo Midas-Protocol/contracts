@@ -61,14 +61,7 @@ contract PythOraclesTest is BaseTest {
     pythOracle.updatePriceFeeds(feedData);
 
     oracle = new PythPriceOracle();
-    oracle.initialize(
-      true,
-      address(0),
-      address(pythOracle),
-      nativeTokenPriceFeed,
-      MasterPriceOracle(address(0)),
-      address(0)
-    );
+    oracle.initialize(address(pythOracle), nativeTokenPriceFeed, address(0));
   }
 
   function getPrice(address testedTokenAddress, bytes32 feedId) internal returns (uint256 price) {

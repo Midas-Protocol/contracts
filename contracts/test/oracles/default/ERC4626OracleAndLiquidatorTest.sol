@@ -62,8 +62,9 @@ contract ERC4626OracleAndLiquidatorTest is BaseTest {
   function setUpBaseOracles() public {
     setUpMpoAndAddresses();
     BasePriceOracle[] memory oracles = new BasePriceOracle[](2);
-    chainlinkOracle = new ChainlinkPriceOracleV2(mpo.admin(), true, address(wethToken), nativeUsdPriceFeed);
-    vm.prank(chainlinkOracle.admin());
+    chainlinkOracle = new ChainlinkPriceOracleV2();
+    chainlinkOracle.initialize(address(usdcToken), nativeUsdPriceFeed);
+    vm.prank(chainlinkOracle.owner());
     chainlinkOracle.setPriceFeeds(
       asArray(address(usdcToken), address(wbtcToken)),
       asArray(usdcEthPriceFeed, wbtcEthPriceFeed),

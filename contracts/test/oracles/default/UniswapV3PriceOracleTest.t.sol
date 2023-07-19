@@ -235,13 +235,10 @@ contract UniswapV3PriceOracleTest is BaseTest {
     if (block.chainid == ETHEREUM_MAINNET) {
       setUpMpoAndAddresses();
       BasePriceOracle[] memory oracles = new BasePriceOracle[](2);
-      ChainlinkPriceOracleV2 chainlinkOracle = new ChainlinkPriceOracleV2(
-        mpo.admin(),
-        true,
-        wtoken,
-        0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-      );
-      vm.prank(chainlinkOracle.admin());
+      ChainlinkPriceOracleV2 chainlinkOracle = new ChainlinkPriceOracleV2();
+      chainlinkOracle.initialize(stable, 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
+
+      vm.prank(chainlinkOracle.owner());
       chainlinkOracle.setPriceFeeds(
         asArray(stable),
         asArray(0x986b5E1e1755e3C2440e960477f25201B0a8bbD4),

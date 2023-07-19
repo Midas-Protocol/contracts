@@ -23,16 +23,6 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   mapping(address => bytes32) public priceFeedIds;
 
   /**
-   * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
-   */
-  bool public CAN_ADMIN_OVERWRITE;
-
-  /**
-   * @dev The Wrapped native asset address.
-   */
-  address public WTOKEN;
-
-  /**
    * @notice DIA NATIVE/USD price feed contracts.
    */
   bytes32 public NATIVE_TOKEN_USD_FEED;
@@ -40,7 +30,6 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   /**
    * @notice MasterPriceOracle for backup for USD price.
    */
-  MasterPriceOracle public MASTER_PRICE_ORACLE;
   address public USD_TOKEN; // token to use as USD price (i.e. USDC)
 
   /**
@@ -50,18 +39,12 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   IPyth public PYTH;
 
   function initialize(
-    bool canAdminOverwrite,
-    address wtoken,
     address pythAddress,
     bytes32 nativeTokenUsdFeed,
-    MasterPriceOracle masterPriceOracle,
     address usdToken
   ) public initializer {
     __SafeOwnable_init(msg.sender);
-    CAN_ADMIN_OVERWRITE = canAdminOverwrite;
-    WTOKEN = wtoken;
     NATIVE_TOKEN_USD_FEED = nativeTokenUsdFeed;
-    MASTER_PRICE_ORACLE = masterPriceOracle;
     USD_TOKEN = usdToken;
     PYTH = IPyth(pythAddress);
   }
@@ -81,13 +64,6 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
     // For each token/feed
     for (uint256 i = 0; i < underlyings.length; i++) {
       address underlying = underlyings[i];
-
-      // Check for existing oracle if !canAdminOverwrite
-      if (!CAN_ADMIN_OVERWRITE)
-        require(
-          priceFeedIds[underlying] == "",
-          "Admin cannot overwrite existing assignments of price feeds to underlying tokens."
-        );
       // Set feed and base currency
       priceFeedIds[underlying] = feedIds[i];
     }
@@ -98,16 +74,13 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
    * Assumes price feeds are 8 decimals (TODO: doublecheck)
    */
   function _price(address underlying) internal view returns (uint256) {
-    // Return 1e18 for WTOKEN
-    if (underlying == WTOKEN || underlying == address(0)) return 1e18;
-
     // Get token/native price from Oracle
     bytes32 feed = priceFeedIds[underlying];
     require(feed != "", "No oracle price feed found for this underlying ERC20 token.");
 
     if (NATIVE_TOKEN_USD_FEED == "") {
       // Get price from MasterPriceOracle
-      uint256 usdNativeTokenPrice = MASTER_PRICE_ORACLE.price(USD_TOKEN);
+      uint256 usdNativeTokenPrice = BasePriceOracle(msg.sender).price(USD_TOKEN);
       uint256 nativeTokenUsdPrice = 1e36 / usdNativeTokenPrice; // 18 decimals -- TODO: doublecheck
       PythStructs.Price memory tokenUsdPrice = PYTH.getCurrentPrice(feed); // 8 decimals ---  TODO: doublecheck
       return
