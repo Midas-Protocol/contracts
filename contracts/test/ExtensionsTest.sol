@@ -6,14 +6,15 @@ import { MarketsTest } from "./config/MarketsTest.t.sol";
 import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
-import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
+import { Comptroller } from "../compound/Comptroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
+import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
-
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import { ComptrollerV3Storage } from "../compound/ComptrollerStorage.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -197,21 +198,15 @@ contract ExtensionsTest is MarketsTest {
 
     for (uint256 j = 0; j < markets.length; j++) {
       ICErc20 someMarket = markets[j];
-      CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
+      CErc20Delegator asDelegator = CErc20Delegator(address(someMarket));
 
       emit log("pool");
       emit log_address(address(somePool));
       emit log("market");
       emit log_address(address(someMarket));
 
-      Comptroller pool = Comptroller(payable(poolAddress));
-
-      // turn auto impl off
-      vm.prank(pool.admin());
-      pool._toggleAutoImplementations(false);
-
-      try this._testExistingCTokenExtensionUpgrade(asDelegate) {} catch Error(string memory reason) {
-        address plugin = address(asDelegate.plugin());
+      try this._testExistingCTokenExtensionUpgrade(asDelegator) {} catch Error(string memory reason) {
+        address plugin = address(CErc20PluginDelegate(address(asDelegator)).plugin());
         emit log("plugin");
         emit log_address(plugin);
 
@@ -224,19 +219,20 @@ contract ExtensionsTest is MarketsTest {
     }
   }
 
-  function _testExistingCTokenExtensionUpgrade(CErc20Delegate asDelegate) public {
-    uint256 totalSupplyBefore = asDelegate.totalSupply();
+  function _testExistingCTokenExtensionUpgrade(CErc20Delegator asDelegator) public {
+    uint256 totalSupplyBefore = asDelegator.totalSupply();
     if (totalSupplyBefore == 0) return; // total supply should be non-zero
 
-    _upgradeMarket(asDelegate);
+    // TODO
+    _upgradeMarket(ICErc20(address(asDelegator)));
 
     // check if the extension was added
-    address[] memory extensions = asDelegate._listExtensions();
+    address[] memory extensions = asDelegator._listExtensions();
     assertEq(extensions.length, 1, "the first extension should be added");
     assertEq(extensions[0], address(newCTokenExtension), "the first extension should be the only extension");
 
     // check if the storage is read from the same place
-    uint256 totalSupplyAfter = asDelegate.totalSupply();
+    uint256 totalSupplyAfter = asDelegator.totalSupply();
     assertGt(totalSupplyAfter, 0, "total supply should be non-zero");
     assertEq(totalSupplyAfter, totalSupplyBefore, "total supply should be the same");
   }
@@ -277,7 +273,7 @@ contract ExtensionsTest is MarketsTest {
 
     for (uint8 i = 0; i < pools.length; i++) {
       vm.prank(ffd.owner());
-      ffd.autoUpgradePool(IComptroller(pools[i].comptroller));
+      ffd.autoUpgradePool(IonicComptroller(pools[i].comptroller));
     }
   }
 

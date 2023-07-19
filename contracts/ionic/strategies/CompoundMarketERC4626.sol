@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import { IonicERC4626 } from "./IonicERC4626.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../../compound/ComptrollerInterface.sol";
 import { IGenericLender } from "../../external/angle/IGenericLender.sol";
 import { OptimizedVaultsRegistry } from "../vault/OptimizedVaultsRegistry.sol";
 import { OptimizedAPRVaultBase } from "../vault/OptimizedAPRVaultBase.sol";
@@ -140,7 +140,7 @@ contract CompoundMarketERC4626 is IonicERC4626, IGenericLender {
   }
 
   function claimRewards() public onlyRegisteredVaults {
-    IComptroller pool = IComptroller(market.comptroller());
+    IonicComptroller pool = IonicComptroller(market.comptroller());
     address[] memory poolFlywheels = pool.getRewardsDistributors();
 
     for (uint256 j = 0; j < poolFlywheels.length; j++) {

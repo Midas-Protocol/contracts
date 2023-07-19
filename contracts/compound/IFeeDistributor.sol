@@ -6,38 +6,16 @@ import "../ionic/AuthoritiesRegistry.sol";
 interface IFeeDistributor {
   function minBorrowEth() external view returns (uint256);
 
-  function maxSupplyEth() external view returns (uint256);
-
   function maxUtilizationRate() external view returns (uint256);
 
   function interestFeeRate() external view returns (uint256);
 
-  function comptrollerImplementationWhitelist(address oldImplementation, address newImplementation)
-    external
-    view
-    returns (bool);
-
-  function pluginImplementationWhitelist(address oldImplementation, address newImplementation)
-    external
-    view
-    returns (bool);
-
-  function cErc20DelegateWhitelist(
-    address oldImplementation,
-    address newImplementation,
-    bool allowResign
-  ) external view returns (bool);
-
   function latestComptrollerImplementation(address oldImplementation) external view returns (address);
 
-  function latestCErc20Delegate(address oldImplementation)
+  function latestCErc20Delegate(uint8 delegateType)
     external
     view
-    returns (
-      address cErc20Delegate,
-      bool allowResign,
-      bytes memory becomeImplementationData
-    );
+    returns (address cErc20Delegate, bytes memory becomeImplementationData);
 
   function latestPluginImplementation(address oldImplementation) external view returns (address);
 
@@ -45,7 +23,11 @@ interface IFeeDistributor {
 
   function getCErc20DelegateExtensions(address cErc20Delegate) external view returns (address[] memory);
 
-  function deployCErc20(bytes calldata constructorData) external returns (address);
+  function deployCErc20(
+    uint8 delegateType,
+    bytes calldata constructorData,
+    bytes calldata becomeImplData
+  ) external returns (address);
 
   function canCall(
     address pool,

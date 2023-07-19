@@ -5,6 +5,7 @@ import { WombatLpERC4626, IVoterProxy, IBaseRewardPool, IBooster } from "../../i
 import { IonicFlywheelCore } from "../../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
+import { ICErc20PluginRewards } from "../../compound/CTokenInterfaces.sol";
 
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
@@ -72,8 +73,8 @@ contract WombatERC4626Test is AbstractERC4626Test {
 
     deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
-    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
+    ICErc20PluginRewards cToken = ICErc20PluginRewards(marketAddress);
+    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), abi.encode(address(plugin)));
     assertEq(address(cToken.plugin()), address(plugin));
 
     marketKey = ERC20(marketAddress);
@@ -136,7 +137,7 @@ contract WombatERC4626Test is AbstractERC4626Test {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
+    ICErc20PluginRewards(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     for (uint8 i = 0; i < rewardsToken.length; i++) {

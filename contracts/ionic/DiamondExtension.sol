@@ -76,7 +76,7 @@ library LibDiamond {
   function getExtensionForFunction(bytes4 msgSig) internal view returns (address) {
     LibDiamond.LogicStorage storage ds = diamondStorage();
     address extension = ds.functions[msgSig].implementation;
-    if (extension == address(0)) revert ExtensionNotFound(msgSig);
+    //if (extension == address(0)) revert ExtensionNotFound(msgSig);
     return extension;
   }
 

@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import { IFeeDistributor } from "../../compound/IFeeDistributor.sol";
 import { ILiquidatorsRegistry } from "../../liquidators/registry/ILiquidatorsRegistry.sol";
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../../compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "../../oracles/BasePriceOracle.sol";
 import { IRedemptionStrategy } from "../../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";

@@ -7,7 +7,7 @@ import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { IBeefyVault, BeefyERC4626 } from "../ionic/strategies/BeefyERC4626.sol";
 import { IonicERC4626 } from "../ionic/strategies/IonicERC4626.sol";
 import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewardsPlugin.sol";
-import "../compound/CErc20.sol";
+import "../compound/CToken.sol";
 import { ArrakisERC4626, IGuniPool } from "../ionic/strategies/ArrakisERC4626.sol";
 
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";

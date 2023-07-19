@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/proxy/utils/Initializable.sol";
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
-import { IComptroller } from "./compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "./compound/ComptrollerInterface.sol";
 import { BasePriceOracle } from "./oracles/BasePriceOracle.sol";
 import { ICErc20 } from "./compound/CTokenInterfaces.sol";
 
@@ -93,7 +93,7 @@ contract PoolLens is Initializable {
   /**
    * @dev Struct for Ionic pool summary data.
    */
-  struct FusePoolData {
+  struct IonicPoolData {
     uint256 totalSupply;
     uint256 totalBorrow;
     address[] underlyingTokens;
@@ -111,12 +111,12 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory publicPools) = directory.getPublicPools();
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
     return (indexes, publicPools, data, errored);
   }
 
@@ -130,14 +130,14 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory publicPools) = directory.getPublicPoolsByVerification(
       whitelistedAdmin
     );
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
     return (indexes, publicPools, data, errored);
   }
 
@@ -151,12 +151,12 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory accountPools) = directory.getPoolsByAccount(account);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
     return (indexes, accountPools, data, errored);
   }
 
@@ -165,17 +165,17 @@ contract PoolLens is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
-  function getPoolsOfUserWithData(address user)
+  function getPoolsOIonicrWithData(address user)
     external
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory userPools) = directory.getPoolsOfUser(user);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
     return (indexes, userPools, data, errored);
   }
 
@@ -184,19 +184,19 @@ contract PoolLens is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
-  function getPoolsData(PoolDirectory.Pool[] memory pools) internal returns (FusePoolData[] memory, bool[] memory) {
-    FusePoolData[] memory data = new FusePoolData[](pools.length);
+  function getPoolsData(PoolDirectory.Pool[] memory pools) internal returns (IonicPoolData[] memory, bool[] memory) {
+    IonicPoolData[] memory data = new IonicPoolData[](pools.length);
     bool[] memory errored = new bool[](pools.length);
 
     for (uint256 i = 0; i < pools.length; i++) {
-      try this.getPoolSummary(IComptroller(pools[i].comptroller)) returns (
+      try this.getPoolSummary(IonicComptroller(pools[i].comptroller)) returns (
         uint256 _totalSupply,
         uint256 _totalBorrow,
         address[] memory _underlyingTokens,
         string[] memory _underlyingSymbols,
         bool _whitelistedAdmin
       ) {
-        data[i] = FusePoolData(_totalSupply, _totalBorrow, _underlyingTokens, _underlyingSymbols, _whitelistedAdmin);
+        data[i] = IonicPoolData(_totalSupply, _totalBorrow, _underlyingTokens, _underlyingSymbols, _whitelistedAdmin);
       } catch {
         errored[i] = true;
       }
@@ -208,7 +208,7 @@ contract PoolLens is Initializable {
   /**
    * @notice Returns total supply balance (in ETH), total borrow balance (in ETH), underlying token addresses, and underlying token symbols of a Ionic pool.
    */
-  function getPoolSummary(IComptroller comptroller)
+  function getPoolSummary(IonicComptroller comptroller)
     external
     returns (
       uint256,
@@ -285,7 +285,7 @@ contract PoolLens is Initializable {
    * @return An array of Ionic pool assets.
    */
   function getPoolAssetsWithData(
-    IComptroller comptroller,
+    IonicComptroller comptroller,
     ICErc20[] memory cTokens,
     address user
   ) internal returns (PoolAsset[] memory) {
@@ -357,7 +357,7 @@ contract PoolLens is Initializable {
     return (detailedAssets);
   }
 
-  function getBorrowCapsPerCollateral(ICErc20 borrowedAsset, IComptroller comptroller)
+  function getBorrowCapsPerCollateral(ICErc20 borrowedAsset, IonicComptroller comptroller)
     internal
     view
     returns (
@@ -412,14 +412,14 @@ contract PoolLens is Initializable {
    * @param comptroller The Comptroller proxy contract of the Ionic pool.
    * @return An array of Ionic pool assets.
    */
-  function getPoolAssetsWithData(IComptroller comptroller) external returns (PoolAsset[] memory) {
+  function getPoolAssetsWithData(IonicComptroller comptroller) external returns (PoolAsset[] memory) {
     return getPoolAssetsWithData(comptroller, comptroller.getAllMarkets(), msg.sender);
   }
 
   /**
    * @dev Struct for a Ionic pool user.
    */
-  struct FusePoolUser {
+  struct IonicPoolUser {
     address account;
     uint256 totalBorrow;
     uint256 totalCollateral;
@@ -430,7 +430,7 @@ contract PoolLens is Initializable {
    * @notice Returns arrays of PoolAsset for a specific user
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getPoolAssetsByUser(IComptroller comptroller, address user) public returns (PoolAsset[] memory) {
+  function getPoolAssetsByUser(IonicComptroller comptroller, address user) public returns (PoolAsset[] memory) {
     PoolAsset[] memory assets = getPoolAssetsWithData(comptroller, comptroller.getAssetsIn(user), user);
     return assets;
   }
@@ -439,7 +439,7 @@ contract PoolLens is Initializable {
    * @notice returns the total supply cap for each asset in the pool
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getSupplyCapsForPool(IComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
+  function getSupplyCapsForPool(IonicComptroller comptroller) public view returns (address[] memory, uint256[] memory) {
     ICErc20[] memory poolMarkets = comptroller.getAllMarkets();
 
     address[] memory assets = new address[](poolMarkets.length);
@@ -456,7 +456,7 @@ contract PoolLens is Initializable {
    * @notice returns the total supply cap for each asset in the pool and the total non-whitelist supplied assets
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    */
-  function getSupplyCapsDataForPool(IComptroller comptroller)
+  function getSupplyCapsDataForPool(IonicComptroller comptroller)
     public
     view
     returns (
@@ -496,7 +496,7 @@ contract PoolLens is Initializable {
       uint256 totalBorrowCap
     )
   {
-    IComptroller comptroller = IComptroller(asset.comptroller());
+    IonicComptroller comptroller = IonicComptroller(asset.comptroller());
     (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
   }
@@ -516,7 +516,7 @@ contract PoolLens is Initializable {
       uint256 nonWhitelistedTotalBorrows
     )
   {
-    IComptroller comptroller = IComptroller(asset.comptroller());
+    IonicComptroller comptroller = IonicComptroller(asset.comptroller());
     (collateral, borrowCapsPerCollateral, collateralBlacklisted) = getBorrowCapsPerCollateral(asset, comptroller);
     totalBorrowCap = comptroller.borrowCaps(address(asset));
     uint256 totalBorrows = asset.totalBorrowsCurrent();
@@ -539,7 +539,7 @@ contract PoolLens is Initializable {
     uint256 arrayLength = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
 
       if (comptroller.whitelist(account)) arrayLength++;
     }
@@ -549,7 +549,7 @@ contract PoolLens is Initializable {
     uint256 index = 0;
 
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller comptroller = IComptroller(pools[i].comptroller);
+      IonicComptroller comptroller = IonicComptroller(pools[i].comptroller);
 
       if (comptroller.whitelist(account)) {
         indexes[index] = i;
@@ -572,12 +572,12 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory accountPools) = getWhitelistedPoolsByAccount(account);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
     return (indexes, accountPools, data, errored);
   }
 }

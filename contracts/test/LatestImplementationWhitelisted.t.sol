@@ -1,8 +1,7 @@
 pragma solidity ^0.8.0;
 
-import { CErc20 } from "../compound/CErc20.sol";
-import { Comptroller } from "../compound/Comptroller.sol";
-import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
+import { CErc20 } from "../compound/CToken.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
@@ -40,7 +39,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      Comptroller comptroller = Comptroller(payable(pools[i].comptroller));
+      IonicComptroller comptroller = IonicComptroller(payable(pools[i].comptroller));
       address implementation = comptroller.comptrollerImplementation();
 
       bool added = false;
@@ -58,11 +57,7 @@ contract LatestImplementationWhitelisted is BaseTest {
       emit log_address(implementationsSet[k]);
 
       address latestImpl = ionicAdmin.latestComptrollerImplementation(implementationsSet[k]);
-      bool whitelisted = ionicAdmin.comptrollerImplementationWhitelist(implementationsSet[k], latestImpl);
-      assertTrue(
-        whitelisted || implementationsSet[k] == latestImpl,
-        "latest implementation for old implementation not whitelisted"
-      );
+      assertTrue(implementationsSet[k] == latestImpl, "some pool is not upgraded the latest impl");
     }
   }
 
@@ -70,11 +65,11 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
+      IonicComptroller comptroller = IonicComptroller(payable(pools[i].comptroller));
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate delegate = CErc20Delegate(address(markets[j]));
-        address implementation = delegate.implementation();
+        ICErc20 market = markets[j];
+        address implementation = market.implementation();
 
         bool added = false;
         for (uint8 k = 0; k < implementationsSet.length; k++) {
@@ -90,15 +85,11 @@ contract LatestImplementationWhitelisted is BaseTest {
     emit log("listing the set");
     for (uint8 k = 0; k < implementationsSet.length; k++) {
       emit log_address(implementationsSet[k]);
-      (address latestCErc20Delegate, bool allowResign, bytes memory becomeImplementationData) = ionicAdmin
-        .latestCErc20Delegate(implementationsSet[k]);
-
-      bool whitelisted = ionicAdmin.cErc20DelegateWhitelist(implementationsSet[k], latestCErc20Delegate, allowResign);
-
-      assertTrue(
-        whitelisted || implementationsSet[k] == latestCErc20Delegate,
-        "no whitelisted implementation for old implementation"
+      (address latestCErc20Delegate, bytes memory becomeImplementationData) = ionicAdmin.latestCErc20Delegate(
+        CErc20Delegate(implementationsSet[k]).delegateType()
       );
+
+      assertTrue(implementationsSet[k] == latestCErc20Delegate, "some markets need to be upgraded");
     }
   }
 
@@ -106,7 +97,7 @@ contract LatestImplementationWhitelisted is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = poolDirectory.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      ComptrollerFirstExtension comptroller = ComptrollerFirstExtension(payable(pools[i].comptroller));
+      IonicComptroller comptroller = IonicComptroller(payable(pools[i].comptroller));
       ICErc20[] memory markets = comptroller.getAllMarkets();
       for (uint8 j = 0; j < markets.length; j++) {
         CErc20PluginDelegate delegate = CErc20PluginDelegate(address(markets[j]));
@@ -133,13 +124,9 @@ contract LatestImplementationWhitelisted is BaseTest {
     for (uint8 k = 0; k < pluginsSet.length; k++) {
       address latestPluginImpl = ionicAdmin.latestPluginImplementation(pluginsSet[k]);
 
-      bool whitelisted = ionicAdmin.pluginImplementationWhitelist(pluginsSet[k], latestPluginImpl);
       emit log_address(pluginsSet[k]);
 
-      assertTrue(
-        whitelisted || pluginsSet[k] == latestPluginImpl,
-        "no whitelisted implementation for old implementation"
-      );
+      assertTrue(pluginsSet[k] == latestPluginImpl, "some plugin is not upgraded to the latest impl");
     }
   }
 }

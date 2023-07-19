@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { MarketsTest, BaseTest, CErc20Delegate } from "./config/MarketsTest.t.sol";
+import { MarketsTest, BaseTest } from "./config/MarketsTest.t.sol";
 import { DiamondBase, DiamondExtension } from "../ionic/DiamondExtension.sol";
 
 import { LeveredPosition } from "../ionic/levered/LeveredPosition.sol";
@@ -20,8 +20,7 @@ import { LiquidatorsRegistryExtension } from "../liquidators/registry/Liquidator
 import { ILiquidatorsRegistry } from "../liquidators/registry/ILiquidatorsRegistry.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
-import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
@@ -95,7 +94,7 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelViewFn() public debuggingOnly fork(BSC_CHAPEL) {
-    ICErc20 stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // TDAI
+    ICErc20 stableMarket = ICErc20(address(1)); // TDAI
     uint256 borrowAmount = 14925373134328358;
 
     uint256 borrowValue = (mpo.getUnderlyingPrice(stableMarket) * borrowAmount) / 1e18;
@@ -103,7 +102,7 @@ contract LeveredPositionFactoryTest is BaseTest {
   }
 
   function testChapelNetApy() public debuggingOnly fork(BSC_CHAPEL) {
-    ICErc20 _stableMarket = ICErc20(0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15); // DAI
+    ICErc20 _stableMarket = ICErc20(address(1)); // DAI
 
     uint256 borrowRate = 5.2e16; // 5.2%
     vm.mockCall(
@@ -127,7 +126,7 @@ contract LeveredPositionFactoryTest is BaseTest {
     int256 netApy = lens.getNetAPY(
       2.7e16, // 2.7%
       1e18, // supply amount
-      ICErc20(0xfa60851E76728eb31EFeA660937cD535C887fDbD), // BOMB
+      ICErc20(address(0)), // BOMB
       _stableMarket,
       2e18 // ratio
     );
@@ -178,8 +177,8 @@ abstract contract LeveredPositionTest is MarketsTest {
 
   function upgradePoolAndMarkets() internal {
     _upgradeExistingPool(address(collateralMarket.comptroller()));
-    _upgradeMarket(CErc20Delegate(address(collateralMarket)));
-    _upgradeMarket(CErc20Delegate(address(stableMarket)));
+    _upgradeMarket(collateralMarket);
+    _upgradeMarket(stableMarket);
   }
 
   function _unpauseMarkets(address collat, address stable) internal {
@@ -515,7 +514,7 @@ interface TwoBrl {
 }
 
 contract Jbrl2BrlLeveredPositionTest is LeveredPositionTest {
-  IComptroller pool;
+  IonicComptroller pool;
   ComptrollerFirstExtension asExtension;
 
   function setUp() public fork(BSC_MAINNET) {}
@@ -581,7 +580,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
     address maticXBbaWMaticWhale = 0xB0B28d7A74e62DF5F6F9E0d9Ae0f4e7982De9585;
     address maticXWhale = 0x72f0275444F2aF8dBf13F78D54A8D3aD7b6E68db;
 
-    IComptroller pool = IComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
+    IonicComptroller pool = IonicComptroller(ICErc20(maticXBbaWMaticMarket).comptroller());
     _configurePairAndLiquidator(maticXBbaWMaticMarket, maticXMarket, new BalancerSwapLiquidator());
 
     {
@@ -602,7 +601,7 @@ contract MaticXMaticXBbaWMaticLeveredPositionTest is LeveredPositionTest {
 }
 
 contract BombTDaiLeveredPositionTest is LeveredPositionTest {
-  uint256 depositAmount = 10000e18;
+  uint256 depositAmount = 100e18;
   address whale = 0xe7B7dF67C1fe053f1C6B965826d3bFF19603c482;
   uint256 ratioOnCreation = 1.0e18;
   uint256 minBorrowNative = 1e16;
@@ -618,13 +617,13 @@ contract BombTDaiLeveredPositionTest is LeveredPositionTest {
       abi.encode(minBorrowNative)
     );
 
-    address xMarket = 0xfa60851E76728eb31EFeA660937cD535C887fDbD; // BOMB
-    address yMarket = 0x5aF82b72E4fA372e69765DeAc2e1B06acCD8DE15; // tdai
+    address xMarket = 0x11771Cd06dB2633EF6A0cEef027E8e1A120d3f25; // BOMB
+    address yMarket = 0x66b05c1711094c32c99a65d2734C72dE0A1C3c81; // tdai
 
     collateralMarket = ICErc20(xMarket);
     stableMarket = ICErc20(yMarket);
 
-    upgradePoolAndMarkets();
+    //upgradePoolAndMarkets();
 
     IERC20Upgradeable collateralToken = IERC20Upgradeable(collateralMarket.underlying());
     IERC20Upgradeable stableToken = IERC20Upgradeable(stableMarket.underlying());

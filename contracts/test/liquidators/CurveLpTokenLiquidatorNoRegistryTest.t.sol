@@ -29,26 +29,6 @@ contract CurveLpTokenLiquidatorNoRegistryTest is BaseTest {
     bUSD = IERC20Upgradeable(ap.getAddress("bUSD"));
     curveV1Oracle = CurveLpTokenPriceOracleNoRegistry(ap.getAddress("CurveLpTokenPriceOracleNoRegistry"));
     curveV2Oracle = CurveV2LpTokenPriceOracleNoRegistry(ap.getAddress("CurveV2LpTokenPriceOracleNoRegistry"));
-
-    // TODO remove after the next deploy
-    if (address(curveV1Oracle) == address(0)) {
-      address[][] memory _poolUnderlyings = new address[][](2);
-      _poolUnderlyings[0] = asArray(
-        0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56,
-        0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d,
-        0x55d398326f99059fF775485246999027B3197955
-      );
-      _poolUnderlyings[1] = asArray(
-        0x316622977073BBC3dF32E7d2A9B3c77596a0a603,
-        0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb
-      );
-      curveV1Oracle = new CurveLpTokenPriceOracleNoRegistry();
-      curveV1Oracle.initialize(
-        asArray(address(lpToken3Eps), address(twobrl)),
-        asArray(pool3Eps, pool2Brl),
-        _poolUnderlyings
-      );
-    }
   }
 
   function testRedeemToken() public fork(BSC_MAINNET) {

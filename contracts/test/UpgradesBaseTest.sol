@@ -10,6 +10,7 @@ import { Unitroller } from "../compound/Unitroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 import { BaseTest } from "./config/BaseTest.t.sol";
 
@@ -30,36 +31,28 @@ abstract contract UpgradesBaseTest is BaseTest {
     address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
 
     // instantiate the new implementation
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
-    address comptrollerImplementationAddress = address(newComptrollerImplementation);
-
-    // whitelist the upgrade
+    Comptroller newComptrollerImplementation = new Comptroller();
     vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
-      asArray(comptrollerImplementationAddress),
-      asArray(true)
-    );
-    // whitelist the new pool creation
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(address(0)),
-      asArray(comptrollerImplementationAddress),
-      asArray(true)
-    );
+    address comptrollerImplementationAddress = address(newComptrollerImplementation);
+    ffd._setLatestComptrollerImplementation(address(0), comptrollerImplementationAddress);
     // add the extension to the auto upgrade config
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = poolExt;
+    extensions[1] = newComptrollerImplementation;
     ffd._setComptrollerExtensions(comptrollerImplementationAddress, extensions);
     vm.stopPrank();
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(comptrollerImplementationAddress);
-    newComptrollerImplementation._become(address(asUnitroller));
+    asUnitroller._registerExtension(
+      DiamondExtension(comptrollerImplementationAddress),
+      DiamondExtension(asUnitroller.comptrollerImplementation())
+    );
+    asUnitroller._upgrade();
     vm.stopPrank();
   }
 
-  function _upgradeMarketWithExtension(CErc20Delegate market) internal {
+  function _upgradeMarketWithExtension(ICErc20 market) internal {
     address implBefore = market.implementation();
 
     // instantiate the new implementation
@@ -75,18 +68,18 @@ abstract contract UpgradesBaseTest is BaseTest {
       becomeImplData = abi.encode(address(0));
     }
 
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
+    // set the new delegate as the latest
+    ffd._setLatestCErc20Delegate(newImpl.delegateType(), address(newImpl), abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
     cErc20DelegateExtensions[0] = marketExt;
+    cErc20DelegateExtensions[1] = newImpl;
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 
     // upgrade to the new delegate
     vm.prank(address(ffd));
-    market._setImplementationSafe(address(newImpl), false, becomeImplData);
+    market._setImplementationSafe(address(newImpl), becomeImplData);
   }
 }

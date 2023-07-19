@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
 
-import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
+import { SafeOwnableUpgradeable } from "../ionic/SafeOwnableUpgradeable.sol";
 
 /**
  * @title AddressesProvider
@@ -9,27 +9,19 @@ import "openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.s
  *         contract addresses that change between deploys and across chains
  * @author Veliko Minkov <veliko@midascapital.xyz>
  */
-contract AddressesProvider is OwnableUpgradeable {
+contract AddressesProvider is SafeOwnableUpgradeable {
   mapping(string => address) private _addresses;
-  mapping(address => Contract) public flywheelRewards;
   mapping(address => Contract) public plugins;
-
-  /* BEGIN DEPRECATED - keep to not break storage layout */
-  mapping(address => Contract) public redemptionStrategies;
-  mapping(address => Contract) public fundingStrategies;
-  mapping(address => JarvisPool) private jarvisPools;
-  /* END DEPRECATED */
-
-  JarvisPool[] public jarvisPoolsConfig;
-  CurveSwapPool[] public curveSwapPoolsConfig;
+  mapping(address => Contract) public flywheelRewards;
   mapping(address => RedemptionStrategy) public redemptionStrategiesConfig;
   mapping(address => FundingStrategy) public fundingStrategiesConfig;
+  JarvisPool[] public jarvisPoolsConfig;
+  CurveSwapPool[] public curveSwapPoolsConfig;
   mapping(address => mapping(address => address)) public balancerPoolForTokens;
 
   /// @dev Initializer to set the admin that can set and change contracts addresses
   function initialize(address owner) public initializer {
-    __Ownable_init();
-    _transferOwnership(owner);
+    __SafeOwnable_init(owner);
   }
 
   /**

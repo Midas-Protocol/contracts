@@ -1,32 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { IComptroller } from "./ComptrollerInterface.sol";
+import { IonicComptroller } from "./ComptrollerInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
+import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
 abstract contract CTokenAdminStorage {
   /*
    * Administrator for Ionic
    */
   address payable public ionicAdmin;
-
-  /**
-   * @dev LEGACY USE ONLY: Administrator for this contract
-   */
-  address payable internal __admin;
-
-  /**
-   * @dev LEGACY USE ONLY: Whether or not the Ionic admin has admin rights
-   */
-  bool internal __ionicAdminHasRights;
-
-  /**
-   * @dev LEGACY USE ONLY: Whether or not the admin has admin rights
-   */
-  bool internal __adminHasRights;
 }
 
-abstract contract CTokenStorage is CTokenAdminStorage {
+abstract contract CErc20Storage is CTokenAdminStorage {
   /**
    * @dev Guard variable for re-entrancy checks
    */
@@ -57,15 +43,10 @@ abstract contract CTokenStorage is CTokenAdminStorage {
    */
   uint256 internal constant reserveFactorPlusFeesMaxMantissa = 1e18;
 
-  /*
-   * LEGACY USE ONLY: Pending administrator for this contract
-   */
-  address payable private __pendingAdmin;
-
   /**
    * @notice Contract which oversees inter-cToken operations
    */
-  IComptroller public comptroller;
+  IonicComptroller public comptroller;
 
   /**
    * @notice Model which tells what the current interest rate should be
@@ -162,11 +143,6 @@ abstract contract CTokenStorage is CTokenAdminStorage {
    */
   uint256 public constant feeSeizeShareMantissa = 1e17; //10%
 
-  // TODO remove after the next deploy
-  bool public constant isCEther = false;
-}
-
-abstract contract CErc20Storage is CTokenStorage {
   /**
    * @notice Underlying asset for this CToken
    */
@@ -201,7 +177,7 @@ abstract contract CTokenBaseEvents {
   /**
    * @notice Event emitted when the Ionic fee is changed
    */
-  event NewFuseFee(uint256 oldFuseFeeMantissa, uint256 newFuseFeeMantissa);
+  event NewIonicFee(uint256 oldIonicFeeMantissa, uint256 newIonicFeeMantissa);
 
   /**
    * @notice EIP20 Approval event
@@ -214,11 +190,11 @@ abstract contract CTokenBaseEvents {
   event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows);
 }
 
-abstract contract CTokenExtensionEvents is CTokenBaseEvents {
+abstract contract CTokenFirstExtensionEvents is CTokenBaseEvents {
   event Flash(address receiver, uint256 amount);
 }
 
-abstract contract CTokenEvents is CTokenBaseEvents {
+abstract contract CTokenSecondExtensionEvents is CTokenBaseEvents {
   /*** Market Events ***/
 
   /**
@@ -263,7 +239,7 @@ abstract contract CTokenEvents is CTokenBaseEvents {
   event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves);
 }
 
-interface CTokenExtensionInterface {
+interface CTokenFirstExtensionInterface {
   /*** User Interface ***/
 
   function transfer(address dst, uint256 amount) external returns (bool);
@@ -325,27 +301,7 @@ interface CTokenExtensionInterface {
   function borrowRatePerBlockAfterBorrow(uint256 borrowAmount) external view returns (uint256);
 }
 
-interface CTokenInterface {
-  function getCash() external view returns (uint256);
-
-  function seize(
-    address liquidator,
-    address borrower,
-    uint256 seizeTokens
-  ) external returns (uint256);
-
-  /*** Admin Functions ***/
-
-  function _withdrawAdminFees(uint256 withdrawAmount) external returns (uint256);
-
-  function _withdrawFuseFees(uint256 withdrawAmount) external returns (uint256);
-
-  function selfTransferOut(address to, uint256 amount) external;
-
-  function selfTransferIn(address from, uint256 amount) external returns (uint256);
-}
-
-interface CErc20Interface is CTokenInterface {
+interface CTokenSecondExtensionInterface {
   function mint(uint256 mintAmount) external returns (uint256);
 
   function redeem(uint256 redeemTokens) external returns (uint256);
@@ -363,22 +319,92 @@ interface CErc20Interface is CTokenInterface {
     uint256 repayAmount,
     address cTokenCollateral
   ) external returns (uint256);
+
+  function getCash() external view returns (uint256);
+
+  function seize(
+    address liquidator,
+    address borrower,
+    uint256 seizeTokens
+  ) external returns (uint256);
+
+  /*** Admin Functions ***/
+
+  function _withdrawAdminFees(uint256 withdrawAmount) external returns (uint256);
+
+  function _withdrawIonicFees(uint256 withdrawAmount) external returns (uint256);
+
+  function selfTransferOut(address to, uint256 amount) external;
+
+  function selfTransferIn(address from, uint256 amount) external returns (uint256);
 }
 
-abstract contract CTokenExtensionBase is CErc20Storage, CTokenExtensionEvents, CTokenExtensionInterface {}
+interface CDelegatorInterface {
+  function implementation() external view returns (address);
 
-abstract contract CTokenBase is CTokenStorage, CTokenEvents, CTokenInterface {}
+  /**
+   * @notice Called by the admin to update the implementation of the delegator
+   * @param implementation_ The address of the new implementation for delegation
+   * @param becomeImplementationData The encoded bytes data to be passed to _becomeImplementation
+   */
+  function _setImplementationSafe(address implementation_, bytes calldata becomeImplementationData) external;
 
-abstract contract CErc20Base is CErc20Storage, CTokenEvents, CErc20Interface {}
+  /**
+   * @dev upgrades the implementation if necessary
+   */
+  function _upgrade() external;
+}
 
-interface CTokenStorageInterface {
+interface CDelegateInterface {
+  /**
+   * @notice Called by the delegator on a delegate to initialize it for duty
+   * @dev Should revert if any issues arise which make it unfit for delegation
+   * @param data The encoded bytes data for any initialization
+   */
+  function _becomeImplementation(bytes calldata data) external;
+
+  function delegateType() external pure returns (uint8);
+
+  function contractType() external pure returns (string memory);
+}
+
+abstract contract CErc20AdminBase is CErc20Storage {
+  /**
+   * @notice Returns a boolean indicating if the sender has admin rights
+   */
+  function hasAdminRights() internal view returns (bool) {
+    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
+    return
+      (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
+      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
+  }
+}
+
+abstract contract CErc20FirstExtensionBase is
+  CErc20AdminBase,
+  CTokenFirstExtensionEvents,
+  CTokenFirstExtensionInterface
+{}
+
+abstract contract CTokenSecondExtensionBase is
+  CErc20AdminBase,
+  CTokenSecondExtensionEvents,
+  CTokenSecondExtensionInterface,
+  CDelegateInterface
+{}
+
+abstract contract CErc20DelegatorBase is CErc20AdminBase, CTokenSecondExtensionEvents, CDelegatorInterface {}
+
+interface CErc20StorageInterface {
   function admin() external view returns (address);
 
   function adminHasRights() external view returns (bool);
 
+  function ionicAdmin() external view returns (address);
+
   function ionicAdminHasRights() external view returns (bool);
 
-  function comptroller() external view returns (IComptroller);
+  function comptroller() external view returns (IonicComptroller);
 
   function name() external view returns (string memory);
 
@@ -407,22 +433,32 @@ interface CTokenStorageInterface {
   function totalBorrows() external view returns (uint256);
 
   function accrualBlockNumber() external view returns (uint256);
-}
 
-interface CErc20StorageInterface is CTokenStorageInterface {
   function underlying() external view returns (address);
+
+  function borrowIndex() external view returns (uint256);
+
+  function interestRateModel() external view returns (address);
 }
 
 interface CErc20PluginStorageInterface is CErc20StorageInterface {
   function plugin() external view returns (address);
 }
 
-interface ICTokenBase is CTokenInterface, CTokenStorageInterface {}
+interface CErc20PluginRewardsInterface is CErc20PluginStorageInterface {
+  function approve(address, address) external;
+}
 
-interface ICTokenExtension is CTokenExtensionInterface, CTokenStorageInterface {}
+interface ICErc20 is
+  CErc20StorageInterface,
+  CTokenSecondExtensionInterface,
+  CTokenFirstExtensionInterface,
+  CDelegatorInterface,
+  CDelegateInterface
+{}
 
-interface ICToken is CErc20Interface, CTokenExtensionInterface, CTokenStorageInterface {}
+interface ICErc20Plugin is CErc20PluginStorageInterface, ICErc20 {
+  function _updatePlugin(address _plugin) external;
+}
 
-interface ICErc20 is CErc20StorageInterface, ICToken {}
-
-interface ICErc20Plugin is CErc20PluginStorageInterface, ICToken {}
+interface ICErc20PluginRewards is CErc20PluginRewardsInterface, ICErc20 {}

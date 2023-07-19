@@ -6,10 +6,9 @@ import { PoolDirectory } from "../PoolDirectory.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { CToken } from "../compound/CToken.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { DiamondExtension, DiamondBase } from "../ionic/DiamondExtension.sol";
@@ -19,7 +18,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract ContractsUpgradesTest is BaseTest {
-  function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
+  function testPoolDirectoryUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = ap.getAddress("PoolDirectory"); // PoolDirectory proxy
 
     // before upgrade
@@ -55,20 +54,18 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testFeeDistributorUpgrade() public fork(BSC_MAINNET) {
-    address oldCercDelegate = 0x94C50805bC16737ead84e25Cd5Aa956bCE04BBDF;
+    // TODO use an already deployed market
+    CErc20Delegate oldCercDelegate = new CErc20Delegate();
 
     // before upgrade
     FeeDistributor ffdProxy = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
     uint256 marketsCounterBefore = ffdProxy.marketsCounter();
     address ownerBefore = ffdProxy.owner();
 
-    (address latestCErc20DelegateBefore, , ) = ffdProxy.latestCErc20Delegate(oldCercDelegate);
-    //    bool whitelistedBefore = ffdProxy.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateBefore, false);
+    (address latestCErc20DelegateBefore, ) = ffdProxy.latestCErc20Delegate(oldCercDelegate.delegateType());
 
     emit log_uint(marketsCounterBefore);
     emit log_address(ownerBefore);
-    //    if (whitelistedBefore) emit log("whitelisted before");
-    //    else emit log("should be whitelisted");
 
     // upgrade
     {
@@ -85,17 +82,13 @@ contract ContractsUpgradesTest is BaseTest {
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
-    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate);
-    //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
+    (address latestCErc20DelegateAfter, ) = ffd.latestCErc20Delegate(oldCercDelegate.delegateType());
 
     emit log_uint(marketsCounterAfter);
     emit log_address(ownerAfter);
-    //    if (whitelistedAfter) emit log("whitelisted After");
-    //    else emit log("should be whitelisted");
 
     assertEq(latestCErc20DelegateBefore, latestCErc20DelegateAfter, "latest delegates do not match");
     assertEq(marketsCounterBefore, marketsCounterAfter, "markets counter does not match");
-    //    assertEq(whitelistedBefore, whitelistedAfter, "whitelisted status does not match");
 
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
@@ -128,20 +121,21 @@ contract ContractsUpgradesTest is BaseTest {
       (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
       for (uint8 i = 0; i < pools.length; i++) {
-        IComptroller pool = IComptroller(pools[i].comptroller);
+        IonicComptroller pool = IonicComptroller(pools[i].comptroller);
         ICErc20[] memory markets = pool.getAllMarkets();
         for (uint8 j = 0; j < markets.length; j++) {
-          CErc20Delegate market = CErc20Delegate(address(markets[j]));
+          ICErc20 market = markets[j];
+
+          uint8 currentDelegateType = market.delegateType();
+          (address upgradeToImpl, ) = ffd.latestCErc20Delegate(currentDelegateType);
 
           address currentImpl = market.implementation();
-          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
-
           if (currentImpl != upgradeToImpl) emit log_address(address(market));
           assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 
           DiamondBase asBase = DiamondBase(address(markets[j]));
           try asBase._listExtensions() returns (address[] memory extensions) {
-            assertEq(extensions.length, 1, "market is missing the first extension");
+            assertEq(extensions.length, 2, "market is missing an extension");
           } catch {
             emit log("market that is not yet upgraded to the extensions upgrade");
             emit log_address(address(market));
@@ -160,6 +154,7 @@ contract ContractsUpgradesTest is BaseTest {
     _testPauseGuardians();
   }
 
+  // TODO redeploy to polygon to fix
   function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
     _testPauseGuardians();
   }
@@ -171,7 +166,7 @@ contract ContractsUpgradesTest is BaseTest {
     (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
+      IonicComptroller pool = IonicComptroller(pools[i].comptroller);
       address pauseGuardian = pool.pauseGuardian();
       if (pauseGuardian != address(0) && pauseGuardian != deployer) {
         emit log_named_address("pool", address(pool));

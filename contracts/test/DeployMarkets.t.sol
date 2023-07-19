@@ -12,7 +12,7 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-import { ICErc20, ICErc20Plugin } from "../compound/CTokenInterfaces.sol";
+import { ICErc20, ICErc20Plugin, ICErc20PluginRewards } from "../compound/CTokenInterfaces.sol";
 import { JumpRateModel } from "../compound/JumpRateModel.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
@@ -21,8 +21,8 @@ import { CTokenFirstExtension, DiamondExtension } from "../compound/CTokenFirstE
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
-import { CErc20Delegator } from "../compound/CErc20Delegator.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import { CErc20 } from "../compound/CToken.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 import { InterestRateModel } from "../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../FeeDistributor.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
@@ -39,7 +39,7 @@ contract DeployMarketsTest is Test {
   MockERC20 rewardToken;
 
   JumpRateModel interestModel;
-  IComptroller comptroller;
+  IonicComptroller comptroller;
 
   CErc20Delegate cErc20Delegate;
   CErc20PluginDelegate cErc20PluginDelegate;
@@ -54,15 +54,8 @@ contract DeployMarketsTest is Test {
   FuseFlywheelDynamicRewardsPlugin rewards;
 
   address[] markets;
-  address[] emptyAddresses;
-  address[] newUnitroller;
-  bool[] falseBoolArray;
-  bool[] trueBoolArray;
-  address[] newImplementation;
   bool[] t;
   bool[] f;
-  address[] oldCErC20Implementations;
-  address[] newCErc20Implementations;
   IonicFlywheelCore[] flywheelsToClaim;
 
   function setUpBaseContracts() public {
@@ -72,56 +65,50 @@ contract DeployMarketsTest is Test {
     ionicAdmin = new FeeDistributor();
     ionicAdmin.initialize(1e16);
     poolDirectory = new PoolDirectory();
-    poolDirectory.initialize(false, emptyAddresses);
+    poolDirectory.initialize(false, new address[](0));
   }
 
-  function setUpWhiteList() public {
+  function setUpExtensions() public {
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
 
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
-    cErc20DelegateExtensions[0] = new CTokenFirstExtension();
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
+    cErc20DelegateExtensions[0] = cErc20Delegate;
+    cErc20DelegateExtensions[1] = new CTokenFirstExtension();
+    ionicAdmin._setCErc20DelegateExtensions(address(0), cErc20DelegateExtensions);
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+
+    cErc20DelegateExtensions[0] = cErc20PluginDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+
+    cErc20DelegateExtensions[0] = cErc20PluginRewardsDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
 
-    for (uint256 i = 0; i < 7; i++) {
-      t.push(true);
-      f.push(false);
-    }
+    ionicAdmin._setLatestCErc20Delegate(cErc20Delegate.delegateType(), address(cErc20Delegate), "");
 
-    oldCErC20Implementations.push(address(0));
-    oldCErC20Implementations.push(address(0));
-    oldCErC20Implementations.push(address(0));
-    oldCErC20Implementations.push(address(cErc20Delegate));
-    oldCErC20Implementations.push(address(cErc20Delegate));
-    oldCErC20Implementations.push(address(cErc20PluginDelegate));
-    oldCErC20Implementations.push(address(cErc20PluginRewardsDelegate));
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20PluginDelegate.delegateType(),
+      address(cErc20PluginDelegate),
+      abi.encode(address(0))
+    );
 
-    newCErc20Implementations.push(address(cErc20Delegate));
-    newCErc20Implementations.push(address(cErc20PluginDelegate));
-    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
-    newCErc20Implementations.push(address(cErc20PluginDelegate));
-    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
-    newCErc20Implementations.push(address(cErc20PluginDelegate));
-    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
-
-    ionicAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20PluginRewardsDelegate.delegateType(),
+      address(cErc20PluginRewardsDelegate),
+      abi.encode(address(0))
+    );
   }
 
   function setUpPool() public {
     underlyingToken.mint(address(this), 100e36);
 
     MockPriceOracle priceOracle = new MockPriceOracle(10);
-    emptyAddresses.push(address(0));
-    Comptroller tempComptroller = new Comptroller(payable(address(ionicAdmin)));
-    newUnitroller.push(address(tempComptroller));
-    trueBoolArray.push(true);
-    falseBoolArray.push(false);
-    ionicAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newUnitroller, trueBoolArray);
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    Comptroller tempComptroller = new Comptroller();
+    ionicAdmin._setLatestComptrollerImplementation(address(0), address(tempComptroller));
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = new ComptrollerFirstExtension();
+    extensions[1] = tempComptroller;
     ionicAdmin._setComptrollerExtensions(address(tempComptroller), extensions);
     (, address comptrollerAddress) = poolDirectory.deployPool(
       "TestPool",
@@ -134,7 +121,7 @@ contract DeployMarketsTest is Test {
     );
 
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = IComptroller(comptrollerAddress);
+    comptroller = IonicComptroller(comptrollerAddress);
 
     AuthoritiesRegistry impl = new AuthoritiesRegistry();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
@@ -143,19 +130,20 @@ contract DeployMarketsTest is Test {
     ionicAdmin.reinitialize(newAr);
     PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
     newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
+    newAr.setUserRole(comptrollerAddress, address(ionicAdmin), poolAuth.SUPPLIER_ROLE(), true);
   }
 
   function setUp() public {
     setUpBaseContracts();
     setUpPool();
-    setUpWhiteList();
+    setUpExtensions();
     vm.roll(1);
   }
 
   function testDeployCErc20Delegate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -163,11 +151,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 
@@ -187,11 +174,9 @@ contract DeployMarketsTest is Test {
   function testDeployCErc20PluginDelegate() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
 
-    whitelistPlugin(address(mockERC4626), address(mockERC4626));
-
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -199,11 +184,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(mockERC4626)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(mockERC4626),
       0.9e18
     );
 
@@ -235,11 +219,9 @@ contract DeployMarketsTest is Test {
 
     mockERC4626Dynamic = new MockERC4626Dynamic(ERC20(address(underlyingToken)), asFlywheelCore);
 
-    whitelistPlugin(address(mockERC4626Dynamic), address(mockERC4626Dynamic));
-
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginRewardsDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -247,16 +229,15 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginRewardsDelegate),
-        abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(address(mockERC4626Dynamic), address(flywheel), address(underlyingToken)),
       0.9e18
     );
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20PluginRewards cToken = ICErc20PluginRewards(address(allMarkets[allMarkets.length - 1]));
 
     flywheel.addStrategyForRewards(ERC20(address(cToken)));
 
@@ -279,14 +260,12 @@ contract DeployMarketsTest is Test {
     assertEq(underlyingToken.balanceOf(address(mockERC4626Dynamic)), 10000000);
   }
 
-  function testAutImplementationCErc20Delegate() public {
+  function testAutoImplementationCErc20Delegate() public {
     mockERC4626 = new MockERC4626(ERC20(address(underlyingToken)));
-
-    whitelistPlugin(address(mockERC4626), address(mockERC4626));
 
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -294,32 +273,29 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(mockERC4626)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(mockERC4626),
       0.9e18
     );
 
     ICErc20[] memory allMarkets = comptroller.getAllMarkets();
-    CErc20PluginDelegate cToken = CErc20PluginDelegate(address(allMarkets[allMarkets.length - 1]));
+    ICErc20Plugin cToken = ICErc20Plugin(address(allMarkets[allMarkets.length - 1]));
 
     assertEq(address(cToken.plugin()), address(mockERC4626), "!plugin == erc4626");
 
     address implBefore = cToken.implementation();
     // just testing to replace the plugin delegate with the plugin rewards delegate
-    whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
     ionicAdmin._setLatestCErc20Delegate(
-      address(cErc20PluginDelegate),
+      cToken.delegateType(),
       address(cErc20PluginRewardsDelegate),
-      false,
       abi.encode(address(0)) // should trigger use of latest implementation
     );
 
-    // trigger the auto implementations
-    vm.prank(address(7));
-    ICErc20(address(cToken)).accrueInterest();
+    // run the upgrade
+    vm.prank(ionicAdmin.owner());
+    ionicAdmin.autoUpgradePool(comptroller);
 
     address implAfter = cToken.implementation();
 
@@ -327,15 +303,13 @@ contract DeployMarketsTest is Test {
     assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
   }
 
-  function testAutImplementationPlugin() public {
+  function testAutoImplementationPlugin() public {
     MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
     MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));
 
-    whitelistPlugin(address(pluginA), address(pluginA));
-
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -343,11 +317,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(pluginA)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(pluginA),
       0.9e18
     );
 
@@ -357,7 +330,6 @@ contract DeployMarketsTest is Test {
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
 
     address pluginImplBefore = address(cToken.plugin());
-    whitelistPlugin(address(pluginA), address(pluginB));
     ionicAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
     ionicAdmin._upgradePluginToLatestImplementation(address(cToken));
     address pluginImplAfter = address(cToken.plugin());
@@ -366,15 +338,13 @@ contract DeployMarketsTest is Test {
     assertEq(pluginImplAfter, address(pluginB), "the new impl should be the B plugin");
   }
 
-  function testAutImplementationCErc20PluginDelegate() public {
+  function testAutoImplementationCErc20PluginDelegate() public {
     MockERC4626 pluginA = new MockERC4626(ERC20(address(underlyingToken)));
     MockERC4626 pluginB = new MockERC4626(ERC20(address(underlyingToken)));
 
-    whitelistPlugin(address(pluginA), address(pluginA));
-
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -382,11 +352,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(address(pluginA)),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(pluginA),
       0.9e18
     );
 
@@ -396,25 +365,23 @@ contract DeployMarketsTest is Test {
     assertEq(address(cToken.plugin()), address(pluginA), "!plugin == erc4626");
 
     address pluginImplBefore = address(cToken.plugin());
-    address implBefore = CErc20PluginDelegate(address(cToken)).implementation();
+    address implBefore = cToken.implementation();
+    uint8 delegateType = cToken.delegateType();
 
     // just testing to replace the plugin delegate with the plugin rewards delegate
-    whitelistCErc20Delegate(address(cErc20PluginDelegate), address(cErc20PluginRewardsDelegate));
     ionicAdmin._setLatestCErc20Delegate(
-      address(cErc20PluginDelegate),
+      delegateType,
       address(cErc20PluginRewardsDelegate),
-      false,
       abi.encode(address(0)) // should trigger use of latest implementation
     );
-    whitelistPlugin(address(pluginA), address(pluginB));
     ionicAdmin._setLatestPluginImplementation(address(pluginA), address(pluginB));
 
-    // trigger the auto implementations from a non-admin address
-    vm.prank(address(7));
-    cToken.accrueInterest();
+    // run the upgrade
+    vm.prank(ionicAdmin.owner());
+    ionicAdmin.autoUpgradePool(comptroller);
 
     address pluginImplAfter = address(cToken.plugin());
-    address implAfter = CErc20PluginDelegate(address(cToken)).implementation();
+    address implAfter = cToken.implementation();
 
     assertEq(pluginImplBefore, address(pluginA), "the old impl should be the A plugin");
     assertEq(pluginImplAfter, address(pluginB), "the new impl should be the B plugin");
@@ -422,42 +389,10 @@ contract DeployMarketsTest is Test {
     assertEq(implAfter, address(cErc20PluginRewardsDelegate), "the new impl should be the plugin rewards delegate");
   }
 
-  // TODO refactor DeployMarketsTest to extend WithPool
-  function whitelistPlugin(address oldImpl, address newImpl) public {
-    address[] memory _oldCErC20Implementations = new address[](1);
-    address[] memory _newCErc20Implementations = new address[](1);
-    bool[] memory arrayOfTrue = new bool[](1);
-
-    _oldCErC20Implementations[0] = address(oldImpl);
-    _newCErc20Implementations[0] = address(newImpl);
-    arrayOfTrue[0] = true;
-
-    ionicAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
-  }
-
-  function whitelistCErc20Delegate(address oldImpl, address newImpl) public {
-    bool[] memory arrayOfTrue = new bool[](1);
-    bool[] memory arrayOfFalse = new bool[](1);
-    address[] memory _oldCErC20Implementations = new address[](1);
-    address[] memory _newCErc20Implementations = new address[](1);
-
-    arrayOfTrue[0] = true;
-    arrayOfFalse[0] = false;
-    _oldCErC20Implementations[0] = address(oldImpl);
-    _newCErc20Implementations[0] = address(newImpl);
-
-    ionicAdmin._editCErc20DelegateWhitelist(
-      _oldCErC20Implementations,
-      _newCErc20Implementations,
-      arrayOfFalse,
-      arrayOfTrue
-    );
-  }
-
   function testInflateExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -465,11 +400,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 
@@ -511,7 +445,7 @@ contract DeployMarketsTest is Test {
   function testSupplyCapInflatedExchangeRate() public {
     vm.roll(1);
     comptroller._deployMarket(
-      false,
+      cErc20Delegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -519,11 +453,10 @@ contract DeployMarketsTest is Test {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       0.9e18
     );
 

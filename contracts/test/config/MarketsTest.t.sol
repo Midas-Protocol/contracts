@@ -11,6 +11,7 @@ import { Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 import { AuthoritiesRegistry } from "../../ionic/AuthoritiesRegistry.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -32,7 +33,7 @@ contract MarketsTest is BaseTest {
     newCTokenExtension = new CTokenFirstExtension();
 
     comptrollerExtension = new ComptrollerFirstExtension();
-    Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
+    Comptroller newComptrollerImplementation = new Comptroller();
     latestComptrollerImplementation = payable(address(newComptrollerImplementation));
   }
 
@@ -56,7 +57,7 @@ contract MarketsTest is BaseTest {
     }
   }
 
-  function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
+  function _prepareCTokenUpgrade(ICErc20 market) internal returns (address) {
     address implBefore = market.implementation();
     //emit log("implementation before");
     //emit log_address(implBefore);
@@ -68,49 +69,37 @@ contract MarketsTest is BaseTest {
       newImpl = cErc20PluginRewardsDelegate;
     }
 
-    // whitelist the upgrade
-    vm.prank(ffd.owner());
-    ffd._editCErc20DelegateWhitelist(asArray(implBefore), asArray(address(newImpl)), asArray(false), asArray(true));
-
     // set the new ctoken delegate as the latest
+    uint8 delegateType = market.delegateType();
     vm.prank(ffd.owner());
-    ffd._setLatestCErc20Delegate(implBefore, address(newImpl), false, abi.encode(address(0)));
+    ffd._setLatestCErc20Delegate(delegateType, address(newImpl), abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
     cErc20DelegateExtensions[0] = newCTokenExtension;
+    cErc20DelegateExtensions[1] = DiamondExtension(address(market));
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 
     return address(newImpl);
   }
 
-  function _upgradeMarket(CErc20Delegate asDelegate) internal {
-    address newDelegate = _prepareCTokenUpgrade(asDelegate);
+  function _upgradeMarket(ICErc20 market) internal {
+    address newDelegate = _prepareCTokenUpgrade(market);
 
     bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
       ? bytes("")
       : abi.encode(address(0));
-    vm.prank(asDelegate.ionicAdmin());
-    asDelegate._setImplementationSafe(newDelegate, false, becomeImplData);
+    vm.prank(market.ionicAdmin());
+    market._setImplementationSafe(newDelegate, becomeImplData);
   }
 
   function _prepareComptrollerUpgrade(address oldCompImpl) internal {
-    // whitelist the upgrade
     vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldCompImpl),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    // whitelist the new pool creation
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(address(0)),
-      asArray(latestComptrollerImplementation),
-      asArray(true)
-    );
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    ffd._setLatestComptrollerImplementation(address(0), latestComptrollerImplementation);
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = comptrollerExtension;
+    extensions[1] = Comptroller(latestComptrollerImplementation);
     ffd._setComptrollerExtensions(latestComptrollerImplementation, extensions);
     vm.stopPrank();
   }
@@ -124,8 +113,11 @@ contract MarketsTest is BaseTest {
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-    Comptroller(latestComptrollerImplementation)._become(poolAddress);
+    asUnitroller._registerExtension(
+      DiamondExtension(latestComptrollerImplementation),
+      DiamondExtension(oldComptrollerImplementation)
+    );
+    asUnitroller._upgrade();
     vm.stopPrank();
   }
 }

@@ -101,6 +101,7 @@ interface IComptroller {
   function _deployMarket(
     bool isCEther,
     bytes memory constructorData,
+    bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
   ) external returns (uint256);
 

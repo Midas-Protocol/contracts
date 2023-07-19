@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "./config/MarketsTest.t.sol";
 import { CompoundMarketERC4626 } from "../ionic/strategies/CompoundMarketERC4626.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
-import { IComptroller } from "../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { OptimizedAPRVaultExtension } from "../ionic/vault/OptimizedAPRVaultExtension.sol";
 import { OptimizedAPRVaultFirstExtension } from "../ionic/vault/OptimizedAPRVaultFirstExtension.sol";
@@ -65,8 +65,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
       lenderSharesHint[0] = 4e17;
       lenderSharesHint[1] = 6e17;
 
-      _upgradeMarket(CErc20Delegate(ankrWbnbMarketAddress));
-      _upgradeMarket(CErc20Delegate(ahWbnbMarketAddress));
+      _upgradeMarket(ankrWbnbMarket);
+      _upgradeMarket(ahWbnbMarket);
 
       twoBrl = TwoBRL(twoBrlAddress);
       vm.prank(twoBrl.minter());
@@ -95,7 +95,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function unpauseMarkets() internal {
-    IComptroller pool = ankrWbnbMarket.comptroller();
+    IonicComptroller pool = ankrWbnbMarket.comptroller();
 
     vm.startPrank(pool.admin());
     pool._setMintPaused(ankrWbnbMarket, false);
@@ -468,7 +468,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     // set up the registry, the vault and the adapter
     {
       // upgrade to enable the aprAfterDeposit fn for the vault
-      _upgradeMarket(CErc20Delegate(twoBrlMarketAddress));
+      _upgradeMarket(ICErc20(twoBrlMarketAddress));
 
       vm.startPrank(someDeployer);
       deployVaultRegistry();

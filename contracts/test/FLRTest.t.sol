@@ -15,8 +15,8 @@ import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
-import { CErc20 } from "../compound/CErc20.sol";
-import { IonicFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
+import { CErc20 } from "../compound/CToken.sol";
+import { IonicFlywheelLensRouter, IonicComptroller, ICErc20, ERC20, IPriceOracle } from "../ionic/strategies/flywheel/IonicFlywheelLensRouter.sol";
 import { IonicFlywheel } from "../ionic/strategies/flywheel/IonicFlywheel.sol";
 import { PoolDirectory } from "../PoolDirectory.sol";
 import { IonicFlywheelCore } from "../ionic/strategies/flywheel/IonicFlywheelCore.sol";
@@ -38,7 +38,7 @@ contract FLRTest is BaseTest {
   function setUpFlywheel(
     address _rewardToken,
     address mkt,
-    IComptroller comptroller,
+    IonicComptroller comptroller,
     address admin
   ) public {
     flywheel = new IonicFlywheel();
@@ -75,7 +75,7 @@ contract FLRTest is BaseTest {
     rewardToken = address(0x71be881e9C5d4465B3FfF61e89c6f3651E69B5bb); // BRZ
     emit log_named_address("rewardToken", address(rewardToken));
     address mkt = 0x159A529c00CD4f91b65C54E77703EDb67B4942e4;
-    setUpFlywheel(rewardToken, mkt, IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117), ap.owner());
+    setUpFlywheel(rewardToken, mkt, IonicComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117), ap.owner());
     emit log_named_uint("mkt dec", ERC20(mkt).decimals());
 
     (uint224 index, uint32 lastUpdatedTimestamp) = flywheel.strategyState(ERC20(mkt));
@@ -85,7 +85,7 @@ contract FLRTest is BaseTest {
     emit log_named_uint("block.timestamp", block.timestamp);
     emit log_named_uint(
       "underlying price",
-      IPriceOracle(address(IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117).oracle())).price(
+      IPriceOracle(address(IonicComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117).oracle())).price(
         address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
       )
     );
@@ -103,7 +103,7 @@ contract FLRTest is BaseTest {
     emit log_named_uint("mkt ts", ERC20(mkt).totalSupply());
 
     IonicFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
-      IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
+      IonicComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
     );
     for (uint256 i = 0; i < marketRewardsInfos.length; i++) {
       if (address(marketRewardsInfos[i].market) != mkt) {
@@ -126,7 +126,7 @@ contract FLRTest is BaseTest {
   }
 
   function testBscLensRouter() public fork(BSC_MAINNET) {
-    IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
+    IonicComptroller pool = IonicComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
     address user = 0x927d81b91c41D1961e3A7d24847b95484e60C626;
     IonicFlywheelLensRouter router = IonicFlywheelLensRouter(ap.getAddress("IonicFlywheelLensRouter"));
 
@@ -135,6 +135,6 @@ contract FLRTest is BaseTest {
 
   function testChapelRouter() public fork(BSC_CHAPEL) {
     IonicFlywheelLensRouter router = IonicFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
-    router.getPoolMarketRewardsInfo(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
+    router.getPoolMarketRewardsInfo(IonicComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
   }
 }

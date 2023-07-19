@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { ICErc20, CErc20Interface } from "./CTokenInterfaces.sol";
+import { ICErc20 } from "./CTokenInterfaces.sol";
 import { ComptrollerErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
-import { ComptrollerBase } from "./ComptrollerInterface.sol";
-import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 import { Unitroller } from "./Unitroller.sol";
 import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { IIonicFlywheel } from "../ionic/strategies/flywheel/IIonicFlywheel.sol";
 import { DiamondExtension, DiamondBase, LibDiamond } from "../ionic/DiamondExtension.sol";
-import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
+import { ComptrollerExtensionInterface, ComptrollerBase, ComptrollerInterface } from "./ComptrollerInterface.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -20,7 +18,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * @author Compound
  * @dev This contract should not to be deployed alone; instead, deploy `Unitroller` (proxy contract) on top of this `Comptroller` (logic/implementation contract).
  */
-contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorReporter, Exponential, DiamondBase {
+contract Comptroller is ComptrollerBase, ComptrollerInterface, ComptrollerErrorReporter, Exponential, DiamondExtension {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   /// @notice Emitted when an admin supports a market
@@ -47,9 +45,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   /// @notice Emitted when the whitelist enforcement is changed
   event WhitelistEnforcementChanged(bool enforce);
 
-  /// @notice Emitted when auto implementations are toggled
-  event AutoImplementationsToggled(bool enabled);
-
   /// @notice Emitted when a new RewardsDistributor contract is added to hooks
   event AddedRewardsDistributor(address rewardsDistributor);
 
@@ -67,10 +62,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
 
   // liquidationIncentiveMantissa must be no greater than this value
   uint256 internal constant liquidationIncentiveMaxMantissa = 1.5e18; // 1.5
-
-  constructor(address payable _ionicAdmin) {
-    ionicAdmin = _ionicAdmin;
-  }
 
   modifier isAuthorized() {
     require(IFeeDistributor(ionicAdmin).canCall(address(this), msg.sender, address(this), msg.sig), "not authorized");
@@ -329,6 +320,23 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   }
 
   /**
+   * @notice Validates mint and reverts on rejection. May emit logs.
+   * @param cToken Asset being minted
+   * @param minter The address minting the tokens
+   * @param actualMintAmount The amount of the underlying asset being minted
+   * @param mintTokens The number of tokens being minted
+   */
+  function mintVerify(
+    address cToken,
+    address minter,
+    uint256 actualMintAmount,
+    uint256 mintTokens
+  ) external {
+    // Add minter to suppliers mapping
+    suppliers[minter] = true;
+  }
+
+  /**
    * @notice Validates redeem and reverts on rejection. May emit logs.
    * @param cToken Asset being redeemed
    * @param redeemer The address redeeming the tokens
@@ -341,10 +349,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     uint256 redeemAmount,
     uint256 redeemTokens
   ) external override {
-    // Shh - currently unused
-    cToken;
-    redeemer;
-
     require(markets[msg.sender].isListed, "!market");
 
     // Require tokens is zero or amount is also zero
@@ -535,11 +539,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     address borrower,
     uint256 repayAmount
   ) external override returns (uint256) {
-    // Shh - currently unused
-    payer;
-    borrower;
-    repayAmount;
-
     // Make sure market is listed
     if (!markets[cToken].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -566,9 +565,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     address borrower,
     uint256 repayAmount
   ) external override returns (uint256) {
-    // Shh - currently unused
-    liquidator;
-
     // Make sure markets are listed
     if (!markets[cTokenBorrowed].isListed || !markets[cTokenCollateral].isListed) {
       return uint256(Error.MARKET_NOT_LISTED);
@@ -618,11 +614,6 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
   ) external override returns (uint256) {
     // Pausing is a very serious situation - we revert to sound the alarms
     require(!seizeGuardianPaused, "!seize:paused");
-
-    // Shh - currently unused
-    liquidator;
-    borrower;
-    seizeTokens;
 
     // Make sure markets are listed
     if (!markets[cTokenCollateral].isListed || !markets[cTokenBorrowed].isListed) {
@@ -951,10 +942,7 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
   function _addRewardsDistributor(address distributor) external returns (uint256) {
-    // Check caller is admin
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.ADD_REWARDS_DISTRIBUTOR_OWNER_CHECK);
-    }
+    require(hasAdminRights(), "!admin");
 
     // Check marker method
     require(IIonicFlywheel(distributor).isRewardsDistributor(), "!isRewardsDistributor");
@@ -1210,8 +1198,9 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
    */
   function _deployMarket(
-    bool,
+    uint8 delegateType,
     bytes calldata constructorData,
+    bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
   ) external returns (uint256) {
     // Check caller is admin
@@ -1220,13 +1209,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     }
 
     // Temporarily enable Ionic admin rights for asset deployment (storing the original value)
-    bool oldFuseAdminHasRights = ionicAdminHasRights;
+    bool oldIonicAdminHasRights = ionicAdminHasRights;
     ionicAdminHasRights = true;
 
     // Deploy via Ionic admin
-    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(constructorData));
+    ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(delegateType, constructorData, becomeImplData));
     // Reset Ionic admin rights to the original value
-    ionicAdminHasRights = oldFuseAdminHasRights;
+    ionicAdminHasRights = oldIonicAdminHasRights;
     // Support market here in the Comptroller
     uint256 err = _supportMarket(cToken);
 
@@ -1236,69 +1225,13 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
     return err == uint256(Error.NO_ERROR) ? _setCollateralFactor(cToken, collateralFactorMantissa) : err;
   }
 
-  /**
-   * @notice Toggles the auto-implementation feature
-   * @param enabled If the feature is to be enabled
-   * @return uint 0=success, otherwise a failure. (See enum Error for details)
-   */
-  function _toggleAutoImplementations(bool enabled) public returns (uint256) {
-    if (!hasAdminRights()) {
-      return fail(Error.UNAUTHORIZED, FailureInfo.TOGGLE_AUTO_IMPLEMENTATIONS_ENABLED_OWNER_CHECK);
-    }
-
-    // Return no error if already set to the desired value
-    if (autoImplementation == enabled) return uint256(Error.NO_ERROR);
-
-    // Store autoImplementation with value enabled
-    autoImplementation = enabled;
-
-    // Emit AutoImplementationsToggled(enabled)
-    emit AutoImplementationsToggled(enabled);
-
-    return uint256(Error.NO_ERROR);
-  }
-
-  function _become(address _unitroller) public {
-    Unitroller unitroller = Unitroller(payable(_unitroller));
-    require(
-      (msg.sender == address(ionicAdmin) && unitroller.ionicAdminHasRights()) ||
-        (msg.sender == unitroller.admin() && unitroller.adminHasRights()),
-      "!admin"
-    );
-
-    uint256 changeStatus = unitroller._acceptImplementation();
-    require(changeStatus == 0, "!unauthorized - not pending impl");
-
-    Comptroller(payable(address(unitroller)))._becomeImplementation();
-  }
-
   function _becomeImplementation() external {
-    require(msg.sender == comptrollerImplementation, "!implementation");
-
-    address[] memory currentExtensions = LibDiamond.listExtensions();
-    for (uint256 i = 0; i < currentExtensions.length; i++) {
-      LibDiamond.removeExtension(DiamondExtension(currentExtensions[i]));
-    }
-
-    address[] memory latestExtensions = IFeeDistributor(ionicAdmin).getComptrollerExtensions(comptrollerImplementation);
-    for (uint256 i = 0; i < latestExtensions.length; i++) {
-      LibDiamond.addExtension(DiamondExtension(latestExtensions[i]));
-    }
+    require(msg.sender == address(this), "!self call");
 
     if (!_notEnteredInitialized) {
       _notEntered = true;
       _notEnteredInitialized = true;
     }
-  }
-
-  /**
-   * @dev register a logic extension
-   * @param extensionToAdd the extension whose functions are to be added
-   * @param extensionToReplace the extension whose functions are to be removed/replaced
-   */
-  function _registerExtension(DiamondExtension extensionToAdd, DiamondExtension extensionToReplace) external override {
-    require(msg.sender == address(ionicAdmin) && ionicAdminHasRights, "!unauthorized - no admin rights");
-    LibDiamond.registerExtension(extensionToAdd, extensionToReplace);
   }
 
   /*** Helper Functions ***/
@@ -1317,6 +1250,45 @@ contract Comptroller is ComptrollerV3Storage, ComptrollerBase, ComptrollerErrorR
 
   function asComptrollerExtension() internal view returns (ComptrollerExtensionInterface) {
     return ComptrollerExtensionInterface(address(this));
+  }
+
+  function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
+    uint8 fnsCount = 30;
+
+    functionSelectors = new bytes4[](fnsCount);
+
+    functionSelectors[--fnsCount] = this.isDeprecated.selector;
+    functionSelectors[--fnsCount] = this._deployMarket.selector;
+    functionSelectors[--fnsCount] = this.getAssetsIn.selector;
+    functionSelectors[--fnsCount] = this.checkMembership.selector;
+    functionSelectors[--fnsCount] = this._setPriceOracle.selector;
+    functionSelectors[--fnsCount] = this._setCloseFactor.selector;
+    functionSelectors[--fnsCount] = this._setCollateralFactor.selector;
+    functionSelectors[--fnsCount] = this._setLiquidationIncentive.selector;
+    functionSelectors[--fnsCount] = this._setWhitelistEnforcement.selector;
+    functionSelectors[--fnsCount] = this._setWhitelistStatuses.selector;
+    functionSelectors[--fnsCount] = this._addRewardsDistributor.selector;
+    functionSelectors[--fnsCount] = this.getHypotheticalAccountLiquidity.selector;
+    functionSelectors[--fnsCount] = this.getMaxRedeemOrBorrow.selector;
+    functionSelectors[--fnsCount] = this.enterMarkets.selector;
+    functionSelectors[--fnsCount] = this.exitMarket.selector;
+    functionSelectors[--fnsCount] = this.mintAllowed.selector;
+    functionSelectors[--fnsCount] = this.redeemAllowed.selector;
+    functionSelectors[--fnsCount] = this.redeemVerify.selector;
+    functionSelectors[--fnsCount] = this.borrowAllowed.selector;
+    functionSelectors[--fnsCount] = this.borrowWithinLimits.selector;
+    functionSelectors[--fnsCount] = this.repayBorrowAllowed.selector;
+    functionSelectors[--fnsCount] = this.liquidateBorrowAllowed.selector;
+    functionSelectors[--fnsCount] = this.seizeAllowed.selector;
+    functionSelectors[--fnsCount] = this.transferAllowed.selector;
+    functionSelectors[--fnsCount] = this.mintVerify.selector;
+    functionSelectors[--fnsCount] = this.getAccountLiquidity.selector;
+    functionSelectors[--fnsCount] = this.liquidateCalculateSeizeTokens.selector;
+    functionSelectors[--fnsCount] = this._beforeNonReentrant.selector;
+    functionSelectors[--fnsCount] = this._afterNonReentrant.selector;
+    functionSelectors[--fnsCount] = this._becomeImplementation.selector;
+
+    require(fnsCount == 0, "use the correct array length");
   }
 
   /*** Pool-Wide/Cross-Asset Reentrancy Prevention ***/

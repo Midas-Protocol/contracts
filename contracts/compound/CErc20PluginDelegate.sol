@@ -22,6 +22,22 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   IERC4626 public plugin;
 
+  function _getExtensionFunctions() public pure virtual override returns (bytes4[] memory functionSelectors) {
+    uint8 fnsCount = 2;
+
+    bytes4[] memory superFunctionSelectors = super._getExtensionFunctions();
+    functionSelectors = new bytes4[](superFunctionSelectors.length + fnsCount);
+
+    for (uint256 i = 0; i < superFunctionSelectors.length; i++) {
+      functionSelectors[i] = superFunctionSelectors[i];
+    }
+
+    functionSelectors[--fnsCount + superFunctionSelectors.length] = this.plugin.selector;
+    functionSelectors[--fnsCount + superFunctionSelectors.length] = this._updatePlugin.selector;
+
+    require(fnsCount == 0, "use the correct array length");
+  }
+
   /**
    * @notice Delegate interface to become the implementation
    * @param data The encoded arguments for becoming
@@ -50,11 +66,6 @@ contract CErc20PluginDelegate is CErc20Delegate {
 
     address oldImplementation = address(plugin) != address(0) ? address(plugin) : _plugin;
 
-    require(
-      IFeeDistributor(ionicAdmin).pluginImplementationWhitelist(oldImplementation, _plugin),
-      "plugin implementation not whitelisted"
-    );
-
     if (address(plugin) != address(0) && plugin.balanceOf(address(this)) != 0) {
       plugin.redeem(plugin.balanceOf(address(this)), address(this), address(this));
     }
@@ -68,7 +79,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
       deposit(amount);
     }
 
-    emit NewPluginImplementation(address(plugin), _plugin);
+    emit NewPluginImplementation(oldImplementation, _plugin);
   }
 
   /*** CToken Overrides ***/
@@ -79,7 +90,7 @@ contract CErc20PluginDelegate is CErc20Delegate {
    * @notice Gets balance of the plugin in terms of the underlying
    * @return The quantity of underlying tokens owned by this contract
    */
-  function getCashPrior() internal view override returns (uint256) {
+  function getCashInternal() internal view override returns (uint256) {
     return plugin.previewRedeem(plugin.balanceOf(address(this)));
   }
 
@@ -108,6 +119,10 @@ contract CErc20PluginDelegate is CErc20Delegate {
    */
   function doTransferOut(address to, uint256 amount) internal override {
     plugin.withdraw(amount, to, address(this));
+  }
+
+  function delegateType() public pure virtual override returns (uint8) {
+    return 2;
   }
 
   function contractType() external pure virtual override returns (string memory) {

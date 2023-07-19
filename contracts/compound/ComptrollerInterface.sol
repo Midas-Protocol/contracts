@@ -3,15 +3,18 @@ pragma solidity >=0.8.0;
 
 import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 import { ICErc20 } from "./CTokenInterfaces.sol";
+import { DiamondExtension } from "../ionic/DiamondExtension.sol";
+import { ComptrollerV3Storage } from "../compound/ComptrollerStorage.sol";
 
 interface ComptrollerInterface {
   function isDeprecated(ICErc20 cToken) external view returns (bool);
 
-  function _become(address _unitroller) external;
+  function _becomeImplementation() external;
 
   function _deployMarket(
-    bool,
+    uint8 delegateType,
     bytes memory constructorData,
+    bytes calldata becomeImplData,
     uint256 collateralFactorMantissa
   ) external returns (uint256);
 
@@ -30,8 +33,6 @@ interface ComptrollerInterface {
   function _setWhitelistEnforcement(bool enforce) external returns (uint256);
 
   function _setWhitelistStatuses(address[] calldata _suppliers, bool[] calldata statuses) external returns (uint256);
-
-  function _toggleAutoImplementations(bool enabled) external returns (uint256);
 
   function _addRewardsDistributor(address distributor) external returns (uint256);
 
@@ -120,6 +121,13 @@ interface ComptrollerInterface {
     uint256 transferTokens
   ) external returns (uint256);
 
+  function mintVerify(
+    address cToken,
+    address minter,
+    uint256 actualMintAmount,
+    uint256 mintTokens
+  ) external;
+
   /*** Liquidity/Liquidation Calculations ***/
 
   function getAccountLiquidity(address account)
@@ -178,8 +186,6 @@ interface ComptrollerStorageInterface {
   function supplyCaps(address cToken) external view returns (uint256);
 
   function borrowCaps(address cToken) external view returns (uint256);
-
-  function autoImplementation() external view returns (bool);
 
   function markets(address cToken) external view returns (bool, uint256);
 
@@ -291,13 +297,32 @@ interface ComptrollerExtensionInterface {
   ) external view returns (uint256);
 }
 
+interface UnitrollerInterface {
+  function comptrollerImplementation() external view returns (address);
+
+  function _upgrade() external;
+
+  function _acceptAdmin() external returns (uint256);
+
+  function _setPendingAdmin(address newPendingAdmin) external returns (uint256);
+
+  function _toggleAdminRights(bool hasRights) external returns (uint256);
+}
+
 interface IComptrollerExtension is ComptrollerExtensionInterface, ComptrollerStorageInterface {}
 
-interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
+//interface IComptrollerBase is ComptrollerInterface, ComptrollerStorageInterface {}
 
-interface IComptroller is IComptrollerBase, ComptrollerExtensionInterface {}
+interface IonicComptroller is
+  ComptrollerInterface,
+  ComptrollerExtensionInterface,
+  UnitrollerInterface,
+  ComptrollerStorageInterface
+{
 
-abstract contract ComptrollerBase is ComptrollerInterface {
+}
+
+abstract contract ComptrollerBase is ComptrollerV3Storage {
   /// @notice Indicator that this is a Comptroller contract (for inspection)
   bool public constant isComptroller = true;
 }

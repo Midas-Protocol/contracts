@@ -175,9 +175,6 @@ contract MaxWithdrawTest is WithPool {
       ar.setUserRole(comptrollerAddress, accountThree, poolAuth.BORROWER_ROLE(), true);
     }
 
-    PoolLensSecondary secondary = new PoolLensSecondary();
-    secondary.initialize(poolDirectory);
-
     deal(address(vars.mimo), accountOne, 5e27);
     deal(address(vars.mimo), accountThree, 5e27);
     deal(address(vars.usdc), accountTwo, 10000e6);

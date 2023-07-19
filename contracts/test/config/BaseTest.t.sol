@@ -149,16 +149,15 @@ abstract contract BaseTest is Test {
 
   function configureAddressesProvider(uint128 chainid) private {
     if (chainid == BSC_MAINNET) {
-      ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
+      ap = AddressesProvider(address(0));
     } else if (chainid == BSC_CHAPEL) {
-      ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
+      ap = AddressesProvider(0x3dc8CE9f581e49B9E5304CF580940ad341F64c3f);
     } else if (block.chainid == POLYGON_MAINNET) {
-      ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
-      dpa = ProxyAdmin(0x9b30a238A94c5a456a02ceC01e41f1c91d54e915);
+      ap = AddressesProvider(address(0));
     } else if (chainid == NEON_DEVNET) {
-      ap = AddressesProvider(0x3F56f8571988D03Cdc7E51fdaB19ADb032CCbe21);
+      ap = AddressesProvider(address(0));
     } else if (chainid == ARBITRUM_ONE) {
-      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
+      ap = AddressesProvider(address(0));
     } else {
       dpa = new ProxyAdmin();
       AddressesProvider logic = new AddressesProvider();
@@ -168,13 +167,15 @@ abstract contract BaseTest is Test {
         abi.encodeWithSelector(ap.initialize.selector, address(this))
       );
       ap = AddressesProvider(address(proxy));
+      ap.setAddress("DefaultProxyAdmin", address(dpa));
     }
+    dpa = ProxyAdmin(ap.getAddress("DefaultProxyAdmin"));
     if (ap.owner() == address(0)) {
       ap.initialize(address(this));
     }
     if (ap.getAddress("deployer") == address(0)) {
       vm.prank(ap.owner());
-      ap.setAddress("deployer", 0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
+      ap.setAddress("deployer", 0x9308dddeC9B5cCd8a2685A46E913C892FE31C826);
     }
   }
 

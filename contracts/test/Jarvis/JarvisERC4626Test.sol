@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import { JarvisERC4626, IElysianFields } from "../../ionic/strategies/JarvisERC4626.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { ICErc20PluginRewards } from "../../compound/CTokenInterfaces.sol";
 
 import { Authority } from "solmate/auth/Auth.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
@@ -54,8 +55,8 @@ contract JarvisERC4626Test is AbstractERC4626Test {
 
     deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
-    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
+    ICErc20PluginRewards cToken = ICErc20PluginRewards(marketAddress);
+    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), abi.encode(address(plugin)));
     assertEq(address(cToken.plugin()), address(plugin));
 
     cToken.approve(address(jrtMimoSep22Token), address(flywheelRewards));
@@ -145,7 +146,7 @@ contract JarvisERC4626Test is AbstractERC4626Test {
   function testClaimRewards() public {
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
+    ICErc20PluginRewards(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     deal(address(jrtMimoSep22Token), address(this), 100e18);

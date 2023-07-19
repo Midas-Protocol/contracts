@@ -4,14 +4,13 @@ pragma solidity >=0.8.0;
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
 import { ICErc20 } from "./CTokenInterfaces.sol";
-import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
-import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
+import { ComptrollerExtensionInterface, ComptrollerBase } from "./ComptrollerInterface.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 contract ComptrollerFirstExtension is
   DiamondExtension,
-  ComptrollerV3Storage,
+  ComptrollerBase,
   ComptrollerExtensionInterface,
   ComptrollerErrorReporter
 {

@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 import { IonicFlywheelCore } from "./IonicFlywheelCore.sol";
-import { IComptroller } from "../../../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../../compound/CTokenInterfaces.sol";
 import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { PoolDirectory } from "../../../PoolDirectory.sol";
@@ -40,13 +40,13 @@ contract IonicFlywheelLensRouter {
     address rewardToken;
   }
 
-  function getPoolMarketRewardsInfo(IComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
+  function getPoolMarketRewardsInfo(IonicComptroller comptroller) external returns (MarketRewardsInfo[] memory) {
     ICErc20[] memory markets = comptroller.getAllMarkets();
     return _getMarketRewardsInfo(markets, comptroller);
   }
 
   function getMarketRewardsInfo(ICErc20[] memory markets) external returns (MarketRewardsInfo[] memory) {
-    IComptroller pool;
+    IonicComptroller pool;
     for (uint256 i = 0; i < markets.length; i++) {
       ICErc20 asMarket = ICErc20(address(markets[i]));
       if (address(pool) == address(0)) pool = asMarket.comptroller();
@@ -55,7 +55,7 @@ contract IonicFlywheelLensRouter {
     return _getMarketRewardsInfo(markets, pool);
   }
 
-  function _getMarketRewardsInfo(ICErc20[] memory markets, IComptroller comptroller)
+  function _getMarketRewardsInfo(ICErc20[] memory markets, IonicComptroller comptroller)
     internal
     returns (MarketRewardsInfo[] memory)
   {
@@ -148,7 +148,7 @@ contract IonicFlywheelLensRouter {
 
     uint256 rewardTokensCounter;
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
+      IonicComptroller pool = IonicComptroller(pools[i].comptroller);
       address[] memory fws = pool.getRewardsDistributors();
 
       rewardTokensCounter += fws.length;
@@ -158,7 +158,7 @@ contract IonicFlywheelLensRouter {
 
     uint256 uniqueRewardTokensCounter = 0;
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
+      IonicComptroller pool = IonicComptroller(pools[i].comptroller);
       address[] memory fws = pool.getRewardsDistributors();
 
       for (uint256 j = 0; j < fws.length; j++) {
@@ -197,7 +197,7 @@ contract IonicFlywheelLensRouter {
     uint256 balanceBefore = ERC20(rewardToken).balanceOf(user);
     (, PoolDirectory.Pool[] memory pools) = fpd.getActivePools();
     for (uint256 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
+      IonicComptroller pool = IonicComptroller(pools[i].comptroller);
       ERC20[] memory markets;
       {
         ICErc20[] memory cerc20s = pool.getAllMarkets();
@@ -258,7 +258,7 @@ contract IonicFlywheelLensRouter {
     return (flywheels, rewardTokens, rewards);
   }
 
-  function claimRewardsForPool(address user, IComptroller comptroller)
+  function claimRewardsForPool(address user, IonicComptroller comptroller)
     public
     returns (
       IonicFlywheelCore[] memory,

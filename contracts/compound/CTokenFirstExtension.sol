@@ -3,19 +3,16 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { IFlashLoanReceiver } from "../ionic/IFlashLoanReceiver.sol";
-import { CTokenExtensionBase, CTokenExtensionInterface, CTokenInterface } from "./CTokenInterfaces.sol";
-import { ComptrollerV3Storage, UnitrollerAdminStorage } from "./ComptrollerStorage.sol";
+import { CErc20FirstExtensionBase, CTokenFirstExtensionInterface, ICErc20 } from "./CTokenInterfaces.sol";
 import { TokenErrorReporter } from "./ErrorReporter.sol";
 import { Exponential } from "./Exponential.sol";
-import { CDelegationStorage } from "./CDelegateInterface.sol";
 import { InterestRateModel } from "./InterestRateModel.sol";
 import { IFeeDistributor } from "./IFeeDistributor.sol";
 import { Multicall } from "../utils/Multicall.sol";
 import { IERC20, SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract CTokenFirstExtension is
-  CDelegationStorage,
-  CTokenExtensionBase,
+  CErc20FirstExtensionBase,
   TokenErrorReporter,
   Exponential,
   DiamondExtension,
@@ -265,10 +262,10 @@ contract CTokenFirstExtension is
     if (newAdminFeeMantissa == type(uint256).max) newAdminFeeMantissa = adminFeeMantissa;
 
     // Get latest Ionic fee
-    uint256 newFuseFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
+    uint256 newIonicFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
 
-    // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
-    if (reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
+    // Check reserveFactorMantissa + newAdminFeeMantissa + newIonicFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
+    if (reserveFactorMantissa + newAdminFeeMantissa + newIonicFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
       return fail(Error.BAD_INPUT, FailureInfo.SET_ADMIN_FEE_BOUNDS_CHECK);
     }
 
@@ -288,13 +285,13 @@ contract CTokenFirstExtension is
     }
 
     // If setting Ionic fee
-    if (ionicFeeMantissa != newFuseFeeMantissa) {
+    if (ionicFeeMantissa != newIonicFeeMantissa) {
       // Set Ionic fee
-      uint256 oldFuseFeeMantissa = ionicFeeMantissa;
-      ionicFeeMantissa = newFuseFeeMantissa;
+      uint256 oldIonicFeeMantissa = ionicFeeMantissa;
+      ionicFeeMantissa = newIonicFeeMantissa;
 
       // Emit event
-      emit NewFuseFee(oldFuseFeeMantissa, newFuseFeeMantissa);
+      emit NewIonicFee(oldIonicFeeMantissa, newIonicFeeMantissa);
     }
 
     return uint256(Error.NO_ERROR);
@@ -662,16 +659,6 @@ contract CTokenFirstExtension is
     emit Flash(msg.sender, amount);
   }
 
-  /**
-   * @notice Returns a boolean indicating if the sender has admin rights
-   */
-  function hasAdminRights() internal view returns (bool) {
-    ComptrollerV3Storage comptrollerStorage = ComptrollerV3Storage(address(comptroller));
-    return
-      (msg.sender == comptrollerStorage.admin() && comptrollerStorage.adminHasRights()) ||
-      (msg.sender == address(ionicAdmin) && comptrollerStorage.ionicAdminHasRights());
-  }
-
   /*** Reentrancy Guard ***/
 
   /**
@@ -704,14 +691,14 @@ contract CTokenFirstExtension is
     if (!localOnly) comptroller._afterNonReentrant();
   }
 
-  function asCToken() internal view returns (CTokenInterface) {
-    return CTokenInterface(address(this));
+  function asCToken() internal view returns (ICErc20) {
+    return ICErc20(address(this));
   }
 
   function multicall(bytes[] calldata data)
     public
     payable
-    override(CTokenExtensionInterface, Multicall)
+    override(CTokenFirstExtensionInterface, Multicall)
     returns (bytes[] memory results)
   {
     return Multicall.multicall(data);

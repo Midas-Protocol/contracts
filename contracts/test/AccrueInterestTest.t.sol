@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import { UpgradesBaseTest } from "./UpgradesBaseTest.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 
 struct AccrualDiff {
   uint256 borrowIndex;
@@ -23,8 +24,9 @@ contract AccrueInterestTest is UpgradesBaseTest {
   }
 
   function _testAccrueInterest(address marketAddress) internal {
-    CErc20Delegate market = CErc20Delegate(marketAddress);
+    //CErc20Delegate market = CErc20Delegate(marketAddress);
     CTokenFirstExtension marketAsExt = CTokenFirstExtension(marketAddress);
+    ICErc20 market = ICErc20(marketAddress);
 
     uint256 adminFeeMantissa = market.adminFeeMantissa();
     uint256 ionicFeeMantissa = market.ionicFeeMantissa();
@@ -69,7 +71,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
         assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves old impl");
       }
       if (ionicFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total fuse fees old impl");
+        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total ionic fees old impl");
       }
       if (adminFeeMantissa > 0) {
         assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees old impl");
@@ -125,7 +127,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
         assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves new impl");
       }
       if (ionicFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total fuse fees new impl");
+        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total ionic fees new impl");
       }
       if (adminFeeMantissa > 0) {
         assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees new impl");
@@ -174,7 +176,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
   function testExploitFix() public debuggingOnly forkAtBlock(BSC_MAINNET, 29185768) {
     // run a market upgrade just before the exploiting tx is called
     address hayBusdMarket = 0xF8527Dc5611B589CbB365aCACaac0d1DC70b25cB;
-    _upgradeMarketWithExtension(CErc20Delegate(hayBusdMarket));
+    _upgradeMarketWithExtension(ICErc20(hayBusdMarket));
 
     vm.prank(0x4b92cC3452Ef1E37528470495B86d3F976470734);
     _functionCall(0xC40119C7269A5FA813d878BF83d14E3462fC8Fde, hex"8f93bfba", "raw liquidation failed");

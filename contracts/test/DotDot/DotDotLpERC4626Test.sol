@@ -8,7 +8,7 @@ import { FuseFlywheelDynamicRewardsPlugin } from "fuse-flywheel/rewards/FuseFlyw
 import { IFlywheelBooster } from "flywheel-v2/interfaces/IFlywheelBooster.sol";
 import { Authority } from "solmate/auth/Auth.sol";
 import { AbstractERC4626Test } from "../abstracts/AbstractERC4626Test.sol";
-import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
+import { ICErc20PluginRewards } from "../../compound/CTokenInterfaces.sol";
 import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 contract DotDotERC4626Test is AbstractERC4626Test {
@@ -82,8 +82,8 @@ contract DotDotERC4626Test is AbstractERC4626Test {
 
     deployCErc20PluginRewardsDelegate(address(plugin), 0.9e18);
     marketAddress = address(comptroller.cTokensByUnderlying(address(underlyingToken)));
-    CErc20PluginRewardsDelegate cToken = CErc20PluginRewardsDelegate(marketAddress);
-    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), false, abi.encode(address(plugin)));
+    ICErc20PluginRewards cToken = ICErc20PluginRewards(marketAddress);
+    cToken._setImplementationSafe(address(cErc20PluginRewardsDelegate), abi.encode(address(plugin)));
     assertEq(address(cToken.plugin()), address(plugin));
 
     cToken.approve(address(dddToken), address(dddRewards));
@@ -163,7 +163,7 @@ contract DotDotERC4626Test is AbstractERC4626Test {
     // Deposit funds, Rewards are 0
     vm.startPrank(address(this));
     underlyingToken.approve(marketAddress, depositAmount);
-    CErc20PluginRewardsDelegate(marketAddress).mint(depositAmount);
+    ICErc20PluginRewards(marketAddress).mint(depositAmount);
     vm.stopPrank();
 
     (uint32 dddStart, uint32 dddEnd, uint192 dddReward) = dddRewards.rewardsCycle(ERC20(address(marketAddress)));

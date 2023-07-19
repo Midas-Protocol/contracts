@@ -4,8 +4,6 @@ pragma solidity >=0.4.23;
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { Auth, Authority } from "solmate/auth/Auth.sol";
 
-import { CErc20 } from "../../compound/CErc20.sol";
-import { CToken } from "../../compound/CToken.sol";
 import { JumpRateModel } from "../../compound/JumpRateModel.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
 import { Comptroller } from "../../compound/Comptroller.sol";
@@ -13,7 +11,7 @@ import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../../compound/CErc20Delegator.sol";
-import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { IonicComptroller } from "../../compound/ComptrollerInterface.sol";
 import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { FeeDistributor } from "../../FeeDistributor.sol";
@@ -32,14 +30,12 @@ import { BaseTest } from "../config/BaseTest.t.sol";
 
 contract WithPool is BaseTest {
   ERC20Upgradeable public underlyingToken;
-  CErc20 cErc20;
-  CToken cToken;
   CErc20Delegate cErc20Delegate;
-
   CErc20PluginDelegate cErc20PluginDelegate;
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
-  IComptroller comptroller;
+  IonicComptroller comptroller;
+  Comptroller newComptroller;
   JumpRateModel interestModel;
 
   FeeDistributor ionicAdmin;
@@ -48,15 +44,9 @@ contract WithPool is BaseTest {
   PoolLens poolLens;
 
   address[] markets;
-  address[] emptyAddresses;
-  address[] newComptrollers;
-  bool[] falseBoolArray;
-  bool[] trueBoolArray;
   bool[] t;
   bool[] f;
   address[] newImplementation;
-  address[] oldCErC20Implementations;
-  address[] newCErc20Implementations;
   address[] hardcodedAddresses;
   string[] hardcodedNames;
 
@@ -83,50 +73,41 @@ contract WithPool is BaseTest {
       ionicAdmin._acceptOwner();
     }
     setUpBaseContracts();
-    setUpWhiteList();
-    // setUpPoolAndMarket();
+    setUpExtensions();
   }
 
-  function setUpWhiteList() internal {
+  function setUpExtensions() internal {
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
 
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
 
+    ionicAdmin._setLatestCErc20Delegate(cErc20Delegate.delegateType(), address(cErc20Delegate), "");
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20PluginDelegate.delegateType(),
+      address(cErc20PluginDelegate),
+      abi.encode(address(0))
+    );
+    ionicAdmin._setLatestCErc20Delegate(
+      cErc20PluginRewardsDelegate.delegateType(),
+      address(cErc20PluginRewardsDelegate),
+      abi.encode(address(0))
+    );
+
+    cErc20DelegateExtensions[1] = cErc20Delegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    cErc20DelegateExtensions[1] = cErc20PluginDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+    cErc20DelegateExtensions[1] = cErc20PluginRewardsDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
-
-    for (uint256 i = 0; i < 7; i++) {
-      t.push(true);
-      f.push(false);
-    }
-
-    oldCErC20Implementations.push(address(0));
-    oldCErC20Implementations.push(address(0));
-    oldCErC20Implementations.push(address(0));
-    oldCErC20Implementations.push(address(cErc20Delegate));
-    oldCErC20Implementations.push(address(cErc20Delegate));
-    oldCErC20Implementations.push(address(cErc20PluginDelegate));
-    oldCErC20Implementations.push(address(cErc20PluginRewardsDelegate));
-
-    newCErc20Implementations.push(address(cErc20Delegate));
-    newCErc20Implementations.push(address(cErc20PluginDelegate));
-    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
-    newCErc20Implementations.push(address(cErc20PluginDelegate));
-    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
-    newCErc20Implementations.push(address(cErc20PluginDelegate));
-    newCErc20Implementations.push(address(cErc20PluginRewardsDelegate));
-
-    ionicAdmin._editCErc20DelegateWhitelist(oldCErC20Implementations, newCErc20Implementations, f, t);
   }
 
   function setUpBaseContracts() internal {
     interestModel = new JumpRateModel(2343665, 1e18, 1e18, 4e18, 0.8e18);
     poolDirectory = new PoolDirectory();
-    poolDirectory.initialize(false, emptyAddresses);
+    poolDirectory.initialize(false, new address[](0));
 
     poolLens = new PoolLens();
     poolLens.initialize(
@@ -148,19 +129,16 @@ contract WithPool is BaseTest {
     uint256 closeFactor,
     uint256 liquidationIncentive
   ) public {
-    emptyAddresses.push(address(0));
-    newComptrollers.push(address(new Comptroller(payable(ionicAdmin))));
-    trueBoolArray.push(true);
-    falseBoolArray.push(false);
-    ionicAdmin._editComptrollerImplementationWhitelist(emptyAddresses, newComptrollers, trueBoolArray);
-
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
+    Comptroller newComptrollerImplementation = new Comptroller();
+    ionicAdmin._setLatestComptrollerImplementation(address(0), address(newComptrollerImplementation));
+    DiamondExtension[] memory extensions = new DiamondExtension[](2);
     extensions[0] = new ComptrollerFirstExtension();
-    ionicAdmin._setComptrollerExtensions(address(newComptrollers[0]), extensions);
+    extensions[1] = newComptrollerImplementation;
+    ionicAdmin._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
 
     (, address comptrollerAddress) = poolDirectory.deployPool(
       name,
-      newComptrollers[0],
+      address(newComptrollerImplementation),
       abi.encode(payable(address(ionicAdmin))),
       enforceWhitelist,
       closeFactor,
@@ -168,7 +146,7 @@ contract WithPool is BaseTest {
       address(priceOracle)
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = IComptroller(comptrollerAddress);
+    comptroller = IonicComptroller(comptrollerAddress);
 
     AuthoritiesRegistry impl = new AuthoritiesRegistry();
     TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
@@ -180,28 +158,17 @@ contract WithPool is BaseTest {
   }
 
   function upgradePool(address pool) internal {
-    FeeDistributor ffd = FeeDistributor(payable(ap.getAddress("FeeDistributor")));
-    Comptroller newComptrollerImplementation = new Comptroller(payable(ffd));
+    Comptroller newComptrollerImplementation = new Comptroller();
 
     Unitroller asUnitroller = Unitroller(payable(pool));
-    address oldComptrollerImplementation = asUnitroller.comptrollerImplementation();
-
-    // whitelist the upgrade
-    vm.startPrank(ffd.owner());
-    ffd._editComptrollerImplementationWhitelist(
-      asArray(oldComptrollerImplementation),
-      asArray(address(newComptrollerImplementation)),
-      asArray(true)
-    );
-    DiamondExtension[] memory extensions = new DiamondExtension[](1);
-    extensions[0] = new ComptrollerFirstExtension();
-    ffd._setComptrollerExtensions(address(newComptrollerImplementation), extensions);
-    vm.stopPrank();
 
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
-    asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
-    newComptrollerImplementation._become(pool);
+    asUnitroller._registerExtension(
+      newComptrollerImplementation,
+      DiamondExtension(asUnitroller.comptrollerImplementation())
+    );
+    asUnitroller._upgrade();
     vm.stopPrank();
   }
 
@@ -212,7 +179,7 @@ contract WithPool is BaseTest {
     uint256 _collateralFactorMantissa
   ) public {
     comptroller._deployMarket(
-      false,
+      cErc20Delegate.delegateType(),
       abi.encode(
         _underlyingToken,
         comptroller,
@@ -220,20 +187,17 @@ contract WithPool is BaseTest {
         InterestRateModel(address(interestModel)),
         name,
         symbol,
-        address(cErc20Delegate),
-        "",
         uint256(1),
         uint256(0)
       ),
+      "",
       _collateralFactorMantissa
     );
   }
 
   function deployCErc20PluginDelegate(address _erc4626, uint256 _collateralFactorMantissa) public {
-    whitelistPlugin(_erc4626, _erc4626);
-
     comptroller._deployMarket(
-      false,
+      cErc20PluginDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -241,20 +205,17 @@ contract WithPool is BaseTest {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginDelegate),
-        abi.encode(_erc4626),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(_erc4626),
       _collateralFactorMantissa
     );
   }
 
   function deployCErc20PluginRewardsDelegate(address _mockERC4626Dynamic, uint256 _collateralFactorMantissa) public {
-    whitelistPlugin(_mockERC4626Dynamic, _mockERC4626Dynamic);
-
     comptroller._deployMarket(
-      false,
+      cErc20PluginRewardsDelegate.delegateType(),
       abi.encode(
         address(underlyingToken),
         comptroller,
@@ -262,24 +223,11 @@ contract WithPool is BaseTest {
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
         "CUT",
-        address(cErc20PluginRewardsDelegate),
-        abi.encode(_mockERC4626Dynamic),
         uint256(1),
         uint256(0)
       ),
+      abi.encode(_mockERC4626Dynamic),
       _collateralFactorMantissa
     );
-  }
-
-  function whitelistPlugin(address oldImpl, address newImpl) internal {
-    address[] memory _oldCErC20Implementations = new address[](1);
-    address[] memory _newCErc20Implementations = new address[](1);
-    bool[] memory arrayOfTrue = new bool[](1);
-
-    _oldCErC20Implementations[0] = address(oldImpl);
-    _newCErc20Implementations[0] = address(newImpl);
-    arrayOfTrue[0] = true;
-
-    ionicAdmin._editPluginImplementationWhitelist(_oldCErC20Implementations, _newCErc20Implementations, arrayOfTrue);
   }
 }

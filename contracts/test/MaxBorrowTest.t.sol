@@ -42,6 +42,7 @@ contract MaxBorrowTest is WithPool {
     }
   }
 
+  // TODO redeploy to polygon to fix
   function testMaxBorrow() public fork(POLYGON_MAINNET) {
     PoolLensSecondary poolLensSecondary = new PoolLensSecondary();
     poolLensSecondary.initialize(poolDirectory);
@@ -53,9 +54,6 @@ contract MaxBorrowTest is WithPool {
 
     deployCErc20Delegate(address(vars.usdc), "USDC", "usdc", 0.9e18);
     deployCErc20Delegate(address(vars.dai), "DAI", "dai", 0.9e18);
-
-    // TODO no need to upgrade after the next deploy
-    upgradePool(address(comptroller));
 
     vars.allMarkets = comptroller.getAllMarkets();
 
@@ -121,9 +119,6 @@ contract MaxBorrowTest is WithPool {
 
     address poolAddress = jFiatPoolAddress;
     Comptroller pool = Comptroller(poolAddress);
-
-    // TODO no need to upgrade after the next deploy
-    upgradePool(address(pool));
 
     ComptrollerFirstExtension asExtension = ComptrollerFirstExtension(poolAddress);
     address[] memory borrowers = asExtension.getAllBorrowers();
