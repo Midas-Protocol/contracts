@@ -135,7 +135,7 @@ contract ContractsUpgradesTest is BaseTest {
 
           DiamondBase asBase = DiamondBase(address(markets[j]));
           try asBase._listExtensions() returns (address[] memory extensions) {
-            assertEq(extensions.length, 1, "market is missing the first extension");
+            assertEq(extensions.length, 2, "market is missing an extension");
           } catch {
             emit log("market that is not yet upgraded to the extensions upgrade");
             emit log_address(address(market));
