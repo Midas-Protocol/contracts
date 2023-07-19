@@ -23,11 +23,6 @@ contract PythPriceOracle is BasePriceOracle, SafeOwnableUpgradeable {
   mapping(address => bytes32) public priceFeedIds;
 
   /**
-   * @dev Controls if `admin` can overwrite existing assignments of oracles to underlying tokens.
-   */
-  bool public CAN_ADMIN_OVERWRITE;
-
-  /**
    * @notice DIA NATIVE/USD price feed contracts.
    */
   bytes32 public NATIVE_TOKEN_USD_FEED;

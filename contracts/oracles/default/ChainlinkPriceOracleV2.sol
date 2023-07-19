@@ -14,7 +14,7 @@ import { SafeOwnableUpgradeable } from "../../ionic/SafeOwnableUpgradeable.sol";
  * @dev Implements `PriceOracle`.
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  */
-contract ChainlinkPriceOracleV2 is BasePriceOracle, SafeOwnableUpgradeable {
+contract ChainlinkPriceOracleV2 is SafeOwnableUpgradeable, BasePriceOracle {
   /**
    * @notice Maps ERC20 token addresses to ETH-based Chainlink price feed contracts.
    */
