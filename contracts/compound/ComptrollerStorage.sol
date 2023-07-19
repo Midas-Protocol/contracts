@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 import "./IFeeDistributor.sol";
 import "../oracles/BasePriceOracle.sol";
-import "./CTokenInterfaces.sol";
+import { ICErc20 } from "./CTokenInterfaces.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 

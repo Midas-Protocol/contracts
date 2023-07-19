@@ -81,7 +81,7 @@ contract WithPool is BaseTest {
     cErc20PluginDelegate = new CErc20PluginDelegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
 
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
     cErc20DelegateExtensions[0] = new CTokenFirstExtension();
 
     ionicAdmin._setLatestCErc20Delegate(cErc20Delegate.delegateType(), address(cErc20Delegate), "");
@@ -96,8 +96,11 @@ contract WithPool is BaseTest {
       abi.encode(address(0))
     );
 
+    cErc20DelegateExtensions[1] = cErc20Delegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20Delegate), cErc20DelegateExtensions);
+    cErc20DelegateExtensions[1] = cErc20PluginDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginDelegate), cErc20DelegateExtensions);
+    cErc20DelegateExtensions[1] = cErc20PluginRewardsDelegate;
     ionicAdmin._setCErc20DelegateExtensions(address(cErc20PluginRewardsDelegate), cErc20DelegateExtensions);
   }
 
@@ -165,6 +168,7 @@ contract WithPool is BaseTest {
       newComptrollerImplementation,
       DiamondExtension(asUnitroller.comptrollerImplementation())
     );
+    asUnitroller._upgrade();
     vm.stopPrank();
   }
 

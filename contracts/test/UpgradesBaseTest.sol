@@ -48,6 +48,7 @@ abstract contract UpgradesBaseTest is BaseTest {
       DiamondExtension(comptrollerImplementationAddress),
       DiamondExtension(asUnitroller.comptrollerImplementation())
     );
+    asUnitroller._upgrade();
     vm.stopPrank();
   }
 
@@ -71,8 +72,9 @@ abstract contract UpgradesBaseTest is BaseTest {
     ffd._setLatestCErc20Delegate(newImpl.delegateType(), address(newImpl), abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
     cErc20DelegateExtensions[0] = marketExt;
+    cErc20DelegateExtensions[1] = newImpl;
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 

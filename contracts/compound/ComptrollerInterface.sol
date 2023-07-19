@@ -7,9 +7,9 @@ import { DiamondExtension } from "../ionic/DiamondExtension.sol";
 import { ComptrollerV3Storage } from "../compound/ComptrollerStorage.sol";
 
 interface ComptrollerInterface {
-  function _becomeImplementation() external;
-
   function isDeprecated(ICErc20 cToken) external view returns (bool);
+
+  function _becomeImplementation() external;
 
   function _deployMarket(
     uint8 delegateType,

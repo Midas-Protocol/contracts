@@ -74,8 +74,9 @@ contract MarketsTest is BaseTest {
     ffd._setLatestCErc20Delegate(market.delegateType(), address(newImpl), abi.encode(address(0)));
 
     // add the extension to the auto upgrade config
-    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](1);
+    DiamondExtension[] memory cErc20DelegateExtensions = new DiamondExtension[](2);
     cErc20DelegateExtensions[0] = newCTokenExtension;
+    cErc20DelegateExtensions[1] = DiamondExtension(address(market));
     vm.prank(ffd.owner());
     ffd._setCErc20DelegateExtensions(address(newImpl), cErc20DelegateExtensions);
 
@@ -115,6 +116,7 @@ contract MarketsTest is BaseTest {
       DiamondExtension(latestComptrollerImplementation),
       DiamondExtension(oldComptrollerImplementation)
     );
+    asUnitroller._upgrade();
     vm.stopPrank();
   }
 }
