@@ -435,6 +435,10 @@ interface CErc20StorageInterface {
   function accrualBlockNumber() external view returns (uint256);
 
   function underlying() external view returns (address);
+
+  function borrowIndex() external view returns (uint256);
+
+  function interestRateModel() external view returns (address);
 }
 
 interface CErc20PluginStorageInterface is CErc20StorageInterface {
@@ -453,6 +457,8 @@ interface ICErc20 is
   CDelegateInterface
 {}
 
-interface ICErc20Plugin is CErc20PluginStorageInterface, ICErc20 {}
+interface ICErc20Plugin is CErc20PluginStorageInterface, ICErc20 {
+  function _updatePlugin(address _plugin) external;
+}
 
 interface ICErc20PluginRewards is CErc20PluginRewardsInterface, ICErc20 {}
