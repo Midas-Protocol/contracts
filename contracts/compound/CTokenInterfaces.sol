@@ -177,7 +177,7 @@ abstract contract CTokenBaseEvents {
   /**
    * @notice Event emitted when the Ionic fee is changed
    */
-  event NewFuseFee(uint256 oldFuseFeeMantissa, uint256 newFuseFeeMantissa);
+  event NewIonicFee(uint256 oldIonicFeeMantissa, uint256 newIonicFeeMantissa);
 
   /**
    * @notice EIP20 Approval event
@@ -332,7 +332,7 @@ interface CTokenSecondExtensionInterface {
 
   function _withdrawAdminFees(uint256 withdrawAmount) external returns (uint256);
 
-  function _withdrawFuseFees(uint256 withdrawAmount) external returns (uint256);
+  function _withdrawIonicFees(uint256 withdrawAmount) external returns (uint256);
 
   function selfTransferOut(address to, uint256 amount) external;
 
@@ -352,7 +352,7 @@ interface CDelegatorInterface {
   /**
    * @dev upgrades the implementation if necessary
    */
-  function _upgrade() external payable;
+  function _upgrade() external;
 }
 
 interface CDelegateInterface {

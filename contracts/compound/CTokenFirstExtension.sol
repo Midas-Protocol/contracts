@@ -262,10 +262,10 @@ contract CTokenFirstExtension is
     if (newAdminFeeMantissa == type(uint256).max) newAdminFeeMantissa = adminFeeMantissa;
 
     // Get latest Ionic fee
-    uint256 newFuseFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
+    uint256 newIonicFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
 
-    // Check reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
-    if (reserveFactorMantissa + newAdminFeeMantissa + newFuseFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
+    // Check reserveFactorMantissa + newAdminFeeMantissa + newIonicFeeMantissa ≤ reserveFactorPlusFeesMaxMantissa
+    if (reserveFactorMantissa + newAdminFeeMantissa + newIonicFeeMantissa > reserveFactorPlusFeesMaxMantissa) {
       return fail(Error.BAD_INPUT, FailureInfo.SET_ADMIN_FEE_BOUNDS_CHECK);
     }
 
@@ -285,13 +285,13 @@ contract CTokenFirstExtension is
     }
 
     // If setting Ionic fee
-    if (ionicFeeMantissa != newFuseFeeMantissa) {
+    if (ionicFeeMantissa != newIonicFeeMantissa) {
       // Set Ionic fee
-      uint256 oldFuseFeeMantissa = ionicFeeMantissa;
-      ionicFeeMantissa = newFuseFeeMantissa;
+      uint256 oldIonicFeeMantissa = ionicFeeMantissa;
+      ionicFeeMantissa = newIonicFeeMantissa;
 
       // Emit event
-      emit NewFuseFee(oldFuseFeeMantissa, newFuseFeeMantissa);
+      emit NewIonicFee(oldIonicFeeMantissa, newIonicFeeMantissa);
     }
 
     return uint256(Error.NO_ERROR);

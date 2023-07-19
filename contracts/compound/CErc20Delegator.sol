@@ -45,7 +45,6 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
 
       // Set initial exchange rate
       initialExchangeRateMantissa = 0.2e18;
-      require(initialExchangeRateMantissa > 0, "!exchangeRate>0");
 
       // Set the comptroller
       comptroller = comptroller_;
@@ -76,15 +75,15 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
       // Sanitize adminFeeMantissa_
       if (adminFeeMantissa_ == type(uint256).max) adminFeeMantissa_ = adminFeeMantissa;
       // Get latest Ionic fee
-      uint256 newFuseFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
+      uint256 newIonicFeeMantissa = IFeeDistributor(ionicAdmin).interestFeeRate();
       require(
-        reserveFactorMantissa + adminFeeMantissa_ + newFuseFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
+        reserveFactorMantissa + adminFeeMantissa_ + newIonicFeeMantissa <= reserveFactorPlusFeesMaxMantissa,
         "!adminFee:set"
       );
       adminFeeMantissa = adminFeeMantissa_;
       emit NewAdminFee(0, adminFeeMantissa_);
-      ionicFeeMantissa = newFuseFeeMantissa;
-      emit NewFuseFee(0, newFuseFeeMantissa);
+      ionicFeeMantissa = newIonicFeeMantissa;
+      emit NewIonicFee(0, newIonicFeeMantissa);
 
       // The counter starts true to prevent changing it from zero to non-zero (i.e. smaller cost/refund)
       _notEntered = true;
@@ -115,7 +114,7 @@ contract CErc20Delegator is CErc20DelegatorBase, DiamondBase {
   /**
    * @dev upgrades the implementation if necessary
    */
-  function _upgrade() external payable override {
+  function _upgrade() external override {
     require(msg.sender == address(this) || hasAdminRights(), "!self or admin");
 
     (bool success, bytes memory data) = address(this).staticcall(abi.encodeWithSignature("delegateType()"));

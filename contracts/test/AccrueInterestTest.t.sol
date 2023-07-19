@@ -71,7 +71,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
         assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves old impl");
       }
       if (ionicFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total fuse fees old impl");
+        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total ionic fees old impl");
       }
       if (adminFeeMantissa > 0) {
         assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees old impl");
@@ -127,7 +127,7 @@ contract AccrueInterestTest is UpgradesBaseTest {
         assertLt(accrualDataBefore.totalReserves, accrualDataAfter.totalReserves, "!total reserves new impl");
       }
       if (ionicFeeMantissa > 0) {
-        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total fuse fees new impl");
+        assertLt(accrualDataBefore.totalIonicFees, accrualDataAfter.totalIonicFees, "!total ionic fees new impl");
       }
       if (adminFeeMantissa > 0) {
         assertLt(accrualDataBefore.totalAdminFees, accrualDataAfter.totalAdminFees, "!total admin fees new impl");

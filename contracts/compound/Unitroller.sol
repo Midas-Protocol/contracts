@@ -108,7 +108,7 @@ contract Unitroller is ComptrollerV3Storage, ComptrollerErrorReporter, DiamondBa
   /**
    * @dev upgrades the implementation if necessary
    */
-  function _upgrade() external payable {
+  function _upgrade() external {
     require(msg.sender == address(this) || hasAdminRights(), "!self || !admin");
 
     address currentImplementation = comptrollerImplementation();

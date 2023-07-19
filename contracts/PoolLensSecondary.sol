@@ -73,7 +73,7 @@ contract PoolLensSecondary is Initializable {
     // Get pool ownership
     address comptrollerAdmin = comptroller.admin();
     bool comptrollerAdminHasRights = comptroller.adminHasRights();
-    bool comptrollerFuseAdminHasRights = comptroller.ionicAdminHasRights();
+    bool comptrollerIonicAdminHasRights = comptroller.ionicAdminHasRights();
 
     // Get cToken ownership
     ICErc20[] memory cTokens = comptroller.getAllMarkets();
@@ -91,13 +91,13 @@ contract PoolLensSecondary is Initializable {
         continue;
       }
       bool cTokenAdminHasRights = cToken.adminHasRights();
-      bool cTokenFuseAdminHasRights = cToken.ionicAdminHasRights();
+      bool cTokenIonicAdminHasRights = cToken.ionicAdminHasRights();
 
       // If outlier, push to array
       if (
         cTokenAdmin != comptrollerAdmin ||
         cTokenAdminHasRights != comptrollerAdminHasRights ||
-        cTokenFuseAdminHasRights != comptrollerFuseAdminHasRights
+        cTokenIonicAdminHasRights != comptrollerIonicAdminHasRights
       ) arrayLength++;
     }
 
@@ -116,25 +116,25 @@ contract PoolLensSecondary is Initializable {
         continue;
       }
       bool cTokenAdminHasRights = cToken.adminHasRights();
-      bool cTokenFuseAdminHasRights = cToken.ionicAdminHasRights();
+      bool cTokenIonicAdminHasRights = cToken.ionicAdminHasRights();
 
       // If outlier, push to array and increment array index
       if (
         cTokenAdmin != comptrollerAdmin ||
         cTokenAdminHasRights != comptrollerAdminHasRights ||
-        cTokenFuseAdminHasRights != comptrollerFuseAdminHasRights
+        cTokenIonicAdminHasRights != comptrollerIonicAdminHasRights
       ) {
         outliers[arrayIndex] = CTokenOwnership(
           address(cToken),
           cTokenAdmin,
           cTokenAdminHasRights,
-          cTokenFuseAdminHasRights
+          cTokenIonicAdminHasRights
         );
         arrayIndex++;
       }
     }
 
-    return (comptrollerAdmin, comptrollerAdminHasRights, comptrollerFuseAdminHasRights, outliers);
+    return (comptrollerAdmin, comptrollerAdminHasRights, comptrollerIonicAdminHasRights, outliers);
   }
 
   /**

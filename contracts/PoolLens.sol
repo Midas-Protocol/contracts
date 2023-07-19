@@ -93,7 +93,7 @@ contract PoolLens is Initializable {
   /**
    * @dev Struct for Ionic pool summary data.
    */
-  struct FusePoolData {
+  struct IonicPoolData {
     uint256 totalSupply;
     uint256 totalBorrow;
     address[] underlyingTokens;
@@ -111,12 +111,12 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory publicPools) = directory.getPublicPools();
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
     return (indexes, publicPools, data, errored);
   }
 
@@ -130,14 +130,14 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory publicPools) = directory.getPublicPoolsByVerification(
       whitelistedAdmin
     );
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(publicPools);
     return (indexes, publicPools, data, errored);
   }
 
@@ -151,12 +151,12 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory accountPools) = directory.getPoolsByAccount(account);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
     return (indexes, accountPools, data, errored);
   }
 
@@ -165,17 +165,17 @@ contract PoolLens is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
-  function getPoolsOfUserWithData(address user)
+  function getPoolsOIonicrWithData(address user)
     external
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory userPools) = directory.getPoolsOfUser(user);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(userPools);
     return (indexes, userPools, data, errored);
   }
 
@@ -184,8 +184,8 @@ contract PoolLens is Initializable {
    * @dev This function is not designed to be called in a transaction: it is too gas-intensive.
    * Ideally, we can add the `view` modifier, but many cToken functions potentially modify the state.
    */
-  function getPoolsData(PoolDirectory.Pool[] memory pools) internal returns (FusePoolData[] memory, bool[] memory) {
-    FusePoolData[] memory data = new FusePoolData[](pools.length);
+  function getPoolsData(PoolDirectory.Pool[] memory pools) internal returns (IonicPoolData[] memory, bool[] memory) {
+    IonicPoolData[] memory data = new IonicPoolData[](pools.length);
     bool[] memory errored = new bool[](pools.length);
 
     for (uint256 i = 0; i < pools.length; i++) {
@@ -196,7 +196,7 @@ contract PoolLens is Initializable {
         string[] memory _underlyingSymbols,
         bool _whitelistedAdmin
       ) {
-        data[i] = FusePoolData(_totalSupply, _totalBorrow, _underlyingTokens, _underlyingSymbols, _whitelistedAdmin);
+        data[i] = IonicPoolData(_totalSupply, _totalBorrow, _underlyingTokens, _underlyingSymbols, _whitelistedAdmin);
       } catch {
         errored[i] = true;
       }
@@ -419,7 +419,7 @@ contract PoolLens is Initializable {
   /**
    * @dev Struct for a Ionic pool user.
    */
-  struct FusePoolUser {
+  struct IonicPoolUser {
     address account;
     uint256 totalBorrow;
     uint256 totalCollateral;
@@ -572,12 +572,12 @@ contract PoolLens is Initializable {
     returns (
       uint256[] memory,
       PoolDirectory.Pool[] memory,
-      FusePoolData[] memory,
+      IonicPoolData[] memory,
       bool[] memory
     )
   {
     (uint256[] memory indexes, PoolDirectory.Pool[] memory accountPools) = getWhitelistedPoolsByAccount(account);
-    (FusePoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
+    (IonicPoolData[] memory data, bool[] memory errored) = getPoolsData(accountPools);
     return (indexes, accountPools, data, errored);
   }
 }

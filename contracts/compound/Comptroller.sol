@@ -1209,13 +1209,13 @@ contract Comptroller is ComptrollerBase, ComptrollerInterface, ComptrollerErrorR
     }
 
     // Temporarily enable Ionic admin rights for asset deployment (storing the original value)
-    bool oldFuseAdminHasRights = ionicAdminHasRights;
+    bool oldIonicAdminHasRights = ionicAdminHasRights;
     ionicAdminHasRights = true;
 
     // Deploy via Ionic admin
     ICErc20 cToken = ICErc20(IFeeDistributor(ionicAdmin).deployCErc20(delegateType, constructorData, becomeImplData));
     // Reset Ionic admin rights to the original value
-    ionicAdminHasRights = oldFuseAdminHasRights;
+    ionicAdminHasRights = oldIonicAdminHasRights;
     // Support market here in the Comptroller
     uint256 err = _supportMarket(cToken);
 

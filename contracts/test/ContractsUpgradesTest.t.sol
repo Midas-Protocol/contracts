@@ -18,7 +18,7 @@ import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/trans
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 contract ContractsUpgradesTest is BaseTest {
-  function testFusePoolDirectoryUpgrade() public fork(BSC_MAINNET) {
+  function testPoolDirectoryUpgrade() public fork(BSC_MAINNET) {
     address contractToTest = ap.getAddress("PoolDirectory"); // PoolDirectory proxy
 
     // before upgrade

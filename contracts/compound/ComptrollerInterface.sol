@@ -300,7 +300,7 @@ interface ComptrollerExtensionInterface {
 interface UnitrollerInterface {
   function comptrollerImplementation() external view returns (address);
 
-  function _upgrade() external payable;
+  function _upgrade() external;
 
   function _acceptAdmin() external returns (uint256);
 

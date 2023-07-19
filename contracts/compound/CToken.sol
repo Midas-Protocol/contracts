@@ -40,7 +40,7 @@ abstract contract CErc20 is CTokenSecondExtensionBase, TokenErrorReporter, Expon
     functionSelectors[--fnsCount] = this.seize.selector;
     functionSelectors[--fnsCount] = this.selfTransferOut.selector;
     functionSelectors[--fnsCount] = this.selfTransferIn.selector;
-    functionSelectors[--fnsCount] = this._withdrawFuseFees.selector;
+    functionSelectors[--fnsCount] = this._withdrawIonicFees.selector;
     functionSelectors[--fnsCount] = this._withdrawAdminFees.selector;
 
     require(fnsCount == 0, "use the correct array length");
@@ -167,19 +167,19 @@ abstract contract CErc20 is CTokenSecondExtensionBase, TokenErrorReporter, Expon
    * @param withdrawAmount Amount of fees to withdraw
    * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
    */
-  function _withdrawFuseFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
+  function _withdrawIonicFees(uint256 withdrawAmount) external override nonReentrant(false) returns (uint256) {
     asCTokenExtension().accrueInterest();
 
     if (accrualBlockNumber != block.number) {
-      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_FUSE_FEES_FRESH_CHECK);
+      return fail(Error.MARKET_NOT_FRESH, FailureInfo.WITHDRAW_IONIC_FEES_FRESH_CHECK);
     }
 
     if (getCashInternal() < withdrawAmount) {
-      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_FUSE_FEES_CASH_NOT_AVAILABLE);
+      return fail(Error.TOKEN_INSUFFICIENT_CASH, FailureInfo.WITHDRAW_IONIC_FEES_CASH_NOT_AVAILABLE);
     }
 
     if (withdrawAmount > totalIonicFees) {
-      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_FUSE_FEES_VALIDATION);
+      return fail(Error.BAD_INPUT, FailureInfo.WITHDRAW_IONIC_FEES_VALIDATION);
     }
 
     /////////////////////////
