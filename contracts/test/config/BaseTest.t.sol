@@ -151,7 +151,7 @@ abstract contract BaseTest is Test {
     if (chainid == BSC_MAINNET) {
       ap = AddressesProvider(address(0));
     } else if (chainid == BSC_CHAPEL) {
-      ap = AddressesProvider(address(0));
+      ap = AddressesProvider(0x3dc8CE9f581e49B9E5304CF580940ad341F64c3f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(address(0));
     } else if (chainid == NEON_DEVNET) {
