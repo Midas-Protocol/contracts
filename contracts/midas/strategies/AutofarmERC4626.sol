@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.10;
+pragma solidity >=0.8.0;
 
 import { ERC4626 } from "solmate/mixins/ERC4626.sol";
 import { MidasERC4626 } from "./MidasERC4626.sol";

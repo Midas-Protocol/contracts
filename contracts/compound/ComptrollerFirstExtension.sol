@@ -267,7 +267,7 @@ contract ComptrollerFirstExtension is
   }
 
   /**
-   * @notice Removed a market from the markets mapping and sets it as unlisted
+   * @notice Remove a market from the markets mapping and sets it as unlisted
    * @dev Admin function unset isListed and collateralFactorMantissa and unadd support for the market
    * @param cToken The address of the market (token) to unlist
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
