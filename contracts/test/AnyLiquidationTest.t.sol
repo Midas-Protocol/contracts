@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import { Comptroller } from "../compound/Comptroller.sol";
-import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
-import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
+import { BasePriceOracle } from "../oracles/BasePriceOracle.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -17,12 +15,11 @@ import { CurveV2LpTokenPriceOracleNoRegistry } from "../oracles/default/CurveV2L
 import { ICurvePool } from "../external/curve/ICurvePool.sol";
 import { IFundsConversionStrategy } from "../liquidators/IFundsConversionStrategy.sol";
 import { IRedemptionStrategy } from "../liquidators/IRedemptionStrategy.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IUniswapV2Router02 } from "../external/uniswap/IUniswapV2Router02.sol";
 import { IUniswapV2Pair } from "../external/uniswap/IUniswapV2Pair.sol";
 import { IUniswapV2Factory } from "../external/uniswap/IUniswapV2Factory.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
 
 contract AnyLiquidationTest is BaseTest {
   FuseSafeLiquidator fsl;
@@ -89,20 +86,6 @@ contract AnyLiquidationTest is BaseTest {
       //        "0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f",
       //        30
       //      );
-    } else if (block.chainid == MOONBEAM_MAINNET) {
-      // TODO figure out how to mock all xcDOT calls
-      mostLiquidPair1 = IUniswapV2Pair(0xa927E1e1E044CA1D9fe1854585003477331fE2Af); // GLMR/xcDOT
-      mostLiquidPair2 = IUniswapV2Pair(0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79); // GLMR/USDC
-      fsl = FuseSafeLiquidator(payable(ap.getAddress("FuseSafeLiquidator")));
-      //      fsl = new FuseSafeLiquidator();
-      //      fsl.initialize(
-      //        ap.getAddress("wtoken"),
-      //        uniswapRouter,
-      //        ap.getAddress("stableToken"),
-      //        ap.getAddress("wBTCToken"),
-      //        "0x48a6ca3d52d0d0a6c53a83cc3c8688dd46ea4cb786b169ee959b95ad30f61643",
-      //        25
-      //      );
     }
   }
 
@@ -121,15 +104,10 @@ contract AnyLiquidationTest is BaseTest {
     doTestAnyLiquidation(random);
   }
 
-  function testMoonbeamAnyLiquidation(uint256 random) public debuggingOnly fork(MOONBEAM_MAINNET) {
-    vm.assume(random > 100 && random < type(uint64).max);
-    doTestAnyLiquidation(random);
-  }
-
   struct LiquidationData {
     IRedemptionStrategy[] strategies;
     bytes[] redemptionDatas;
-    ICToken[] markets;
+    ICErc20[] markets;
     address[] borrowers;
     FuseSafeLiquidator liquidator;
     IFundsConversionStrategy[] fundingStrategies;
@@ -182,8 +160,8 @@ contract AnyLiquidationTest is BaseTest {
     // find a debt market in which the borrower has borrowed
     for (uint256 m = 0; m < vars.markets.length; m++) {
       uint256 marketIndexWithOffset = (random + m) % vars.markets.length;
-      ICToken randomMarket = vars.markets[marketIndexWithOffset];
-      borrowAmount = randomMarket.borrowBalanceStored(vars.borrower);
+      ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
+      borrowAmount = randomMarket.borrowBalanceCurrent(vars.borrower);
       if (borrowAmount > 0) {
         debtMarket = ICErc20(address(randomMarket));
         break;
@@ -199,13 +177,13 @@ contract AnyLiquidationTest is BaseTest {
       // until there is shortfall for which to be liquidated
       for (uint256 m = 0; m < vars.markets.length; m++) {
         uint256 marketIndexWithOffset = (random - m) % vars.markets.length;
-        ICToken randomMarket = vars.markets[marketIndexWithOffset];
+        ICErc20 randomMarket = vars.markets[marketIndexWithOffset];
         uint256 borrowerCollateral = randomMarket.balanceOf(vars.borrower);
         if (borrowerCollateral > 0) {
           if (address(randomMarket) == address(debtMarket)) continue;
 
           // the collateral prices change
-          MasterPriceOracle mpo = MasterPriceOracle(address(vars.comptroller.oracle()));
+          BasePriceOracle mpo = vars.comptroller.oracle();
           uint256 priceCollateral = mpo.getUnderlyingPrice(randomMarket);
           vm.mockCall(
             address(mpo),
@@ -328,6 +306,7 @@ contract AnyLiquidationTest is BaseTest {
     if (exchangeCollateralTo != address(0)) {
       address collateralTokenToRedeem = vars.collateralMarket.underlying();
       while (collateralTokenToRedeem != exchangeCollateralTo) {
+        // TODO
         AddressesProvider.RedemptionStrategy memory strategy = ap.getRedemptionStrategy(collateralTokenToRedeem);
         if (strategy.addr == address(0)) break;
         collateralTokenToRedeem = addRedemptionStrategy(

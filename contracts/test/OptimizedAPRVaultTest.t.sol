@@ -3,15 +3,8 @@ pragma solidity >=0.8.0;
 
 import "./config/MarketsTest.t.sol";
 import { CompoundMarketERC4626 } from "../midas/strategies/CompoundMarketERC4626.sol";
-import { ICErc20 } from "../external/compound/ICErc20.sol";
-
-import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
-import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { IERC4626Upgradeable as IERC4626 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
-import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
-
-import { WETH } from "solmate/tokens/WETH.sol";
-import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { OptimizedAPRVaultExtension } from "../midas/vault/OptimizedAPRVaultExtension.sol";
 import { OptimizedAPRVaultFirstExtension } from "../midas/vault/OptimizedAPRVaultFirstExtension.sol";
@@ -20,11 +13,17 @@ import { VaultFees } from "../midas/vault/IVault.sol";
 import { OptimizedVaultsRegistry } from "../midas/vault/OptimizedVaultsRegistry.sol";
 import { AdapterConfig } from "../midas/vault/OptimizedAPRVaultStorage.sol";
 import { OptimizedAPRVaultBase } from "../midas/vault/OptimizedAPRVaultBase.sol";
-
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
+
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { IFlywheelRewards } from "flywheel/interfaces/IFlywheelRewards.sol";
 import { FuseFlywheelDynamicRewards } from "fuse-flywheel/rewards/FuseFlywheelDynamicRewards.sol";
+import { WETH } from "solmate/tokens/WETH.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
+import { MathUpgradeable as Math } from "openzeppelin-contracts-upgradeable/contracts/utils/math/MathUpgradeable.sol";
+import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import { IERC4626Upgradeable as IERC4626 } from "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
+import { IERC20MetadataUpgradeable as IERC20Metadata } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/ERC4626Upgradeable.sol";
 
 interface TwoBRL is IERC20Metadata {
   function minter() external view returns (address);
@@ -66,8 +65,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
       lenderSharesHint[0] = 4e17;
       lenderSharesHint[1] = 6e17;
 
-      _upgradeExistingCTokenExtension(CErc20Delegate(ankrWbnbMarketAddress));
-      _upgradeExistingCTokenExtension(CErc20Delegate(ahWbnbMarketAddress));
+      _upgradeMarket(CErc20Delegate(ankrWbnbMarketAddress));
+      _upgradeMarket(CErc20Delegate(ahWbnbMarketAddress));
 
       twoBrl = TwoBRL(twoBrlAddress);
       vm.prank(twoBrl.minter());
@@ -92,6 +91,15 @@ contract OptimizedAPRVaultTest is MarketsTest {
     ankrWbnbMarket.mint(depositAmount * 10);
     wbnb.approve(ahWbnbMarketAddress, depositAmount * 10);
     ahWbnbMarket.mint(depositAmount * 10);
+    vm.stopPrank();
+  }
+
+  function unpauseMarkets() internal {
+    IComptroller pool = ankrWbnbMarket.comptroller();
+
+    vm.startPrank(pool.admin());
+    pool._setMintPaused(ankrWbnbMarket, false);
+    pool._setMintPaused(ahWbnbMarket, false);
     vm.stopPrank();
   }
 
@@ -157,6 +165,8 @@ contract OptimizedAPRVaultTest is MarketsTest {
   }
 
   function setUpVault() internal {
+    unpauseMarkets();
+
     // make sure there is enough liquidity in the testing markets
     addLiquidity();
 
@@ -458,7 +468,7 @@ contract OptimizedAPRVaultTest is MarketsTest {
     // set up the registry, the vault and the adapter
     {
       // upgrade to enable the aprAfterDeposit fn for the vault
-      _upgradeExistingCTokenExtension(CErc20Delegate(twoBrlMarketAddress));
+      _upgradeMarket(CErc20Delegate(twoBrlMarketAddress));
 
       vm.startPrank(someDeployer);
       deployVaultRegistry();

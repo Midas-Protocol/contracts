@@ -13,7 +13,8 @@ import { CErc20PluginDelegate } from "../../compound/CErc20PluginDelegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20Delegator } from "../../compound/CErc20Delegator.sol";
-import { ComptrollerInterface } from "../../compound/ComptrollerInterface.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
 import { InterestRateModel } from "../../compound/InterestRateModel.sol";
 import { FuseFeeDistributor } from "../../FuseFeeDistributor.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
@@ -24,6 +25,8 @@ import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/t
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import { CTokenFirstExtension, DiamondExtension } from "../../compound/CTokenFirstExtension.sol";
 import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
+import { AuthoritiesRegistry } from "../../midas/AuthoritiesRegistry.sol";
+import { PoolRolesAuthority } from "../../midas/PoolRolesAuthority.sol";
 
 import { BaseTest } from "../config/BaseTest.t.sol";
 
@@ -36,7 +39,7 @@ contract WithPool is BaseTest {
   CErc20PluginDelegate cErc20PluginDelegate;
   CErc20PluginRewardsDelegate cErc20PluginRewardsDelegate;
 
-  Comptroller comptroller;
+  IComptroller comptroller;
   WhitePaperInterestRateModel interestModel;
 
   FuseFeeDistributor fuseAdmin;
@@ -165,7 +168,15 @@ contract WithPool is BaseTest {
       address(priceOracle)
     );
     Unitroller(payable(comptrollerAddress))._acceptAdmin();
-    comptroller = Comptroller(payable(comptrollerAddress));
+    comptroller = IComptroller(comptrollerAddress);
+
+    AuthoritiesRegistry impl = new AuthoritiesRegistry();
+    TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
+    AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
+    newAr.initialize(address(321));
+    fuseAdmin.reinitialize(newAr);
+    PoolRolesAuthority poolAuth = newAr.createPoolAuthority(comptrollerAddress);
+    newAr.setUserRole(comptrollerAddress, address(this), poolAuth.BORROWER_ROLE(), true);
   }
 
   function upgradePool(address pool) internal {
@@ -190,7 +201,7 @@ contract WithPool is BaseTest {
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
     asUnitroller._setPendingImplementation(address(newComptrollerImplementation));
-    newComptrollerImplementation._become(asUnitroller);
+    newComptrollerImplementation._become(pool);
     vm.stopPrank();
   }
 
@@ -204,7 +215,7 @@ contract WithPool is BaseTest {
       false,
       abi.encode(
         _underlyingToken,
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         name,
@@ -225,7 +236,7 @@ contract WithPool is BaseTest {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",
@@ -246,7 +257,7 @@ contract WithPool is BaseTest {
       false,
       abi.encode(
         address(underlyingToken),
-        ComptrollerInterface(address(comptroller)),
+        comptroller,
         payable(address(fuseAdmin)),
         InterestRateModel(address(interestModel)),
         "cUnderlyingToken",

@@ -6,12 +6,11 @@ import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { ComptrollerFirstExtension, DiamondExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CToken } from "../compound/CToken.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Unitroller } from "../compound/Unitroller.sol";
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 
@@ -86,8 +85,7 @@ contract ContractsUpgradesTest is BaseTest {
 
     uint256 marketsCounterAfter = ffd.marketsCounter();
     address ownerAfter = ffd.owner();
-    (address latestCErc20DelegateAfter, bool allowResignAfter, bytes memory becomeImplementationDataAfter) = ffd
-      .latestCErc20Delegate(oldCercDelegate);
+    (address latestCErc20DelegateAfter, , ) = ffd.latestCErc20Delegate(oldCercDelegate);
     //    bool whitelistedAfter = ffd.cErc20DelegateWhitelist(oldCercDelegate, latestCErc20DelegateAfter, false);
 
     emit log_uint(marketsCounterAfter);
@@ -102,6 +100,10 @@ contract ContractsUpgradesTest is BaseTest {
     assertEq(ownerBefore, ownerAfter, "owner mismatch");
   }
 
+  function testMarketsLatestImplementationsChapel() public fork(BSC_CHAPEL) {
+    _testMarketsLatestImplementations();
+  }
+
   function testMarketsLatestImplementationsBsc() public fork(BSC_MAINNET) {
     _testMarketsLatestImplementations();
   }
@@ -110,11 +112,11 @@ contract ContractsUpgradesTest is BaseTest {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsMoonbeam() public fork(MOONBEAM_MAINNET) {
+  function testMarketsLatestImplementationsArbitrum() public fork(ARBITRUM_ONE) {
     _testMarketsLatestImplementations();
   }
 
-  function testMarketsLatestImplementationsEvmos() public fork(EVMOS_MAINNET) {
+  function testMarketsLatestImplementationsEth() public fork(ETHEREUM_MAINNET) {
     _testMarketsLatestImplementations();
   }
 
@@ -122,31 +124,33 @@ contract ContractsUpgradesTest is BaseTest {
     FuseFeeDistributor ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    if (address(fpd) != address(0)) {
+      (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      IComptroller pool = IComptroller(pools[i].comptroller);
-      ICToken[] memory markets = pool.getAllMarkets();
-      for (uint8 j = 0; j < markets.length; j++) {
-        CErc20Delegate market = CErc20Delegate(address(markets[j]));
+      for (uint8 i = 0; i < pools.length; i++) {
+        IComptroller pool = IComptroller(pools[i].comptroller);
+        ICErc20[] memory markets = pool.getAllMarkets();
+        for (uint8 j = 0; j < markets.length; j++) {
+          CErc20Delegate market = CErc20Delegate(address(markets[j]));
 
-        address currentImpl = market.implementation();
-        (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
+          address currentImpl = market.implementation();
+          (address upgradeToImpl, , ) = ffd.latestCErc20Delegate(currentImpl);
 
-        if (currentImpl != upgradeToImpl) emit log_address(address(market));
-        assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
+          if (currentImpl != upgradeToImpl) emit log_address(address(market));
+          assertEq(currentImpl, upgradeToImpl, "market needs to be upgraded");
 
-        DiamondBase asBase = DiamondBase(address(markets[j]));
-        try asBase._listExtensions() returns (address[] memory extensions) {
-          assertEq(extensions.length, 1, "market is missing the first extension");
-        } catch {
-          emit log("market that is not yet upgraded to the extensions upgrade");
-          emit log_address(address(market));
-          emit log("implementation");
-          emit log_address(currentImpl);
-          emit log("pool");
-          emit log_address(pools[i].comptroller);
-          emit log("");
+          DiamondBase asBase = DiamondBase(address(markets[j]));
+          try asBase._listExtensions() returns (address[] memory extensions) {
+            assertEq(extensions.length, 1, "market is missing the first extension");
+          } catch {
+            emit log("market that is not yet upgraded to the extensions upgrade");
+            emit log_address(address(market));
+            emit log("implementation");
+            emit log_address(currentImpl);
+            emit log("pool");
+            emit log_address(pools[i].comptroller);
+            emit log("");
+          }
         }
       }
     }
@@ -157,10 +161,6 @@ contract ContractsUpgradesTest is BaseTest {
   }
 
   function testPauseGuardiansPolygon() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testPauseGuardians();
-  }
-
-  function testPauseGuardiansMoonbeam() public debuggingOnly fork(MOONBEAM_MAINNET) {
     _testPauseGuardians();
   }
 

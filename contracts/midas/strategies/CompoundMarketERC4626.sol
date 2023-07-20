@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.0;
 
-import "./MidasERC4626.sol";
-import { ICErc20 } from "../../external/compound/ICErc20.sol";
-import { IComptroller } from "../../external/compound/IComptroller.sol";
+import { MidasERC4626 } from "./MidasERC4626.sol";
+import { ICErc20 } from "../../compound/CTokenInterfaces.sol";
+import { IComptroller } from "../../compound/ComptrollerInterface.sol";
+import { IGenericLender } from "../../external/angle/IGenericLender.sol";
+import { OptimizedVaultsRegistry } from "../vault/OptimizedVaultsRegistry.sol";
+import { OptimizedAPRVaultBase } from "../vault/OptimizedAPRVaultBase.sol";
+import { MidasFlywheel } from "./flywheel/MidasFlywheel.sol";
 
-import "openzeppelin-contracts-upgradeable/contracts/interfaces/IERC4626Upgradeable.sol";
-import "../../external/angle/IGenericLender.sol";
-import "../vault/OptimizedVaultsRegistry.sol";
+import { ERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
+import { ERC20 } from "solmate/tokens/ERC20.sol";
 
 contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   ICErc20 public market;
@@ -53,8 +56,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   }
 
   function totalAssets() public view override returns (uint256) {
-    // TODO consider making the ctoken balanceOfUnderlying fn a view fn
-    return (market.balanceOf(address(this)) * market.exchangeRateHypothetical()) / 1e18;
+    return market.balanceOfUnderlying(address(this));
   }
 
   function balanceOfUnderlying(address account) public view returns (uint256) {
@@ -70,6 +72,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
     require(market.redeemUnderlying(amount) == 0, "redeem from market failed");
   }
 
+  // TODO rewards APY?
   function aprAfterDeposit(uint256 amount) public view returns (uint256) {
     return market.supplyRatePerBlockAfterDeposit(amount) * blocksPerYear;
   }
@@ -132,7 +135,7 @@ contract CompoundMarketERC4626 is MidasERC4626, IGenericLender {
   function sweep(address _token, address to) public onlyOwner {
     require(_token != asset(), "!asset");
 
-    IERC20Upgradeable token = IERC20Upgradeable(_token);
+    ERC20Upgradeable token = ERC20Upgradeable(_token);
     token.transfer(to, token.balanceOf(address(this)));
   }
 

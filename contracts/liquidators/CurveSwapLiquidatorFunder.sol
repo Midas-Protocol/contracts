@@ -29,7 +29,7 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
         CurveV2LpTokenPriceOracleNoRegistry curveV2Oracle,
         address inputTokenAddress,
         address outputTokenAddress,
-        address payable wtoken
+
       ) = abi.decode(
           strategyData,
           (CurveLpTokenPriceOracleNoRegistry, CurveV2LpTokenPriceOracleNoRegistry, address, address, address)
@@ -92,5 +92,9 @@ contract CurveSwapLiquidatorFunder is CurveSwapLiquidator, IFundsConversionStrat
     } else {
       return binSearch(curvePool, i, j, mid, high, value);
     }
+  }
+
+  function name() public pure override(CurveSwapLiquidator, IRedemptionStrategy) returns (string memory) {
+    return "CurveSwapLiquidatorFunder";
   }
 }

@@ -81,4 +81,8 @@ contract MStableLiquidator is IRedemptionStrategy {
       outputAmount = MBTC.redeem(address(outputToken), mAssetReturned, 1, address(this));
     }
   }
+
+  function name() public pure returns (string memory) {
+    return "MStableLiquidator";
+  }
 }

@@ -7,7 +7,7 @@ import { FixedPointMathLib } from "solmate/utils/FixedPointMathLib.sol";
 import { MidasERC4626, DotDotLpERC4626, ILpDepositor } from "../../midas/strategies/DotDotLpERC4626.sol";
 import { ERC20 } from "solmate/tokens/ERC20.sol";
 import { MidasFlywheelCore } from "../../midas/strategies/flywheel/MidasFlywheelCore.sol";
-import { ComptrollerFirstExtension } from "../../compound/Comptroller.sol";
+import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../../FusePoolDirectory.sol";
 
 import { FlywheelCore, IFlywheelRewards } from "flywheel-v2/FlywheelCore.sol";
@@ -180,23 +180,11 @@ contract FlywheelPerformanceFeeTest is BaseTest {
     assertEq(dddFlywheel.rewardsAccrued(feeRecipient), 0, "feeRecipient rewardsAccrued should be 0");
   }
 
-  function testMoonbeamAllFlywheelsFeeRecipient() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testAllFlywheelsFeeRecipient();
-  }
-
   function testPolygonAllFlywheelsFeeRecipient() public debuggingOnly fork(POLYGON_MAINNET) {
     _testAllFlywheelsFeeRecipient();
   }
 
   function testBscAllFlywheelsFeeRecipient() public debuggingOnly fork(BSC_MAINNET) {
-    _testAllFlywheelsFeeRecipient();
-  }
-
-  function testFantomAllFlywheelsFeeRecipient() public debuggingOnly fork(FANTOM_OPERA) {
-    _testAllFlywheelsFeeRecipient();
-  }
-
-  function testEvmosAllFlywheelsFeeRecipient() public debuggingOnly fork(EVMOS_MAINNET) {
     _testAllFlywheelsFeeRecipient();
   }
 

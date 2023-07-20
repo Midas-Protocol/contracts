@@ -12,11 +12,8 @@ import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 abstract contract BaseTest is Test {
   uint128 constant ETHEREUM_MAINNET = 1;
   uint128 constant BSC_MAINNET = 56;
-  uint128 constant MOONBEAM_MAINNET = 1284;
   uint128 constant POLYGON_MAINNET = 137;
   uint128 constant ARBITRUM_ONE = 42161;
-  uint128 constant FANTOM_OPERA = 250;
-  uint128 constant EVMOS_MAINNET = 9001;
 
   uint128 constant BSC_CHAPEL = 97;
   uint128 constant NEON_DEVNET = 245022926;
@@ -75,6 +72,12 @@ abstract contract BaseTest is Test {
     }
   }
 
+  modifier whenForking() {
+    try vm.activeFork() returns (uint256) {
+      _;
+    } catch {}
+  }
+
   function shouldRunForChain(uint256 chainid) internal returns (bool) {
     bool run = true;
     try vm.envUint("TEST_RUN_CHAINID") returns (uint256 envChainId) {
@@ -108,18 +111,12 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc")) + 100;
       } else if (chainid == BSC_CHAPEL) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
-      } else if (chainid == MOONBEAM_MAINNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("moonbeam")) + 100;
-      } else if (chainid == EVMOS_MAINNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("evmos")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
       } else if (chainid == NEON_DEVNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
-      } else if (chainid == FANTOM_OPERA) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("fantom")) + 100;
       } else if (chainid == ETHEREUM_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum")) + 100;
       }
@@ -135,18 +132,12 @@ abstract contract BaseTest is Test {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_archive")) + 100;
       } else if (chainid == BSC_CHAPEL) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 100;
-      } else if (chainid == MOONBEAM_MAINNET) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("moonbeam_archive")) + 100;
-      } else if (chainid == EVMOS_MAINNET) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("evmos_archive")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("polygon_archive")) + 100;
       } else if (chainid == NEON_DEVNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
-      } else if (chainid == FANTOM_OPERA) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("fantom_archive")) + 100;
       } else if (chainid == ETHEREUM_MAINNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
       }
@@ -161,10 +152,6 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x01c97299b37E66c03419bC4Db24074a89FB36e6d);
     } else if (chainid == BSC_CHAPEL) {
       ap = AddressesProvider(0x38742363597fBaE312B0bdcC351fCc6107E9E27E);
-    } else if (chainid == MOONBEAM_MAINNET) {
-      ap = AddressesProvider(0x771ee5a72A57f3540E5b9A6A8C226C2a24A70Fae);
-    } else if (block.chainid == EVMOS_MAINNET) {
-      ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
     } else if (block.chainid == POLYGON_MAINNET) {
       ap = AddressesProvider(0x2fCa24E19C67070467927DDB85810fF766423e8e);
       dpa = ProxyAdmin(0x9b30a238A94c5a456a02ceC01e41f1c91d54e915);
@@ -172,8 +159,6 @@ abstract contract BaseTest is Test {
       ap = AddressesProvider(0x3F56f8571988D03Cdc7E51fdaB19ADb032CCbe21);
     } else if (chainid == ARBITRUM_ONE) {
       ap = AddressesProvider(0xe693a13526Eb4cff15EbeC54779Ea640E2F36a9f);
-    } else if (chainid == FANTOM_OPERA) {
-      ap = AddressesProvider(0xC1B6152d3977E994F5a4E0dead9d0a11a0D229Ef);
     } else {
       dpa = new ProxyAdmin();
       AddressesProvider logic = new AddressesProvider();
@@ -189,7 +174,7 @@ abstract contract BaseTest is Test {
     }
     if (ap.getAddress("deployer") == address(0)) {
       vm.prank(ap.owner());
-      ap.setAddress("deployer", 0x27521eae4eE4153214CaDc3eCD703b9B0326C908);
+      ap.setAddress("deployer", 0xb6c11605e971ab46B9BE4fDC48C9650A257075db);
     }
   }
 

@@ -33,4 +33,8 @@ contract SaddleLpTokenLiquidator is IRedemptionStrategy {
 
     outputToken = IERC20Upgradeable(outputTokenAddress);
   }
+
+  function name() public pure returns (string memory) {
+    return "SaddleLpTokenLiquidator";
+  }
 }

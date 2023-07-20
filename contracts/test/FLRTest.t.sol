@@ -13,15 +13,13 @@ import { IERC20MetadataUpgradeable, IERC20Upgradeable } from "openzeppelin-contr
 
 import { IFlywheelBooster } from "flywheel/interfaces/IFlywheelBooster.sol";
 import { FlywheelStaticRewards } from "flywheel-v2/rewards/FlywheelStaticRewards.sol";
-import { FuseFlywheelLensRouter, CToken as ICToken } from "fuse-flywheel/FuseFlywheelLensRouter.sol";
 import { FuseFlywheelCore } from "fuse-flywheel/FuseFlywheelCore.sol";
 
-import "../compound/CTokenInterfaces.sol";
 import { CErc20 } from "../compound/CErc20.sol";
-
-import { MidasFlywheelLensRouter, IComptroller, CErc20Token, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
+import { MidasFlywheelLensRouter, IComptroller, ICErc20, ERC20, IPriceOracle } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { MidasFlywheel } from "../midas/strategies/flywheel/MidasFlywheel.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
+import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 
 contract FLRTest is BaseTest {
   address rewardToken;
@@ -33,8 +31,8 @@ contract FLRTest is BaseTest {
   FusePoolDirectory internal fpd;
 
   function afterForkSetUp() internal override {
-    lensRouter = new MidasFlywheelLensRouter();
     fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
+    lensRouter = new MidasFlywheelLensRouter(fpd);
   }
 
   function setUpFlywheel(
@@ -91,7 +89,6 @@ contract FLRTest is BaseTest {
         address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c)
       )
     );
-    emit log_named_uint("exchangeRateCurrent", CErc20Token(mkt).exchangeRateCurrent());
 
     vm.warp(block.timestamp + 10);
 
@@ -105,7 +102,7 @@ contract FLRTest is BaseTest {
     emit log_named_uint("rewardsEndTimestamp", rewardsEndTimestamp);
     emit log_named_uint("mkt ts", ERC20(mkt).totalSupply());
 
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getMarketRewardsInfo(
+    MidasFlywheelLensRouter.MarketRewardsInfo[] memory marketRewardsInfos = lensRouter.getPoolMarketRewardsInfo(
       IComptroller(0x5EB884651F50abc72648447dCeabF2db091e4117)
     );
     for (uint256 i = 0; i < marketRewardsInfos.length; i++) {
@@ -128,76 +125,16 @@ contract FLRTest is BaseTest {
     }
   }
 
-  function testMoonbeamFlywheelLensRouter() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    CErc20Token market = CErc20Token(0xa9736bA05de1213145F688e4619E5A7e0dcf4C72);
-    rewardToken = address(0x931715FEE2d06333043d11F658C8CE934aC61D0c);
-    IComptroller comptroller = IComptroller(0xeB2D3A9D962d89b4A9a34ce2bF6a2650c938e185);
-    // setUpFlywheel(rewardToken, address(market), comptroller, ap.owner());
-
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(34315417857347)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
-      abi.encode(15786961530391797)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
-      abi.encode(10)
-    );
-
-    MidasFlywheelLensRouter.MarketRewardsInfo[] memory info = lensRouter.getMarketRewardsInfo(comptroller);
-    for (uint8 i = 0; i < info.length; i++) {
-      for (uint8 j = 0; j < info[i].rewardsInfo.length; j++) {
-        if (info[i].rewardsInfo[j].formattedAPR != 0) {
-          emit log("");
-          emit log_named_address("market", address(info[i].market));
-          emit log_named_uint("rewardSpeedPerSecondPerToken", info[i].rewardsInfo[j].rewardSpeedPerSecondPerToken);
-          emit log_named_uint("formattedAPR", info[i].rewardsInfo[j].formattedAPR);
-          emit log_named_uint("rewardTokenPrice", info[i].rewardsInfo[j].rewardTokenPrice);
-          emit log_named_address("rewardToken", info[i].rewardsInfo[j].rewardToken);
-          emit log_named_uint("totalSupply", info[i].market.totalSupply());
-        }
-      }
-    }
-  }
-
   function testBscLensRouter() public fork(BSC_MAINNET) {
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0xb4c8353412633B779893Bb728435930b7d3610C8);
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
+    IComptroller pool = IComptroller(0x1851e32F34565cb95754310b031C5a2Fc0a8a905);
+    address user = 0x927d81b91c41D1961e3A7d24847b95484e60C626;
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(ap.getAddress("MidasFlywheelLensRouter"));
 
-    for (uint8 i = 0; i < pools.length; i++) {
-      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
-    }
+    router.claimRewardsForPool(user, pool);
   }
 
-  function testMoonbeamLensRouter() public fork(MOONBEAM_MAINNET) {
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xa9736bA05de1213145F688e4619E5A7e0dcf4C72),
-      abi.encode(34315417857347)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20Upgradeable.balanceOf.selector, 0xc6e37086D09ec2048F151D11CdB9F9BbbdB7d685),
-      abi.encode(15786961530391797)
-    );
-    vm.mockCall(
-      0xFfFFfFff1FcaCBd218EDc0EbA20Fc2308C778080,
-      abi.encodeWithSelector(IERC20MetadataUpgradeable.decimals.selector),
-      abi.encode(10)
-    );
-
-    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x30a6630101baBE0da765e3Ed8323824d40eD9a42);
-
-    (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
-
-    for (uint8 i = 0; i < pools.length; i++) {
-      router.getMarketRewardsInfo(IComptroller(pools[i].comptroller));
-    }
+  function testChapelRouter() public fork(BSC_CHAPEL) {
+    MidasFlywheelLensRouter router = MidasFlywheelLensRouter(0x3391ed1C5203168337Fa827cB5Ac8BB8B60D93B7);
+    router.getPoolMarketRewardsInfo(IComptroller(0x044c436b2f3EF29D30f89c121f9240cf0a08Ca4b));
   }
 }

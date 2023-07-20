@@ -43,4 +43,8 @@ contract AlphaHomoraV1BankLiquidator is IRedemptionStrategy {
     W_NATIVE.deposit{ value: outputAmount }();
     return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
   }
+
+  function name() public pure returns (string memory) {
+    return "AlphaHomoraV1BankLiquidator";
+  }
 }

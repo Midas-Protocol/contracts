@@ -2,9 +2,10 @@
 pragma solidity >=0.8.0;
 
 import "./IRedemptionStrategy.sol";
-import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 import "../external/balancer/IBalancerPool.sol";
 import "../external/balancer/IBalancerVault.sol";
+
+import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
 contract BalancerLpTokenLiquidator is IRedemptionStrategy {
   function redeem(
@@ -45,5 +46,9 @@ contract BalancerLpTokenLiquidator is IRedemptionStrategy {
     vault.exitPool(poolId, address(this), payable(address(this)), request);
 
     outputAmount = outputToken.balanceOf(address(this));
+  }
+
+  function name() public pure returns (string memory) {
+    return "BalancerLpTokenLiquidator";
   }
 }

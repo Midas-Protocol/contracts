@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "../external/bomb/IXBomb.sol";
 import "./IRedemptionStrategy.sol";
 import "./IFundsConversionStrategy.sol";
+import { MasterPriceOracle } from "../oracles/MasterPriceOracle.sol";
 
 /**
  * @title XBombLiquidatorFunder
@@ -40,19 +41,23 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     uint256 inputAmount,
     bytes memory strategyData
   ) internal returns (IERC20Upgradeable outputToken, uint256 outputAmount) {
-    (, address xbomb, IERC20Upgradeable bomb) = abi.decode(strategyData, (address, address, IERC20Upgradeable));
-    if (address(inputToken) == xbomb) {
+    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb, IERC20Upgradeable _outputToken) = abi.decode(
+      strategyData,
+      (address, address, IERC20Upgradeable, IERC20Upgradeable)
+    );
+    if (inputTokenAddress == xbomb) {
       // burns the xBOMB and returns the underlying BOMB to the liquidator
+      inputToken.approve(address(xbomb), inputAmount);
       IXBomb(xbomb).leave(inputAmount);
 
-      outputToken = bomb;
+      outputToken = _outputToken;
       outputAmount = outputToken.balanceOf(address(this));
-    } else if (inputToken == bomb) {
+    } else if (inputTokenAddress == address(bomb)) {
       // mints xBOMB
-      bomb.approve(address(xbomb), inputAmount);
+      inputToken.approve(address(xbomb), inputAmount);
       IXBomb(xbomb).enter(inputAmount);
 
-      outputToken = IERC20Upgradeable(xbomb);
+      outputToken = _outputToken;
       outputAmount = outputToken.balanceOf(address(this));
     } else {
       revert("unknown input token");
@@ -69,9 +74,9 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     view
     returns (IERC20Upgradeable, uint256)
   {
-    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb) = abi.decode(
+    (address inputTokenAddress, address xbomb, IERC20Upgradeable bomb, ) = abi.decode(
       strategyData,
-      (address, address, IERC20Upgradeable)
+      (address, address, IERC20Upgradeable, IERC20Upgradeable)
     );
     if (inputTokenAddress == xbomb) {
       // what amount of staked/xbomb equals the desired output amount of bomb?
@@ -82,5 +87,51 @@ contract XBombLiquidatorFunder is IFundsConversionStrategy {
     } else {
       revert("unknown input token");
     }
+  }
+
+  function name() public pure returns (string memory) {
+    return "XBombLiquidatorFunder";
+  }
+}
+
+contract XBombSwap {
+  IERC20Upgradeable public testingBomb;
+  IERC20Upgradeable public testingStable;
+  MasterPriceOracle public oracle;
+
+  constructor(
+    IERC20Upgradeable _testingBomb,
+    IERC20Upgradeable _testingStable,
+    MasterPriceOracle _oracle
+  ) {
+    testingBomb = _testingBomb;
+    testingStable = _testingStable;
+    oracle = _oracle;
+  }
+
+  function leave(uint256 _share) external {
+    testingBomb.transferFrom(msg.sender, address(this), _share);
+    testingStable.transfer(msg.sender, toREWARD(_share));
+  }
+
+  function enter(uint256 _amount) external {
+    testingStable.transferFrom(msg.sender, address(this), _amount);
+    testingBomb.transfer(msg.sender, toSTAKED(_amount));
+  }
+
+  function getExchangeRate() external view returns (uint256) {
+    return 1e18;
+  }
+
+  function toREWARD(uint256 stakedAmount) public view returns (uint256) {
+    uint256 bombPrice = oracle.price(address(testingBomb));
+    uint256 stablePrice = oracle.price(address(testingStable));
+    return (stakedAmount * bombPrice) / stablePrice;
+  }
+
+  function toSTAKED(uint256 rewardAmount) public view returns (uint256) {
+    uint256 bombPrice = oracle.price(address(testingBomb));
+    uint256 stablePrice = oracle.price(address(testingStable));
+    return (rewardAmount * stablePrice) / bombPrice;
   }
 }

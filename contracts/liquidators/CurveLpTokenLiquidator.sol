@@ -49,4 +49,8 @@ contract CurveLpTokenLiquidator is IRedemptionStrategy {
       return (IERC20Upgradeable(address(W_NATIVE)), outputAmount);
     }
   }
+
+  function name() public pure returns (string memory) {
+    return "CurveLpTokenLiquidator";
+  }
 }

@@ -7,14 +7,13 @@ import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
 import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
-import { CTokenInterface, CTokenExtensionInterface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
 import { FuseFeeDistributor } from "../FuseFeeDistributor.sol";
 import { CTokenFirstExtension } from "../compound/CTokenFirstExtension.sol";
 
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -148,13 +147,11 @@ contract ExtensionsTest is MarketsTest {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(pools[random % pools.length].comptroller);
-    CTokenInterface[] memory markets = somePool.getAllMarkets();
+    ICErc20[] memory markets = somePool.getAllMarkets();
 
     if (markets.length == 0) return;
 
-    CTokenInterface someMarket = markets[random % markets.length];
-    CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
-    CTokenExtensionInterface asExtension = asDelegate.asCTokenExtensionInterface();
+    ICErc20 someMarket = markets[random % markets.length];
 
     emit log("pool");
     emit log_address(address(somePool));
@@ -163,10 +160,10 @@ contract ExtensionsTest is MarketsTest {
 
     vm.roll(block.number + 1);
 
-    bytes memory blockNumberBeforeCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
-    bytes memory accrueInterestCall = abi.encodeWithSelector(asExtension.accrueInterest.selector);
-    bytes memory blockNumberAfterCall = abi.encodeWithSelector(asDelegate.accrualBlockNumber.selector);
-    bytes[] memory results = asExtension.multicall(
+    bytes memory blockNumberBeforeCall = abi.encodeWithSelector(someMarket.accrualBlockNumber.selector);
+    bytes memory accrueInterestCall = abi.encodeWithSelector(someMarket.accrueInterest.selector);
+    bytes memory blockNumberAfterCall = abi.encodeWithSelector(someMarket.accrualBlockNumber.selector);
+    bytes[] memory results = someMarket.multicall(
       asArray(blockNumberBeforeCall, accrueInterestCall, blockNumberAfterCall)
     );
     uint256 blockNumberBefore = abi.decode(results[0], (uint256));
@@ -179,7 +176,7 @@ contract ExtensionsTest is MarketsTest {
     _testAllPoolsAllMarketsCTokenExtensionUpgrade();
   }
 
-  function testMoonbeamExistingCTokenExtensionUpgrade() public fork(MOONBEAM_MAINNET) {
+  function testArbitrumExistingCTokenExtensionUpgrade() public fork(ARBITRUM_ONE) {
     _testAllPoolsAllMarketsCTokenExtensionUpgrade();
   }
 
@@ -194,12 +191,12 @@ contract ExtensionsTest is MarketsTest {
   function _testPoolAllMarketsExtensionUpgrade(address poolAddress) internal {
     ComptrollerFirstExtension somePool = ComptrollerFirstExtension(poolAddress);
 
-    CTokenInterface[] memory markets = somePool.getAllMarkets();
+    ICErc20[] memory markets = somePool.getAllMarkets();
 
     if (markets.length == 0) return;
 
     for (uint256 j = 0; j < markets.length; j++) {
-      CTokenInterface someMarket = markets[j];
+      ICErc20 someMarket = markets[j];
       CErc20PluginDelegate asDelegate = CErc20PluginDelegate(address(someMarket));
 
       emit log("pool");
@@ -231,7 +228,7 @@ contract ExtensionsTest is MarketsTest {
     uint256 totalSupplyBefore = asDelegate.totalSupply();
     if (totalSupplyBefore == 0) return; // total supply should be non-zero
 
-    _upgradeExistingCTokenExtension(asDelegate);
+    _upgradeMarket(asDelegate);
 
     // check if the extension was added
     address[] memory extensions = asDelegate._listExtensions();
@@ -252,19 +249,11 @@ contract ExtensionsTest is MarketsTest {
     _testComptrollersExtensions();
   }
 
-  function testMoonbeamComptrollerExtensions() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testComptrollersExtensions();
-  }
-
   function testChapelComptrollerExtensions() public debuggingOnly fork(BSC_CHAPEL) {
     _testComptrollersExtensions();
   }
 
   function testArbitrumComptrollerExtensions() public debuggingOnly fork(ARBITRUM_ONE) {
-    _testComptrollersExtensions();
-  }
-
-  function testFantomComptrollerExtensions() public debuggingOnly fork(FANTOM_OPERA) {
     _testComptrollersExtensions();
   }
 
@@ -292,52 +281,31 @@ contract ExtensionsTest is MarketsTest {
     }
   }
 
-  function testMoonbeamExchangeRateHypo() public debuggingOnly fork(MOONBEAM_MAINNET) {
-    _testExchangeRateHypo();
+  function testPolygonTotalUnderlyingSupplied() public debuggingOnly fork(POLYGON_MAINNET) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function testPolygonExchangeRateHypo() public debuggingOnly fork(POLYGON_MAINNET) {
-    _testExchangeRateHypo();
+  function testBscTotalUnderlyingSupplied() public debuggingOnly fork(BSC_MAINNET) {
+    _testTotalUnderlyingSupplied();
   }
 
-  function testBscExchangeRateHypo() public debuggingOnly fork(BSC_MAINNET) {
-    _testExchangeRateHypo();
-  }
-
-  function testEvmosExchangeRateHypo() public debuggingOnly fork(EVMOS_MAINNET) {
-    _testExchangeRateHypo();
-  }
-
-  function testFantomExchangeRateHypo() public debuggingOnly fork(FANTOM_OPERA) {
-    _testExchangeRateHypo();
-  }
-
-  function _testExchangeRateHypo() internal {
+  function _testTotalUnderlyingSupplied() internal {
     FusePoolDirectory fpd = FusePoolDirectory(ap.getAddress("FusePoolDirectory"));
 
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
     for (uint8 i = 0; i < pools.length; i++) {
-      if (pools[i].comptroller == 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459) continue;
-      if (pools[i].comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
+      //      if (pools[i].comptroller == 0x5373C052Df65b317e48D6CAD8Bb8AC50995e9459) continue;
+      //      if (pools[i].comptroller == 0xD265ff7e5487E9DD556a4BB900ccA6D087Eb3AD2) continue;
       ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(pools[i].comptroller);
 
-      CTokenInterface[] memory markets = poolExt.getAllMarkets();
+      ICErc20[] memory markets = poolExt.getAllMarkets();
       for (uint8 k = 0; k < markets.length; k++) {
         CErc20Delegate market = CErc20Delegate(address(markets[k]));
         //        emit log(market.contractType());
         //        emit log_named_address("impl", market.implementation());
         CTokenFirstExtension marketAsExt = CTokenFirstExtension(address(markets[k]));
-        uint256 cash = market.getCash();
-        if (cash > 0) {
-          uint256 exchRateBefore = marketAsExt.exchangeRateStored();
-          emit log_named_uint("rate before", exchRateBefore);
-          uint256 hypoRate = marketAsExt.exchangeRateHypothetical();
-          marketAsExt.accrueInterest();
-          uint256 exchRateAfter = marketAsExt.exchangeRateStored();
-          emit log_named_uint("rate after", exchRateAfter);
-          assertEq(hypoRate, exchRateAfter, "hypo rate zero");
-        }
+        marketAsExt.getTotalUnderlyingSupplied();
       }
     }
   }

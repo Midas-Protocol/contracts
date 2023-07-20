@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 
 import { MasterPriceOracle } from "../../../oracles/MasterPriceOracle.sol";
-import { IPriceOracle } from "../../../external/compound/IPriceOracle.sol";
+import { BasePriceOracle } from "../../../oracles/BasePriceOracle.sol";
 import { IPair, Observation } from "../../../external/solidly/IPair.sol";
 import { IRouter } from "../../../external/solidly/IRouter.sol";
 import { IUniswapV2Pair } from "../../../external/uniswap/IUniswapV2Pair.sol";
@@ -33,10 +33,10 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
   function getLpPrice(address lpToken, UniswapLikeLpTokenPriceOracle oracle) internal returns (uint256) {
     if (address(mpo.oracles(lpToken)) == address(0)) {
       address[] memory underlyings = new address[](1);
-      IPriceOracle[] memory oracles = new IPriceOracle[](1);
+      BasePriceOracle[] memory oracles = new BasePriceOracle[](1);
 
       underlyings[0] = lpToken;
-      oracles[0] = IPriceOracle(oracle);
+      oracles[0] = oracle;
 
       vm.prank(mpo.admin());
       mpo.add(underlyings, oracles);
@@ -116,31 +116,6 @@ contract UniswapLikeLpTokenPriceOracleTest is BaseTest {
     address lpToken = 0x06A4c4389d5C6cD1Ec63dDFFb7e9b3214254A720; // Lp WETH/GMX (volatile AMM)
 
     uint256 price = getLpPrice(lpToken, getSolidlyLpTokenPriceOracle());
-    assertTrue(price > 0);
-    verifyLpPrice(lpToken, price, 1e17);
-  }
-
-  function testGlmrUsdcLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
-    address lpToken = 0x8CCBbcAF58f5422F6efD4034d8E8a3c9120ADf79; // Lp GLMR-USDC
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-  }
-
-  function testGlmrWbtcpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
-    address lpToken = 0xf8f5E8B9Ee84664695B14862212D8092E16331F6; // Lp WBTC-WGLMR
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
-    assertTrue(price > 0);
-
-    // This approximation doesn't really work with larger priced tokens
-    // verifyLpPrice(lpToken, price, 1e17);
-  }
-
-  function testWGlmrWethLpTokenOraclePrice() public fork(MOONBEAM_MAINNET) {
-    address lpToken = 0x8577273FB3B72306F3A59E26ab77116f5D428DAa; // Lp WETH-WGLMR
-
-    uint256 price = getLpPrice(lpToken, getUniswapLpTokenPriceOracle());
     assertTrue(price > 0);
     verifyLpPrice(lpToken, price, 1e17);
   }

@@ -4,15 +4,14 @@ pragma solidity >=0.8.0;
 import { BaseTest } from "./config/BaseTest.t.sol";
 
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { IComptroller } from "../external/compound/IComptroller.sol";
-import { ICToken } from "../external/compound/ICToken.sol";
+import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { MidasFlywheelCore } from "../midas/strategies/flywheel/MidasFlywheelCore.sol";
 import { MidasReplacingFlywheel } from "../midas/strategies/flywheel/MidasReplacingFlywheel.sol";
 import { ReplacingFlywheelDynamicRewards } from "../midas/strategies/flywheel/rewards/ReplacingFlywheelDynamicRewards.sol";
 import { MidasFlywheelLensRouter } from "../midas/strategies/flywheel/MidasFlywheelLensRouter.sol";
 import { CErc20PluginRewardsDelegate } from "../compound/CErc20PluginRewardsDelegate.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
-import { CTokenInterface } from "../compound/CTokenInterfaces.sol";
+import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { Comptroller } from "../compound/Comptroller.sol";
 
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -36,14 +35,6 @@ contract FlywheelUpgradesTest is BaseTest {
     _testFlywheelUpgrade();
   }
 
-  function testFlywheelUpgradeMoonbeam() public fork(MOONBEAM_MAINNET) {
-    _testFlywheelUpgrade();
-  }
-
-  function testFlywheelUpgradeEvmos() public fork(EVMOS_MAINNET) {
-    _testFlywheelUpgrade();
-  }
-
   function _testFlywheelUpgrade() internal {
     MidasFlywheelCore newImpl = new MidasFlywheelCore();
 
@@ -52,7 +43,7 @@ contract FlywheelUpgradesTest is BaseTest {
     for (uint8 i = 0; i < pools.length; i++) {
       IComptroller pool = IComptroller(pools[i].comptroller);
 
-      ICToken[] memory markets = pool.getAllMarkets();
+      ICErc20[] memory markets = pool.getAllMarkets();
 
       address[] memory flywheels = pool.getRewardsDistributors();
       if (flywheels.length > 0) {
@@ -103,14 +94,6 @@ contract FlywheelUpgradesTest is BaseTest {
     _testAllPoolsMarketsAllowance();
   }
 
-  function testMoonbeamFlywheelAllowance() public fork(MOONBEAM_MAINNET) {
-    _testAllPoolsMarketsAllowance();
-  }
-
-  function testEvmosFlywheelAllowance() public fork(EVMOS_MAINNET) {
-    _testAllPoolsMarketsAllowance();
-  }
-
   function _testAllPoolsMarketsAllowance() internal {
     (, FusePoolDirectory.FusePool[] memory pools) = fpd.getActivePools();
 
@@ -123,7 +106,7 @@ contract FlywheelUpgradesTest is BaseTest {
     ComptrollerFirstExtension poolExt = ComptrollerFirstExtension(poolAddress);
     address[] memory fws = poolExt.getRewardsDistributors();
 
-    CTokenInterface[] memory markets = poolExt.getAllMarkets();
+    ICErc20[] memory markets = poolExt.getAllMarkets();
 
     for (uint8 j = 0; j < markets.length; j++) {
       string memory contractType = CErc20PluginRewardsDelegate(address(markets[j])).contractType();

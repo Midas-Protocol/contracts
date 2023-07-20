@@ -7,8 +7,12 @@ import { CErc20Delegate } from "../../compound/CErc20Delegate.sol";
 import { CErc20PluginRewardsDelegate } from "../../compound/CErc20PluginRewardsDelegate.sol";
 import { DiamondExtension } from "../../midas/DiamondExtension.sol";
 import { CTokenFirstExtension } from "../../compound/CTokenFirstExtension.sol";
-import { ComptrollerFirstExtension, Comptroller } from "../../compound/Comptroller.sol";
+import { Comptroller } from "../../compound/Comptroller.sol";
 import { Unitroller } from "../../compound/Unitroller.sol";
+import { ComptrollerFirstExtension } from "../../compound/ComptrollerFirstExtension.sol";
+import { AuthoritiesRegistry } from "../../midas/AuthoritiesRegistry.sol";
+
+import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 contract MarketsTest is BaseTest {
   FuseFeeDistributor internal ffd;
@@ -22,6 +26,7 @@ contract MarketsTest is BaseTest {
 
   function afterForkSetUp() internal virtual override {
     ffd = FuseFeeDistributor(payable(ap.getAddress("FuseFeeDistributor")));
+    upgradeFfd();
     cErc20Delegate = new CErc20Delegate();
     cErc20PluginRewardsDelegate = new CErc20PluginRewardsDelegate();
     newCTokenExtension = new CTokenFirstExtension();
@@ -29,6 +34,26 @@ contract MarketsTest is BaseTest {
     comptrollerExtension = new ComptrollerFirstExtension();
     Comptroller newComptrollerImplementation = new Comptroller(payable(address(ffd)));
     latestComptrollerImplementation = payable(address(newComptrollerImplementation));
+  }
+
+  function upgradeFfd() internal {
+    {
+      FuseFeeDistributor newImpl = new FuseFeeDistributor();
+      TransparentUpgradeableProxy proxy = TransparentUpgradeableProxy(payable(address(ffd)));
+      bytes32 bytesAtSlot = vm.load(address(proxy), 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103);
+      address admin = address(uint160(uint256(bytesAtSlot)));
+      vm.prank(admin);
+      proxy.upgradeTo(address(newImpl));
+    }
+
+    if (address(ffd.authoritiesRegistry()) == address(0)) {
+      AuthoritiesRegistry impl = new AuthoritiesRegistry();
+      TransparentUpgradeableProxy proxy = new TransparentUpgradeableProxy(address(impl), address(1), "");
+      AuthoritiesRegistry newAr = AuthoritiesRegistry(address(proxy));
+      newAr.initialize(address(321));
+      vm.prank(ffd.owner());
+      ffd.reinitialize(newAr);
+    }
   }
 
   function _prepareCTokenUpgrade(CErc20Delegate market) internal returns (address) {
@@ -60,7 +85,7 @@ contract MarketsTest is BaseTest {
     return address(newImpl);
   }
 
-  function _upgradeExistingCTokenExtension(CErc20Delegate asDelegate) internal {
+  function _upgradeMarket(CErc20Delegate asDelegate) internal {
     address newDelegate = _prepareCTokenUpgrade(asDelegate);
 
     bytes memory becomeImplData = (address(newDelegate) == address(cErc20Delegate))
@@ -100,7 +125,7 @@ contract MarketsTest is BaseTest {
     // upgrade to the new comptroller
     vm.startPrank(asUnitroller.admin());
     asUnitroller._setPendingImplementation(latestComptrollerImplementation);
-    Comptroller(latestComptrollerImplementation)._become(asUnitroller);
+    Comptroller(latestComptrollerImplementation)._become(poolAddress);
     vm.stopPrank();
   }
 }

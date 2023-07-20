@@ -42,4 +42,8 @@ contract HarvestLiquidator is IRedemptionStrategy {
       outputAmount = outputToken.balanceOf(address(this));
     } else revert("Invalid token address passed to HarvestLiquidator.");
   }
+
+  function name() public pure returns (string memory) {
+    return "HarvestLiquidator";
+  }
 }

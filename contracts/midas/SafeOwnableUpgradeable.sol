@@ -26,12 +26,7 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
   modifier onlyOwnerOrAdmin() {
     bool isOwner = owner() == _msgSender();
     if (!isOwner) {
-      bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
-      AddressSlot storage adminSlot;
-      assembly {
-        adminSlot.slot := _ADMIN_SLOT
-      }
-      address admin = adminSlot.value;
+      address admin = _getProxyAdmin();
       bool isAdmin = admin == _msgSender();
       require(isAdmin, "Ownable: caller is neither the owner nor the admin");
     }
@@ -94,5 +89,14 @@ abstract contract SafeOwnableUpgradeable is OwnableUpgradeable {
   function transferOwnership(address newOwner) public override onlyOwner {
     emit NewPendingOwner(pendingOwner, newOwner);
     pendingOwner = newOwner;
+  }
+
+  function _getProxyAdmin() internal view returns (address admin) {
+    bytes32 _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
+    AddressSlot storage adminSlot;
+    assembly {
+      adminSlot.slot := _ADMIN_SLOT
+    }
+    admin = adminSlot.value;
   }
 }

@@ -6,7 +6,7 @@ import "./EIP20Interface.sol";
 
 contract CErc20RewardsDelegate is CErc20Delegate {
   /// @notice A reward token claim function
-  /// to be overriden for use cases where rewardToken needs to be pulled in
+  /// to be overridden for use cases where rewardToken needs to be pulled in
   function claim() external {}
 
   /// @notice token approval function

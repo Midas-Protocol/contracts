@@ -77,4 +77,8 @@ contract CurveSwapLiquidator is IRedemptionStrategy {
 
     return (outputToken, outputAmount);
   }
+
+  function name() public pure virtual returns (string memory) {
+    return "CurveSwapLiquidator";
+  }
 }

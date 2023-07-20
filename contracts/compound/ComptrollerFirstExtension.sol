@@ -3,19 +3,25 @@ pragma solidity >=0.8.0;
 
 import { DiamondExtension } from "../midas/DiamondExtension.sol";
 import { ComptrollerErrorReporter } from "../compound/ErrorReporter.sol";
-import { CTokenInterface, CTokenExtensionInterface, CErc20Interface } from "./CTokenInterfaces.sol";
+import { ICErc20 } from "./CTokenInterfaces.sol";
+import { ComptrollerExtensionInterface } from "./ComptrollerInterface.sol";
 import { ComptrollerV3Storage } from "./ComptrollerStorage.sol";
 
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, ComptrollerErrorReporter {
+contract ComptrollerFirstExtension is
+  DiamondExtension,
+  ComptrollerV3Storage,
+  ComptrollerExtensionInterface,
+  ComptrollerErrorReporter
+{
   using EnumerableSet for EnumerableSet.AddressSet;
 
   /// @notice Emitted when supply cap for a cToken is changed
-  event NewSupplyCap(CTokenInterface indexed cToken, uint256 newSupplyCap);
+  event NewSupplyCap(ICErc20 indexed cToken, uint256 newSupplyCap);
 
   /// @notice Emitted when borrow cap for a cToken is changed
-  event NewBorrowCap(CTokenInterface indexed cToken, uint256 newBorrowCap);
+  event NewBorrowCap(ICErc20 indexed cToken, uint256 newBorrowCap);
 
   /// @notice Emitted when borrow cap guardian is changed
   event NewBorrowCapGuardian(address oldBorrowCapGuardian, address newBorrowCapGuardian);
@@ -27,10 +33,47 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   event ActionPaused(string action, bool pauseState);
 
   /// @notice Emitted when an action is paused on a market
-  event MarketActionPaused(CTokenInterface cToken, string action, bool pauseState);
+  event MarketActionPaused(ICErc20 cToken, string action, bool pauseState);
 
   /// @notice Emitted when an admin unsupports a market
-  event MarketUnlisted(CTokenInterface cToken);
+  event MarketUnlisted(ICErc20 cToken);
+
+  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
+    uint8 fnsCount = 30;
+    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
+    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
+    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
+    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
+    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
+    functionSelectors[--fnsCount] = this._setMintPaused.selector;
+    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
+    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
+    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
+    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
+    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
+    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
+    functionSelectors[--fnsCount] = this.getWhitelist.selector;
+    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
+    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
+    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
+    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
+    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
+    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
+    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
+    functionSelectors[--fnsCount] = this.getAssetAsCollateralValueCap.selector;
+    require(fnsCount == 0, "use the correct array length");
+    return functionSelectors;
+  }
 
   /**
    * @notice Returns true if the accruing flyhwheel was found and replaced
@@ -60,13 +103,59 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return false;
   }
 
+  function getAssetAsCollateralValueCap(
+    ICErc20 collateral,
+    ICErc20 cTokenModify,
+    bool redeeming,
+    address account
+  ) external view returns (uint256) {
+    if (address(collateral) == address(cTokenModify) && !redeeming) {
+      // the collateral asset counts as 0 liquidity when borrowed
+      return 0;
+    }
+
+    uint256 assetAsCollateralValueCap = type(uint256).max;
+    if (address(cTokenModify) != address(0)) {
+      // if the borrowed asset is blacklisted against this collateral & account is not whitelisted
+      if (
+        borrowingAgainstCollateralBlacklist[address(cTokenModify)][address(collateral)] &&
+        !borrowingAgainstCollateralBlacklistWhitelist[address(cTokenModify)][address(collateral)].contains(account)
+      ) {
+        assetAsCollateralValueCap = 0;
+      } else {
+        // for each user the value of this kind of collateral is capped regardless of the amount borrowed
+        // denominated in the borrowed asset
+        uint256 borrowCapForCollateral = borrowCapForCollateral[address(cTokenModify)][address(collateral)];
+        // check if set to any value & account is not whitelisted
+        if (
+          borrowCapForCollateral != 0 &&
+          !borrowCapForCollateralWhitelist[address(cTokenModify)][address(collateral)].contains(account)
+        ) {
+          uint256 borrowedAssetPrice = oracle.getUnderlyingPrice(cTokenModify);
+          // this asset usage as collateral is capped at the native value of the borrow cap
+          assetAsCollateralValueCap = (borrowCapForCollateral * borrowedAssetPrice) / 1e18;
+        }
+      }
+    }
+
+    // if there is any supply cap, don't allow donations to the market/plugin to go around it
+    if (supplyCaps[address(collateral)] > 0 && !supplyCapWhitelist[address(collateral)].contains(account)) {
+      uint256 collateralAssetPrice = oracle.getUnderlyingPrice(collateral);
+      uint256 supplyCapValue = (supplyCaps[address(collateral)] * collateralAssetPrice) / 1e18;
+      supplyCapValue = (supplyCapValue * markets[address(collateral)].collateralFactorMantissa) / 1e18;
+      if (supplyCapValue < assetAsCollateralValueCap) assetAsCollateralValueCap = supplyCapValue;
+    }
+
+    return assetAsCollateralValueCap;
+  }
+
   /**
    * @notice Set the given supply caps for the given cToken markets. Supplying that brings total underlying supply to or above supply cap will revert.
    * @dev Admin or borrowCapGuardian function to set the supply caps. A supply cap of 0 corresponds to unlimited supplying.
    * @param cTokens The addresses of the markets (tokens) to change the supply caps for
    * @param newSupplyCaps The new supply cap values in underlying to be set. A value of 0 corresponds to unlimited supplying.
    */
-  function _setMarketSupplyCaps(CTokenInterface[] calldata cTokens, uint256[] calldata newSupplyCaps) external {
+  function _setMarketSupplyCaps(ICErc20[] calldata cTokens, uint256[] calldata newSupplyCaps) external {
     require(msg.sender == admin || msg.sender == borrowCapGuardian, "!admin");
 
     uint256 numMarkets = cTokens.length;
@@ -86,7 +175,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
    * @param cTokens The addresses of the markets (tokens) to change the borrow caps for
    * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
    */
-  function _setMarketBorrowCaps(CTokenInterface[] calldata cTokens, uint256[] calldata newBorrowCaps) external {
+  function _setMarketBorrowCaps(ICErc20[] calldata cTokens, uint256[] calldata newBorrowCaps) external {
     require(msg.sender == admin || msg.sender == borrowCapGuardian, "!admin");
 
     uint256 numMarkets = cTokens.length;
@@ -139,9 +228,9 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return uint256(Error.NO_ERROR);
   }
 
-  function _setMintPaused(CTokenInterface cToken, bool state) public returns (bool) {
+  function _setMintPaused(ICErc20 cToken, bool state) public returns (bool) {
     require(markets[address(cToken)].isListed, "!market");
-    require(msg.sender == pauseGuardian || hasAdminRights(), "!gaurdian");
+    require(msg.sender == pauseGuardian || hasAdminRights(), "!guardian");
     require(hasAdminRights() || state == true, "!admin");
 
     mintGuardianPaused[address(cToken)] = state;
@@ -149,7 +238,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     return state;
   }
 
-  function _setBorrowPaused(CTokenInterface cToken, bool state) public returns (bool) {
+  function _setBorrowPaused(ICErc20 cToken, bool state) public returns (bool) {
     require(markets[address(cToken)].isListed, "!market");
     require(msg.sender == pauseGuardian || hasAdminRights(), "!guardian");
     require(hasAdminRights() || state == true, "!admin");
@@ -183,7 +272,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
    * @param cToken The address of the market (token) to unlist
    * @return uint 0=success, otherwise a failure. (See enum Error for details)
    */
-  function _unsupportMarket(CTokenInterface cToken) external returns (uint256) {
+  function _unsupportMarket(ICErc20 cToken) external returns (uint256) {
     // Check admin rights
     if (!hasAdminRights()) return fail(Error.UNAUTHORIZED, FailureInfo.UNSUPPORT_MARKET_OWNER_CHECK);
 
@@ -199,7 +288,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
 
     /* Delete cToken from allMarkets */
     // load into memory for faster iteration
-    CTokenInterface[] memory _allMarkets = allMarkets;
+    ICErc20[] memory _allMarkets = allMarkets;
     uint256 len = _allMarkets.length;
     uint256 assetIndex = len;
     for (uint256 i = 0; i < len; i++) {
@@ -216,7 +305,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
     allMarkets[assetIndex] = allMarkets[allMarkets.length - 1];
     allMarkets.pop();
 
-    cTokensByUnderlying[CErc20Interface(address(cToken)).underlying()] = CTokenInterface(address(0));
+    cTokensByUnderlying[ICErc20(address(cToken)).underlying()] = ICErc20(address(0));
     emit MarketUnlisted(cToken);
 
     return uint256(Error.NO_ERROR);
@@ -298,7 +387,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   function getWhitelistedSuppliersSupply(address cToken) public view returns (uint256 supplied) {
     address[] memory whitelistedSuppliers = supplyCapWhitelist[cToken].values();
     for (uint256 i = 0; i < whitelistedSuppliers.length; i++) {
-      supplied += CTokenExtensionInterface(cToken).balanceOfUnderlyingHypo(whitelistedSuppliers[i]);
+      supplied += ICErc20(cToken).balanceOfUnderlying(whitelistedSuppliers[i]);
     }
   }
 
@@ -320,44 +409,8 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
   function getWhitelistedBorrowersBorrows(address cToken) public view returns (uint256 borrowed) {
     address[] memory whitelistedBorrowers = borrowCapWhitelist[cToken].values();
     for (uint256 i = 0; i < whitelistedBorrowers.length; i++) {
-      borrowed += CTokenInterface(cToken).borrowBalanceStored(whitelistedBorrowers[i]);
+      borrowed += ICErc20(cToken).borrowBalanceCurrent(whitelistedBorrowers[i]);
     }
-  }
-
-  function _getExtensionFunctions() external pure virtual override returns (bytes4[] memory) {
-    uint8 fnsCount = 29;
-    bytes4[] memory functionSelectors = new bytes4[](fnsCount);
-    functionSelectors[--fnsCount] = this.addNonAccruingFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setMarketSupplyCaps.selector;
-    functionSelectors[--fnsCount] = this._setMarketBorrowCaps.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForCollateralWhitelist.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateralWhitelist.selector;
-    functionSelectors[--fnsCount] = this._supplyCapWhitelist.selector;
-    functionSelectors[--fnsCount] = this._borrowCapWhitelist.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapGuardian.selector;
-    functionSelectors[--fnsCount] = this._setPauseGuardian.selector;
-    functionSelectors[--fnsCount] = this._setMintPaused.selector;
-    functionSelectors[--fnsCount] = this._setBorrowPaused.selector;
-    functionSelectors[--fnsCount] = this._setTransferPaused.selector;
-    functionSelectors[--fnsCount] = this._setSeizePaused.selector;
-    functionSelectors[--fnsCount] = this._unsupportMarket.selector;
-    functionSelectors[--fnsCount] = this.getAllMarkets.selector;
-    functionSelectors[--fnsCount] = this.getAllBorrowers.selector;
-    functionSelectors[--fnsCount] = this.getWhitelist.selector;
-    functionSelectors[--fnsCount] = this.getRewardsDistributors.selector;
-    functionSelectors[--fnsCount] = this.isUserOfPool.selector;
-    functionSelectors[--fnsCount] = this.getAccruingFlywheels.selector;
-    functionSelectors[--fnsCount] = this._removeFlywheel.selector;
-    functionSelectors[--fnsCount] = this._setBorrowCapForCollateral.selector;
-    functionSelectors[--fnsCount] = this._blacklistBorrowingAgainstCollateral.selector;
-    functionSelectors[--fnsCount] = this.isBorrowCapForCollateralWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isBlacklistBorrowingAgainstCollateralWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isSupplyCapWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.isBorrowCapWhitelisted.selector;
-    functionSelectors[--fnsCount] = this.getWhitelistedSuppliersSupply.selector;
-    functionSelectors[--fnsCount] = this.getWhitelistedBorrowersBorrows.selector;
-    require(fnsCount == 0, "use the correct array length");
-    return functionSelectors;
   }
 
   /**
@@ -365,7 +418,7 @@ contract ComptrollerFirstExtension is DiamondExtension, ComptrollerV3Storage, Co
    * @dev The automatic getter may be used to access an individual market.
    * @return The list of market addresses
    */
-  function getAllMarkets() public view returns (CTokenInterface[] memory) {
+  function getAllMarkets() public view returns (ICErc20[] memory) {
     return allMarkets;
   }
 

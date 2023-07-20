@@ -4,10 +4,6 @@ pragma solidity >=0.8.0;
 import "openzeppelin-contracts-upgradeable/contracts/token/ERC20/ERC20Upgradeable.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/IERC20Upgradeable.sol";
 
-import "../../external/compound/IPriceOracle.sol";
-import "../../external/compound/ICToken.sol";
-import "../../external/compound/ICErc20.sol";
-
 import "../../external/balancer/IBalancerPool.sol";
 import "../../external/balancer/IBalancerVault.sol";
 import "../../external/balancer/BNum.sol";
@@ -22,7 +18,7 @@ import { MasterPriceOracle } from "../MasterPriceOracle.sol";
  * @author Carlo Mazzaferro <carlo@midascapital.xyz> (https://github.com/carlomazzaferro)
  * @notice BalancerLpTokenPriceOracle is a price oracle for Balancer LP tokens.
  * @dev Implements the `PriceOracle` interface used by Midas pools (and Compound v2).
-        This implmentation generalises the BalancerLpTokenPriceOracle to allow for >= 2 tokens.
+        This implementation generalises the BalancerLpTokenPriceOracle to allow for >= 2 tokens.
  */
 contract BalancerLpTokenPriceOracleNTokens is SafeOwnableUpgradeable, BasePriceOracle, BNum {
   /**
@@ -50,8 +46,8 @@ contract BalancerLpTokenPriceOracleNTokens is SafeOwnableUpgradeable, BasePriceO
    * @dev Implements the `PriceOracle` interface for Fuse pools (and Compound v2).
    * @return Price in ETH of the token underlying `cToken`, scaled by `10 ** (36 - underlyingDecimals)`.
    */
-  function getUnderlyingPrice(ICToken cToken) external view override returns (uint256) {
-    address underlying = ICErc20(address(cToken)).underlying();
+  function getUnderlyingPrice(ICErc20 cToken) external view override returns (uint256) {
+    address underlying = cToken.underlying();
     // Comptroller needs prices to be scaled by 1e(36 - decimals)
     // Since `_price` returns prices scaled by 18 decimals, we must scale them by 1e(36 - 18 - decimals)
     return (_price(underlying) * 1e18) / (10**uint256(ERC20Upgradeable(underlying).decimals()));
