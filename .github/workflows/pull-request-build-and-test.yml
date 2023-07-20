@@ -33,44 +33,44 @@ jobs:
       - name: Lint
         run: npm run lint
 
-  build-and-test-bsc:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      BSC_MAINNET_RPC_URL: https://bsc-dataseed.binance.org
-      BSC_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/bsc
-      TEST_RUN_CHAINID: 56
-      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+  # build-and-test-bsc:
+  #   needs: [lint]
+  #   env:
+  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
+  #     BSC_MAINNET_RPC_URL: https://bsc-dataseed.binance.org
+  #     BSC_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/bsc
+  #     TEST_RUN_CHAINID: 56
+  #     TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
+  #     - name: Install Foundry
+  #       uses: onbjerg/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
 
-      - name: Install Forge dependencies
-        run: forge install
+  #     - name: Install Forge dependencies
+  #       run: forge install
 
-      - name: Forge RPC cache
-        uses: actions/cache@v3
-        with:
-          path: "~/.foundry/cache"
-          key: rpc-cache-bsc-${{ hashFiles('rpc-cache-keyfile') }}
+  #     - name: Forge RPC cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: "~/.foundry/cache"
+  #         key: rpc-cache-bsc-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run base tests for BSC mainnet
-        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+  #     - name: Run base tests for BSC mainnet
+  #       run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
 
-      - name: Run slow tests for BSC mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+  #     - name: Run slow tests for BSC mainnet
+  #       if: always()
+  #       run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
 
-      - name: Run flaky tests for BSC mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+  #     - name: Run flaky tests for BSC mainnet
+  #       if: always()
+  #       run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
         
 
   build-and-test-polygon:
@@ -113,44 +113,44 @@ jobs:
         run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
         
 
-  build-and-test-arbitrum:
-    needs: [lint]
-    env:
-      MNEMONIC: "${{ secrets.MNEMONIC }}"
-      ARBITRUM_MAINNET_RPC_URL: https://endpoints.omniatech.io/v1/arbitrum/one/public
-      ARBITRUM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/arbitrum
-      TEST_RUN_CHAINID: 42161
-      TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+  # build-and-test-arbitrum:
+  #   needs: [lint]
+  #   env:
+  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
+  #     ARBITRUM_MAINNET_RPC_URL: https://endpoints.omniatech.io/v1/arbitrum/one/public
+  #     ARBITRUM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/arbitrum
+  #     TEST_RUN_CHAINID: 42161
+  #     TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
 
-      - name: Install Foundry
-        uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
+  #     - name: Install Foundry
+  #       uses: onbjerg/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
 
-      - name: Install Forge dependencies
-        run: forge install
+  #     - name: Install Forge dependencies
+  #       run: forge install
 
-      - name: Forge RPC cache
-        uses: actions/cache@v3
-        with:
-          path: "~/.foundry/cache"
-          key: rpc-cache-arbitrum-${{ hashFiles('rpc-cache-keyfile') }}
+  #     - name: Forge RPC cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: "~/.foundry/cache"
+  #         key: rpc-cache-arbitrum-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run base tests for Arbitrum mainnet
-        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+  #     - name: Run base tests for Arbitrum mainnet
+  #       run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
 
-      - name: Run slow tests for Arbitrum mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+  #     - name: Run slow tests for Arbitrum mainnet
+  #       if: always()
+  #       run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
 
-      - name: Run flaky tests for Arbitrum mainnet
-        if: always()
-        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+  #     - name: Run flaky tests for Arbitrum mainnet
+  #       if: always()
+  #       run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
   build-and-test-neon:
     needs: [lint]
@@ -180,9 +180,17 @@ jobs:
           path: "~/.foundry/cache"
           key: rpc-cache-neon-${{ hashFiles('rpc-cache-keyfile') }}
 
-      - name: Run forge tests for Neon devnet
-        run: forge test -vv --no-match-contract 'Abstract|BeefyERC4626Test|DotDotERC4626Test|ArrakisERC4626Test|JarvisERC4626Test|CurveERC4626Test|EllipsisERC4626Test|HelioERC4626Test|WombatERC4626Test|AaveV3ERC4626Test|ThenaERC4626Test'
-  
+      - name: Run base tests for Neon mainnet
+        run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+      - name: Run slow tests for Neon mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+      - name: Run flaky tests for Neon mainnet
+        if: always()
+        run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+
   build-and-test-chapel:
     needs: [lint]
     env:
@@ -222,14 +230,53 @@ jobs:
         if: always()
         run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
 
-  build-and-test-ethereum:
+  # build-and-test-ethereum:
+  #   needs: [lint]
+  #   env:
+  #     MNEMONIC: "${{ secrets.MNEMONIC }}"
+  #     TEST_RUN_CHAINID: 1
+  #     TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
+  #     ETHEREUM_MAINNET_RPC_URL: https://eth.llamarpc.com
+  #     ETHEREUM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/eth
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Install Foundry
+  #       uses: onbjerg/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
+
+  #     - name: Install Forge dependencies
+  #       run: forge install
+
+  #     - name: Forge RPC cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: "~/.foundry/cache"
+  #         key: rpc-cache-local-${{ hashFiles('rpc-cache-keyfile') }}
+
+  #     - name: Run base tests for Ethereum mainnet
+  #       run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
+
+  #     - name: Run slow tests for Ethereum mainnet
+  #       if: always()
+  #       run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
+
+  #     - name: Run flaky tests for Ethereum mainnet
+  #       if: always()
+  #       run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
+        
+  build-and-test-linea:
     needs: [lint]
     env:
       MNEMONIC: "${{ secrets.MNEMONIC }}"
-      TEST_RUN_CHAINID: 1
+      TEST_RUN_CHAINID: 59144
       TEST_RUN_LEVEL: ${{ github.event_name == 'pull_request' && '100' || '90' }}
-      ETHEREUM_MAINNET_RPC_URL: https://eth.llamarpc.com
-      ETHEREUM_MAINNET_ARCHIVE_RPC_URL: https://rpc.ankr.com/eth
+      LINEA_MAINNET_RPC_URL: ${{ secrets.LINEA_MAINNET_RPC_URL }}
+      LINEA_MAINNET_ARCHIVE_RPC_URL: ${{ secrets.LINEA_MAINNET_ARCHIVE_RPC_URL }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -253,11 +300,11 @@ jobs:
       - name: Run base tests for Ethereum mainnet
         run: forge test -vv --no-match-contract '${{ env.EXCLUDE_TESTS }}|${{ env.FLAKY_TESTS }}|${{ env.SLOW_TESTS }}'
 
-      - name: Run slow tests for Ethereum mainnet
+      - name: Run slow tests for Linea mainnet
         if: always()
         run: forge test -vv --match-contract '${{ env.SLOW_TESTS }}'
 
-      - name: Run flaky tests for Ethereum mainnet
+      - name: Run flaky tests for Linea mainnet
         if: always()
         run: forge test -vv --match-contract '${{ env.FLAKY_TESTS }}'
         

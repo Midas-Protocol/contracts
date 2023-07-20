@@ -16,7 +16,8 @@ abstract contract BaseTest is Test {
   uint128 constant ARBITRUM_ONE = 42161;
 
   uint128 constant BSC_CHAPEL = 97;
-  uint128 constant NEON_DEVNET = 245022934;
+  uint128 constant NEON_MAINNET = 245022934;
+  uint128 constant LINEA_MAINNET = 59144;
 
   // taken from ERC1967Upgrade
   bytes32 internal constant _ADMIN_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
@@ -113,14 +114,17 @@ abstract contract BaseTest is Test {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("bsc_chapel")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("polygon")) + 100;
-      } else if (chainid == NEON_DEVNET) {
-        forkIds[chainid] = vm.createFork(vm.rpcUrl("neon_dev")) + 100;
+      } else if (chainid == NEON_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("neon")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("arbitrum")) + 100;
       } else if (chainid == ETHEREUM_MAINNET) {
         forkIds[chainid] = vm.createFork(vm.rpcUrl("ethereum")) + 100;
+      } else if (chainid == LINEA_MAINNET) {
+        forkIds[chainid] = vm.createFork(vm.rpcUrl("linea")) + 100;
       }
     }
+
     return forkIds[chainid] - 100;
   }
 
@@ -134,12 +138,14 @@ abstract contract BaseTest is Test {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("bsc_chapel_archive")) + 100;
       } else if (chainid == POLYGON_MAINNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("polygon_archive")) + 100;
-      } else if (chainid == NEON_DEVNET) {
-        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("neon_dev_archive")) + 100;
+      } else if (chainid == NEON_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("neon_archive")) + 100;
       } else if (chainid == ARBITRUM_ONE) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("arbitrum_archive")) + 100;
       } else if (chainid == ETHEREUM_MAINNET) {
         forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("ethereum_archive")) + 100;
+      } else if (chainid == LINEA_MAINNET) {
+        forkIds[chainidWithOffset] = vm.createFork(vm.rpcUrl("linea_archive")) + 100;
       }
     }
     return forkIds[chainidWithOffset] - 100;
@@ -153,10 +159,12 @@ abstract contract BaseTest is Test {
     } else if (chainid == BSC_CHAPEL) {
       ap = AddressesProvider(0x3dc8CE9f581e49B9E5304CF580940ad341F64c3f);
     } else if (block.chainid == POLYGON_MAINNET) {
-      ap = AddressesProvider(address(0));
-    } else if (chainid == NEON_DEVNET) {
-      ap = AddressesProvider(address(0));
+      ap = AddressesProvider(0xE31baC0B582AA248c0017F87F24087cEa7A55E26);
+    } else if (chainid == NEON_MAINNET) {
+      ap = AddressesProvider(0xF4C60F6ac6b3AF54044757a1a54D76EEe28244CE);
     } else if (chainid == ARBITRUM_ONE) {
+      ap = AddressesProvider(address(0));
+    } else if (chainid == LINEA_MAINNET) {
       ap = AddressesProvider(address(0));
     } else {
       dpa = new ProxyAdmin();
