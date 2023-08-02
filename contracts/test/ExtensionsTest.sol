@@ -6,7 +6,7 @@ import { MarketsTest } from "./config/MarketsTest.t.sol";
 import { DiamondExtension, DiamondBase } from "../midas/DiamondExtension.sol";
 import { ComptrollerFirstExtension } from "../compound/ComptrollerFirstExtension.sol";
 import { FusePoolDirectory } from "../FusePoolDirectory.sol";
-import { Comptroller, ComptrollerV3Storage } from "../compound/Comptroller.sol";
+import { Comptroller, ComptrollerV4Storage } from "../compound/Comptroller.sol";
 import { ICErc20 } from "../compound/CTokenInterfaces.sol";
 import { CErc20Delegate } from "../compound/CErc20Delegate.sol";
 import { CErc20PluginDelegate } from "../compound/CErc20PluginDelegate.sol";
@@ -18,7 +18,7 @@ import { IComptroller } from "../compound/ComptrollerInterface.sol";
 import { IERC20Upgradeable } from "openzeppelin-contracts-upgradeable/contracts/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import { TransparentUpgradeableProxy } from "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
+contract MockComptrollerExtension is DiamondExtension, ComptrollerV4Storage {
   function getFirstMarketSymbol() public view returns (string memory) {
     return allMarkets[0].symbol();
   }
@@ -48,7 +48,7 @@ contract MockComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
   }
 }
 
-contract MockSecondComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
+contract MockSecondComptrollerExtension is DiamondExtension, ComptrollerV4Storage {
   function getThirdMarketSymbol() public view returns (string memory) {
     return allMarkets[2].symbol();
   }
@@ -62,7 +62,7 @@ contract MockSecondComptrollerExtension is DiamondExtension, ComptrollerV3Storag
   }
 }
 
-contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV3Storage {
+contract MockThirdComptrollerExtension is DiamondExtension, ComptrollerV4Storage {
   function getFourthMarketSymbol() public view returns (string memory) {
     return allMarkets[3].symbol();
   }
